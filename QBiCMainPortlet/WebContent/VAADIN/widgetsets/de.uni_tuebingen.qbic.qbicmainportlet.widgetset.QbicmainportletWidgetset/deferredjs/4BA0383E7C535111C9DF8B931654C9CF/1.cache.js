@@ -1,0 +1,1 @@
+$wnd.de_uni_tuebingen_qbic_qbicmainportlet_widgetset_QbicmainportletWidgetset.runAsyncCallback1('q8(956,1,rod);_.nc=function m$b(){uPb((!pPb&&(pPb=new vPb),pPb),this.b.e)};ucd(Vh)(1);\n//# sourceURL=de.uni_tuebingen.qbic.qbicmainportlet.widgetset.QbicmainportletWidgetset-1.js\n')
