@@ -20,6 +20,8 @@
       margin-left: auto;
       margin-right: auto;
       margin-bottom: 5px;
+      height: 64px;
+      width: 64px;
 }
 
 .toolbar .v-button span {
@@ -45,7 +47,51 @@
    -webkit-box-shadow: none;
    -moz-box-shadow: none;
    box-shadow: none;
-}  
-  
+}
+
+/////////////////
+
+.v-button-dropdown {
+      display: block;
+      height: 55px;
+      background: transparent;
+      border: none;
+      text-align: center;
+}
+ 
+.v-button-dropdown img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 5px;
+}
+
+.v-button-dropdown span {
+      font-size: x-small;
+      text-shadow: #fafafa 1px 1px 0;
+}
+
+.v-button-dropdown .v-button-wrap, 
+.v-disabled.v-button .v-button-wrap {
+   background: transparent;
+   border: none;
+   -webkit-border-radius: 0;
+   -moz-border-radius: 0;
+   border-radius: 0;
+   -webkit-box-shadow: none;
+   -moz-box-shadow: none;
+   box-shadow: none;
+}
+
+.v-button-dropdown .v-button:active .v-button-wrap,
+.v-button.v-pressed .v-button-wrap {
+   background: transparent;
+   -webkit-box-shadow: none;
+   -moz-box-shadow: none;
+   box-shadow: none;
+}
+
+
+
 }
 

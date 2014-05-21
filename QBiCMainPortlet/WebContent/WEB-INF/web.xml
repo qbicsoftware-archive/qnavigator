@@ -9,4 +9,21 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
+  
+   <servlet>
+  <servlet-name>QBiCMainPortletApplication</servlet-name>
+  <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
+  <init-param>
+    <param-name>UI</param-name>
+    <param-value>
+      de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletUI
+    </param-value>
+  </init-param>
+  <init-param>
+    <param-name>widgetset</param-name>
+    <param-value>
+      de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset
+    </param-value>
+  </init-param>
+</servlet>
 </web-app>

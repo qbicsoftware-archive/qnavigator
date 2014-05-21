@@ -11,6 +11,7 @@ import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.ThemeResource;
@@ -29,6 +30,7 @@ import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
+@Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
 public class QbicmainportletUI extends UI {
 
 	@WebServlet(value = "/*", asyncSupported = true)
@@ -92,7 +94,7 @@ public class QbicmainportletUI extends UI {
 		
 		PopupButton popupButton = new PopupButton("Add");
 		popupButton.setIcon(new ThemeResource(
-		"../runo/icons/16/document-add.png"));
+		"../runo/icons/32/document-web.png"));
 
 		GridLayout gl = new GridLayout(4, 3);
 		gl.setWidth("150px");
@@ -108,30 +110,17 @@ public class QbicmainportletUI extends UI {
 		gl.addComponent(createIconButton("../runo/icons/32/document-txt.png"));
 		
 		popupButton.setContent(gl);
-		popupButton.setPopupVisible(true);
+		popupButton.setPopupVisible(false);
 		
-		ToolBar toolbar = new ToolBar();	
+		ToolBar toolbar = new ToolBar(ToolBar.View.Space);	
 		//toolbar.addComponent(button1);
 		//toolbar.addComponent(button2);
-		//toolbar.addComponent(popupButton);
-		
+		toolbar.addComponent(popupButton);
+		//overallLayout.addComponent(popupButton);
 		t.setSizeFull();
 		
-		treeComponentLayout.addComponent(t);
-		treeComponentLayout.addComponent(new SpaceView());
-		treeComponentLayout.setSplitPosition(20, Sizeable.UNITS_PERCENTAGE);
-		treeComponentLayout.setSizeFull();
-		treeComponentLayout.setStyleName(Reindeer.SPLITPANEL_SMALL);
-		
-		overallLayout.setSizeFull();
-
-
-		overallLayout.addComponent(toolbar);
-		overallLayout.addComponent(treeComponentLayout);
-		
-		overallLayout.setExpandRatio(toolbar, 1);
-		overallLayout.setExpandRatio(treeComponentLayout, 5);
-
+		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), new Tree()/*Tree.getInstance()*/, new SpaceView());
+		setContent(spaceView);
 	}
 	
 	private Button createIconButton(String icon) {
