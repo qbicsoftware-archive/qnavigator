@@ -4,8 +4,8 @@ import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -73,12 +73,26 @@ public class ToolBar extends HorizontalLayout{
 			this.setStyleName("toolbar");
 		}
 		
+		public void addComponent(String componentcaption,final String view){
+			Button button = new Button(componentcaption , new Button.ClickListener() {
+				 
+				@Override
+				public void buttonClick(ClickEvent event) {
+					getUI().getNavigator().navigateTo(view);
+				}
+			});
+			button.setSizeFull();
+			//button.setStyleName("toolbar");
+			this.addComponent(button);
+		}
+		
 		public void addComponent(String componentcaption){
 			Button button = new Button(componentcaption);
 			button.setSizeFull();
 			//button.setStyleName("toolbar");
 			this.addComponent(button);
 		}
+		
 		
 	}
 	
@@ -91,10 +105,10 @@ public class ToolBar extends HorizontalLayout{
 		
 		DropDown planningDropDown = new DropDown();
 		
-		planningDropDown.addComponent("Add Space");
-		planningDropDown.addComponent("Add User");
+		planningDropDown.addComponent("Add Space","addspaceView");
+		planningDropDown.addComponent("Add User","spaceView");
 
-		planningDropDown.addComponent("Download");
+		planningDropDown.addComponent("Download","addspaceView");
 
 		planning.setContent(planningDropDown);
 		planning.setPopupVisible(false);
@@ -105,7 +119,7 @@ public class ToolBar extends HorizontalLayout{
 		computer.setIcon(new ThemeResource("computer.png"));
 		this.setButtonSize64(computer);
 		DropDown integrationDropDown = new DropDown();
-		integrationDropDown.addComponent("Do integrate");
+		integrationDropDown.addComponent("Do integrate","spaceView");
 		integrationDropDown.addComponent("Do not integrate");
 		computer.setContent(integrationDropDown);
 		
@@ -129,23 +143,6 @@ public class ToolBar extends HorizontalLayout{
 		this.addComponent(dna);
 		this.addComponent(graph);
 		
-	}
-
-	private Button addButton(String caption, final String view) {
-		@SuppressWarnings("serial")
-		Button button = new Button(caption);
-				
-		/*
-		  , new Button.ClickListener() {
-		 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				getUI().getNavigator().navigateTo(view);
-			}
-		});
-		*/
-		return button;
-
 	}
 	
 	private void setButtonSize64(PopupButton button){

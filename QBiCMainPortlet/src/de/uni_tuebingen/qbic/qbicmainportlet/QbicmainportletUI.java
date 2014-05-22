@@ -14,12 +14,12 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -43,10 +43,7 @@ public class QbicmainportletUI extends UI {
 		projToExp.put("MUSP", new ArrayList<String>(Arrays.asList("NMR","MTX")));
 		Map<String,ArrayList<String>> expToSamp = new HashMap<String,ArrayList<String>>();
 		expToSamp.put("MA", new ArrayList<String>(Arrays.asList("QHPTI001AB","QHPTI002DB","QHPTI003AC","QHPTI004AX","QHPTI005AC","QHPTI006AS","QHPTI007A4")));
-		Tree t = new Tree("Tree Explorer");//TreeView.getInstance();//new Tree("Tree Explorer");
-		t.setCaption("Tree Explorer");
 		HierarchicalContainer tc = new HierarchicalContainer();
-		t.setContainerDataSource(tc);
 		for(String spaceKey : spaceToProj.keySet()) {
 			tc.addItem(spaceKey);
 			for(String proj : spaceToProj.get(spaceKey)) {
@@ -66,17 +63,6 @@ public class QbicmainportletUI extends UI {
 				}
 			}
 		}
-		t.addItemClickListener(new ItemClickListener(){
-
-			@Override
-			public void itemClick(ItemClickEvent event) {
-				if(event.isDoubleClick()){
-					System.out.println(event.getItemId());
-				}
-				
-			}
-			
-		});
 		
 		IndexedContainer spaces = new IndexedContainer();
 		spaces.addContainerProperty("name", String.class, "");
@@ -97,9 +83,28 @@ public class QbicmainportletUI extends UI {
         spaces.getContainerProperty(ic_id2, "name").setValue("TEST3");
         spaces.getContainerProperty(ic_id2, "projects").setValue("9");
         spaces.getContainerProperty(ic_id2, "date").setValue("01.01.2014");
+		
+        Navigator navigator = new Navigator(UI.getCurrent(), this);
+		TreeView t = new TreeView(tc);
+		t.addItemClickListener(new ItemClickListener(){
+
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				if(event.isDoubleClick()){
+					System.out.println(event.getItemId());
+				}
+				
+			}
+			
+		});
+        LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
+        TreeView t2 = new TreeView(tc);
+
+        LevelView addSpaceView = new LevelView(new ToolBar(ToolBar.View.Space),t2/*Tree.getInstance()*/, new AddSpaceView(new Table(), spaces));
         
-		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
-		setContent(spaceView);
+        navigator.addView("spaceView", spaceView);
+        navigator.addView("addspaceView", addSpaceView);
+        navigator.navigateTo("spaceView");
 	}
 	
 	private Button createIconButton(String icon) {

@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import com.vaadin.data.Container;
 import com.vaadin.ui.Tree;
 
 public class TreeView extends Tree implements java.io.Serializable {
@@ -7,20 +8,11 @@ public class TreeView extends Tree implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 8164877353787099428L;
-	/*
-	private static TreeView INSTANCE  = new TreeView();
 	
-	protected TreeView(){
-		
+	
+	public TreeView(Container c){
+		this.setContainerDataSource(c);
 	}
-	
-	public static synchronized TreeView getInstance(){
-		return INSTANCE;
-	}
-	
-    private Object readResolve() {
-        return INSTANCE;
-  }*/
 	
 	
 }

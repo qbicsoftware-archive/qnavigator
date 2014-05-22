@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -11,7 +13,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
 
-public class LevelView extends VerticalLayout{
+public class LevelView extends VerticalLayout implements View{
 	/**
 	 * 
 	 */
@@ -60,5 +62,11 @@ public class LevelView extends VerticalLayout{
 		
 		this.setExpandRatio(this.toolbar, 1);
 		this.setExpandRatio(this.treeComponentLayout, 5);
+	}
+
+	@Override
+	public void enter(ViewChangeEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 }
