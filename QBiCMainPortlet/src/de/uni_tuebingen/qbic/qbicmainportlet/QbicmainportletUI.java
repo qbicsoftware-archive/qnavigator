@@ -13,6 +13,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -21,6 +22,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -77,7 +79,27 @@ public class QbicmainportletUI extends UI {
 		
 		final VerticalLayout testTable = new VerticalLayout();
 		
-		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*/, new SpaceView());
+		IndexedContainer spaces = new IndexedContainer();
+		spaces.addContainerProperty("name", String.class, "");
+		spaces.addContainerProperty("projects", String.class, "");
+		spaces.addContainerProperty("date", String.class, "");
+
+        Object ic_id = spaces.addItemAt(0);
+        spaces.getContainerProperty(ic_id, "name").setValue("TEST1");
+        spaces.getContainerProperty(ic_id, "projects").setValue("5");
+        spaces.getContainerProperty(ic_id, "date").setValue("01.01.2014");
+		
+        Object ic_id1 = spaces.addItemAt(0);
+        spaces.getContainerProperty(ic_id1, "name").setValue("TEST2");
+        spaces.getContainerProperty(ic_id1, "projects").setValue("3");
+        spaces.getContainerProperty(ic_id1, "date").setValue("01.01.2014");
+        
+        Object ic_id2 = spaces.addItemAt(0);
+        spaces.getContainerProperty(ic_id2, "name").setValue("TEST3");
+        spaces.getContainerProperty(ic_id2, "projects").setValue("9");
+        spaces.getContainerProperty(ic_id2, "date").setValue("01.01.2014");
+        
+		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
 		setContent(spaceView);
 	}
 	
