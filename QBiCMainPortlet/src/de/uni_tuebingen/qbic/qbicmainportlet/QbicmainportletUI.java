@@ -7,21 +7,17 @@ import java.util.Map;
 
 import javax.servlet.annotation.WebServlet;
 
-import org.vaadin.hene.popupbutton.PopupButton;
-
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
@@ -43,9 +39,6 @@ public class QbicmainportletUI extends UI {
 		final VerticalLayout overallLayout = new VerticalLayout();
 		overallLayout.setMargin(true);
 		setContent(overallLayout);
-
-		
-		HorizontalSplitPanel treeComponentLayout = new HorizontalSplitPanel();
 		
 		Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
 		spaceToProj.put("QBIC", new ArrayList<String>(Arrays.asList("HPTI","MUSP","KHEC")));
@@ -54,7 +47,8 @@ public class QbicmainportletUI extends UI {
 		projToExp.put("MUSP", new ArrayList<String>(Arrays.asList("NMR","MTX")));
 		Map<String,ArrayList<String>> expToSamp = new HashMap<String,ArrayList<String>>();
 		expToSamp.put("MA", new ArrayList<String>(Arrays.asList("QHPTI001AB","QHPTI002DB","QHPTI003AC","QHPTI004AX","QHPTI005AC","QHPTI006AS","QHPTI007A4")));
-		Tree t = new Tree("Tree Explorer");
+		Tree t = new Tree("Tree Explorer");//TreeView.getInstance();//new Tree("Tree Explorer");
+		t.setCaption("Tree Explorer");
 		HierarchicalContainer tc = new HierarchicalContainer();
 		t.setContainerDataSource(tc);
 		for(String spaceKey : spaceToProj.keySet()) {
@@ -76,8 +70,18 @@ public class QbicmainportletUI extends UI {
 				}
 			}
 		}
-		
-		final VerticalLayout testTable = new VerticalLayout();
+		t.addItemClickListener(new ItemClickListener(){
+
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				if(event.isDoubleClick()){
+					System.out.println(event.getItemId());
+				}
+				
+			}
+			
+		});
+final VerticalLayout testTable = new VerticalLayout();
 		
 		IndexedContainer spaces = new IndexedContainer();
 		spaces.addContainerProperty("name", String.class, "");
