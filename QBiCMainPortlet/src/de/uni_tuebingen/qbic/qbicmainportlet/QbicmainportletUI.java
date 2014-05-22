@@ -21,7 +21,6 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
@@ -36,9 +35,6 @@ public class QbicmainportletUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
-		final VerticalLayout overallLayout = new VerticalLayout();
-		overallLayout.setMargin(true);
-		setContent(overallLayout);
 		
 		Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
 		spaceToProj.put("QBIC", new ArrayList<String>(Arrays.asList("HPTI","MUSP","KHEC")));
@@ -81,7 +77,6 @@ public class QbicmainportletUI extends UI {
 			}
 			
 		});
-final VerticalLayout testTable = new VerticalLayout();
 		
 		IndexedContainer spaces = new IndexedContainer();
 		spaces.addContainerProperty("name", String.class, "");
@@ -112,6 +107,5 @@ final VerticalLayout testTable = new VerticalLayout();
 		b.setIcon(new ThemeResource(icon));
 		b.setStyleName(Reindeer.BUTTON_LINK);
 		return b;
-		}
-
+	}
 }

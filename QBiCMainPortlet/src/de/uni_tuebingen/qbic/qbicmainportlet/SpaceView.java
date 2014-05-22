@@ -15,9 +15,9 @@ public class SpaceView extends Panel{
 	private static final long serialVersionUID = 2699910993266409192L;
 	
 	Table table;
-	
+	VerticalLayout vert;
 	public SpaceView(Table table, IndexedContainer datasource) {
-		VerticalLayout vert = new VerticalLayout();
+		vert = new VerticalLayout();
 		this.setCaption("Available Projects");
 		
 		this.table = table;
@@ -26,10 +26,15 @@ public class SpaceView extends Panel{
 		
 		vert.addComponent(this.table);
 		vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-		
 		this.setContent(vert);
 				
 		this.table.setContainerDataSource(datasource);
+	}
+	
+	public void setSizeFull(){
+		vert.setSizeFull();
+		this.table.setSizeFull();
+		super.setSizeFull();
 	}
 
 }
