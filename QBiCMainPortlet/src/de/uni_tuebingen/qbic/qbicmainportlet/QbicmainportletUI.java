@@ -2,22 +2,23 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
+import java.util.Vector;
 
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
+import com.vaadin.data.Item;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -37,58 +38,23 @@ public class QbicmainportletUI extends UI {
 	public static class Servlet extends VaadinServlet {
 	}
 
-	public class QBiCTree extends Observable {
-		private Tree qbic_navtree = null;
-		
-		public QBiCTree() {
-			super();
-			this.qbic_navtree = new Tree("Default title");
-		}
-
-		public QBiCTree(Tree init_tree) {
-			super();
-			this.qbic_navtree = init_tree;
-		}
-
-		public void registerClickListener() {
-			ItemClickListener ic_listener = new ItemClickListener() {
-
-				@Override
-				public void itemClick(ItemClickEvent event) {
-					if(event.isDoubleClick()){
-						System.out.println(event.getItemId());
-						
-						setChanged();
-						notifyObservers(qbic_navtree.getContainerProperty(event.getItemId(), "metadata").getValue());
-					}
-
-				}
-			};
-
-			qbic_navtree.addItemClickListener(ic_listener);
-		}
-		
-		
-	};
-	
 	public class QBiCRenderContainer implements Observer {
 		private IndexedContainer idx_cont_render = null;
-		
+
 		public QBiCRenderContainer() {
 			super();
 			this.setIndexContainer(new IndexedContainer());
 		}
-		
+
 		public QBiCRenderContainer(IndexedContainer idxcont_tmp) {
 			super();
 			this.setIndexContainer(idxcont_tmp);
 		}
 
-		
-		
+
 		@Override
 		public void update(Observable o, Object arg) {
-			
+
 			this.render(arg);
 		}
 
@@ -99,29 +65,46 @@ public class QbicmainportletUI extends UI {
 		public void setIndexContainer(IndexedContainer idx_cont_render) {
 			this.idx_cont_render = idx_cont_render;
 		}
-		
+
 		public void render(Object arg) {
-			DummyMetaData work_obj = (DummyMetaData) arg;
+			Vector<Item> children = (Vector<Item>) arg;
+			
+			
+			if (children.isEmpty()) {
+				System.out.println("no children to render!");
+				return ;
+			}
 			
 			idx_cont_render.removeAllItems();
+
+			// arg is the root node of the opened (double-clicked) subtree
 			
-			idx_cont_render.addContainerProperty("identifier", String.class, "N/A");
-			idx_cont_render.addContainerProperty("description", String.class, "N/A");
-			idx_cont_render.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
-			idx_cont_render.addContainerProperty("number of subitems", Integer.class, 0);
-			idx_cont_render.addContainerProperty("creation date", Date.class, new Date());
-	
-			Object ic_id = idx_cont_render.addItem();
-			idx_cont_render.getContainerProperty(ic_id, "identifier").setValue(work_obj.getIdentifier());
-			idx_cont_render.getContainerProperty(ic_id, "description").setValue(work_obj.getDescription());
-			idx_cont_render.getContainerProperty(ic_id, "type").setValue(work_obj.getType());
-			idx_cont_render.getContainerProperty(ic_id, "number of subitems").setValue(work_obj.getNumOfChildren());
-			idx_cont_render.getContainerProperty(ic_id, "creation date").setValue(work_obj.getCreationDate());
+				for (Object c : children) {
+					Item cobj = (Item) c;
+					DummyMetaData work_obj = (DummyMetaData) cobj.getItemProperty("metadata").getValue();
+
+
+
+
+					idx_cont_render.addContainerProperty("identifier", String.class, "N/A");
+					idx_cont_render.addContainerProperty("description", String.class, "N/A");
+					idx_cont_render.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
+					idx_cont_render.addContainerProperty("number of subitems", Integer.class, 0);
+					idx_cont_render.addContainerProperty("creation date", Date.class, new Date());
+
+					Object ic_id = idx_cont_render.addItem();
+					idx_cont_render.getContainerProperty(ic_id, "identifier").setValue(work_obj.getIdentifier());
+					idx_cont_render.getContainerProperty(ic_id, "description").setValue(work_obj.getDescription());
+					idx_cont_render.getContainerProperty(ic_id, "type").setValue(work_obj.getType());
+					idx_cont_render.getContainerProperty(ic_id, "number of subitems").setValue(work_obj.getNumOfChildren());
+					idx_cont_render.getContainerProperty(ic_id, "creation date").setValue(work_obj.getCreationDate());
+				}
+			
 			
 		}
-		
+
 	};
-	
+
 	enum MetaDataType {UNDEFINED, QSPACE, QPROJECT, QSAMPLE, QEXPERIMENT};
 
 	public class DummyMetaData {
@@ -131,9 +114,9 @@ public class QbicmainportletUI extends UI {
 			this.type = MetaDataType.UNDEFINED;
 			this.num_of_children = new Integer(0);
 			this.creation_date = new Date();
-			
+
 		}
-		
+
 		public String getIdentifier() {
 			return identifier;
 		}
@@ -164,15 +147,15 @@ public class QbicmainportletUI extends UI {
 		public void setCreationDate(Date creation_date) {
 			this.creation_date = creation_date;
 		}
-		
+
 		private String identifier;
 		private String description;
 		private MetaDataType type;
 		private Integer num_of_children;
 		private Date creation_date;
 	};
-	
-	
+
+
 	@Override
 	protected void init(VaadinRequest request) {
 
@@ -186,14 +169,14 @@ public class QbicmainportletUI extends UI {
 
 
 		Tree t = new Tree("QBiC Explorer");//TreeView.getInstance();//new Tree("Tree Explorer");
-		QBiCTree qbic_tree = new QBiCTree(t);
+		TreeView qbic_tree = new TreeView(t);
 		qbic_tree.registerClickListener();
 
 		HierarchicalContainer tc = new HierarchicalContainer();
 		t.setContainerDataSource(tc);
-		
+
 		tc.addContainerProperty("metadata", DummyMetaData.class, new DummyMetaData());
-		
+
 		for(String spaceKey : spaceToProj.keySet()) {
 			tc.addItem(spaceKey);
 			DummyMetaData dmd = new DummyMetaData();
@@ -202,9 +185,9 @@ public class QbicmainportletUI extends UI {
 			dmd.setDescription("This is space " + spaceKey);
 			dmd.setNumOfChildren(-1);
 			dmd.setCreationDate(new Date(2014,02,10));
-			
+
 			tc.getContainerProperty(spaceKey, "metadata").setValue(dmd);
-			
+
 			for(String proj : spaceToProj.get(spaceKey)) {
 				tc.addItem(proj);
 				tc.setParent(proj, spaceKey);
@@ -214,37 +197,37 @@ public class QbicmainportletUI extends UI {
 				dmd1.setDescription("This is project " + proj);
 				dmd1.setNumOfChildren(-1);
 				dmd1.setCreationDate(new Date(2014,02,10));
-				
+
 				tc.getContainerProperty(proj, "metadata").setValue(dmd1);
-				
-				
+
+
 				if(projToExp.get(proj)!=null) {
 					for(String exp : projToExp.get(proj)) {
 						tc.addItem(exp);
 						tc.setParent(exp, proj);
-						
+
 						DummyMetaData dmd2 = new DummyMetaData();
 						dmd2.setIdentifier(exp);
 						dmd2.setType(MetaDataType.QEXPERIMENT);
 						dmd2.setDescription("This is experiment " + exp);
 						dmd2.setNumOfChildren(-1);
 						dmd2.setCreationDate(new Date(2014,02,10));
-						
+
 						tc.getContainerProperty(exp, "metadata").setValue(dmd2);
-						
-						
+
+
 						if(expToSamp.get(exp)!=null) {
 							for(String samp : expToSamp.get(exp)) {
 								tc.addItem(samp);
 								tc.setParent(samp, exp);
-								
+
 								DummyMetaData dmd3 = new DummyMetaData();
 								dmd3.setIdentifier(samp);
 								dmd3.setType(MetaDataType.QSAMPLE);
 								dmd3.setDescription("This is sample " + samp);
 								dmd3.setNumOfChildren(-1);
 								dmd3.setCreationDate(new Date(2014,02,10));
-								
+
 								tc.getContainerProperty(samp, "metadata").setValue(dmd3);
 
 							}
@@ -271,7 +254,7 @@ public class QbicmainportletUI extends UI {
 		spaces.getContainerProperty(ic_id, "type").setValue(MetaDataType.QSAMPLE);
 		spaces.getContainerProperty(ic_id, "number of subitems").setValue(0);
 		spaces.getContainerProperty(ic_id, "creation date").setValue(new Date(10,10,10));
-		
+
 
 		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
 		setContent(spaceView);
