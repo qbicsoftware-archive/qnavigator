@@ -18,6 +18,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.Item;
+import com.vaadin.data.Property.ReadOnlyException;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
@@ -188,18 +189,28 @@ public class QbicmainportletUI extends UI {
 		t.setContainerDataSource(tc);
 
 		tc.addContainerProperty("metadata", DummyMetaData.class, new DummyMetaData());
-
+		
 		for(String spaceKey : spacesDummy) {
 			tc.addItem(spaceKey);
+
 			DummyMetaData dmd = new DummyMetaData();
 			dmd.setIdentifier(spaceKey);
 			dmd.setType(MetaDataType.QSPACE);
 			dmd.setDescription("This is space " + spaceKey);
-			dmd.setNumOfChildren(-1);
 			dmd.setCreationDate(new Date(2014,02,10));
 
-			tc.getContainerProperty(spaceKey, "metadata").setValue(dmd);
 			ArrayList<String> projects = datareaderDummy.getProjects(spaceKey);
+						
+			try {
+				dmd.setNumOfChildren(projects.size());
+			} catch (NullPointerException e) {
+				// TODO Auto-generated catch block
+				dmd.setNumOfChildren(0);
+				e.printStackTrace();
+			}
+			
+			tc.getContainerProperty(spaceKey, "metadata").setValue(dmd);
+			
 			if(projects != null){
 				for(String proj : projects) {
 					tc.addItem(proj);
@@ -208,12 +219,19 @@ public class QbicmainportletUI extends UI {
 					dmd1.setIdentifier(proj);
 					dmd1.setType(MetaDataType.QPROJECT);
 					dmd1.setDescription("This is project " + proj);
-					dmd1.setNumOfChildren(-1);
 					dmd1.setCreationDate(new Date(2014,02,11));
 
+					ArrayList<String> samples  = datareaderDummy.getSamples(proj);
+					try {
+						dmd1.setNumOfChildren(samples.size());
+					} catch (NullPointerException e) {
+						// TODO Auto-generated catch block
+						dmd.setNumOfChildren(0);
+						e.printStackTrace();
+					}
 					tc.getContainerProperty(proj, "metadata").setValue(dmd1);
 
-					ArrayList<String> samples  = datareaderDummy.getSamples(proj);
+					
 					if(samples !=null) {
 						for(String samp :samples) {
 							tc.addItem(samp);
@@ -247,10 +265,20 @@ public class QbicmainportletUI extends UI {
 		spaces.addContainerProperty("creation date", Date.class, new Date());
 
 		Object ic_id = spaces.addItem();
-		spaces.getContainerProperty(ic_id, "identifier").setValue("TEST");
-		spaces.getContainerProperty(ic_id, "description").setValue("TEST HALT");
-		spaces.getContainerProperty(ic_id, "type").setValue(MetaDataType.QSAMPLE);
-		spaces.getContainerProperty(ic_id, "number of subitems").setValue(0);
+		spaces.getContainerProperty(ic_id, "identifier").setValue("QBIC_ROOT");
+		spaces.getContainerProperty(ic_id, "description").setValue("Root node of TreeView");
+		spaces.getContainerProperty(ic_id, "type").setValue(MetaDataType.UNDEFINED);
+		
+		
+		try {
+			spaces.getContainerProperty(ic_id, "number of subitems").setValue(spacesDummy.size());
+		} catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			spaces.getContainerProperty(ic_id, "number of subitems").setValue(0);
+			e.printStackTrace();
+		}
+		
+		
 		spaces.getContainerProperty(ic_id, "creation date").setValue(new Date(10,10,10));
 
 		
