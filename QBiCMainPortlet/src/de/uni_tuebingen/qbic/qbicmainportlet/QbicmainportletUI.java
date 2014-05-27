@@ -19,6 +19,7 @@ import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -255,9 +256,16 @@ public class QbicmainportletUI extends UI {
 		spaces.getContainerProperty(ic_id, "number of subitems").setValue(0);
 		spaces.getContainerProperty(ic_id, "creation date").setValue(new Date(10,10,10));
 
-
+		
+		Navigator navigator = new Navigator(UI.getCurrent(),this);
+		Tree t2 = new Tree();
+		t2.setContainerDataSource(tc);
 		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
-		setContent(spaceView);
+		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), t2/*Tree.getInstance()*/, new AddSpaceView(new Table(), spaces));
+		navigator.addView("spaceView", spaceView);
+		navigator.addView("addSpaceView", addspaceView);
+		navigator.navigateTo("spaceView");
+		
 	}
 
 	private Button createIconButton(String icon) {
