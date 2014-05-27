@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -84,9 +85,9 @@ public class QbicmainportletUI extends UI {
 					Item cobj = (Item) c;
 					DummyMetaData work_obj = (DummyMetaData) cobj.getItemProperty("metadata").getValue();
 
-					
-					
-					
+
+
+
 					idx_cont_render.addContainerProperty("identifier", String.class, "N/A");
 					idx_cont_render.addContainerProperty("description", String.class, "N/A");
 					idx_cont_render.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
@@ -160,16 +161,26 @@ public class QbicmainportletUI extends UI {
 	@Override
 	protected void init(VaadinRequest request) {
 
-		Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
+		/*Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
 		spaceToProj.put("QBIC", new ArrayList<String>(Arrays.asList("HPTI","MUSP","KHEC")));
 		Map<String,ArrayList<String>> projToExp = new HashMap<String,ArrayList<String>>();
 		projToExp.put("HPTI", new ArrayList<String>(Arrays.asList("MA")));
 		projToExp.put("MUSP", new ArrayList<String>(Arrays.asList("NMR","MTX")));
 		Map<String,ArrayList<String>> expToSamp = new HashMap<String,ArrayList<String>>();
 		expToSamp.put("MA", new ArrayList<String>(Arrays.asList("QHPTI001AB","QHPTI002DB","QHPTI003AC","QHPTI004AX","QHPTI005AC","QHPTI006AS","QHPTI007A4")));
-
+*/
+		DummyDataReader datareaderDummy = null;
+		try {
+			datareaderDummy = new DummyDataReader();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ArrayList<String> spacesDummy  = datareaderDummy.getSpaces();
 
 		Tree t = new Tree("QBiC Explorer");//TreeView.getInstance();//new Tree("Tree Explorer");
+		//t.setImmediate(true);
+		//t.setSelectable(true);
 		TreeView qbic_tree = new TreeView(t);
 		qbic_tree.registerClickListener();
 
@@ -178,7 +189,7 @@ public class QbicmainportletUI extends UI {
 
 		tc.addContainerProperty("metadata", DummyMetaData.class, new DummyMetaData());
 
-		for(String spaceKey : spaceToProj.keySet()) {
+		for(String spaceKey : spacesDummy) {
 			tc.addItem(spaceKey);
 			DummyMetaData dmd = new DummyMetaData();
 			dmd.setIdentifier(spaceKey);
@@ -188,54 +199,40 @@ public class QbicmainportletUI extends UI {
 			dmd.setCreationDate(new Date(2014,02,10));
 
 			tc.getContainerProperty(spaceKey, "metadata").setValue(dmd);
+			ArrayList<String> projects = datareaderDummy.getProjects(spaceKey);
+			if(projects != null){
+				for(String proj : projects) {
+					tc.addItem(proj);
+					tc.setParent(proj, spaceKey);
+					DummyMetaData dmd1 = new DummyMetaData();
+					dmd1.setIdentifier(proj);
+					dmd1.setType(MetaDataType.QPROJECT);
+					dmd1.setDescription("This is project " + proj);
+					dmd1.setNumOfChildren(-1);
+					dmd1.setCreationDate(new Date(2014,02,11));
 
-			for(String proj : spaceToProj.get(spaceKey)) {
-				tc.addItem(proj);
-				tc.setParent(proj, spaceKey);
-				DummyMetaData dmd1 = new DummyMetaData();
-				dmd1.setIdentifier(proj);
-				dmd1.setType(MetaDataType.QPROJECT);
-				dmd1.setDescription("This is project " + proj);
-				dmd1.setNumOfChildren(-1);
-				dmd1.setCreationDate(new Date(2014,02,10));
+					tc.getContainerProperty(proj, "metadata").setValue(dmd1);
 
-				tc.getContainerProperty(proj, "metadata").setValue(dmd1);
+					ArrayList<String> samples  = datareaderDummy.getSamples(proj);
+					if(samples !=null) {
+						for(String samp :samples) {
+							tc.addItem(samp);
+							tc.setParent(samp, proj);
 
+							DummyMetaData dmd3 = new DummyMetaData();
+							dmd3.setIdentifier(samp);
+							dmd3.setType(MetaDataType.QSAMPLE);
+							dmd3.setDescription("This is sample " + samp);
+							dmd3.setNumOfChildren(-1);
+							dmd3.setCreationDate(new Date(2014,02,12));
 
-				if(projToExp.get(proj)!=null) {
-					for(String exp : projToExp.get(proj)) {
-						tc.addItem(exp);
-						tc.setParent(exp, proj);
-
-						DummyMetaData dmd2 = new DummyMetaData();
-						dmd2.setIdentifier(exp);
-						dmd2.setType(MetaDataType.QEXPERIMENT);
-						dmd2.setDescription("This is experiment " + exp);
-						dmd2.setNumOfChildren(-1);
-						dmd2.setCreationDate(new Date(2014,02,10));
-
-						tc.getContainerProperty(exp, "metadata").setValue(dmd2);
-
-
-						if(expToSamp.get(exp)!=null) {
-							for(String samp : expToSamp.get(exp)) {
-								tc.addItem(samp);
-								tc.setParent(samp, exp);
-
-								DummyMetaData dmd3 = new DummyMetaData();
-								dmd3.setIdentifier(samp);
-								dmd3.setType(MetaDataType.QSAMPLE);
-								dmd3.setDescription("This is sample " + samp);
-								dmd3.setNumOfChildren(-1);
-								dmd3.setCreationDate(new Date(2014,02,10));
-
-								tc.getContainerProperty(samp, "metadata").setValue(dmd3);
-
-							}
+							tc.getContainerProperty(samp, "metadata").setValue(dmd3);
+							tc.setChildrenAllowed(samp, false);
 						}
 					}
 				}
 			}
+
 		}
 
 

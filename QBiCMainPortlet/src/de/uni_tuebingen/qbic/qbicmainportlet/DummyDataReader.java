@@ -4,13 +4,18 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.vaadin.server.VaadinService;
+import com.vaadin.ui.UI;
+
 public class DummyDataReader {
 
-	private String data = "././openBISdataTree.txt";
+	private String data = "openBISdataTree.txt";
 	private ArrayList<String> spaces = new ArrayList<String>();
 	private HashMap<String,ArrayList<String>> spaceProjects = new HashMap<String,ArrayList<String>>();
 	private HashMap<String,ArrayList<String>> projSamples = new HashMap<String,ArrayList<String>>();
@@ -21,7 +26,16 @@ public class DummyDataReader {
 	}
 
 	private void fillData() throws IOException {
-		BufferedReader r = new BufferedReader(new FileReader(data));
+		String workingDir = System.getProperty("user.dir");
+		System.out.println("Current working directory : " + workingDir);
+		UI.getCurrent().getSession().getService();
+		System.out.println(VaadinService.getCurrent().getBaseDirectory().getAbsolutePath());
+		InputStream input = DummyDataReader.class.getClassLoader().getResourceAsStream(data);
+		if(input == null){
+			System.out.println("WUHHH");
+		}
+		InputStreamReader reader = new InputStreamReader(input);
+		BufferedReader r = new BufferedReader(reader);
 		int level = 0; //space: 0, proj: 1, samp: 2
 		String currSpace = "";
 		String currProj = "";
