@@ -261,9 +261,9 @@ public class QbicmainportletUI extends UI {
 		Tree t2 = new Tree();
 		t2.setContainerDataSource(tc);
 		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
-		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), t2/*Tree.getInstance()*/, new AddSpaceView(new Table(), spaces));
+		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), t2/*Tree.getInstance()*/,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
 		navigator.addView("spaceView", spaceView);
-		navigator.addView("addSpaceView", addspaceView);
+		navigator.addView("addspaceView", addspaceView);
 		navigator.navigateTo("spaceView");
 		
 	}
