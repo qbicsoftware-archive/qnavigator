@@ -3,6 +3,7 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
@@ -112,12 +113,12 @@ public class ToolBar extends HorizontalLayout{
 
 		planning.setContent(planningDropDown);
 		planning.setPopupVisible(false);
-		this.setButtonSize64(planning);
+		this.setButtonSize(planning, 128);
 		
 		//Integration
 		PopupButton computer = new PopupButton("Integration");
 		computer.setIcon(new ThemeResource("computer.png"));
-		this.setButtonSize64(computer);
+		this.setButtonSize(computer, 128);
 		DropDown integrationDropDown = new DropDown();
 		integrationDropDown.addComponent("Do integrate","spaceView");
 		integrationDropDown.addComponent("Do not integrate");
@@ -126,13 +127,13 @@ public class ToolBar extends HorizontalLayout{
 		//Experiment
 		PopupButton dna = new PopupButton("Experiment");
 		dna.setIcon(new ThemeResource("dna.png"));
-		this.setButtonSize64(dna);
+		this.setButtonSize(dna, 128);
 		
 		
 		//Analysis
 		PopupButton graph = new PopupButton("Analysis");
 		graph.setIcon(new ThemeResource("graph.png"));
-		this.setButtonSize64(graph);
+		this.setButtonSize(graph, 128);
 		DropDown graphDropDown = new DropDown();
 		graphDropDown.addComponent("Execute Workflow");
 		graphDropDown.addComponent("What ever");
@@ -143,11 +144,17 @@ public class ToolBar extends HorizontalLayout{
 		this.addComponent(dna);
 		this.addComponent(graph);
 		
+		this.setComponentAlignment(planning, Alignment.TOP_CENTER);
+		this.setComponentAlignment(computer, Alignment.TOP_CENTER);
+		this.setComponentAlignment(dna, Alignment.TOP_CENTER);
+		this.setComponentAlignment(graph, Alignment.TOP_CENTER);
+		
+		
 	}
 	
-	private void setButtonSize64(PopupButton button){
-		button.setHeight("64px");
-		button.setWidth("64px");
+	private void setButtonSize(PopupButton button, Integer button_size_px){
+		button.setHeight(button_size_px.toString() + "px");
+		button.setWidth(button_size_px.toString() + "px");
 	}
 	
 	private Button createIconButton(String icon) {

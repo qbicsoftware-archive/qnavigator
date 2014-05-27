@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import javax.swing.GroupLayout.Alignment;
+
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Sizeable;
@@ -8,6 +10,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
@@ -19,7 +22,8 @@ public class LevelView extends VerticalLayout implements View{
 	 */
 	private static final long serialVersionUID = 4753771416181038820L;
 	
-	Label statusMonitor = new Label("Here we could put some job status or general information");
+	//Label statusMonitor = new Label("Here we could put some job status or general information.");
+	TextField statusMonitor = new TextField("Status monitor", "Here we could put some job status or general information.");
 	ToolBar toolbar;
 	Tree treeView;
 	Component mainComponent;
@@ -42,7 +46,6 @@ public class LevelView extends VerticalLayout implements View{
 	public void buildLayout(){
 		this.treeComponentLayout.removeAllComponents();
 		this.removeAllComponents();
-		
 		this.treeView.setSizeFull();
 		this.treeComponentLayout.addComponent(this.treeView);
 		this.treeComponentLayout.addComponent(this.mainComponent);
@@ -52,10 +55,10 @@ public class LevelView extends VerticalLayout implements View{
 		this.mainComponent.setSizeFull();
 		this.treeComponentLayout.setSizeFull();
 		this.treeComponentLayout.setStyleName(Reindeer.SPLITPANEL_SMALL);
+		this.treeComponentLayout.setMargin(true);
 		
 		this.setSizeFull();
 
-		
 		this.headerLayout.addComponent(this.statusMonitor);
 		this.headerLayout.addComponent(this.toolbar);
 		this.headerLayout.setMargin(true);
@@ -73,7 +76,7 @@ public class LevelView extends VerticalLayout implements View{
 		this.addComponent(this.treeComponentLayout);
 		
 		this.setExpandRatio(this.headerLayout, 1);
-		this.setExpandRatio(this.treeComponentLayout, 5);
+		this.setExpandRatio(this.treeComponentLayout, 3);
 	}
 
 	@Override
