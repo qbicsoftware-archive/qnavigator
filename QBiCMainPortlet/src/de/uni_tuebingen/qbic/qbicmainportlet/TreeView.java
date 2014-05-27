@@ -35,7 +35,8 @@ public class TreeView extends Observable {
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				if(event.isDoubleClick()){
-
+					qbic_navtree.expandItem(event.getItemId());
+					
 					//notifyObservers(qbic_navtree.getContainerProperty(event.getItemId(), "metadata").getValue());
 
 					Collection<?> child_ids = qbic_navtree.getChildren(event.getItemId());

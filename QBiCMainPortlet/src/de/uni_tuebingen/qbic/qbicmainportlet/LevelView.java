@@ -18,10 +18,14 @@ public class LevelView extends VerticalLayout implements View{
 	 * 
 	 */
 	private static final long serialVersionUID = 4753771416181038820L;
+	
+	Label statusMonitor = new Label("Here we could put some job status or general information");
 	ToolBar toolbar;
 	Tree treeView;
 	Component mainComponent;
+	HorizontalLayout headerLayout = new HorizontalLayout();
 	HorizontalLayout treeComponentLayout = new HorizontalLayout();
+	
 	public LevelView(){
 		
 	}
@@ -51,8 +55,16 @@ public class LevelView extends VerticalLayout implements View{
 		
 		this.setSizeFull();
 
-
-		this.addComponent(this.toolbar);
+		
+		this.headerLayout.addComponent(this.statusMonitor);
+		this.headerLayout.addComponent(this.toolbar);
+		this.headerLayout.setMargin(true);
+		this.headerLayout.setExpandRatio(this.statusMonitor, 0.2f);
+		this.headerLayout.setExpandRatio(this.toolbar, 0.8f);
+		this.statusMonitor.setSizeFull();
+		this.toolbar.setSizeFull();
+		this.headerLayout.setSizeFull();
+		this.addComponent(this.headerLayout);
 		//Label space1 = new Label("<div style=\"font-size:xx-small; border-color:blue;border-style:dotted hidden dashed hidden;\">&nbsp;</div>", Label.CONTENT_XHTML);
 		//space1.setHeight("1em");
 		Label space2 = new Label("<hr width=\"100%\">",Label.CONTENT_XHTML);
@@ -60,7 +72,7 @@ public class LevelView extends VerticalLayout implements View{
 		this.addComponent(space2);
 		this.addComponent(this.treeComponentLayout);
 		
-		this.setExpandRatio(this.toolbar, 1);
+		this.setExpandRatio(this.headerLayout, 1);
 		this.setExpandRatio(this.treeComponentLayout, 5);
 	}
 

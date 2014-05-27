@@ -84,9 +84,9 @@ public class QbicmainportletUI extends UI {
 					Item cobj = (Item) c;
 					DummyMetaData work_obj = (DummyMetaData) cobj.getItemProperty("metadata").getValue();
 
-
-
-
+					
+					
+					
 					idx_cont_render.addContainerProperty("identifier", String.class, "N/A");
 					idx_cont_render.addContainerProperty("description", String.class, "N/A");
 					idx_cont_render.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
