@@ -42,5 +42,7 @@
 			rev="&vaadin.version;" conf="widgetset-compile->default" />
 			
 		<dependency org="org.vaadin.addons" name="popupbutton" rev="2.3.0" />
+		
+		<dependency org="org.vaadin.addons" name="vaadin-ipc-for-liferay" rev="2.0.0" />
 	</dependencies>
 </ivy-module>
