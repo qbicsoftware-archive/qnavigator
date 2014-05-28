@@ -247,6 +247,7 @@ public class QbicmainportletUI extends UI {
 					}
 				}
 			}
+			// HALLO
 
 		}
 
