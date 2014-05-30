@@ -160,6 +160,7 @@ public class QbicmainportletUI extends UI {
 		VerticalLayout layout = new VerticalLayout();
 		layout.addComponent(new Button("blakdfg"));
 		this.setContent(layout);
+		System.out.println("TEST");
 		/*Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
 		spaceToProj.put("QBIC", new ArrayList<String>(Arrays.asList("HPTI","MUSP","KHEC")));
 		Map<String,ArrayList<String>> projToExp = new HashMap<String,ArrayList<String>>();
