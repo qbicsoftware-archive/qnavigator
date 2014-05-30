@@ -44,5 +44,7 @@
 		<dependency org="org.vaadin.addons" name="popupbutton" rev="2.3.0" />
 		
 		<dependency org="org.vaadin.addons" name="vaadin-ipc-for-liferay" rev="2.0.0" />
+	
+		<dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.9.v7" />
 	</dependencies>
 </ivy-module>
