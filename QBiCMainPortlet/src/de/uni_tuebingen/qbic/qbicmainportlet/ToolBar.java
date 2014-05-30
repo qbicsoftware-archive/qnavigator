@@ -17,7 +17,7 @@ public class ToolBar extends HorizontalLayout{
 	 */
 	private static final long serialVersionUID = -3673630619072584036L;
 
-	public enum View {Space, Project, Sample};
+	public enum View {Space, Project, Sample, Dataset};
 	
 	public ToolBar(View view) {
 		try {
@@ -35,6 +35,8 @@ public class ToolBar extends HorizontalLayout{
 		setWidth("100%");
 	}
 
+	
+	
 	private void createPopupButtons(View view) throws Exception {
 		switch(view){
 			case Space:
@@ -46,11 +48,21 @@ public class ToolBar extends HorizontalLayout{
 			case Sample:
 				this.createSampleButtonSet();
                 break;
+			case Dataset:
+				this.createDatasetButtonSet();
+                break;     
            default:
-        	   throw new Exception("How did you do this? We show only spaces, projects and samples");
+        	   throw new Exception("How did you do this? We show only spaces, projects and samples and new feature: datasets");
 		}
 		
 	}
+
+	private void createDatasetButtonSet() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 
 	private void createSampleButtonSet() {
 		// TODO Auto-generated method stub
@@ -120,8 +132,7 @@ public class ToolBar extends HorizontalLayout{
 		computer.setIcon(new ThemeResource("computer.png"));
 		this.setButtonSize(computer, 128);
 		DropDown integrationDropDown = new DropDown();
-		integrationDropDown.addComponent("Do integrate","spaceView");
-		integrationDropDown.addComponent("Do not integrate");
+		integrationDropDown.addComponent("View Datasets","datasetView");
 		computer.setContent(integrationDropDown);
 		
 		//Experiment

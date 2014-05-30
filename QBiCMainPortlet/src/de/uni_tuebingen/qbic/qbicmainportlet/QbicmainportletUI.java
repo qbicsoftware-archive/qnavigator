@@ -29,6 +29,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
@@ -99,8 +100,6 @@ public class QbicmainportletUI extends UI {
 					idx_cont_render.getContainerProperty(ic_id, "number of subitems").setValue(work_obj.getNumOfChildren());
 					idx_cont_render.getContainerProperty(ic_id, "creation date").setValue(work_obj.getCreationDate());
 				}
-			
-			
 		}
 
 	};
@@ -158,7 +157,9 @@ public class QbicmainportletUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
-
+		VerticalLayout layout = new VerticalLayout();
+		layout.addComponent(new Button("blakdfg"));
+		this.setContent(layout);
 		/*Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
 		spaceToProj.put("QBIC", new ArrayList<String>(Arrays.asList("HPTI","MUSP","KHEC")));
 		Map<String,ArrayList<String>> projToExp = new HashMap<String,ArrayList<String>>();
@@ -166,7 +167,7 @@ public class QbicmainportletUI extends UI {
 		projToExp.put("MUSP", new ArrayList<String>(Arrays.asList("NMR","MTX")));
 		Map<String,ArrayList<String>> expToSamp = new HashMap<String,ArrayList<String>>();
 		expToSamp.put("MA", new ArrayList<String>(Arrays.asList("QHPTI001AB","QHPTI002DB","QHPTI003AC","QHPTI004AX","QHPTI005AC","QHPTI006AS","QHPTI007A4")));
-*/
+*
 		DummyDataReader datareaderDummy = null;
 		try {
 			datareaderDummy = new DummyDataReader();
@@ -283,12 +284,16 @@ public class QbicmainportletUI extends UI {
 		Navigator navigator = new Navigator(UI.getCurrent(),this);
 		Tree t2 = new Tree();
 		t2.setContainerDataSource(tc);
-		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
-		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), t2/*Tree.getInstance()*/,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
+		Tree t3 = new Tree();
+		t3.setContainerDataSource(tc);
+		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*, new SpaceView(new Table(), spaces));
+		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), t2/*Tree.getInstance()*,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
+		//LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),t3, new Button("TODO"));
 		navigator.addView("spaceView", spaceView);
 		navigator.addView("addspaceView", addspaceView);
+		//navigator.addView("datasetView", datasetView);
 		navigator.navigateTo("spaceView");
-		
+		*/
 	}
 
 	private Button createIconButton(String icon) {
