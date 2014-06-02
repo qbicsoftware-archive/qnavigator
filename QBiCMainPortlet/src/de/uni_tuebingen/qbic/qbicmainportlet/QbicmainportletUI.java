@@ -160,15 +160,14 @@ public class QbicmainportletUI extends UI {
 		VerticalLayout layout = new VerticalLayout();
 		layout.addComponent(new Button("blakdfg"));
 		this.setContent(layout);
-		System.out.println("TEST");
-		/*Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
+		Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
 		spaceToProj.put("QBIC", new ArrayList<String>(Arrays.asList("HPTI","MUSP","KHEC")));
 		Map<String,ArrayList<String>> projToExp = new HashMap<String,ArrayList<String>>();
 		projToExp.put("HPTI", new ArrayList<String>(Arrays.asList("MA")));
 		projToExp.put("MUSP", new ArrayList<String>(Arrays.asList("NMR","MTX")));
 		Map<String,ArrayList<String>> expToSamp = new HashMap<String,ArrayList<String>>();
 		expToSamp.put("MA", new ArrayList<String>(Arrays.asList("QHPTI001AB","QHPTI002DB","QHPTI003AC","QHPTI004AX","QHPTI005AC","QHPTI006AS","QHPTI007A4")));
-*
+
 		DummyDataReader datareaderDummy = null;
 		try {
 			datareaderDummy = new DummyDataReader();
@@ -287,14 +286,14 @@ public class QbicmainportletUI extends UI {
 		t2.setContainerDataSource(tc);
 		Tree t3 = new Tree();
 		t3.setContainerDataSource(tc);
-		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t/*Tree.getInstance()*, new SpaceView(new Table(), spaces));
-		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), t2/*Tree.getInstance()*,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
+		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t /*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
+		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), t2/*Tree.getInstance()*/,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
 		//LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),t3, new Button("TODO"));
 		navigator.addView("spaceView", spaceView);
 		navigator.addView("addspaceView", addspaceView);
 		//navigator.addView("datasetView", datasetView);
 		navigator.navigateTo("spaceView");
-		*/
+		
 	}
 
 	private Button createIconButton(String icon) {
