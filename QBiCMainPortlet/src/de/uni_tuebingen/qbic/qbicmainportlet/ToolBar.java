@@ -58,7 +58,7 @@ public class ToolBar extends HorizontalLayout{
 	}
 
 	private void createDatasetButtonSet() {
-		// TODO Auto-generated method stub
+		createSpaceButtonSet();
 		
 	}
 
@@ -132,6 +132,8 @@ public class ToolBar extends HorizontalLayout{
 		computer.setIcon(new ThemeResource("computer.png"));
 		this.setButtonSize(computer, 128);
 		DropDown integrationDropDown = new DropDown();
+		
+		// Dataset View
 		integrationDropDown.addComponent("View Datasets","datasetView");
 		computer.setContent(integrationDropDown);
 		

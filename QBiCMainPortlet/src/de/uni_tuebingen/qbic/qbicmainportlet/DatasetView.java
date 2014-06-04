@@ -87,7 +87,7 @@ public class DatasetView extends VerticalLayout {
 		buttonLayout.addComponent(this.download);
 		
 		
-		table = buildFilterTable();
+		this.table = buildFilterTable();
 		
 		this.addComponent(this.table);
 		this.addComponent(buttonLayout);

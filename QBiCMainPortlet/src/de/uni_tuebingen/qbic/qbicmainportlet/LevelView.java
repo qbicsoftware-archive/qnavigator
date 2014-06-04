@@ -13,6 +13,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -26,7 +27,7 @@ public class LevelView extends VerticalLayout implements View{
 	//Label statusMonitor = new Label("Here we could put some job status or general information.");
 	TextArea statusMonitor = new TextArea("Status monitor", "Here we could put some job status or general information.");
 	ToolBar toolbar;
-	Tree treeView;
+	TreeView treeView;
 	Component mainComponent;
 	HorizontalLayout headerLayout = new HorizontalLayout();
 	HorizontalLayout treeComponentLayout = new HorizontalLayout();
@@ -35,7 +36,7 @@ public class LevelView extends VerticalLayout implements View{
 		
 	}
 	
-	public LevelView(ToolBar toolbar, Tree treeView, Component component){
+	public LevelView(ToolBar toolbar, TreeView treeView, Component component){
 		this.toolbar = toolbar;
 		this.treeView = treeView;
 		this.mainComponent = component;
@@ -47,7 +48,6 @@ public class LevelView extends VerticalLayout implements View{
 	public void buildLayout(){
 		this.treeComponentLayout.removeAllComponents();
 		this.removeAllComponents();
-		this.treeView.setSizeFull();
 		this.treeComponentLayout.addComponent(this.treeView);
 		this.treeComponentLayout.addComponent(this.mainComponent);
 		//this.treeComponentLayout.setSplitPosition(20, Sizeable.UNITS_PERCENTAGE);
@@ -82,6 +82,17 @@ public class LevelView extends VerticalLayout implements View{
 
 	@Override
 	public void enter(ViewChangeEvent event) {
+		
+		if(this.mainComponent instanceof DatasetView)
+		{
+			Object currentValue = this.treeView.getValue();
+			Object type = this.treeView.getContainerProperty(currentValue, "type");
+		//	((DatasetView) this.mainComponent).setContainerDataSource(DataHandler.getDatasets(currentValue, type));
+			
+		}
+		
+		//System.out.println("Entering enter");
+		//this.treeView.setValue(UI.getCurrent().getSession().getAttribute("value"));
 		// TODO Auto-generated method stub
 		
 	}

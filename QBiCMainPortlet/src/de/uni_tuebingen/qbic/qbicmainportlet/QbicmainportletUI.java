@@ -157,6 +157,7 @@ public class QbicmainportletUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
+		UI.getCurrent().getSession().setAttribute("state", new State());
 		VerticalLayout layout = new VerticalLayout();
 		layout.addComponent(new Button("blakdfg"));
 		this.setContent(layout);
@@ -255,8 +256,9 @@ public class QbicmainportletUI extends UI {
 
 		IndexedContainer spaces = new IndexedContainer();
 		QBiCRenderContainer qidx_container = new QBiCRenderContainer(spaces);
-		qbic_tree.addObserver(qidx_container);
+		//qbic_tree.addObserver(qidx_container);
 
+		
 		spaces.addContainerProperty("identifier", String.class, "N/A");
 		spaces.addContainerProperty("description", String.class, "N/A");
 		spaces.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
@@ -282,16 +284,32 @@ public class QbicmainportletUI extends UI {
 
 		
 		Navigator navigator = new Navigator(UI.getCurrent(),this);
-		Tree t2 = new Tree();
-		t2.setContainerDataSource(tc);
-		Tree t3 = new Tree();
-		t3.setContainerDataSource(tc);
-		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), t /*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
-		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), t2/*Tree.getInstance()*/,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
-		//LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),t3, new Button("TODO"));
+		
+		
+		
+
+		TreeView tv = new TreeView();
+		tv.setContainerDataSource(tc);
+
+		TreeView tv2 = new TreeView();
+		tv2.setContainerDataSource(tc);
+		
+		TreeView tv3 = new TreeView();
+		tv3.setContainerDataSource(tc);
+		
+		State state = (State) UI.getCurrent().getSession().getAttribute("state");
+		
+		state.addObserver(tv);
+		state.addObserver(tv2);
+		state.addObserver(tv3);
+		
+		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), tv /*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
+		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), tv2/*Tree.getInstance()*/,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
+		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),tv3, new Button("TODO"));
+				
 		navigator.addView("spaceView", spaceView);
 		navigator.addView("addspaceView", addspaceView);
-		//navigator.addView("datasetView", datasetView);
+		navigator.addView("datasetView", datasetView);
 		navigator.navigateTo("spaceView");
 		
 	}

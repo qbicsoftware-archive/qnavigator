@@ -447,7 +447,7 @@ public class OpenBisClient {//implements Serializable {
 	 */
 	public List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> getDataSetsOfSpace(String space) {
 		List<Sample> samples = getSamplesofSpace(space);
-		ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> ids = new ArrayList<String>(); 
 		for (Iterator<Sample> iterator = samples.iterator(); iterator.hasNext();) {
 			Sample s = (Sample) iterator.next();
 			ids.add(s.getIdentifier());
