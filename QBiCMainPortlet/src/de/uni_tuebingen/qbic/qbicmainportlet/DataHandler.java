@@ -12,14 +12,18 @@ import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 
 import com.vaadin.data.util.IndexedContainer;
 
+import de.uni_tuebingen.qbic.util.DashboardUtil;
+
 public class DataHandler {
 	
-	IndexedContainer datasets;
+	Map<String,IndexedContainer> datasets = new HashMap<String,IndexedContainer>();
 	OpenBisClient openBisClient;
 	
-	public DataHandler(){
+	public DataHandler(OpenBisClient client){
 		reset();
-		initConnection();
+		
+		this.openBisClient = client;
+		//initConnection();
 	}
 
 	
@@ -35,6 +39,7 @@ public class DataHandler {
 		// TODO change return type of dataset retrieval methods if possible
 		if(type.equals("space")) {
 			dataset_list = this.openBisClient.getDataSetsOfSpace(id);
+			this.datasets.put(id, new IndexedContainer());
 		}
 		/*
 		else if(type.equals("project")) {
@@ -50,7 +55,7 @@ public class DataHandler {
 			throw new Exception("Unknown datatype!");
 		}
 		
-		return this.createDatasetContainer(dataset_list);
+		return this.createDatasetContainer(dataset_list, id);
 		
 		//this.datasets = this.toContainer(List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> dataset, type);
 		
@@ -72,31 +77,32 @@ public class DataHandler {
 		 //this.projects = new HashMap<String,IndexedContainer>();
 		 //this.experiments = new HashMap<String,IndexedContainer>();
 		 //this.samples = new HashMap<String,IndexedContainer>();
-		 //this.datasets = new HashMap<String,IndexedContainer>();
+		 this.datasets = new HashMap<String,IndexedContainer>();
 	}
 	
-	public void initConnection() {
+	
+	//public void initConnection() {
 		// TODO this.openBISClient = new OpenClient();
-	}
+	//}
 	
 	
 	@SuppressWarnings("unchecked")
-	private IndexedContainer createDatasetContainer(List<DataSet> datasets) {
-		IndexedContainer ds = new IndexedContainer();
+	private IndexedContainer createDatasetContainer(List<DataSet> datasets, String id) {
 		
-		ds.addContainerProperty("Patient", String.class, null);
-		ds.addContainerProperty("Sample", String.class, null);
-		ds.addContainerProperty("Sample Type", String.class, null);
-		ds.addContainerProperty("File Name", String.class, null);
-		ds.addContainerProperty("File Type", String.class, null);
-		ds.addContainerProperty("Dataset Type", String.class, null);
-		ds.addContainerProperty("Registration Date", Timestamp.class, null);
-		ds.addContainerProperty("Validated", Boolean.class, null);
-		ds.addContainerProperty("File Size", Integer.class, null);
-		ds.addContainerProperty("dl_link", String.class, null);
+	
+		this.datasets.get(id).addContainerProperty("Patient", String.class, null);
+		this.datasets.get(id).addContainerProperty("Sample", String.class, null);
+		this.datasets.get(id).addContainerProperty("Sample Type", String.class, null);
+		this.datasets.get(id).addContainerProperty("File Name", String.class, null);
+		this.datasets.get(id).addContainerProperty("File Type", String.class, null);
+		this.datasets.get(id).addContainerProperty("Dataset Type", String.class, null);
+		this.datasets.get(id).addContainerProperty("Registration Date", Timestamp.class, null);
+		this.datasets.get(id).addContainerProperty("Validated", Boolean.class, null);
+		this.datasets.get(id).addContainerProperty("File Size", String.class, null);
+		this.datasets.get(id).addContainerProperty("dl_link", String.class, null);
 		
 		for(DataSet d: datasets) {
-			Object new_ds = this.datasets.addItem();
+			Object new_ds = this.datasets.get(id).addItem();
 			String code = d.getSampleIdentifierOrNull();
 			String sample = code.split("/")[2];
 			String patient = sample.substring(0, 5);
@@ -106,27 +112,25 @@ public class DataHandler {
             String dateString = sd.format(date);
             Timestamp ts = Timestamp.valueOf(dateString);
             
-            
             FileInfoDssDTO[] filelist = d.listFiles("original", false);
             
             String download_link = filelist[0].getPathInDataSet();
             String file_name = download_link.split("/")[1];
             
-            //System.out.println(d.getDataSetDss().tryGetInternalPathInDataStore() + "/" + filelist[0].getPathInDataSet());
-            //long filesize = filelist[0].getFileSize() / (1024L * 1024L);
+            String fileSize = DashboardUtil.humanReadableByteCount(filelist[0].getFileSize(), true);
             
-            ds.getContainerProperty(new_ds, "Patient").setValue(patient);
-            ds.getContainerProperty(new_ds, "Sample").setValue(sample);
-            ds.getContainerProperty(new_ds, "Sample Type").setValue(this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode());
-            ds.getContainerProperty(new_ds, "File Name").setValue(file_name);
-            ds.getContainerProperty(new_ds, "File Type").setValue(d.getDataSetTypeCode());
-            ds.getContainerProperty(new_ds, "Dataset Type").setValue(d.getDataSetTypeCode());
-            ds.getContainerProperty(new_ds, "Registration Date").setValue(ts);
-            ds.getContainerProperty(new_ds, "Validated").setValue(true);
-            ds.getContainerProperty(new_ds, "File Size").setValue( (int) filelist[0].getFileSize());
-            ds.getContainerProperty(new_ds, "dl_link").setValue(d.getDataSetDss().tryGetInternalPathInDataStore() + "/" + filelist[0].getPathInDataSet());
+            this.datasets.get(id).getContainerProperty(new_ds, "Patient").setValue(patient);
+            this.datasets.get(id).getContainerProperty(new_ds, "Sample").setValue(sample);
+            this.datasets.get(id).getContainerProperty(new_ds, "Sample Type").setValue(this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode());
+            this.datasets.get(id).getContainerProperty(new_ds, "File Name").setValue(file_name);
+            this.datasets.get(id).getContainerProperty(new_ds, "File Type").setValue(d.getDataSetTypeCode());
+            this.datasets.get(id).getContainerProperty(new_ds, "Dataset Type").setValue(d.getDataSetTypeCode());
+            this.datasets.get(id).getContainerProperty(new_ds, "Registration Date").setValue(ts);
+            this.datasets.get(id).getContainerProperty(new_ds, "Validated").setValue(true);
+            this.datasets.get(id).getContainerProperty(new_ds, "File Size").setValue( fileSize );
+            this.datasets.get(id).getContainerProperty(new_ds, "dl_link").setValue(d.getDataSetDss().tryGetInternalPathInDataStore() + "/" + filelist[0].getPathInDataSet());
 		}
-		return ds;
+		return this.datasets.get(id);
 	}
 }
 	

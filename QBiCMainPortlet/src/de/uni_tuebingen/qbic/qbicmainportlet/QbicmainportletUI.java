@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.liferay.portal.kernel.configuration.ConfigurationFactory;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
@@ -31,6 +32,10 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
+
+import de.uni_tuebingen.qbic.main.ConfigurationManager;
+import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
@@ -72,34 +77,34 @@ public class QbicmainportletUI extends UI {
 
 		public void render(Object arg) {
 			Vector<Item> children = (Vector<Item>) arg;
-			
-			
+
+
 			if (children.isEmpty()) {
 				System.out.println("no children to render!");
 				return ;
 			}
-			
+
 			idx_cont_render.removeAllItems();
 
 			// arg is the root node of the opened (double-clicked) subtree
-			
-				for (Object c : children) {
-					Item cobj = (Item) c;
-					DummyMetaData work_obj = (DummyMetaData) cobj.getItemProperty("metadata").getValue();
 
-					idx_cont_render.addContainerProperty("identifier", String.class, "N/A");
-					idx_cont_render.addContainerProperty("description", String.class, "N/A");
-					idx_cont_render.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
-					idx_cont_render.addContainerProperty("number of subitems", Integer.class, 0);
-					idx_cont_render.addContainerProperty("creation date", Date.class, new Date());
+			for (Object c : children) {
+				Item cobj = (Item) c;
+				DummyMetaData work_obj = (DummyMetaData) cobj.getItemProperty("metadata").getValue();
 
-					Object ic_id = idx_cont_render.addItem();
-					idx_cont_render.getContainerProperty(ic_id, "identifier").setValue(work_obj.getIdentifier());
-					idx_cont_render.getContainerProperty(ic_id, "description").setValue(work_obj.getDescription());
-					idx_cont_render.getContainerProperty(ic_id, "type").setValue(work_obj.getType());
-					idx_cont_render.getContainerProperty(ic_id, "number of subitems").setValue(work_obj.getNumOfChildren());
-					idx_cont_render.getContainerProperty(ic_id, "creation date").setValue(work_obj.getCreationDate());
-				}
+				idx_cont_render.addContainerProperty("identifier", String.class, "N/A");
+				idx_cont_render.addContainerProperty("description", String.class, "N/A");
+				idx_cont_render.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
+				idx_cont_render.addContainerProperty("number of subitems", Integer.class, 0);
+				idx_cont_render.addContainerProperty("creation date", Date.class, new Date());
+
+				Object ic_id = idx_cont_render.addItem();
+				idx_cont_render.getContainerProperty(ic_id, "identifier").setValue(work_obj.getIdentifier());
+				idx_cont_render.getContainerProperty(ic_id, "description").setValue(work_obj.getDescription());
+				idx_cont_render.getContainerProperty(ic_id, "type").setValue(work_obj.getType());
+				idx_cont_render.getContainerProperty(ic_id, "number of subitems").setValue(work_obj.getNumOfChildren());
+				idx_cont_render.getContainerProperty(ic_id, "creation date").setValue(work_obj.getCreationDate());
+			}
 		}
 
 	};
@@ -152,12 +157,18 @@ public class QbicmainportletUI extends UI {
 		private MetaDataType type;
 		private Integer num_of_children;
 		private Date creation_date;
-	};
+	}
+
+	private  OpenBisClient openBisConnection;
 
 
 	@Override
 	protected void init(VaadinRequest request) {
+		initConnection();
+
 		UI.getCurrent().getSession().setAttribute("state", new State());
+		UI.getCurrent().getSession().setAttribute("datahandler", new DataHandler(this.openBisConnection));
+		
 		VerticalLayout layout = new VerticalLayout();
 		layout.addComponent(new Button("blakdfg"));
 		this.setContent(layout);
@@ -188,9 +199,17 @@ public class QbicmainportletUI extends UI {
 		t.setContainerDataSource(tc);
 
 		tc.addContainerProperty("metadata", DummyMetaData.class, new DummyMetaData());
+
+		tc.addContainerProperty("identifier", String.class, "N/A");
+		tc.addContainerProperty("type", String.class, "N/A");
 		
 		for(String spaceKey : spacesDummy) {
+			
+			
 			tc.addItem(spaceKey);
+			
+			tc.getContainerProperty(spaceKey, "identifier").setValue("IVAC_ALL");
+			tc.getContainerProperty(spaceKey, "type").setValue("space");
 
 			DummyMetaData dmd = new DummyMetaData();
 			dmd.setIdentifier(spaceKey);
@@ -199,7 +218,7 @@ public class QbicmainportletUI extends UI {
 			dmd.setCreationDate(new Date(2014,02,10));
 
 			ArrayList<String> projects = datareaderDummy.getProjects(spaceKey);
-						
+
 			try {
 				dmd.setNumOfChildren(projects.size());
 			} catch (NullPointerException e) {
@@ -207,9 +226,9 @@ public class QbicmainportletUI extends UI {
 				dmd.setNumOfChildren(0);
 				e.printStackTrace();
 			}
-			
+
 			tc.getContainerProperty(spaceKey, "metadata").setValue(dmd);
-			
+
 			if(projects != null){
 				for(String proj : projects) {
 					tc.addItem(proj);
@@ -230,7 +249,7 @@ public class QbicmainportletUI extends UI {
 					}
 					tc.getContainerProperty(proj, "metadata").setValue(dmd1);
 
-					
+
 					if(samples !=null) {
 						for(String samp :samples) {
 							tc.addItem(samp);
@@ -254,11 +273,12 @@ public class QbicmainportletUI extends UI {
 		}
 
 
+
 		IndexedContainer spaces = new IndexedContainer();
 		QBiCRenderContainer qidx_container = new QBiCRenderContainer(spaces);
 		//qbic_tree.addObserver(qidx_container);
 
-		
+
 		spaces.addContainerProperty("identifier", String.class, "N/A");
 		spaces.addContainerProperty("description", String.class, "N/A");
 		spaces.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
@@ -269,8 +289,8 @@ public class QbicmainportletUI extends UI {
 		spaces.getContainerProperty(ic_id, "identifier").setValue("QBIC_ROOT");
 		spaces.getContainerProperty(ic_id, "description").setValue("Root node of TreeView");
 		spaces.getContainerProperty(ic_id, "type").setValue(MetaDataType.UNDEFINED);
-		
-		
+
+
 		try {
 			spaces.getContainerProperty(ic_id, "number of subitems").setValue(spacesDummy.size());
 		} catch (NullPointerException e) {
@@ -278,40 +298,47 @@ public class QbicmainportletUI extends UI {
 			spaces.getContainerProperty(ic_id, "number of subitems").setValue(0);
 			e.printStackTrace();
 		}
-		
-		
+
+
 		spaces.getContainerProperty(ic_id, "creation date").setValue(new Date(10,10,10));
 
-		
+
 		Navigator navigator = new Navigator(UI.getCurrent(),this);
-		
-		
-		
+
+
+
 
 		TreeView tv = new TreeView();
 		tv.setContainerDataSource(tc);
 
 		TreeView tv2 = new TreeView();
 		tv2.setContainerDataSource(tc);
-		
+
 		TreeView tv3 = new TreeView();
 		tv3.setContainerDataSource(tc);
-		
+
 		State state = (State) UI.getCurrent().getSession().getAttribute("state");
-		
+
 		state.addObserver(tv);
 		state.addObserver(tv2);
 		state.addObserver(tv3);
-		
+
 		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), tv /*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
 		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), tv2/*Tree.getInstance()*/,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
-		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),tv3, new Button("TODO"));
-				
+		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),tv3, new DatasetView());
+
 		navigator.addView("spaceView", spaceView);
 		navigator.addView("addspaceView", addspaceView);
 		navigator.addView("datasetView", datasetView);
 		navigator.navigateTo("spaceView");
 		
+	}
+	
+	private  void initConnection() {
+		ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
+		//System.out.println(manager.getDataSourceURL() + manager.getDataSourceUser() + manager.getDataSourcePassword());
+		// TODO LiferayUtils ?!
+		this.openBisConnection = new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(), manager.getDataSourceURL(), true); //LiferayAndVaadinUtils.getOpenBisClient();
 	}
 
 	private Button createIconButton(String icon) {

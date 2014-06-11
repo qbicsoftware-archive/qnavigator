@@ -38,6 +38,7 @@ import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -49,6 +50,7 @@ public class DatasetView extends VerticalLayout {
 	 */
 	private static final long serialVersionUID = 8672873911284888801L;
 
+	private Label general_information;
 	private FilterTable table;
 	private IndexedContainer datasets;
 	private Button download;
@@ -71,6 +73,17 @@ public class DatasetView extends VerticalLayout {
 	public void setContainerDataSource(IndexedContainer newDataSource){
 		this.datasets = (IndexedContainer) newDataSource;
 		this.table.setContainerDataSource(this.datasets);
+		
+		this.table.setColumnCollapsed("state", true);
+
+		this.table.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
+		
+		this.setSizeFull();
+		this.table.setSizeFull();
+	}
+	
+	public void setInfo(String name, String entity, String owner) {		
+		this.general_information.setValue(String.format("Name: %s\nEntity Type: %s\nOwner: %s\n",name,entity,owner));
 	}
 	
 	private void buildLayout(){
@@ -89,7 +102,13 @@ public class DatasetView extends VerticalLayout {
 		
 		this.table = buildFilterTable();
 		
+		this.general_information = new Label("Name: \nEntity Type: \nOwner: \n", Label.CONTENT_PREFORMATTED);
+		this.general_information.setCaption("General Information: ");
+		
+		this.addComponent(this.general_information);
+		
 		this.addComponent(this.table);
+		this.table.setSizeFull();
 		this.addComponent(buttonLayout);
 	}
 	
@@ -114,9 +133,6 @@ public class DatasetView extends VerticalLayout {
 
         filterTable.setContainerDataSource(this.datasets);
 
-        filterTable.setColumnCollapsed("state", true);
-
-        filterTable.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
 
         /*
         filterTable.setItemDescriptionGenerator(new ColumnDescriptionGenerator() {

@@ -83,10 +83,29 @@ public class LevelView extends VerticalLayout implements View{
 	@Override
 	public void enter(ViewChangeEvent event) {
 		
+		System.out.println("instance? " + this.mainComponent);
 		if(this.mainComponent instanceof DatasetView)
 		{
 			Object currentValue = this.treeView.getValue();
-			Object type = this.treeView.getContainerProperty(currentValue, "type");
+			
+			System.out.println(currentValue);
+			//System.out.println("type: " + this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue());
+			//System.out.println("ID: " + this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue());
+			DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+			
+			String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
+			String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+			
+			DatasetView ds = (DatasetView) this.mainComponent;
+			try {
+				ds.setContainerDataSource(dh.getDatasets(name, type));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			ds.setInfo(name, type, "Testuser");
+			
 		//	((DatasetView) this.mainComponent).setContainerDataSource(DataHandler.getDatasets(currentValue, type));
 			
 		}
