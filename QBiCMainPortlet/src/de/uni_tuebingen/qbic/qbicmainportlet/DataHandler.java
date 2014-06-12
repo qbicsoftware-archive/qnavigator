@@ -103,36 +103,36 @@ public class DataHandler {
 
 		// TODO change return type of dataset retrieval methods if possible
 		if(type.equals("space")) {
-			if(this.space_to_datasets.get(id) != null) {
-				return this.space_to_datasets.get(id);
+			if(this.space_to_samples.get(id) != null) {
+				return this.space_to_samples.get(id);
 			}
 
 			else {
 				sample_list = this.openBisClient.getSamplesofSpace(id);
 				samples = this.createSampleContainer(sample_list, id);
-				this.space_to_datasets.put(id, samples);
+				this.space_to_samples.put(id, samples);
 			}
 		}
 		else if(type.equals("project")) {
-			if(this.project_to_datasets.get(id) != null) {
-				return this.project_to_datasets.get(id);
+			if(this.project_to_samples.get(id) != null) {
+				return this.project_to_samples.get(id);
 			}
 
 			else {
 				sample_list = this.openBisClient.getSamplesofProject(id);
 				samples = this.createSampleContainer(sample_list, id);
-				this.project_to_datasets.put(id, samples);
+				this.project_to_samples.put(id, samples);
 			}
 		}
 		else if(type.equals("experiment")) {
-			if(this.experiment_to_datasets.get(id) != null) {
-				return this.experiment_to_datasets.get(id);
+			if(this.experiment_to_samples.get(id) != null) {
+				return this.experiment_to_samples.get(id);
 			}
 
 			else {
 				sample_list = this.openBisClient.getSamplesofExp(id);
 				samples = this.createSampleContainer(sample_list, id);
-				this.experiment_to_datasets.put(id, samples);
+				this.experiment_to_samples.put(id, samples);
 			}
 		}
 		else {
