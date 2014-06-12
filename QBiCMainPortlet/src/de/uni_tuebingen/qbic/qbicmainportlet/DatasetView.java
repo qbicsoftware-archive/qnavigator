@@ -55,7 +55,7 @@ public class DatasetView extends VerticalLayout {
 	private IndexedContainer datasets;
 	private Button download;
 	private final String DOWNLOAD_BUTTON_CAPTION = "Download marked files";
-	private final String[] FILTER_TABLE_COLUMNS = new String[] { "Patient", "Sample", "Sample Type",
+	private final String[] FILTER_TABLE_COLUMNS = new String[] { "Project", "Sample", "Sample Type",
             "File Name", "File Type", "Dataset Type", "Registration Date" , "Validated", "File Size"};
 	
 	public DatasetView() {

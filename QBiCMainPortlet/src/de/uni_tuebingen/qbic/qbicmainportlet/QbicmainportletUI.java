@@ -14,7 +14,6 @@ import java.util.Vector;
 
 import javax.servlet.annotation.WebServlet;
 
-import com.liferay.portal.kernel.configuration.ConfigurationFactory;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;

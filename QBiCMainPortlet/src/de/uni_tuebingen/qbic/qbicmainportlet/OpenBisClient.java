@@ -399,7 +399,7 @@ public class OpenBisClient {//implements Serializable {
 		return found_proj;	
 	}
 	
-	
+	/*
 	public List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> listDataSetsTest(String code) {
 		List<Experiment> exps = this.getExperimentsofSpace(code);
 		
@@ -412,13 +412,22 @@ public class OpenBisClient {//implements Serializable {
 		
 		return ds;
 	}
-
+*/
 
 	/**
 	 * Function to list all datasets of a specific sample
 	 * @param  projCode identifier of the openBIS sample
 	 * @return list with all datasets of the given sample
 	 */
+	public List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> getDataSetsOfSample(String code) {
+		
+		List<String> codes = new ArrayList<String>();
+		codes.add(code);
+		
+		return this.facade.listDataSetsForSamples(codes);
+	}
+	// TODO ANOTHER WAY TO GET THE CORRECT DATASET TYPE ?
+	/*
 	public List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> getDataSetsOfSample(String code) {
 		SearchCriteria ec = new SearchCriteria();
 		ec.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, code));
@@ -426,12 +435,19 @@ public class OpenBisClient {//implements Serializable {
 		sc.addSubCriteria(SearchSubCriteria.createSampleCriteria(ec));
 		return openbisInfoService.searchForDataSetsOnBehalfOfUser(sessionToken, sc, userId);
 		}
-
+	*/
 	/**
 	 * Function to list all datasets of a specific experiment
 	 * @param  projCode identifier of the openBIS experiment
 	 * @return list with all datasets of the given experiment
 	 */
+	public List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> getDataSetsOfExperiment(String expCode) {
+		
+		return this.facade.listDataSetsForExperiment(expCode);
+	}
+	
+	// TODO ANOTHER WAY TO GET THE CORRECT DATASET TYPE ?
+		/*
 	public List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> getDataSetsOfExperiment(String expCode) {
 		SearchCriteria ec = new SearchCriteria();
 		ec.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, expCode));
@@ -439,7 +455,7 @@ public class OpenBisClient {//implements Serializable {
 		sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(ec));
 		return openbisInfoService.searchForDataSetsOnBehalfOfUser(sessionToken, sc, userId);
 	}
-
+	*/
 	/**
 	 * Function to list all datasets of a specific space
 	 * @param  projCode identifier of the openBIS space
@@ -452,7 +468,7 @@ public class OpenBisClient {//implements Serializable {
 			Sample s = (Sample) iterator.next();
 			ids.add(s.getIdentifier());
 		}
-		return facade.listDataSetsForSamples(ids);
+		return this.facade.listDataSetsForSamples(ids);
 	}
 
 	/**
@@ -460,6 +476,18 @@ public class OpenBisClient {//implements Serializable {
 	 * @param  projCode identifier of the openBIS project
 	 * @return list with all datasets of the given project
 	 */
+	public List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> getDataSetsOfProject(String projCode) {
+		List<Sample> samps = getSamplesofProject(projCode);
+		List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> res = new ArrayList<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
+		for (Iterator<Sample> iterator = samps.iterator(); iterator.hasNext();) {
+			Sample sample = (Sample) iterator.next();
+			res.addAll(getDataSetsOfSample(sample.getCode()));
+		}
+		return res;
+	}
+	
+	// TODO ANOTHER WAY TO GET THE CORRECT DATASET TYPE ?
+	/*
 	public List<DataSet> getDataSetsOfProject(String projCode) {
 		List<Sample> samps = getSamplesofProject(projCode);
 		List<DataSet> res = new ArrayList<DataSet>();
@@ -469,7 +497,7 @@ public class OpenBisClient {//implements Serializable {
 		}
 		return res;
 	}
-
+	*/
 	/**
 	 * Function to list all datasets of a specific type
 	 * @param  type identifier of the openBIS type
