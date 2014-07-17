@@ -4,7 +4,7 @@
     <portlet>
         <!-- Matches definition in portlet.xml. -->
         <!-- Note: Must not be the same as servlet name. -->
-        <portlet-name>QbicmainportletApplication portlet</portlet-name>
+        <portlet-name>QbicmainportletApplicationPortlet</portlet-name>
         <instanceable>true</instanceable>
         <ajaxable>false</ajaxable>
     </portlet>

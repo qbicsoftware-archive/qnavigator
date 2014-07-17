@@ -1,5 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
+import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 //import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.EntityRegistrationDetails;
@@ -28,7 +32,8 @@ public class DataHandler {
 	Map<String,IndexedContainer> experiment_to_datasets = new HashMap<String,IndexedContainer>();
 	Map<String,IndexedContainer> sample_to_datasets = new HashMap<String,IndexedContainer>();
 	
-
+	
+	
 	OpenBisClient openBisClient;
 	
 	public DataHandler(OpenBisClient client){
@@ -90,7 +95,7 @@ public class DataHandler {
 			}
 		}
 		else {
-			throw new Exception("Unknown datatype!");
+			throw new Exception("Unknown datatype: " + type);
 		}
 
 		return datasets;
@@ -216,9 +221,12 @@ public class DataHandler {
 		dataset_container.addContainerProperty("Registration Date", Timestamp.class, null);
 		dataset_container.addContainerProperty("Validated", Boolean.class, null);
 		dataset_container.addContainerProperty("File Size", String.class, null);
+		dataset_container.addContainerProperty("file_size_bytes", Long.class, null);
 		dataset_container.addContainerProperty("dl_link", String.class, null);
-		
+		dataset_container.addContainerProperty("CODE", String.class, null);
+		dataset_container.addContainerProperty("file_size_bytes", Long.class, null);
 		for(DataSet d: datasets) {
+			
 			Object new_ds = dataset_container.addItem();
 			String code = d.getSampleIdentifierOrNull();
 			String sample = code.split("/")[2];
@@ -235,7 +243,6 @@ public class DataHandler {
             String file_name = download_link.split("/")[1];
             
             String fileSize = DashboardUtil.humanReadableByteCount(filelist[0].getFileSize(), true);
-            
             dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
             dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
             dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode());
@@ -246,8 +253,25 @@ public class DataHandler {
             dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
             dataset_container.getContainerProperty(new_ds, "File Size").setValue( fileSize );
             dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDataSetDss().tryGetInternalPathInDataStore() + "/" + filelist[0].getPathInDataSet());
+            dataset_container.getContainerProperty(new_ds, "CODE").setValue(d.getCode());
+            dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(filelist[0].getFileSize());
 		}
+		System.out.println("datasets size: " + datasets.size());
 		return dataset_container;
+	}
+
+
+	public URL getUrlForDataset(String datasetCode, String dataset_type) throws MalformedURLException {
+		
+		return this.openBisClient.getDataStoreDownloadURL(datasetCode, dataset_type);
+	}
+	
+	public InputStream getDatasetStream(String datasetCode){
+		
+		IOpenbisServiceFacade facade = openBisClient.getFacade();
+		DataSet dataSet  = facade.getDataSet(datasetCode);
+		FileInfoDssDTO[] filelist = dataSet.listFiles("original", false);
+		return dataSet.getFile(filelist[0].getPathInDataSet());
 	}
 }
 	

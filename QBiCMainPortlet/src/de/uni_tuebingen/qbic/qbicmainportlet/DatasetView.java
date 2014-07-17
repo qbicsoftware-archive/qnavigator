@@ -23,6 +23,9 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.VaadinPortletSession;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.combobox.FilteringMode;
@@ -36,6 +39,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
@@ -53,7 +57,7 @@ public class DatasetView extends VerticalLayout {
 	private Label general_information;
 	private FilterTable table;
 	private IndexedContainer datasets;
-	private Button download;
+	private ButtonLink download;
 	private final String DOWNLOAD_BUTTON_CAPTION = "Download marked files";
 	private final String[] FILTER_TABLE_COLUMNS = new String[] { "Project", "Sample", "Sample Type",
             "File Name", "File Type", "Dataset Type", "Registration Date" , "Validated", "File Size"};
@@ -95,12 +99,24 @@ public class DatasetView extends VerticalLayout {
 	    buttonLayout.setWidth("100%");
 	    buttonLayout.setSpacing(true);
 		
-		this.download = new Button(DOWNLOAD_BUTTON_CAPTION);
-		this.download.setStyleName(Reindeer.BUTTON_SMALL);
+		this.download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
+		//this.download.setStyleName(Reindeer.BUTTON_SMALL);
 		buttonLayout.addComponent(this.download);
 		
 		
 		this.table = buildFilterTable();
+		MpPortletListener mppl  = new MpPortletListener(this.download, this.table);
+		this.table.addValueChangeListener(mppl);
+	       if (VaadinSession.getCurrent() instanceof VaadinPortletSession) {
+	            VaadinPortletSession portletsession =
+	                    (VaadinPortletSession) VaadinSession.getCurrent();
+
+	            // Add a custom listener to handle action and
+	            // render requests.
+	            portletsession.addPortletListener(mppl);
+	      
+			}
+
 		
 		this.general_information = new Label("Name: \nEntity Type: \nOwner: \n", Label.CONTENT_PREFORMATTED);
 		this.general_information.setCaption("General Information: ");
@@ -132,7 +148,6 @@ public class DatasetView extends VerticalLayout {
         filterTable.setColumnReorderingAllowed(true);
 
         filterTable.setContainerDataSource(this.datasets);
-
 
         /*
         filterTable.setItemDescriptionGenerator(new ColumnDescriptionGenerator() {

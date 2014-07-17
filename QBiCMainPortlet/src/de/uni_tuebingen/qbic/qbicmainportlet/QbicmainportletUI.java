@@ -26,6 +26,8 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
@@ -35,7 +37,11 @@ import com.vaadin.ui.themes.Reindeer;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
-
+/*
+ * in portal-ext.properties the following settings must be set, in order to work
+ * com.liferay.portal.servlet.filters.etag.ETagFilter=false
+ * com.liferay.portal.servlet.filters.header.HeaderFilter=false
+ */
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
 @Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
@@ -159,7 +165,7 @@ public class QbicmainportletUI extends UI {
 	}
 
 	private  OpenBisClient openBisConnection;
-
+	private VerticalLayout mainLayout;
 
 	@Override
 	protected void init(VaadinRequest request) {
@@ -223,7 +229,7 @@ public class QbicmainportletUI extends UI {
 			} catch (NullPointerException e) {
 				// TODO Auto-generated catch block
 				dmd.setNumOfChildren(0);
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 
 			tc.getContainerProperty(spaceKey, "metadata").setValue(dmd);
@@ -247,7 +253,7 @@ public class QbicmainportletUI extends UI {
 						e.printStackTrace();
 					}
 					tc.getContainerProperty(proj, "metadata").setValue(dmd1);
-
+					tc.getContainerProperty(proj, "type").setValue("project");
 
 					if(samples !=null) {
 						for(String samp :samples) {
@@ -262,6 +268,7 @@ public class QbicmainportletUI extends UI {
 							dmd3.setCreationDate(new Date(2014,02,12));
 
 							tc.getContainerProperty(samp, "metadata").setValue(dmd3);
+							tc.getContainerProperty(samp, "type").setValue("sample");
 							tc.setChildrenAllowed(samp, false);
 						}
 					}
@@ -270,7 +277,9 @@ public class QbicmainportletUI extends UI {
 			// HALLO
 
 		}
-
+		if(tc.getItem(tc.getIdByIndex(0)) instanceof DummyMetaData){
+			System.out.println("is dummyMetaData");
+		}
 
 
 		IndexedContainer spaces = new IndexedContainer();
@@ -302,9 +311,6 @@ public class QbicmainportletUI extends UI {
 		spaces.getContainerProperty(ic_id, "creation date").setValue(new Date(10,10,10));
 
 
-		Navigator navigator = new Navigator(UI.getCurrent(),this);
-
-
 
 
 		TreeView tv = new TreeView();
@@ -326,10 +332,24 @@ public class QbicmainportletUI extends UI {
 		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), tv2/*Tree.getInstance()*/,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
 		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),tv3, new DatasetView());
 
+		
+        mainLayout = new VerticalLayout();
+        mainLayout.setMargin(false);
+        setContent(mainLayout);
+		
+        VerticalLayout navigatorContent = new VerticalLayout();
+		
+		Navigator navigator = new Navigator(UI.getCurrent(),navigatorContent);
 		navigator.addView("spaceView", spaceView);
 		navigator.addView("addspaceView", addspaceView);
 		navigator.addView("datasetView", datasetView);
 		navigator.navigateTo("spaceView");
+		setNavigator(navigator);
+		
+		//Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do this
+		JavaScript.getCurrent().execute("window.location.reload();");
+		
+		mainLayout.addComponent(navigatorContent);
 		
 	}
 	

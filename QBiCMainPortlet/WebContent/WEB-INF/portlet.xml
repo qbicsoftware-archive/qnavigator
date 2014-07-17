@@ -2,13 +2,13 @@
 <portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
 
     <portlet>
-        <portlet-name>QbicmainportletApplication portlet</portlet-name>
+        <portlet-name>QbicmainportletApplicationPortlet</portlet-name>
         <display-name>QBiCMainPortlet</display-name>
         
         <portlet-class>com.vaadin.server.VaadinPortlet</portlet-class>
         <init-param>
             <name>UI</name>
-            <value>com.example.qbicmainportlet.QbicmainportletUI</value>
+            <value>de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletUI</value>
         </init-param>
         
         <!--

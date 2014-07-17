@@ -95,10 +95,10 @@ public class LevelView extends VerticalLayout implements View{
 			
 			String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
 			String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-			
+			System.out.println("Name: " +name + " type " + type + " value " + this.treeView.getValue() );
 			DatasetView ds = (DatasetView) this.mainComponent;
 			try {
-				ds.setContainerDataSource(dh.getDatasets(name, type));
+				ds.setContainerDataSource(dh.getDatasets((String)currentValue, type));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

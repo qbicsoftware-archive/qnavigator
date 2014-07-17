@@ -1,6 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -746,4 +748,36 @@ public class OpenBisClient {//implements Serializable {
 		}
 		return mapToChar(sum % 34);
 	}
+	
+	/**
+	 * @throws MalformedURLException 
+	 * Returns an download url for the openbis dataset with the given code and dataset_type.
+	 * Throughs MalformedURLException if a url can not be created from the given parameters.
+	 * @param openbis_code
+	 * @param openbis_dataset_type
+	 * @return
+	 */
+	
+	public URL getDataStoreDownloadURL(String openbis_code, String openbis_dataset_type) throws MalformedURLException{
+	    String download_url = this.serverURL;
+	    download_url += "/datastore_server/";
+
+	    download_url += openbis_code;
+	    download_url += "/original/";
+	    download_url += openbis_dataset_type;
+	    download_url += "?mode=simpleHtml&sessionID=";
+	    download_url += this.getSessionToken();
+	    return new URL(download_url);
+		
+	}
+	
+	public String getSessionToken(){
+	    if(!this.openbisInfoService.isSessionActive(this.sessionToken)){
+	        this.logout();
+	        this.login();
+	      }
+	      return this.sessionToken;
+	}
+	
+	
 }
