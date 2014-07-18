@@ -389,7 +389,7 @@ public class MpPortletListener implements PortletListener, com.vaadin.data.Prope
 				Iterator<Object> iterator = this.currentSelectedTableIndices.iterator();
 				Object next = iterator.next();
 				String datasetCode = (String)table.getItem(next).getItemProperty("CODE").getValue();
-				String datasetType = (String)table.getItem(next).getItemProperty("CODE").getValue();
+				String datasetType = (String)table.getItem(next).getItemProperty("File Name").getValue();
 				try {
 					this.open.setResource(new ExternalResource(dataHanlder.getUrlForDataset(datasetCode,datasetType)));
 				} catch (MalformedURLException e) {

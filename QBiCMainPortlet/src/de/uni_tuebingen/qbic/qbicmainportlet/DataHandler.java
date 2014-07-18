@@ -261,9 +261,9 @@ public class DataHandler {
 	}
 
 
-	public URL getUrlForDataset(String datasetCode, String dataset_type) throws MalformedURLException {
+	public URL getUrlForDataset(String datasetCode, String datasetName) throws MalformedURLException {
 		
-		return this.openBisClient.getDataStoreDownloadURL(datasetCode, dataset_type);
+		return this.openBisClient.getDataStoreDownloadURL(datasetCode, datasetName);
 	}
 	
 	public InputStream getDatasetStream(String datasetCode){

@@ -753,18 +753,20 @@ public class OpenBisClient {//implements Serializable {
 	 * @throws MalformedURLException 
 	 * Returns an download url for the openbis dataset with the given code and dataset_type.
 	 * Throughs MalformedURLException if a url can not be created from the given parameters.
-	 * @param openbis_code
-	 * @param openbis_dataset_type
+	 * NOTE: datastoreURL differs from serverURL only by the port -> quick hack used
+	 * @param openbisCode
+	 * @param openbisFilename
 	 * @return
 	 */
 	
-	public URL getDataStoreDownloadURL(String openbis_code, String openbis_dataset_type) throws MalformedURLException{
-	    String download_url = this.serverURL;
+	public URL getDataStoreDownloadURL(String openbisCode, String openbisFilename) throws MalformedURLException{
+	    String download_url = this.serverURL.substring(0,this.serverURL.length()-1);
+	    download_url += "4";
 	    download_url += "/datastore_server/";
 
-	    download_url += openbis_code;
+	    download_url += openbisCode;
 	    download_url += "/original/";
-	    download_url += openbis_dataset_type;
+	    download_url += openbisFilename;
 	    download_url += "?mode=simpleHtml&sessionID=";
 	    download_url += this.getSessionToken();
 	    return new URL(download_url);
