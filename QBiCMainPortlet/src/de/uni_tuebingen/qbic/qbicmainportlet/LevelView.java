@@ -1,23 +1,20 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import javax.swing.GroupLayout.Alignment;
-
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
-
+/**
+ * Implements the vaadin View interface. LevelViews show their main component in the same manner, whether it is a button a table or any other vaadin component.
+ * 
+ *
+ */
 public class LevelView extends VerticalLayout implements View{
 	/**
 	 * 
@@ -42,7 +39,6 @@ public class LevelView extends VerticalLayout implements View{
 		this.mainComponent = component;
 		
 		this.buildLayout();
-
 	}
 
 	public void buildLayout(){
@@ -82,17 +78,15 @@ public class LevelView extends VerticalLayout implements View{
 
 	@Override
 	public void enter(ViewChangeEvent event) {
+		Object currentValue = this.treeView.getValue();
 		
-		System.out.println("instance? " + this.mainComponent);
+		System.out.println(currentValue);
+		//System.out.println("type: " + this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue());
+		//System.out.println("ID: " + this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue());
+		DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");		
+		
 		if(this.mainComponent instanceof DatasetView)
 		{
-			Object currentValue = this.treeView.getValue();
-			
-			System.out.println(currentValue);
-			//System.out.println("type: " + this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue());
-			//System.out.println("ID: " + this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue());
-			DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-			
 			String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
 			String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
 			System.out.println("Name: " +name + " type " + type + " value " + this.treeView.getValue() );
@@ -100,19 +94,20 @@ public class LevelView extends VerticalLayout implements View{
 			try {
 				ds.setContainerDataSource(dh.getDatasets((String)currentValue, type));
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			}
-			
 			ds.setInfo(name, type, "Testuser");
 			
-		//	((DatasetView) this.mainComponent).setContainerDataSource(DataHandler.getDatasets(currentValue, type));
-			
 		}
-		
-		//System.out.println("Entering enter");
-		//this.treeView.setValue(UI.getCurrent().getSession().getAttribute("value"));
-		// TODO Auto-generated method stub
-		
+		else if(this.mainComponent instanceof SampleView){
+			SpaceView sv = (SpaceView) this.mainComponent;
+			try{
+				String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+				sv.setContainerDataSource(dh.getSamples((String) currentValue, type));
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}
 	}
 }

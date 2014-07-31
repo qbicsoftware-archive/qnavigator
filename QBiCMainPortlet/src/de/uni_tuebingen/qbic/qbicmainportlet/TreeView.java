@@ -135,6 +135,7 @@ public class TreeView extends Tree implements Observer {
 
 		if(((ArrayList<String>) arg).get(0).equals("expanded")) {
 			this.setValue(((ArrayList<String>) arg).get(1));
+			UI.getCurrent().getNavigator().navigateTo(this.getItem(this.getValue()).getItemProperty("type").getValue().toString());
 		}
 		else if(((ArrayList<String>) arg).get(0).equals("collapsed")) {
 			this.collapseItem(((ArrayList<String>) arg).get(1));

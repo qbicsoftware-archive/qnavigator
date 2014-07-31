@@ -2,41 +2,27 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Random;
-import java.util.Vector;
 
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
-import com.vaadin.data.Item;
-import com.vaadin.data.Property.ReadOnlyException;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.Reindeer;
 
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 /*
  * in portal-ext.properties the following settings must be set, in order to work
  * com.liferay.portal.servlet.filters.etag.ETagFilter=false
@@ -51,68 +37,6 @@ public class QbicmainportletUI extends UI {
 	@VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class)
 	public static class Servlet extends VaadinServlet {
 	}
-
-	public class QBiCRenderContainer implements Observer {
-		private IndexedContainer idx_cont_render = null;
-
-		public QBiCRenderContainer() {
-			super();
-			this.setIndexContainer(new IndexedContainer());
-		}
-
-		public QBiCRenderContainer(IndexedContainer idxcont_tmp) {
-			super();
-			this.setIndexContainer(idxcont_tmp);
-		}
-
-
-		@Override
-		public void update(Observable o, Object arg) {
-
-			this.render(arg);
-		}
-
-		public IndexedContainer getIndexContainer() {
-			return idx_cont_render;
-		}
-
-		public void setIndexContainer(IndexedContainer idx_cont_render) {
-			this.idx_cont_render = idx_cont_render;
-		}
-
-		public void render(Object arg) {
-			Vector<Item> children = (Vector<Item>) arg;
-
-
-			if (children.isEmpty()) {
-				System.out.println("no children to render!");
-				return ;
-			}
-
-			idx_cont_render.removeAllItems();
-
-			// arg is the root node of the opened (double-clicked) subtree
-
-			for (Object c : children) {
-				Item cobj = (Item) c;
-				DummyMetaData work_obj = (DummyMetaData) cobj.getItemProperty("metadata").getValue();
-
-				idx_cont_render.addContainerProperty("identifier", String.class, "N/A");
-				idx_cont_render.addContainerProperty("description", String.class, "N/A");
-				idx_cont_render.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
-				idx_cont_render.addContainerProperty("number of subitems", Integer.class, 0);
-				idx_cont_render.addContainerProperty("creation date", Date.class, new Date());
-
-				Object ic_id = idx_cont_render.addItem();
-				idx_cont_render.getContainerProperty(ic_id, "identifier").setValue(work_obj.getIdentifier());
-				idx_cont_render.getContainerProperty(ic_id, "description").setValue(work_obj.getDescription());
-				idx_cont_render.getContainerProperty(ic_id, "type").setValue(work_obj.getType());
-				idx_cont_render.getContainerProperty(ic_id, "number of subitems").setValue(work_obj.getNumOfChildren());
-				idx_cont_render.getContainerProperty(ic_id, "creation date").setValue(work_obj.getCreationDate());
-			}
-		}
-
-	};
 
 	enum MetaDataType {UNDEFINED, QSPACE, QPROJECT, QSAMPLE, QEXPERIMENT};
 
@@ -170,20 +94,10 @@ public class QbicmainportletUI extends UI {
 	@Override
 	protected void init(VaadinRequest request) {
 		initConnection();
-
-		UI.getCurrent().getSession().setAttribute("state", new State());
-		UI.getCurrent().getSession().setAttribute("datahandler", new DataHandler(this.openBisConnection));
 		
-		VerticalLayout layout = new VerticalLayout();
-		layout.addComponent(new Button("blakdfg"));
-		this.setContent(layout);
-		Map<String,ArrayList<String>> spaceToProj = new HashMap<String,ArrayList<String>>();
-		spaceToProj.put("QBIC", new ArrayList<String>(Arrays.asList("HPTI","MUSP","KHEC")));
-		Map<String,ArrayList<String>> projToExp = new HashMap<String,ArrayList<String>>();
-		projToExp.put("HPTI", new ArrayList<String>(Arrays.asList("MA")));
-		projToExp.put("MUSP", new ArrayList<String>(Arrays.asList("NMR","MTX")));
-		Map<String,ArrayList<String>> expToSamp = new HashMap<String,ArrayList<String>>();
-		expToSamp.put("MA", new ArrayList<String>(Arrays.asList("QHPTI001AB","QHPTI002DB","QHPTI003AC","QHPTI004AX","QHPTI005AC","QHPTI006AS","QHPTI007A4")));
+		initSessionAttributes();
+		
+		buildLayout();
 
 		DummyDataReader datareaderDummy = null;
 		try {
@@ -280,11 +194,9 @@ public class QbicmainportletUI extends UI {
 		if(tc.getItem(tc.getIdByIndex(0)) instanceof DummyMetaData){
 			System.out.println("is dummyMetaData");
 		}
-
+//I suppose this can be deleted
 
 		IndexedContainer spaces = new IndexedContainer();
-		QBiCRenderContainer qidx_container = new QBiCRenderContainer(spaces);
-		//qbic_tree.addObserver(qidx_container);
 
 
 		spaces.addContainerProperty("identifier", String.class, "N/A");
@@ -312,7 +224,6 @@ public class QbicmainportletUI extends UI {
 
 
 
-
 		TreeView tv = new TreeView();
 		tv.setContainerDataSource(tc);
 
@@ -333,26 +244,35 @@ public class QbicmainportletUI extends UI {
 		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),tv3, new DatasetView());
 
 		
-        mainLayout = new VerticalLayout();
-        mainLayout.setMargin(false);
-        setContent(mainLayout);
+
 		
         VerticalLayout navigatorContent = new VerticalLayout();
-		
 		Navigator navigator = new Navigator(UI.getCurrent(),navigatorContent);
-		navigator.addView("spaceView", spaceView);
+		navigator.addView(MetaDataType.QSPACE.toString(), spaceView);
 		navigator.addView("addspaceView", addspaceView);
 		navigator.addView("datasetView", datasetView);
-		navigator.navigateTo("spaceView");
+		navigator.navigateTo(MetaDataType.QSPACE.toString());
 		setNavigator(navigator);
-		
 		//Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do this
 		JavaScript.getCurrent().execute("window.location.reload();");
-		
+        
+		mainLayout = new VerticalLayout();
+        mainLayout.setMargin(false);	
 		mainLayout.addComponent(navigatorContent);
+        setContent(mainLayout);
 		
 	}
 	
+	private void buildLayout() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void initSessionAttributes() {
+		UI.getCurrent().getSession().setAttribute("state", new State());
+		UI.getCurrent().getSession().setAttribute("datahandler", new DataHandler(this.openBisConnection));
+	}
+
 	private  void initConnection() {
 		ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
 		//System.out.println(manager.getDataSourceURL() + manager.getDataSourceUser() + manager.getDataSourcePassword());
@@ -360,10 +280,4 @@ public class QbicmainportletUI extends UI {
 		this.openBisConnection = new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(), manager.getDataSourceURL(), true); //LiferayAndVaadinUtils.getOpenBisClient();
 	}
 
-	private Button createIconButton(String icon) {
-		Button b = new Button();
-		b.setIcon(new ThemeResource(icon));
-		b.setStyleName(Reindeer.BUTTON_LINK);
-		return b;
-	}
 }

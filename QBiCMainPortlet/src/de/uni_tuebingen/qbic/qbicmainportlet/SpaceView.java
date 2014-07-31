@@ -36,5 +36,9 @@ public class SpaceView extends Panel{
 		this.table.setSizeFull();
 		super.setSizeFull();
 	}
+	
+	public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer){
+		this.table.setContainerDataSource(spaceViewIndexedContainer);
+	}
 
 }
