@@ -15,6 +15,7 @@ import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 //import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.EntityRegistrationDetails;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.util.IndexedContainer;
@@ -162,7 +163,50 @@ public class DataHandler {
 	//public void initConnection() {
 		// TODO this.openBISClient = new OpenClient();
 	//}
-	
+	@SuppressWarnings("unchecked")
+	private IndexedContainer createExperimentContainer(List<Experiment> exps, String id) {
+		
+		IndexedContainer sample_container = new IndexedContainer();
+		
+		sample_container.addContainerProperty("Space", String.class, null);
+		sample_container.addContainerProperty("Project", String.class, null);
+		sample_container.addContainerProperty("Experiment", String.class, null);
+		sample_container.addContainerProperty("Sample Type", String.class, null);
+		sample_container.addContainerProperty("Registration Date", Timestamp.class, null);
+		sample_container.addContainerProperty("Registerator", String.class, null);
+		sample_container.addContainerProperty("Properties", HashMap.class, null);
+
+
+		
+		for(Experiment e: exps) {
+			Object new_ds = sample_container.addItem();
+			
+		/*	String code = e.getCode();
+			String type = e.getSampleTypeCode();
+			
+			String space = code.split("/")[1];
+			String project = code.split("/")[2];
+			String experiment = code.split("/")[3];
+						
+			Date date = s.getRegistrationDetails().getRegistrationDate();
+			String registrator = s.getRegistrationDetails().getUserId();
+			
+			SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            String dateString = sd.format(date);
+            Timestamp ts = Timestamp.valueOf(dateString);
+            
+            sample_container.getContainerProperty(new_ds, "Space").setValue(space);
+            sample_container.getContainerProperty(new_ds, "Project").setValue(project);
+            sample_container.getContainerProperty(new_ds, "Experiment").setValue(experiment);
+            sample_container.getContainerProperty(new_ds, "Sample Type").setValue(type);
+            sample_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
+            sample_container.getContainerProperty(new_ds, "Registerator").setValue(registrator);
+            sample_container.getContainerProperty(new_ds, "Properties").setValue(s.getProperties());
+            */
+		}
+            
+		return sample_container;
+	}
 	
 	@SuppressWarnings("unchecked")
 	private IndexedContainer createSampleContainer(List<Sample> samples, String id) {
@@ -175,6 +219,8 @@ public class DataHandler {
 		sample_container.addContainerProperty("Sample Type", String.class, null);
 		sample_container.addContainerProperty("Registration Date", Timestamp.class, null);
 		sample_container.addContainerProperty("Registerator", String.class, null);
+		sample_container.addContainerProperty("Properties", HashMap.class, null);
+
 
 		
 		for(Sample s: samples) {
@@ -186,9 +232,7 @@ public class DataHandler {
 			String space = code.split("/")[1];
 			String project = code.split("/")[2];
 			String experiment = code.split("/")[3];
-			
-			//TODO properties
-			
+						
 			Date date = s.getRegistrationDetails().getRegistrationDate();
 			String registrator = s.getRegistrationDetails().getUserId();
 			
@@ -200,8 +244,9 @@ public class DataHandler {
             sample_container.getContainerProperty(new_ds, "Project").setValue(project);
             sample_container.getContainerProperty(new_ds, "Experiment").setValue(experiment);
             sample_container.getContainerProperty(new_ds, "Sample Type").setValue(type);
-            sample_container.getContainerProperty(new_ds, "Registration Date").setValue(date);
+            sample_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
             sample_container.getContainerProperty(new_ds, "Registerator").setValue(registrator);
+            sample_container.getContainerProperty(new_ds, "Properties").setValue(s.getProperties());
 		}
             
 		return sample_container;
@@ -224,7 +269,6 @@ public class DataHandler {
 		dataset_container.addContainerProperty("file_size_bytes", Long.class, null);
 		dataset_container.addContainerProperty("dl_link", String.class, null);
 		dataset_container.addContainerProperty("CODE", String.class, null);
-		dataset_container.addContainerProperty("file_size_bytes", Long.class, null);
 		for(DataSet d: datasets) {
 			
 			Object new_ds = dataset_container.addItem();
