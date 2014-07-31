@@ -101,6 +101,15 @@ public class LevelView extends VerticalLayout implements View{
 			
 		}
 		else if(this.mainComponent instanceof SampleView){
+			SampleView sv = (SampleView) this.mainComponent;
+			try{
+				String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+				sv.setContainerDataSource(dh.getSamples((String) currentValue, type));
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+		else if(this.mainComponent instanceof SpaceView){
 			SpaceView sv = (SpaceView) this.mainComponent;
 			try{
 				String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
@@ -109,5 +118,6 @@ public class LevelView extends VerticalLayout implements View{
 				e.printStackTrace();
 			}
 		}
+		
 	}
 }

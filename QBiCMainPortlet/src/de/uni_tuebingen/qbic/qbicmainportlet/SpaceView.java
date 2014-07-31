@@ -31,6 +31,12 @@ public class SpaceView extends Panel{
 		this.table.setContainerDataSource(datasource);
 	}
 	
+	
+	public SpaceView(){
+		//execute the above constructor with default settings, in order to have the same settings
+		this(new Table(), new IndexedContainer());
+	}
+	
 	public void setSizeFull(){
 		vert.setSizeFull();
 		this.table.setSizeFull();

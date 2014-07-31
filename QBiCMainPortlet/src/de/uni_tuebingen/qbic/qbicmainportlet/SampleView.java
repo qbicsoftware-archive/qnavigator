@@ -29,10 +29,17 @@ public class SampleView extends Panel {
 		this.table.setContainerDataSource(datasource);
 	}
 	
+	public SampleView(){
+		//execute the above constructor with default settings, in order to have the same settings
+		this(new Table(), new IndexedContainer());
+	}
+	
 	public void setSizeFull(){
 		vert.setSizeFull();
 		this.table.setSizeFull();
 		super.setSizeFull();
 	}
-
+	public void setContainerDataSource(IndexedContainer sampleViewIndexedContainer){
+		this.table.setContainerDataSource(sampleViewIndexedContainer);
+	}
 }

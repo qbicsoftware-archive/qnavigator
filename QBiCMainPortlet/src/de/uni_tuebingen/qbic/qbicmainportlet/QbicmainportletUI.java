@@ -10,14 +10,12 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.JavaScript;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Tree;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -38,67 +36,18 @@ public class QbicmainportletUI extends UI {
 	public static class Servlet extends VaadinServlet {
 	}
 
-	enum MetaDataType {UNDEFINED, QSPACE, QPROJECT, QSAMPLE, QEXPERIMENT};
-
-	public class DummyMetaData {
-		public DummyMetaData() {
-			this.identifier = new String();
-			this.description = new String();
-			this.type = MetaDataType.UNDEFINED;
-			this.num_of_children = new Integer(0);
-			this.creation_date = new Date();
-
-		}
-
-		public String getIdentifier() {
-			return identifier;
-		}
-		public void setIdentifier(String identifier) {
-			this.identifier = identifier;
-		}
-		public String getDescription() {
-			return description;
-		}
-		public void setDescription(String description) {
-			this.description = description;
-		}
-		public MetaDataType getType() {
-			return type;
-		}
-		public void setType(MetaDataType type) {
-			this.type = type;
-		}
-		public Integer getNumOfChildren() {
-			return num_of_children;
-		}
-		public void setNumOfChildren(Integer num_of_children) {
-			this.num_of_children = num_of_children;
-		}
-		public Date getCreationDate() {
-			return creation_date;
-		}
-		public void setCreationDate(Date creation_date) {
-			this.creation_date = creation_date;
-		}
-
-		private String identifier;
-		private String description;
-		private MetaDataType type;
-		private Integer num_of_children;
-		private Date creation_date;
-	}
-
 	private  OpenBisClient openBisConnection;
 	private VerticalLayout mainLayout;
 
 	@Override
 	protected void init(VaadinRequest request) {
 		initConnection();
-		
 		initSessionAttributes();
-		
 		buildLayout();
-
+	}
+	
+	private void fillHierarchicalTreeContainer(HierarchicalContainer tc) {
+		// TODO Auto-generated method stub
 		DummyDataReader datareaderDummy = null;
 		try {
 			datareaderDummy = new DummyDataReader();
@@ -108,14 +57,6 @@ public class QbicmainportletUI extends UI {
 		}
 		ArrayList<String> spacesDummy  = datareaderDummy.getSpaces();
 
-		Tree t = new Tree("QBiC Explorer");//TreeView.getInstance();//new Tree("Tree Explorer");
-		//t.setImmediate(true);
-		//t.setSelectable(true);
-		TreeView qbic_tree = new TreeView(t);
-		qbic_tree.registerClickListener();
-
-		HierarchicalContainer tc = new HierarchicalContainer();
-		t.setContainerDataSource(tc);
 
 		tc.addContainerProperty("metadata", DummyMetaData.class, new DummyMetaData());
 
@@ -127,7 +68,7 @@ public class QbicmainportletUI extends UI {
 			
 			tc.addItem(spaceKey);
 			
-			tc.getContainerProperty(spaceKey, "identifier").setValue("IVAC_ALL");
+			tc.getContainerProperty(spaceKey, "identifier").setValue(spaceKey);
 			tc.getContainerProperty(spaceKey, "type").setValue("space");
 
 			DummyMetaData dmd = new DummyMetaData();
@@ -190,60 +131,20 @@ public class QbicmainportletUI extends UI {
 			}
 			// HALLO
 
-		}
-		if(tc.getItem(tc.getIdByIndex(0)) instanceof DummyMetaData){
-			System.out.println("is dummyMetaData");
-		}
-//I suppose this can be deleted
+		}		
+	}
 
-		IndexedContainer spaces = new IndexedContainer();
-
-
-		spaces.addContainerProperty("identifier", String.class, "N/A");
-		spaces.addContainerProperty("description", String.class, "N/A");
-		spaces.addContainerProperty("type", MetaDataType.class, MetaDataType.UNDEFINED);
-		spaces.addContainerProperty("number of subitems", Integer.class, 0);
-		spaces.addContainerProperty("creation date", Date.class, new Date());
-
-		Object ic_id = spaces.addItem();
-		spaces.getContainerProperty(ic_id, "identifier").setValue("QBIC_ROOT");
-		spaces.getContainerProperty(ic_id, "description").setValue("Root node of TreeView");
-		spaces.getContainerProperty(ic_id, "type").setValue(MetaDataType.UNDEFINED);
-
-
-		try {
-			spaces.getContainerProperty(ic_id, "number of subitems").setValue(spacesDummy.size());
-		} catch (NullPointerException e) {
-			// TODO Auto-generated catch block
-			spaces.getContainerProperty(ic_id, "number of subitems").setValue(0);
-			e.printStackTrace();
-		}
-
-
-		spaces.getContainerProperty(ic_id, "creation date").setValue(new Date(10,10,10));
-
-
-
-		TreeView tv = new TreeView();
-		tv.setContainerDataSource(tc);
-
-		TreeView tv2 = new TreeView();
-		tv2.setContainerDataSource(tc);
-
-		TreeView tv3 = new TreeView();
-		tv3.setContainerDataSource(tc);
-
-		State state = (State) UI.getCurrent().getSession().getAttribute("state");
-
-		state.addObserver(tv);
-		state.addObserver(tv2);
-		state.addObserver(tv3);
-
-		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), tv /*Tree.getInstance()*/, new SpaceView(new Table(), spaces));
-		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), tv2/*Tree.getInstance()*/,new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
-		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),tv3, new DatasetView());
-
+	private void buildLayout() {
+		HierarchicalContainer tc = new HierarchicalContainer();
+		fillHierarchicalTreeContainer(tc);
 		
+		State state = (State) UI.getCurrent().getSession().getAttribute("state");
+		
+		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state) , new SpaceView());
+		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state),new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
+		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),createTreeView(tc,state), new DatasetView());
+		LevelView sampleView = new LevelView(new ToolBar(ToolBar.View.Sample),createTreeView(tc,state) ,new SampleView());
+		LevelView homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new Label("Welcome, your data"));
 
 		
         VerticalLayout navigatorContent = new VerticalLayout();
@@ -251,7 +152,10 @@ public class QbicmainportletUI extends UI {
 		navigator.addView(MetaDataType.QSPACE.toString(), spaceView);
 		navigator.addView("addspaceView", addspaceView);
 		navigator.addView("datasetView", datasetView);
-		navigator.navigateTo(MetaDataType.QSPACE.toString());
+		navigator.addView("sampleView",sampleView);
+		navigator.addView("", homeView);
+		
+		navigator.navigateTo("");
 		setNavigator(navigator);
 		//Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do this
 		JavaScript.getCurrent().execute("window.location.reload();");
@@ -262,12 +166,16 @@ public class QbicmainportletUI extends UI {
         setContent(mainLayout);
 		
 	}
-	
-	private void buildLayout() {
-		// TODO Auto-generated method stub
+
+	private TreeView createTreeView(HierarchicalContainer tc, State st){
+		TreeView t = new TreeView();
+		t.setContainerDataSource(tc);
+		st.addObserver(t);
+		return t;
+		
 		
 	}
-
+	
 	private void initSessionAttributes() {
 		UI.getCurrent().getSession().setAttribute("state", new State());
 		UI.getCurrent().getSession().setAttribute("datahandler", new DataHandler(this.openBisConnection));
