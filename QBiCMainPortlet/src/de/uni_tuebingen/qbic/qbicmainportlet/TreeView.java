@@ -1,20 +1,16 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Vector;
 
 import com.vaadin.data.Container;
-import com.vaadin.data.Item;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 
-
+@SuppressWarnings("serial")
 public class TreeView extends Tree implements Observer {
 
 	public TreeView() {
@@ -46,7 +42,7 @@ public class TreeView extends Tree implements Observer {
 			public void itemClick(ItemClickEvent event) {
 				State state = (State)UI.getCurrent().getSession().getAttribute("state");
 				ArrayList<String> message = new ArrayList<String>();
-				message.add("expanded");
+				message.add("clicked");
 				message.add(event.getItemId().toString());
 				state.notifyObservers(message);
 			}
@@ -121,12 +117,16 @@ public class TreeView extends Tree implements Observer {
 			return;
 		}
 		super.setValue(itemId);
+		this.expandNode(itemId);
+	}
+	
+	public void expandNode(Object itemId){
 		//this.expandItemsRecursively(itemId);
 		while(!this.isRoot(itemId)){
 			this.expandItem(itemId);
 			itemId = this.getParent(itemId);
 		}
-		this.expandItem(itemId);
+		this.expandItem(itemId);	
 	}
 
 	@SuppressWarnings("unchecked")
@@ -134,11 +134,14 @@ public class TreeView extends Tree implements Observer {
 	public void update(Observable o, Object arg) {
 
 		if(((ArrayList<String>) arg).get(0).equals("expanded")) {
-			this.setValue(((ArrayList<String>) arg).get(1));
-			UI.getCurrent().getNavigator().navigateTo(this.getItem(this.getValue()).getItemProperty("type").getValue().toString());
+			this.expandNode(((ArrayList<String>) arg).get(1));
 		}
 		else if(((ArrayList<String>) arg).get(0).equals("collapsed")) {
 			this.collapseItem(((ArrayList<String>) arg).get(1));
+		}
+		else if(((ArrayList<String>) arg).get(0).equals("clicked")) {
+			this.setValue(((ArrayList<String>) arg).get(1));
+			UI.getCurrent().getNavigator().navigateTo(this.getItem(this.getValue()).getItemProperty("type").getValue().toString());
 		}
 	}
 	
