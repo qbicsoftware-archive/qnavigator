@@ -140,8 +140,10 @@ public class MpPortletListener implements PortletListener, com.vaadin.data.Prope
 	                }
 	                
 	                long tarFileLength = computeTarLength(file_sizes, tar_record_size,tar_block_size); 
-	                response.setContentLength((int) tarFileLength);
-
+	                
+	                //response.setContentLength((int) tarFileLength);
+	                //For some reason setContentLength does not work
+	                response.setProperty("Content-Length", String.valueOf(tarFileLength));
 
 	                final byte[] buffer = new byte[bufferSize];
 	                	

@@ -26,13 +26,13 @@ public class DummyDataReader {
 	}
 
 	private void fillData() throws IOException {
-		String workingDir = System.getProperty("user.dir");
-		System.out.println("Current working directory : " + workingDir);
+		//String workingDir = System.getProperty("user.dir");
+		//System.out.println("Current working directory : " + workingDir);
 		UI.getCurrent().getSession().getService();
-		System.out.println(VaadinService.getCurrent().getBaseDirectory().getAbsolutePath());
+		//System.out.println(VaadinService.getCurrent().getBaseDirectory().getAbsolutePath());
 		InputStream input = DummyDataReader.class.getClassLoader().getResourceAsStream(data);
 		if(input == null){
-			System.out.println("WUHHH");
+	//		System.out.println("WUHHH");
 		}
 		InputStreamReader reader = new InputStreamReader(input);
 		BufferedReader r = new BufferedReader(reader);
@@ -50,14 +50,14 @@ public class DummyDataReader {
 					break;
 				case 1:
 					currProj = line;
-					System.out.println("adding project "+currProj);
+		//			System.out.println("adding project "+currProj);
 					if(spaceProjects.containsKey(currSpace)) spaceProjects.get(currSpace).add(currProj);
 					else spaceProjects.put(currSpace, new ArrayList<String>(Arrays.asList(currProj)));
 					break;
 				default:
 					currSpace = line;
 					spaces.add(currSpace);
-					System.out.println("adding space "+currSpace);
+		//			System.out.println("adding space "+currSpace);
 					break;
 				}
 			}
@@ -69,7 +69,7 @@ public class DummyDataReader {
 		String[] cats = line.split("\t");
 		String id = cats[0];
 		SampleBean b = new SampleBean(id,cats[1], cats[3], cats[2], cats[5], cats[4], "unknown");
-		System.out.println("adding sample "+b);
+//		System.out.println("adding sample "+b);
 		if(sampData.containsKey(id)) sampData.get(id).add(b);
 		else sampData.put(id, new ArrayList<SampleBean>(Arrays.asList(b)));
 		if(projSamples.containsKey(project)) projSamples.get(project).add(id);

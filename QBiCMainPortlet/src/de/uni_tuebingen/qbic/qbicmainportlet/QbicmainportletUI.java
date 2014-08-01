@@ -67,7 +67,7 @@ public class QbicmainportletUI extends UI {
 			
 			
 			tc.addItem(spaceKey);
-			
+			tc.setParent(spaceKey, null);
 			tc.getContainerProperty(spaceKey, "identifier").setValue(spaceKey);
 			tc.getContainerProperty(spaceKey, "type").setValue("space");
 
@@ -145,15 +145,17 @@ public class QbicmainportletUI extends UI {
 		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),createTreeView(tc,state), new DatasetView());
 		LevelView sampleView = new LevelView(new ToolBar(ToolBar.View.Sample),createTreeView(tc,state) ,new SampleView());
 		LevelView homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new Label("Welcome, your data"));
-
+		LevelView projectView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new Label("Project View"));
 		
         VerticalLayout navigatorContent = new VerticalLayout();
 		Navigator navigator = new Navigator(UI.getCurrent(),navigatorContent);
-		navigator.addView(MetaDataType.QSPACE.toString(), spaceView);
+		navigator.addView("space", spaceView);
 		navigator.addView("addspaceView", addspaceView);
 		navigator.addView("datasetView", datasetView);
-		navigator.addView("sampleView",sampleView);
+		navigator.addView("sample",sampleView);
 		navigator.addView("", homeView);
+		navigator.addView("project", projectView);
+		
 		
 		navigator.navigateTo("");
 		setNavigator(navigator);
