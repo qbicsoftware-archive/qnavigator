@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.basic.dto.Space;
 
+import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
@@ -268,7 +270,6 @@ public class DataHandler {
 			Object new_s = space_container.addItem();
 			
 			Set<String> users = s.getUsers();
-			
 			space_container.getContainerProperty(new_s, "Users").setValue(users);
 						
 			//s.getRoles(userID)
@@ -462,6 +463,76 @@ public class DataHandler {
 		DataSet dataSet  = facade.getDataSet(datasetCode);
 		FileInfoDssDTO[] filelist = dataSet.listFiles("original", false);
 		return dataSet.getFile(filelist[0].getPathInDataSet());
+	}
+
+	public void fillHierarchicalTreeContainer(HierarchicalContainer tc, String screenName) {
+		tc.addContainerProperty("metadata", DummyMetaData.class, new DummyMetaData());
+		tc.addContainerProperty("identifier", String.class, "N/A");
+		tc.addContainerProperty("type", String.class, "N/A");
+		
+		List<SpaceWithProjectsAndRoleAssignments> space_list = this.openBisClient.facade.getSpacesWithProjects();
+		
+		for(SpaceWithProjectsAndRoleAssignments s : space_list) {
+			if(s.getUsers().contains(screenName)){
+				String space_name  = s.getCode();
+
+				tc.addItem(space_name);
+				tc.setParent(space_name, null);
+				tc.getContainerProperty(space_name, "identifier").setValue(space_name);
+				tc.getContainerProperty(space_name, "type").setValue("space");
+				
+				DummyMetaData dmd = new DummyMetaData();
+				dmd.setIdentifier(space_name);
+				dmd.setType(MetaDataType.QSPACE);
+				dmd.setDescription("This is space " + space_name);
+				dmd.setCreationDate(new Date(2020,02,10));
+				List<Project> projects = s.getProjects();
+				for(Project project: projects){
+					String project_name = project.getCode();
+					tc.addItem(project_name);
+					tc.setParent(project_name, space_name);
+					DummyMetaData dmd1 = new DummyMetaData();
+					dmd1.setIdentifier(project_name);
+					dmd1.setType(MetaDataType.QPROJECT);
+					dmd1.setDescription(project.getDescription());
+					EntityRegistrationDetails erd = project.getRegistrationDetails();
+					if(erd == null){
+						dmd1.setCreationDate(new Date(2020,1,1));
+					}else{
+						dmd1.setCreationDate(erd.getRegistrationDate());
+					}
+					tc.getContainerProperty(project_name, "metadata").setValue(dmd1);
+					tc.getContainerProperty(project_name, "type").setValue("project");
+					List<Project> tmp_list = new ArrayList<Project>();
+					tmp_list.add(project);
+					int number_of_samples = 0;
+					List<Experiment> experiments = this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(), tmp_list, null);
+					
+					for(Experiment experiment : experiments){
+						List<Sample> samples = this.openBisClient.openbisInfoService.listSamplesForExperiment(this.openBisClient.getSessionToken(), experiment.getIdentifier());
+						for(Sample sample : samples){
+							number_of_samples++;
+							String samp = sample.getCode();
+							tc.addItem(samp);
+							tc.setParent(samp, project_name);
+
+							DummyMetaData dmd3 = new DummyMetaData();
+							dmd3.setIdentifier(samp);
+							dmd3.setType(MetaDataType.QSAMPLE);
+							dmd3.setDescription(sample.getIdentifier());
+							dmd3.setNumOfChildren(-1);
+							dmd3.setCreationDate(sample.getRegistrationDetails().getRegistrationDate());
+
+							tc.getContainerProperty(samp, "metadata").setValue(dmd3);
+							tc.getContainerProperty(samp, "type").setValue("sample");
+							tc.setChildrenAllowed(samp, false);
+						}
+
+					}				
+					dmd1.setNumOfChildren(number_of_samples);
+				}
+			}
+		}
 	}
 }
 	

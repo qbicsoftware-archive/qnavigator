@@ -6,6 +6,7 @@ import java.util.Date;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.liferay.portal.model.User;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
@@ -21,6 +22,7 @@ import com.vaadin.ui.VerticalLayout;
 
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 /*
  * in portal-ext.properties the following settings must be set, in order to work
  * com.liferay.portal.servlet.filters.etag.ETagFilter=false
@@ -41,13 +43,31 @@ public class QbicmainportletUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
-		initConnection();
-		initSessionAttributes();
-		buildLayout();
+		if(LiferayAndVaadinUtils.getUser() == null){
+			buildNoUserLogin();
+		}
+		else{
+			initConnection();
+			initSessionAttributes();
+			buildLayout();
+		}
 	}
 	
-	private void fillHierarchicalTreeContainer(HierarchicalContainer tc) {
-		// TODO Auto-generated method stub
+	private void buildNoUserLogin() {
+		mainLayout = new VerticalLayout();
+        mainLayout.setMargin(false);	
+		mainLayout.addComponent(new Label("You have to login, in order to see your data."));
+        setContent(mainLayout);
+		
+	}
+
+	private void fillHierarchicalTreeContainer(HierarchicalContainer tc){
+		DataHandler dh = (DataHandler)UI.getCurrent().getSession().getAttribute("datahandler");
+		User user = LiferayAndVaadinUtils.getUser();
+		dh.fillHierarchicalTreeContainer(tc, user.getScreenName());
+	}
+	
+	private void fillHierarchicalTreeContainerWithDummyData(HierarchicalContainer tc) {
 		DummyDataReader datareaderDummy = null;
 		try {
 			datareaderDummy = new DummyDataReader();
@@ -179,6 +199,9 @@ public class QbicmainportletUI extends UI {
 	}
 	
 	private void initSessionAttributes() {
+		if(this.openBisConnection == null){
+			this.initConnection();
+		}
 		UI.getCurrent().getSession().setAttribute("state", new State());
 		UI.getCurrent().getSession().setAttribute("datahandler", new DataHandler(this.openBisConnection));
 	}
