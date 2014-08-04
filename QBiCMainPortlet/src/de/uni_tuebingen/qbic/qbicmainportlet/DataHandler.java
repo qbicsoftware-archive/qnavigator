@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
+import ch.systemsx.cisd.openbis.dss.client.api.v1.IDataSetDss;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 //import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
@@ -70,8 +71,8 @@ public class DataHandler {
 
 		else if(this.spaces.get(id) == null){
 			space_list = this.openBisClient.facade.getSpacesWithProjects();
-			spaces = this.createSpaceContainer(space_list);
-			this.space_to_datasets.put(id, spaces);
+			spaces = this.createSpaceContainer(space_list, id);
+			this.spaces.put(id, spaces);
 		}
 		
 		else {
@@ -260,21 +261,69 @@ public class DataHandler {
 	//public void initConnection() {
 		// TODO this.openBISClient = new OpenClient();
 	//}
-	private IndexedContainer createSpaceContainer(List<SpaceWithProjectsAndRoleAssignments> spaces) {
+	/**
+	 * returns an empyt Container if id is not a valid space id
+	 * @param spaces
+	 * @param id
+	 * @return
+	 */
+	private IndexedContainer createSpaceContainer(List<SpaceWithProjectsAndRoleAssignments> spaces, String id) {
 		
 		IndexedContainer space_container = new IndexedContainer();
 		
-		space_container.addContainerProperty("Users", Set.class, null);
-
-		for(SpaceWithProjectsAndRoleAssignments s: spaces) {
-			Object new_s = space_container.addItem();
-			
-			Set<String> users = s.getUsers();
-			space_container.getContainerProperty(new_s, "Users").setValue(users);
-						
-			//s.getRoles(userID)
+		space_container.addContainerProperty("Number of Projects", Integer.class, 0);
+		space_container.addContainerProperty("Number of Samples", Integer.class, 0);
+		space_container.addContainerProperty("Number of Datasets", Integer.class, 0);
+		space_container.addContainerProperty("Last Dataset registered", String.class, "No dataset registered");
+		
+		List<Project> projects = this.openBisClient.getProjectsofSpace(id);
+		int number_of_samples = 0;
+		int number_of_projects = projects.size();
+		int number_of_datasets = 0;
+		String lastModifiedDataset = "N/A"; 
+		String lastModifiedExperiment = "N/A";
+		String lastModifiedSample = "N/A";
+		Date lastModifiedDate = new Date(0,0,0);
+		
+		//List<String> tmp_list_str = new ArrayList<String>();
+		//for(Project project : projects){
+		//	tmp_list_str.add(project.getIdentifier());
+		//}
+		
+		
+		
+		//List<Experiment> experiments = this.openBisClient.getExperimentsofSpace(id);//this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(), projects, null);
+		List<Sample> samplesOfSpace = this.openBisClient.getSamplesofSpace(id);//this.openBisClient.facade.listSamplesForProjects(tmp_list_str);
+		number_of_samples += samplesOfSpace.size();
+		//ArrayList<String> tmp_experiment_identifier_lis = new ArrayList<String>();
+		//for(Experiment experiment: experiments){
+		//	tmp_experiment_identifier_lis.add(experiment.getIdentifier());
+		//}
+		List<DataSet> datasets = this.openBisClient.getDataSetsOfSpace(id); //this.openBisClient.facade.listDataSetsForExperiments(tmp_experiment_identifier_lis);
+		number_of_datasets = datasets.size();
+		
+		
+		for(DataSet dataset: datasets){
+			Date date = dataset.getRegistrationDate();
+			if(date.after(lastModifiedDate)){
+				lastModifiedDataset = dataset.getCode();
+				lastModifiedSample = dataset.getSampleIdentifierOrNull();
+				if(lastModifiedSample == null){
+					lastModifiedSample = "N/A";
+				}
+				lastModifiedExperiment = dataset.getExperimentIdentifier();
+			}
 		}
 		
+		
+		
+		
+		Object new_s = space_container.addItem();
+		space_container.getContainerProperty(new_s, "Number of Projects").setValue(number_of_projects);
+		space_container.getContainerProperty(new_s, "Number of Samples").setValue(number_of_samples);
+		space_container.getContainerProperty(new_s, "Number of Datasets").setValue(number_of_datasets);
+
+		space_container.getContainerProperty(new_s, "Last Dataset registered").setValue(String.format("DatSet %s in Sample %s on Experiment %s Date: %s", lastModifiedDataset, lastModifiedSample, lastModifiedExperiment, lastModifiedDate.toString()));
 		return space_container;
 	}
 	

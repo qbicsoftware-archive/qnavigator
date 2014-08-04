@@ -470,6 +470,9 @@ public class OpenBisClient {//implements Serializable {
 			Sample s = (Sample) iterator.next();
 			ids.add(s.getIdentifier());
 		}
+		if(ids.isEmpty()){
+			return new ArrayList<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
+		}
 		return this.facade.listDataSetsForSamples(ids);
 	}
 

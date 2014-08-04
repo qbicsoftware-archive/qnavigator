@@ -38,8 +38,8 @@ public class SpaceView extends Panel{
 	}
 	
 	public void setSizeFull(){
-		vert.setSizeFull();
 		this.table.setSizeFull();
+		vert.setSizeFull();
 		super.setSizeFull();
 	}
 	
