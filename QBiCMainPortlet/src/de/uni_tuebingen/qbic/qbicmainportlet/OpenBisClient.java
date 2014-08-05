@@ -270,9 +270,14 @@ public class OpenBisClient {//implements Serializable {
 	// java.util.List<IExperimentImmutable> listExperiments(java.lang.String projectIdentifier)
 	// @param /space/EXP_CODE
 	// in ch.systemsx.cisd.openbis.dss.generic.shared.api.internal.v2
-	public List<Experiment> getExperimentsofProject(String project) {
+	/**
+	 * returns a list of all Experiments connected to the project with the identifier from openBis
+	 * @param projectIdentifier
+	 * @return
+	 */
+	public List<Experiment> getExperimentsofProject(String projectIdentifier) {
 		List<String> projects  = new ArrayList<String>();
-		projects.add(project);
+		projects.add(projectIdentifier);
         List<Experiment> foundExps = facade.listExperimentsForProjects(projects);   
 		return foundExps;	
 	}
@@ -382,6 +387,16 @@ public class OpenBisClient {//implements Serializable {
 		return project;
 	}
 	
+	public Project getProjectByOpenBisCode(String projectCode){
+		List<Project> projects = this.listProjects();
+		Project project = null;
+		for(Project p: projects){
+			if(p.getCode().equals(projectCode)){
+				project = p;
+			}
+		}
+		return project;		
+	}
 	
 	/**
 	 * Function to retrieve the project of an experiment from openBIS

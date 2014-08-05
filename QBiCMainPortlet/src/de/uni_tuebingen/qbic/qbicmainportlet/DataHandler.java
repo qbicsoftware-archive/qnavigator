@@ -370,21 +370,20 @@ public class DataHandler {
 		
 		experiment_container.addContainerProperty("Space", String.class, null);
 		experiment_container.addContainerProperty("Project", String.class, null);
-		experiment_container.addContainerProperty("Experiment-Type", String.class, null);
+		experiment_container.addContainerProperty("Experiment Type", String.class, null);
 		experiment_container.addContainerProperty("Registration Date", Timestamp.class, null);
 		experiment_container.addContainerProperty("Registerator", String.class, null);
-		experiment_container.addContainerProperty("Properties", HashMap.class, null);
+		experiment_container.addContainerProperty("Properties", Map.class, null);
 
 
 		
 		for(Experiment e: exps) {
 			Object new_ds = experiment_container.addItem();
 			
-			String code = e.getCode();
+			String experimentIdentifier = e.getIdentifier();
 			String type = e.getExperimentTypeCode();
-			
-			String space = code.split("/")[1];
-			String project = code.split("/")[2];
+			String space = experimentIdentifier.split("/")[1];
+			String project = experimentIdentifier.split("/")[2];
 						
 			Date date = e.getRegistrationDetails().getRegistrationDate();
 			String registrator = e.getRegistrationDetails().getUserId();
@@ -552,6 +551,7 @@ public class DataHandler {
 					}
 					tc.getContainerProperty(project_name, "metadata").setValue(dmd1);
 					tc.getContainerProperty(project_name, "type").setValue("project");
+					tc.getContainerProperty(project_name, "identifier").setValue(project_name);
 					List<Project> tmp_list = new ArrayList<Project>();
 					tmp_list.add(project);
 					int number_of_samples = 0;

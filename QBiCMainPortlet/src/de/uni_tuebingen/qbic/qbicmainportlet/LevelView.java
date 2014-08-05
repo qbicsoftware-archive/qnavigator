@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.Component;
@@ -120,6 +122,19 @@ public class LevelView extends VerticalLayout implements View{
 				e.printStackTrace();
 			}
 		}
-		
+		else if(this.mainComponent instanceof ProjectView){
+			ProjectView pv = (ProjectView) this.mainComponent;
+			try{
+				
+				//String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
+				String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+				Project project = dh.openBisClient.getProjectByOpenBisCode(name);
+				String projectIdentifier = project.getIdentifier(); 
+				pv.setContainerDataSource(dh.getExperiments(projectIdentifier, type), name);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}		
 	}
 }
