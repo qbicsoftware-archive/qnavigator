@@ -106,7 +106,8 @@ public class LevelView extends VerticalLayout implements View{
 			SampleView sv = (SampleView) this.mainComponent;
 			try{
 				String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-				sv.setContainerDataSource(dh.getSamples((String) currentValue, type));
+				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
+				sv.setContainerDataSource(dh.getDatasets(name, type), name);
 			} catch (Exception e){
 				e.printStackTrace();
 			}

@@ -129,7 +129,10 @@ public class DataHandler {
 			}
 
 			else {
-				dataset_list = this.openBisClient.getDataSetsOfSample(id);
+				Sample sample = this.openBisClient.getSampleByIdentifier(id);
+				
+				dataset_list = this.openBisClient.getDataSetsOfSample(sample.getIdentifier());
+				
 				datasets = this.createDatasetContainer(dataset_list, id);
 				this.sample_to_datasets.put(id, datasets);
 			}
@@ -574,9 +577,9 @@ public class DataHandler {
 
 							tc.getContainerProperty(samp, "metadata").setValue(dmd3);
 							tc.getContainerProperty(samp, "type").setValue("sample");
+							tc.getContainerProperty(samp, "identifier").setValue(samp);
 							tc.setChildrenAllowed(samp, false);
 						}
-
 					}				
 					dmd1.setNumOfChildren(number_of_samples);
 				}

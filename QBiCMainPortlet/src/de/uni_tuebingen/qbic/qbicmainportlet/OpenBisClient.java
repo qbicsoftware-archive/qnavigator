@@ -198,7 +198,7 @@ public class OpenBisClient {//implements Serializable {
 	}
 	
 	/**
-	 * Function to retrieve a sample by it's identifier
+	 * Function to retrieve a sample by it's identifier ... actually it seems to be the code not the identifier
 	 * @param  id  identifier of the sample
 	 * @return the sample with the given identifier
 	 */
@@ -208,6 +208,14 @@ public class OpenBisClient {//implements Serializable {
 
 	     List<Sample> foundSamples = this.openbisInfoService.searchForSamples(sessionToken, sc);
 	     return foundSamples.get(0);
+	}
+	/**
+	 * NOT IMPLEMENTED, DOES NOTHING
+	 * @param id
+	 */
+	public void getSampleByCode(String id) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	
@@ -798,6 +806,7 @@ public class OpenBisClient {//implements Serializable {
 	      }
 	      return this.sessionToken;
 	}
+
 	
 	
 }

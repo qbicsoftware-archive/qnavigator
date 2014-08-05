@@ -14,9 +14,12 @@ public class SampleView extends Panel {
 	private static final long serialVersionUID = 377522772714840963L;
 	Table table;
 	VerticalLayout vert;
-	public SampleView(Table table, IndexedContainer datasource) {
+
+	private String id;
+	public SampleView(Table table, IndexedContainer datasource, String id) {
 		vert = new VerticalLayout();
-		this.setCaption("Available Projects");
+		this.id = id;
+		this.updateCaption();
 		
 		this.table = table;
 		this.table.setSelectable(true);
@@ -29,17 +32,32 @@ public class SampleView extends Panel {
 		this.table.setContainerDataSource(datasource);
 	}
 	
+	
 	public SampleView(){
 		//execute the above constructor with default settings, in order to have the same settings
-		this(new Table(), new IndexedContainer());
+		this(new Table(), new IndexedContainer(), "No sample selected");
 	}
 	
 	public void setSizeFull(){
-		vert.setSizeFull();
 		this.table.setSizeFull();
+		vert.setSizeFull();
 		super.setSizeFull();
 	}
-	public void setContainerDataSource(IndexedContainer sampleViewIndexedContainer){
-		this.table.setContainerDataSource(sampleViewIndexedContainer);
+	
+	/**
+	 * sets the ContainerDataSource for showing it in a table and the id of the current Openbis Space. The id is shown in the caption.
+	 * @param spaceViewIndexedContainer
+	 * @param id
+	 */
+	public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer, String id){
+		this.table.setContainerDataSource(spaceViewIndexedContainer);
+		this.id = id;
+		this.updateCaption();
+	}
+
+
+	private void updateCaption() {
+		this.setCaption(String.format("Statistics of Sample: %s", id));
+		
 	}
 }

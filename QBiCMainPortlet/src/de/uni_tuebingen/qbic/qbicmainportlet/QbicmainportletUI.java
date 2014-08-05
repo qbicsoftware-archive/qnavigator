@@ -163,7 +163,7 @@ public class QbicmainportletUI extends UI {
 		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state) , new SpaceView());
 		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state),new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
 		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),createTreeView(tc,state), new DatasetView());
-		LevelView sampleView = new LevelView(new ToolBar(ToolBar.View.Sample),createTreeView(tc,state) ,new SampleView());
+		LevelView sampleView = new LevelView(new ToolBar(ToolBar.View.Space),createTreeView(tc,state) ,new SampleView());
 		LevelView homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new Label("Welcome, your data"));
 		LevelView projectView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new ProjectView());
 		
