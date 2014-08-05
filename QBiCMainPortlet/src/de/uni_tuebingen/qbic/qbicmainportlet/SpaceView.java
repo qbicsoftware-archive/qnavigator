@@ -16,9 +16,12 @@ public class SpaceView extends Panel{
 	
 	Table table;
 	VerticalLayout vert;
-	public SpaceView(Table table, IndexedContainer datasource) {
+
+	private String id;
+	public SpaceView(Table table, IndexedContainer datasource, String id) {
 		vert = new VerticalLayout();
-		this.setCaption("Available Projects");
+		this.id = id;
+		this.updateCaption();
 		
 		this.table = table;
 		this.table.setSelectable(true);
@@ -34,7 +37,7 @@ public class SpaceView extends Panel{
 	
 	public SpaceView(){
 		//execute the above constructor with default settings, in order to have the same settings
-		this(new Table(), new IndexedContainer());
+		this(new Table(), new IndexedContainer(), "No space selected");
 	}
 	
 	public void setSizeFull(){
@@ -43,8 +46,21 @@ public class SpaceView extends Panel{
 		super.setSizeFull();
 	}
 	
-	public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer){
+	/**
+	 * sets the ContainerDataSource for showing it in a table and the id of the current Openbis Space. The id is shown in the caption.
+	 * @param spaceViewIndexedContainer
+	 * @param id
+	 */
+	public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer, String id){
 		this.table.setContainerDataSource(spaceViewIndexedContainer);
+		this.id = id;
+		this.updateCaption();
+	}
+
+
+	private void updateCaption() {
+		this.setCaption(String.format("Statistics of Space: %s", id));
+		
 	}
 
 }

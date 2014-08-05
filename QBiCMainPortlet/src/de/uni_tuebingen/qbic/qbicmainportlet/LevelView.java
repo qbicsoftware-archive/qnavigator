@@ -115,7 +115,7 @@ public class LevelView extends VerticalLayout implements View{
 				
 				//String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
 				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
-				sv.setContainerDataSource(dh.getSpaces(name));
+				sv.setContainerDataSource(dh.getSpaces(name), name);
 			} catch (Exception e){
 				e.printStackTrace();
 			}
