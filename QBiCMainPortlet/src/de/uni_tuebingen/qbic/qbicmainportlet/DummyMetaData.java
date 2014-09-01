@@ -3,7 +3,10 @@ import java.util.Date;
 
 
 	enum MetaDataType {UNDEFINED, QSPACE, QPROJECT, QSAMPLE, QEXPERIMENT};
-
+/**
+ * It is either deprecated and can be removed, or we start using it in a meaningful way.
+ * @deprecated
+ */
 	public class DummyMetaData {
 		public DummyMetaData() {
 			this.identifier = new String();

@@ -56,7 +56,7 @@ public class QbicmainportletUI extends UI {
 	private void buildNoUserLogin() {
 		mainLayout = new VerticalLayout();
         mainLayout.setMargin(false);	
-		mainLayout.addComponent(new Label("You have to login, in order to see your data."));
+		mainLayout.addComponent(new Label("You have to 'Sign in', in order to see your data."));
         setContent(mainLayout);
 		
 	}
@@ -166,6 +166,8 @@ public class QbicmainportletUI extends UI {
 		LevelView sampleView = new LevelView(new ToolBar(ToolBar.View.Space),createTreeView(tc,state) ,new SampleView());
 		LevelView homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new Label("Welcome, your data"));
 		LevelView projectView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new ProjectView());
+		LevelView experimentView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new Label("EXPERIMENT VIEW IN IMPLEMENTATION"));
+		
 		
         VerticalLayout navigatorContent = new VerticalLayout();
 		Navigator navigator = new Navigator(UI.getCurrent(),navigatorContent);
@@ -175,7 +177,7 @@ public class QbicmainportletUI extends UI {
 		navigator.addView("sample",sampleView);
 		navigator.addView("", homeView);
 		navigator.addView("project", projectView);
-		
+		navigator.addView("experiment", experimentView);
 		
 		navigator.navigateTo("");
 		setNavigator(navigator);

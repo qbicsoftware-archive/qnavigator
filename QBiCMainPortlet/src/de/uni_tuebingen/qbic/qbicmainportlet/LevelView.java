@@ -96,8 +96,8 @@ public class LevelView extends VerticalLayout implements View{
 			try {
 				ds.setContainerDataSource(dh.getDatasets((String)currentValue, type));
 			} catch (Exception e) {
-
-				e.printStackTrace();
+				System.out.println("Exception in LevelView.enter. mainComponent is DatasetView");
+				//e.printStackTrace();
 			}
 			ds.setInfo(name, type, "Testuser");
 			
@@ -109,7 +109,8 @@ public class LevelView extends VerticalLayout implements View{
 				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
 				sv.setContainerDataSource(dh.getDatasets(name, type), name);
 			} catch (Exception e){
-				e.printStackTrace();
+				System.out.println("Exception in LevelView.enter. mainComponent is SampleView");
+				//e.printStackTrace();
 			}
 		}
 		else if(this.mainComponent instanceof SpaceView){
@@ -118,9 +119,10 @@ public class LevelView extends VerticalLayout implements View{
 				
 				//String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
 				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
-				sv.setContainerDataSource(dh.getSpaces(name), name);
+				sv.setContainerDataSource(dh.getSpace(name), name);
 			} catch (Exception e){
-				e.printStackTrace();
+				System.out.println("Exception in LevelView.enter. mainComponent is SpaceView");
+				//e.printStackTrace();
 			}
 		}
 		else if(this.mainComponent instanceof ProjectView){
@@ -134,7 +136,8 @@ public class LevelView extends VerticalLayout implements View{
 				String projectIdentifier = project.getIdentifier(); 
 				pv.setContainerDataSource(dh.getExperiments(projectIdentifier, type), name);
 			} catch (Exception e){
-				e.printStackTrace();
+				System.out.println("Exception in LevelView.enter. mainComponent is ProjectView");
+				//e.printStackTrace();
 			}
 		}		
 	}

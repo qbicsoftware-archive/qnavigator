@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ch.systemsx.cisd.common.api.client.ServiceFinder;
 import ch.systemsx.cisd.common.exceptions.InvalidAuthenticationException;
@@ -382,7 +383,7 @@ public class OpenBisClient {//implements Serializable {
 	 * Function to retrieve a project from openBIS by the ID of the 
 	 * project.
 	 * @param  proj  ID of the project which should be retrieved as string
-	 * @return  the found project
+	 * @return project associatied with the given id
 	 */
 	public Project getProjectbyID(String proj) {
 		List<Project> projects = this.listProjects();
@@ -401,9 +402,22 @@ public class OpenBisClient {//implements Serializable {
 		for(Project p: projects){
 			if(p.getCode().equals(projectCode)){
 				project = p;
+				break;
 			}
 		}
 		return project;		
+	}
+	
+	public Experiment getExperimentByOpenBisCode(String openbisCode) {
+		List<Experiment> experiments =  this.listExperiments();
+		Experiment experiment = null;
+		for(Experiment e: experiments){
+			if(e.getCode().equals(openbisCode)){
+				experiment = e;
+				break;
+			}
+		}
+		return experiment;
 	}
 	
 	/**
@@ -472,15 +486,19 @@ public class OpenBisClient {//implements Serializable {
 	}
 	
 	// TODO ANOTHER WAY TO GET THE CORRECT DATASET TYPE ?
-		/*
-	public List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> getDataSetsOfExperiment(String expCode) {
+	/**
+	 * Returns all datasets of a given experiment. The new version should run smoother
+	 * @param expCode openbis code of an openbis experiment
+	 * @return list of dataset
+	 * @deprecated 
+	 */
+	public List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> getDataSetsOfExperimentOld(String expCode) {
 		SearchCriteria ec = new SearchCriteria();
 		ec.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, expCode));
 		SearchCriteria sc = new SearchCriteria();
 		sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(ec));
 		return openbisInfoService.searchForDataSetsOnBehalfOfUser(sessionToken, sc, userId);
 	}
-	*/
 	/**
 	 * Function to list all datasets of a specific space
 	 * @param  projCode identifier of the openBIS space
@@ -506,10 +524,11 @@ public class OpenBisClient {//implements Serializable {
 	 */
 	public List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> getDataSetsOfProject(String projCode) {
 		List<Sample> samps = getSamplesofProject(projCode);
+		System.out.println(samps.size());
 		List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> res = new ArrayList<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
 		for (Iterator<Sample> iterator = samps.iterator(); iterator.hasNext();) {
 			Sample sample = (Sample) iterator.next();
-			res.addAll(getDataSetsOfSample(sample.getCode()));
+			res.addAll(getDataSetsOfSample(sample.getIdentifier()));
 		}
 		return res;
 	}
@@ -630,9 +649,19 @@ public class OpenBisClient {//implements Serializable {
 		return experiments;	
 	}
 
-	// TODO not possible ???
-	public void getSpaceByCode(String code) {
-
+	/**
+	 * returns all users of a Space.
+	 * @param code
+	 * @return
+	 */
+	public Set<String> getSpaceMembers(String code) {
+		List<SpaceWithProjectsAndRoleAssignments> spaces = this.facade.getSpacesWithProjects();
+		for(SpaceWithProjectsAndRoleAssignments space : spaces){
+			if(space.getCode().equals(code)){
+				return space.getUsers();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -805,8 +834,6 @@ public class OpenBisClient {//implements Serializable {
 	        this.login();
 	      }
 	      return this.sessionToken;
-	}
-
-	
+	}	
 	
 }

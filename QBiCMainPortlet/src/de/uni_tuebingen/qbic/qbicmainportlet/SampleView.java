@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.sql.Timestamp;
+
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Panel;
@@ -51,6 +53,8 @@ public class SampleView extends Panel {
 	 */
 	public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer, String id){
 		this.table.setContainerDataSource(spaceViewIndexedContainer);
+		this.table.setVisibleColumns(new Object[]{"Project",
+			    "Sample", "Sample Type", "File Name", "Dataset Type", "Registration Date", "File Size"});
 		this.id = id;
 		this.updateCaption();
 	}
