@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,10 +48,23 @@ class SpaceInformation{
 	}
 }
 
+class ProjectInformation {
+
+	public IndexedContainer experiments;
+	public int numberOfExperiments;
+	public int numberOfSamples;
+	public int numberOfDatasets;
+	public String lastChangedExperiment;
+	public String lastChangedSample;
+	public Date lastChangedDataset;
+	public String description;
+}
+
 public class DataHandler {
 
 	
 	Map<String,SpaceInformation> spaces = new HashMap<String,SpaceInformation>();
+	Map<String, ProjectInformation> projectInformations = new HashMap<String, ProjectInformation>();
 	
 	Map<String,IndexedContainer> space_to_projects = new HashMap<String,IndexedContainer>();
 
@@ -270,8 +284,70 @@ public class DataHandler {
 		return projects;
 	}
 
+	public ProjectInformation getProjectInformation(String id){
+		if(this.projectInformations.containsKey(id)){
+			return this.projectInformations.get(id);
+		}
+		else{
+			ProjectInformation ret = new ProjectInformation();
+			try {
+				ret.experiments = this.getExperiments(id, "project");
+				Project project = this.openBisClient.getProjectbyID(id);
+				ret.description = project.getDescription();
+				ret.numberOfExperiments = ret.experiments.size();
+				ret.numberOfSamples = this.openBisClient.getSamplesofProject(project.getCode()).size();
 
-
+				List<DataSet> datasets = this.openBisClient.getDataSetsOfProject(project.getCode());
+				ret.numberOfDatasets = datasets.size();
+				
+				StringBuilder lce = new StringBuilder();
+				System.out.println("lce: " + lce.toString());
+				StringBuilder lcs = new StringBuilder();
+				ret.lastChangedDataset = new Date(0,0,0);
+				this.lastDatasetRegistered(datasets, ret.lastChangedDataset, lce, lcs);
+				ret.lastChangedExperiment = lce.toString();
+				ret.lastChangedSample = lcs.toString();
+				
+				this.projectInformations.put(id, ret);
+			} catch (Exception e) {
+				System.out.println("Exception in DataHandler.getProjectInformation, line 279.");
+				ret = null;
+				//e.printStackTrace();
+			}
+			
+			
+			
+			return ret;
+		}
+	}
+	/**
+	 * checks which of the datasets in the given list is the oldest and writes that into the last tree parameters
+	 * Note: lastModifiedDate, lastModifiedExperiment, lastModifiedSample will be modified. if lastModifiedSample, lastModifiedExperiment have value N/A datasets have no registration dates
+	 * Params should not be null
+	 * @param datasets List of datasets that will be compared
+	 * @param lastModifiedDate will contain the last modified date
+	 * @param lastModifiedExperiment will contain experiment identifier, which contains last registered dataset
+	 * @param lastModifiedSample will contain last sample identifier, which contains last registered dataset, or null if dataset does not belong to a sample.
+	 */
+	public void lastDatasetRegistered(List<DataSet> datasets, Date lastModifiedDate, StringBuilder lastModifiedExperiment, StringBuilder lastModifiedSample){
+		String exp = "N/A";
+		String samp = "N/A";
+		for(DataSet dataset: datasets){
+			Date date = dataset.getRegistrationDate();
+			
+			if(date.after(lastModifiedDate)){
+				samp = dataset.getSampleIdentifierOrNull();
+				if(samp == null){
+					samp = "N/A";
+				}
+				exp = dataset.getExperimentIdentifier();
+				lastModifiedDate.setTime(date.getTime());
+				break;
+			}
+		}
+		lastModifiedExperiment.append(exp);
+		lastModifiedSample.append(samp);
+	}
 
 	public void reset() {
 		 //this.spaces = new HashMap<String,IndexedContainer>();
@@ -315,50 +391,22 @@ public class DataHandler {
 		int number_of_projects = projects.size();//projects.size();
 		int number_of_experiments = 0;
 		int number_of_datasets = 0;
-		String lastModifiedDataset = "N/A"; 
 		String lastModifiedExperiment = "N/A";
 		String lastModifiedSample = "N/A";
 		Date lastModifiedDate = new Date(0,0,0);
 		
-		//List<String> tmp_list_str = new ArrayList<String>();
-		//for(Project project : projects){
-		//	tmp_list_str.add(project.getIdentifier());
-		//}
-		
-		
-		
 		number_of_experiments = this.openBisClient.getExperimentsofSpace(id).size();//this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(), projects, null);  
 		List<Sample> samplesOfSpace = this.openBisClient.getSamplesofSpace(id);//this.openBisClient.facade.listSamplesForProjects(tmp_list_str);
 		number_of_samples += samplesOfSpace.size();
-		//ArrayList<String> tmp_experiment_identifier_lis = new ArrayList<String>();
-		//for(Experiment experiment: experiments){
-		//	tmp_experiment_identifier_lis.add(experiment.getIdentifier());
-		//}
 		List<DataSet> datasets = this.openBisClient.getDataSetsOfSpace(id); //this.openBisClient.facade.listDataSetsForExperiments(tmp_experiment_identifier_lis);
 		number_of_datasets = datasets.size();
 		
-		//SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        //String dateString = sd.format(lastModifiedDate);
-        //Timestamp ts = Timestamp.valueOf(dateString);
-		for(DataSet dataset: datasets){
-			Date date = dataset.getRegistrationDate();
-			
-            //dateString = sd.format(date);
-            //Timestamp tmp_ts = Timestamp.valueOf(dateString);
-			
-			
-			
-			//if(tmp_ts.after(ts)){
-			if(date.after(lastModifiedDate)){
-				lastModifiedDataset = dataset.getCode();
-				lastModifiedSample = dataset.getSampleIdentifierOrNull();
-				if(lastModifiedSample == null){
-					lastModifiedSample = "N/A";
-				}
-				lastModifiedExperiment = dataset.getExperimentIdentifier();
-				lastModifiedDate = date;
-			}
-		}
+		StringBuilder lce = new StringBuilder();
+		StringBuilder lcs = new StringBuilder();
+		this.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
+		lastModifiedExperiment = lce.toString();
+		lastModifiedSample = lcs.toString();
+		System.out.println(lastModifiedExperiment);
 		
 		spaceInformation.numberOfProjects = number_of_projects;
 		spaceInformation.numberOfExperiments = number_of_experiments;
@@ -367,7 +415,8 @@ public class DataHandler {
 		spaceInformation.lastChangedDataset = lastModifiedDate;
 		spaceInformation.lastChangedSample = lastModifiedSample;
 		spaceInformation.lastChangedExperiment = lastModifiedExperiment;
-		spaceInformation.members = tmp_space.getUsers();
+		
+		spaceInformation.members = filterQBiCStaffOutOfMembers(tmp_space.getUsers());
 		
 		for(Project p: projects ){
 			Object new_s = space_container.addItem();
@@ -378,18 +427,36 @@ public class DataHandler {
 		
 		return spaceInformation;
 	}
-	
+	/**
+	 * This method filters out qbic staff and other unnecessary space members
+	 * TODO: this method might be better of as not being part of the DataHandler...and not hardcoded
+	 * @param users a set of all space users or members
+	 * @return a new set which exculdes qbic staff and functional members
+	 */
+	private Set<String> filterQBiCStaffOutOfMembers(Set<String> users) {
+		Set<String> ret = new LinkedHashSet<String>(users);
+		ret.remove("iiswo01"); //QBiC Staff
+		ret.remove("iisfr01"); //QBiC Staff
+		ret.remove("kxmsn01"); //QBiC Staff
+		ret.remove("zxmbf02"); //QBiC Staff
+		//ret.remove("iiswo01"); //David Wojnar
+//		ret.remove("iiswo01"); //David Wojnar
+		ret.remove("qeana10"); //functional user
+		ret.remove("etlserver"); // OpenBIS user
+		ret.remove("admin"); // OpenBIS user
+		ret.remove("QBIC"); //OpenBIS user
+		return ret;
+	}
+
 	@SuppressWarnings("unchecked")
 	private IndexedContainer createProjectContainer(List<Project> projs, String id) {
 		
 		IndexedContainer project_container = new IndexedContainer();
 		
-		project_container.addContainerProperty("Space", String.class, null);
 		project_container.addContainerProperty("Description", String.class, null);
+		project_container.addContainerProperty("Space", String.class, null);
 		project_container.addContainerProperty("Registration Date", Timestamp.class, null);
 		project_container.addContainerProperty("Registerator", String.class, null);
-		
-		project_container.addContainerProperty("Space", String.class, null);
 		
 		for(Project p: projs) {
 			Object new_p = project_container.addItem();
@@ -420,8 +487,7 @@ public class DataHandler {
 		
 		IndexedContainer experiment_container = new IndexedContainer();
 		
-		experiment_container.addContainerProperty("Space", String.class, null);
-		experiment_container.addContainerProperty("Project", String.class, null);
+		experiment_container.addContainerProperty("Experiment", String.class, null);
 		experiment_container.addContainerProperty("Experiment Type", String.class, null);
 		experiment_container.addContainerProperty("Registration Date", Timestamp.class, null);
 		experiment_container.addContainerProperty("Registerator", String.class, null);
@@ -443,9 +509,7 @@ public class DataHandler {
 			SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             String dateString = sd.format(date);
             Timestamp ts = Timestamp.valueOf(dateString);
-            
-            experiment_container.getContainerProperty(new_ds, "Space").setValue(space);
-            experiment_container.getContainerProperty(new_ds, "Project").setValue(project);
+            experiment_container.getContainerProperty(new_ds, "Experiment").setValue(e.getCode());
             experiment_container.getContainerProperty(new_ds, "Experiment Type").setValue(type);
             experiment_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
             experiment_container.getContainerProperty(new_ds, "Registerator").setValue(registrator);

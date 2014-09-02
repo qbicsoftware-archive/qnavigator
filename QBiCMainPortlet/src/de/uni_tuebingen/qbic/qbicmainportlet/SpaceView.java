@@ -82,7 +82,6 @@ public class SpaceView extends Panel{
 			vert.addComponent(new Label(String.format("Last Change: %s", String.format("In Experiment %s, Sample: %s. Date: %s", spaceViewIndexedContainer.lastChangedExperiment,spaceViewIndexedContainer.lastChangedSample.split("/")[2], spaceViewIndexedContainer.lastChangedDataset.toString()))));
 		}
 		vert.addComponent(this.table);
-		System.out.println(vert.getComponentCount());
 	}
 
 
