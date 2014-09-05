@@ -25,8 +25,10 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.basic.dto.Space;
 
+import com.vaadin.data.Container;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.ui.ProgressBar;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -49,7 +51,6 @@ class SpaceInformation{
 }
 
 class ProjectInformation {
-
 	public IndexedContainer experiments;
 	public int numberOfExperiments;
 	public int numberOfSamples;
@@ -58,6 +59,19 @@ class ProjectInformation {
 	public String lastChangedSample;
 	public Date lastChangedDataset;
 	public String description;
+	public String statusMessage;
+	public ProgressBar progressBar;
+	public String contact;
+}
+
+class ExperimentInformation{
+
+	public String experimentType;
+	public int numberOfSamples;
+	public int numberOfDatasets;
+	public String lastChangedSample;
+	public Date lastChangedDataset;
+	public IndexedContainer samples;
 }
 
 public class DataHandler {
@@ -65,6 +79,7 @@ public class DataHandler {
 	
 	Map<String,SpaceInformation> spaces = new HashMap<String,SpaceInformation>();
 	Map<String, ProjectInformation> projectInformations = new HashMap<String, ProjectInformation>();
+	Map<String, ExperimentInformation> experimentInformations = new HashMap<String, ExperimentInformation>();
 	
 	Map<String,IndexedContainer> space_to_projects = new HashMap<String,IndexedContainer>();
 
@@ -83,6 +98,7 @@ public class DataHandler {
 	
 	
 	OpenBisClient openBisClient;
+	
 	
 	public DataHandler(OpenBisClient client){
 		reset();
@@ -295,18 +311,28 @@ public class DataHandler {
 				Project project = this.openBisClient.getProjectbyID(id);
 				ret.description = project.getDescription();
 				ret.numberOfExperiments = ret.experiments.size();
-				ret.numberOfSamples = this.openBisClient.getSamplesofProject(project.getCode()).size();
+				
 
 				List<DataSet> datasets = this.openBisClient.getDataSetsOfProject(project.getCode());
 				ret.numberOfDatasets = datasets.size();
 				
 				StringBuilder lce = new StringBuilder();
-				System.out.println("lce: " + lce.toString());
 				StringBuilder lcs = new StringBuilder();
 				ret.lastChangedDataset = new Date(0,0,0);
 				this.lastDatasetRegistered(datasets, ret.lastChangedDataset, lce, lcs);
 				ret.lastChangedExperiment = lce.toString();
 				ret.lastChangedSample = lcs.toString();
+				List<Sample> samples = this.openBisClient.getSamplesofProject(project.getCode());
+				ret.numberOfSamples = samples.size();
+				//TODO status message
+				//TODO progressBar
+				ret.statusMessage = "Not implemented";
+				ret.progressBar = new ProgressBar();
+				ret.progressBar.setValue(0.7f);
+				ret.contact = String.format("Some QBiC Stuff\nWith a phone number\nAnd an adress");
+				
+				
+				
 				
 				this.projectInformations.put(id, ret);
 			} catch (Exception e) {
@@ -320,6 +346,34 @@ public class DataHandler {
 			return ret;
 		}
 	}
+	
+	public ExperimentInformation getExperimentInformation(String id){
+		if(this.experimentInformations.containsKey(id)){
+			return this.experimentInformations.get(id);
+		}else {
+			ExperimentInformation ret = new ExperimentInformation();
+			Experiment exp = this.openBisClient.getExperimentByOpenBisCode(id);
+			
+			ret.experimentType = exp.getExperimentTypeCode();
+			try {
+				ret.samples = this.getSamples(id, "experiment");
+				ret.numberOfSamples = ret.samples.size();
+				List<DataSet> datasets  = this.openBisClient.getDataSetsOfExperiment(exp.getPermId());
+				ret.numberOfDatasets = datasets.size();
+				StringBuilder lce = new StringBuilder();
+				StringBuilder lcs = new StringBuilder();
+				ret.lastChangedDataset = new Date(0,0,0);
+				this.lastDatasetRegistered(datasets, ret.lastChangedDataset, lce, lcs);
+				ret.lastChangedSample = lcs.toString();
+				this.experimentInformations.put(id, ret);
+			} catch (Exception e) {
+				e.printStackTrace();
+				ret = null;
+			}
+			return ret;
+		}
+	}
+	
 	/**
 	 * checks which of the datasets in the given list is the oldest and writes that into the last tree parameters
 	 * Note: lastModifiedDate, lastModifiedExperiment, lastModifiedSample will be modified. if lastModifiedSample, lastModifiedExperiment have value N/A datasets have no registration dates
@@ -376,7 +430,7 @@ public class DataHandler {
 			}
 		}
 		if(tmp_space == null) {
-			System.out.println("space is null!!!");
+			System.out.println("space is null! In DataHandler.createSpaceContainer");
 			return null;
 		}
 		SpaceInformation spaceInformation = new SpaceInformation();
@@ -406,7 +460,6 @@ public class DataHandler {
 		this.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
 		lastModifiedExperiment = lce.toString();
 		lastModifiedSample = lcs.toString();
-		System.out.println(lastModifiedExperiment);
 		
 		spaceInformation.numberOfProjects = number_of_projects;
 		spaceInformation.numberOfExperiments = number_of_experiments;
@@ -523,41 +576,27 @@ public class DataHandler {
 	private IndexedContainer createSampleContainer(List<Sample> samples, String id) {
 		
 		IndexedContainer sample_container = new IndexedContainer();
+		sample_container.addContainerProperty("Sample", String.class, null);
 		sample_container.addContainerProperty("Description", String.class, null);
-		sample_container.addContainerProperty("Space", String.class, null);
-		sample_container.addContainerProperty("Project", String.class, null);
-		sample_container.addContainerProperty("Experiment", String.class, null);
 		sample_container.addContainerProperty("Sample Type", String.class, null);
 		sample_container.addContainerProperty("Registration Date", Timestamp.class, null);
-		sample_container.addContainerProperty("Registerator", String.class, null);
-		sample_container.addContainerProperty("Properties", HashMap.class, null);
+		sample_container.addContainerProperty("Species", String.class, null);
 
-
-		
 		for(Sample s: samples) {
 			Object new_ds = sample_container.addItem();
 			
-			String code = s.getCode();
 			String type = s.getSampleTypeCode();
 			
-			String space = code.split("/")[1];
-			String project = code.split("/")[2];
-			String experiment = code.split("/")[3];
-						
 			Date date = s.getRegistrationDetails().getRegistrationDate();
-			String registrator = s.getRegistrationDetails().getUserId();
-			
+			Map<String, String> properties = s.getProperties();
 			SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             String dateString = sd.format(date);
             Timestamp ts = Timestamp.valueOf(dateString);
-            sample_container.getContainerProperty(new_ds, "Description").setValue("No description available");
-            sample_container.getContainerProperty(new_ds, "Space").setValue(space);
-            sample_container.getContainerProperty(new_ds, "Project").setValue(project);
-            sample_container.getContainerProperty(new_ds, "Experiment").setValue(experiment);
+            sample_container.getContainerProperty(new_ds, "Sample").setValue(s.getCode());
+            sample_container.getContainerProperty(new_ds, "Description").setValue(properties.get("SAMPLE_CLASS"));
             sample_container.getContainerProperty(new_ds, "Sample Type").setValue(type);
             sample_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
-            sample_container.getContainerProperty(new_ds, "Registerator").setValue(registrator);
-            sample_container.getContainerProperty(new_ds, "Properties").setValue(s.getProperties());
+            sample_container.getContainerProperty(new_ds, "Species").setValue(properties.get("SPECIES"));
 		}
             
 		return sample_container;
@@ -611,7 +650,7 @@ public class DataHandler {
             dataset_container.getContainerProperty(new_ds, "CODE").setValue(d.getCode());
             dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(filelist[0].getFileSize());
 		}
-		System.out.println("datasets size: " + datasets.size());
+		//System.out.println("datasets size: " + datasets.size());
 		return dataset_container;
 	}
 
@@ -709,6 +748,10 @@ public class DataHandler {
 						tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
 						List<Sample> samples = this.openBisClient.openbisInfoService.listSamplesForExperiment(this.openBisClient.getSessionToken(), experiment.getIdentifier());
 						for(Sample sample : samples){
+						//The commented code allows only biological samples to be shown in TreeView. We show all samples for now.
+						//	if (!sample.getSampleTypeCode().equals("BIOLOGICAL")){
+						//		continue;
+						//	}
 							number_of_samples++;
 							String samp = sample.getCode();
 							if(tc.containsId(samp)){

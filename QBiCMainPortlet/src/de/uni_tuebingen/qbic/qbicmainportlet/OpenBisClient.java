@@ -477,12 +477,12 @@ public class OpenBisClient {//implements Serializable {
 	*/
 	/**
 	 * Function to list all datasets of a specific experiment
-	 * @param  projCode identifier of the openBIS experiment
+	 * @param  expPermId permId of the openBIS experiment (experiment.getPermId())
 	 * @return list with all datasets of the given experiment
 	 */
-	public List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> getDataSetsOfExperiment(String expCode) {
+	public List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> getDataSetsOfExperiment(String expPermId) {
 		
-		return this.facade.listDataSetsForExperiment(expCode);
+		return this.facade.listDataSetsForExperiment(expPermId);
 	}
 	
 	// TODO ANOTHER WAY TO GET THE CORRECT DATASET TYPE ?
@@ -524,7 +524,7 @@ public class OpenBisClient {//implements Serializable {
 	 */
 	public List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> getDataSetsOfProject(String projCode) {
 		List<Sample> samps = getSamplesofProject(projCode);
-		System.out.println(samps.size());
+		//System.out.println(samps.size());
 		List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> res = new ArrayList<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
 		for (Iterator<Sample> iterator = samps.iterator(); iterator.hasNext();) {
 			Sample sample = (Sample) iterator.next();
@@ -651,8 +651,8 @@ public class OpenBisClient {//implements Serializable {
 
 	/**
 	 * returns all users of a Space.
-	 * @param code
-	 * @return
+	 * @param code openbis code of the space
+	 * @return set of strings
 	 */
 	public Set<String> getSpaceMembers(String code) {
 		List<SpaceWithProjectsAndRoleAssignments> spaces = this.facade.getSpacesWithProjects();
@@ -729,7 +729,7 @@ public class OpenBisClient {//implements Serializable {
 	 * @return object name of the QueryTableModel which is returned by the aggregation service
 	 */
 	public String addParentChildConnection(Map<String, Object> params) {
-		System.out.println(params);
+		//System.out.println(params);
 		return this.openbisDssService.createReportFromAggregationService(this.sessionToken, "DSS1", "create-parent-child", params).toString();
 	}
 	
@@ -752,7 +752,7 @@ public class OpenBisClient {//implements Serializable {
 			properties.put("QBIC_BARCODE", barcode);
 			params.put("code", barcode);
 		}
-		System.out.println(params);
+		//System.out.println(params);
 		return this.openbisDssService.createReportFromAggregationService(this.sessionToken, "DSS1", service, params).toString();
 	}
 
@@ -768,7 +768,7 @@ public class OpenBisClient {//implements Serializable {
 		Project project = this.getProjectbyID(proj);
 		//Project project = getProjectofExperiment(exp);
 		int number_of_samples = getSamplesofProject(project.getCode()).size();
-		System.out.println(number_of_samples);
+		//System.out.println(number_of_samples);
 		
 		String barcode = project.getCode() + String.format("%03d", (number_of_samples + 1)) + "S";
 		//String barcode = project.getCode() + String.format("%03d", Math.max(1, number_of_samples + number_of_samples_offset)) + "S";

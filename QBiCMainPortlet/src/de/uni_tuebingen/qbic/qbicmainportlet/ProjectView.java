@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
@@ -48,7 +50,7 @@ public class ProjectView extends Panel {
 	}
 	
 	/**
-	 * sets the ContainerDataSource for showing it in a table and the id of the current Openbis Space. The id is shown in the caption.
+	 * sets the ContainerDataSource for showing it in a table and the id of the current Openbis Project. The id is shown in the caption.
 	 * @param projectInformation
 	 * @param id
 	 */
@@ -61,18 +63,38 @@ public class ProjectView extends Panel {
 
 	private void setStatistics(ProjectInformation projectInformation) {
 		vert.removeAllComponents();
-		vert.addComponent(new Label(String.format("Description: %s", projectInformation.description)));
-		vert.addComponent(new Label(String.format("Number of Experiments: %s", projectInformation.numberOfExperiments)));
-		vert.addComponent(new Label(String.format("Number of Samples: %s", projectInformation.numberOfSamples)));
-		vert.addComponent(new Label(String.format("Number of Datasets: %s", projectInformation.numberOfDatasets)));
+		
+		VerticalLayout contact = new VerticalLayout();
+		contact.addComponent(new Label("QBiC contact:"));
+		contact.addComponent(new Label(projectInformation.contact));
+		
+		VerticalLayout statistics = new VerticalLayout();
+		
+		
+		statistics.addComponent(new Label(String.format("Description: %s", projectInformation.description)));
+		statistics.addComponent(new Label(String.format("Number of Experiments: %s", projectInformation.numberOfExperiments)));
+		statistics.addComponent(new Label(String.format("Number of Samples: %s", projectInformation.numberOfSamples)));
+		statistics.addComponent(new Label(String.format("Number of Datasets: %s", projectInformation.numberOfDatasets)));
+		HorizontalLayout temp = new HorizontalLayout();
+		temp.addComponent(new Label(String.format("Status: %s", projectInformation.statusMessage)));
+		temp.addComponent(projectInformation.progressBar);
+		//temp.setSizeFull();
+		temp.setSpacing(true);
+		statistics.addComponent(temp);
 		if(projectInformation.numberOfDatasets > 0){
 			
 			String lastSample = "No Sample available";
 			if(projectInformation.lastChangedSample != null){
 				lastSample = projectInformation.lastChangedSample.split("/")[2];
 			}
-			vert.addComponent(new Label(String.format("Last Change: %s", String.format("In Experiment %s, Sample: %s. Date: %s", projectInformation.lastChangedExperiment,lastSample , projectInformation.lastChangedDataset.toString()))));
+			statistics.addComponent(new Label(String.format("Last Change: %s", String.format("In Sample: %s. Date: %s",lastSample , projectInformation.lastChangedDataset.toString()))));
 		}
+		HorizontalLayout head = new HorizontalLayout();
+		head.addComponent(statistics);
+		head.addComponent(contact);
+		head.setMargin(true);
+		head.setSpacing(true);
+		vert.addComponent(head);
 		vert.addComponent(this.table);
 	}
 
@@ -83,26 +105,6 @@ public class ProjectView extends Panel {
 	private void tableClickChangeTreeView(){
 		table.setSelectable(true);
 		table.setImmediate(true);
-		this.table.addValueChangeListener(new Property.ValueChangeListener() {
-
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-				Object property  = event.getProperty().getValue();
-				if(property == null){
-					return;
-				}
-				String experiment = (String) table.getItem(property).getItemProperty("Experiment").getValue();
-				State state = (State)UI.getCurrent().getSession().getAttribute("state");
-				ArrayList<String> message = new ArrayList<String>();
-				message.add("clicked");
-				message.add(experiment);
-				state.notifyObservers(message);
-				
-			}
-		});
+		this.table.addValueChangeListener(new ViewTablesClickListener(table, "Experiment"));
 	}
-
-	
-	
-	
 }

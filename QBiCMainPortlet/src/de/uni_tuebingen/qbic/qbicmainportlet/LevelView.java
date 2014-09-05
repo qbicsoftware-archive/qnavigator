@@ -30,16 +30,16 @@ public class LevelView extends VerticalLayout implements View{
 	Component mainComponent;
 	HorizontalLayout headerLayout = new HorizontalLayout();
 	HorizontalLayout treeComponentLayout = new HorizontalLayout();
-	
+	String currentValue;
 	public LevelView(){
-		
+		currentValue = "_____empyt_____";
 	}
 	
 	public LevelView(ToolBar toolbar, TreeView treeView, Component component){
 		this.toolbar = toolbar;
 		this.treeView = treeView;
 		this.mainComponent = component;
-		
+		currentValue = "_____empyt_____";
 		this.buildLayout();
 	}
 
@@ -82,7 +82,11 @@ public class LevelView extends VerticalLayout implements View{
 	public void enter(ViewChangeEvent event) {
 		Object currentValue = this.treeView.getValue();
 		
-		System.out.println(currentValue);
+		if(currentValue == null || currentValue.equals(this.currentValue)){
+			return;
+		}
+		
+		//System.out.println(currentValue);
 		//System.out.println("type: " + this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue());
 		//System.out.println("ID: " + this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue());
 		DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");		
@@ -91,7 +95,7 @@ public class LevelView extends VerticalLayout implements View{
 		{
 			String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
 			String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-			System.out.println("Name: " +name + " type " + type + " value " + this.treeView.getValue() );
+			//System.out.println("Name: " +name + " type " + type + " value " + this.treeView.getValue() );
 			DatasetView ds = (DatasetView) this.mainComponent;
 			try {
 				ds.setContainerDataSource(dh.getDatasets((String)currentValue, type));
@@ -99,7 +103,7 @@ public class LevelView extends VerticalLayout implements View{
 				System.out.println("Exception in LevelView.enter. mainComponent is DatasetView");
 				//e.printStackTrace();
 			}
-			ds.setInfo(name, type, "Testuser");
+			ds.setInfo(name, type);
 			
 		}
 		else if(this.mainComponent instanceof SampleView){
@@ -131,7 +135,7 @@ public class LevelView extends VerticalLayout implements View{
 				
 				//String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
 				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
-				String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+				//String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
 				Project project = dh.openBisClient.getProjectByOpenBisCode(name);
 				String projectIdentifier = project.getIdentifier(); 
 				pv.setContainerDataSource(dh.getProjectInformation(projectIdentifier), name);
@@ -139,6 +143,16 @@ public class LevelView extends VerticalLayout implements View{
 				System.out.println("Exception in LevelView.enter. mainComponent is ProjectView");
 				//e.printStackTrace();
 			}
-		}		
+		}
+		else if(this.mainComponent instanceof ExperimentView){
+			ExperimentView ev = (ExperimentView) this.mainComponent;
+			try{
+				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
+				//String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+				ev.setContainerDataSource(dh.getExperimentInformation(name), name);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}
 	}
 }

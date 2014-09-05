@@ -51,8 +51,8 @@ public class DatasetView extends VerticalLayout {
 		this.table.setSizeFull();
 	}
 	
-	public void setInfo(String name, String entity, String owner) {		
-		this.general_information.setValue(String.format("Name: %s\nEntity Type: %s\nOwner: %s\n",name,entity,owner));
+	public void setInfo(String name, String entity) {		
+		this.general_information.setValue(String.format("Name: %s\nEntity Type: %s\n",name));
 	}
 	
 	private void buildLayout(){

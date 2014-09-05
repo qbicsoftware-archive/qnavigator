@@ -43,6 +43,7 @@ public class QbicmainportletUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
+		
 		if(LiferayAndVaadinUtils.getUser() == null){
 			buildNoUserLogin();
 		}
@@ -132,6 +133,7 @@ public class QbicmainportletUI extends UI {
 
 					if(samples !=null) {
 						for(String samp :samples) {
+							
 							tc.addItem(samp);
 							tc.setParent(samp, proj);
 
@@ -166,7 +168,7 @@ public class QbicmainportletUI extends UI {
 		LevelView sampleView = new LevelView(new ToolBar(ToolBar.View.Space),createTreeView(tc,state) ,new SampleView());
 		LevelView homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new Label("Welcome, your data"));
 		LevelView projectView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new ProjectView());
-		LevelView experimentView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new Label("EXPERIMENT VIEW IN IMPLEMENTATION"));
+		LevelView experimentView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new ExperimentView());
 		
 		
         VerticalLayout navigatorContent = new VerticalLayout();

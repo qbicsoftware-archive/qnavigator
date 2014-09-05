@@ -53,8 +53,7 @@ public class SampleView extends Panel {
 	 */
 	public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer, String id){
 		this.table.setContainerDataSource(spaceViewIndexedContainer);
-		this.table.setVisibleColumns(new Object[]{"Project",
-			    "Sample", "Sample Type", "File Name", "Dataset Type", "Registration Date", "File Size"});
+		this.table.setVisibleColumns(new Object[]{ "Sample Type", "File Name", "Dataset Type", "Registration Date", "File Size"});
 		this.id = id;
 		this.updateCaption();
 	}

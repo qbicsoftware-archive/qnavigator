@@ -15,14 +15,18 @@ public class TreeView extends Tree implements Observer {
 
 	public TreeView() {
 		super();
+		this.init();
+		
+	}
+	private void init(){
 		this.setImmediate(true);
 		this.registerClickListener();
+		this.setCaption("Workspaces");
 	}
 	
 	public TreeView(Container c){
 		super();
-		this.setImmediate(true);
-		this.registerClickListener();
+		this.init();
 		this.setContainerDataSource(c);
 	}
 	
