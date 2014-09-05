@@ -9,4 +9,19 @@
   @include liferay;
 
   /* Insert your theme rules here */
+  
+  /*Font size changed so that the fonts in the TreeView and ComponentViews, e.g. SpaceView and Tables are bigger.*/
+ .v-widget {
+  	font-size: 13px;
+  }
+  .v-caption {
+  	font-size: 16px;
+  }
+  .v-table-caption-container {
+  	font-size: 15px;
+  }
+  .v-panel-caption{
+  	font-size: 16px;
+  }
+  
 }

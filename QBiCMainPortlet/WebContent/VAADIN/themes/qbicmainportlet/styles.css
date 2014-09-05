@@ -5085,6 +5085,22 @@ body .qbicmainportlet.v-app {
 	bottom: 0;
 }
 
+.qbicmainportlet .v-widget {
+	font-size: 13px;
+}
+
+.qbicmainportlet .v-caption {
+	font-size: 16px;
+}
+
+.qbicmainportlet .v-table-caption-container {
+	font-size: 15px;
+}
+
+.qbicmainportlet .v-panel-caption {
+	font-size: 16px;
+}
+
 .qbicmainportlet .toolbar .v-button {
 	display: block;
 	height: 55px;
@@ -5161,4 +5177,8 @@ body .qbicmainportlet.v-app {
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
+}
+
+.v-ff .qbicmainportlet .v-scrollable {
+	font-size: 13px;
 }

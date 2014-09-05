@@ -1,6 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -48,6 +50,8 @@ public class QbicmainportletUI extends UI {
 			buildNoUserLogin();
 		}
 		else{
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			System.out.println("QbicNavigator: User: " + LiferayAndVaadinUtils.getUser().getScreenName() + " at " +dateFormat.format(new Date()) + " UTC.");
 			initConnection();
 			initSessionAttributes();
 			buildLayout();

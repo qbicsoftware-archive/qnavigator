@@ -90,8 +90,9 @@
    -moz-box-shadow: none;
    box-shadow: none;
 }
-
-
-
 }
+/*overriding font size. Elements in Tables will bigger. here in order to ovrride it for sure.*/
+  .v-ff .qbicmainportlet .v-scrollable {
+  	font-size: 13px;
+  }
 

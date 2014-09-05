@@ -58,10 +58,10 @@ public class LevelView extends VerticalLayout implements View{
 		
 		this.setSizeFull();
 
-		this.headerLayout.addComponent(this.statusMonitor);
+		//this.headerLayout.addComponent(this.statusMonitor);
 		this.headerLayout.addComponent(this.toolbar);
 		this.headerLayout.setMargin(true);
-		this.headerLayout.setExpandRatio(this.statusMonitor, 0.2f);
+		//this.headerLayout.setExpandRatio(this.statusMonitor, 0.2f);
 		this.headerLayout.setExpandRatio(this.toolbar, 0.8f);
 		this.statusMonitor.setSizeFull();
 		this.toolbar.setSizeFull();
