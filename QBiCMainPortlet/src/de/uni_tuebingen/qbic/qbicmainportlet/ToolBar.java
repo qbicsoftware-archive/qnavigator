@@ -149,7 +149,6 @@ public class ToolBar extends HorizontalLayout{
 		this.setButtonSize(graph, 128);
 		DropDown graphDropDown = new DropDown();
 		graphDropDown.addComponent("Execute Workflow");
-		graphDropDown.addComponent("What ever");
 		graph.setContent(graphDropDown);
 		
 		this.addComponent(planning);

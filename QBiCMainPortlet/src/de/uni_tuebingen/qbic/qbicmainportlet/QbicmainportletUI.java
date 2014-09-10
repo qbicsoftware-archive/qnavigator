@@ -77,33 +77,38 @@ public class QbicmainportletUI extends UI {
         System.out.println(VaadinService.getCurrentRequest().getRemoteHost());
         System.out.println(VaadinService.getCurrentRequest().getRemoteAddr());
         System.out.println(VaadinService.getCurrentRequest().getRemotePort());
-        Link loginPortalLink = new Link("Sign in", new ExternalResource("/c/portal/login"));
-		loginPortalLink.setIcon(new ThemeResource("sign_in.png"));
+        Link loginPortalLink = new Link("", new ExternalResource("/c/portal/login"));
+		loginPortalLink.setIcon(new ThemeResource("lock12.png"));
         
 		VerticalLayout signIn = new VerticalLayout();
 		
 		
 		
-		signIn.addComponent(new Label("You have to"));
+		signIn.addComponent(new Label("<h3>Sign in to manage your projects and access your data:</h3>",ContentMode.HTML));
 		signIn.addComponent(loginPortalLink);
-		signIn.addComponent(new Label("in order to see your data"));
-		
+		signIn.setStyleName("no-user-login");
 		VerticalLayout contact = new VerticalLayout();
-		contact.addComponent(new Label("Contact us:"));
+		contact.addComponent(new Label("<h3>If you are interested in doing projects get in contact:</h3>", ContentMode.HTML));
 		contact.addComponent(mailToQbicLink);
-		grid.addComponent(signIn);
-		grid.addComponent(contact);
-		grid.setMargin(true);
-		grid.setSpacing(true);
-		grid.setComponentAlignment(signIn, Alignment.MIDDLE_LEFT);
-		Label spaceing = new Label("&nbsp;", ContentMode.HTML);
-		grid.addComponent(spaceing);
-		grid.setComponentAlignment(spaceing, Alignment.MIDDLE_CENTER);
-		grid.setComponentAlignment(contact, Alignment.MIDDLE_RIGHT);
-		mainLayout.addComponent(grid);
-        
-		setContent(grid);
+		contact.setStyleName("no-user-login");
+
+		HorizontalLayout test = new HorizontalLayout();
+		Label expandingGap1 = new Label();
+		expandingGap1.setWidth("100%");
+		test.addComponent(expandingGap1);
+		test.addComponent(signIn);
+		//Label expandingGap2 = new Label();
+		//test.addComponent(expandingGap2);
+		test.addComponent(contact);
+		test.setExpandRatio(expandingGap1, 0.16f);
+		test.setExpandRatio(signIn, 0.36f);
+
+		//test.setExpandRatio(expandingGap2, 0.12f);
+		test.setExpandRatio(contact, 0.36f);
 		
+		test.setWidth("100%");
+		test.setSpacing(true);
+		setContent(test);
 	}
 
 	private void fillHierarchicalTreeContainer(HierarchicalContainer tc){
@@ -260,5 +265,4 @@ public class QbicmainportletUI extends UI {
 		// TODO LiferayUtils ?!
 		this.openBisConnection = new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(), manager.getDataSourceURL(), true); //LiferayAndVaadinUtils.getOpenBisClient();
 	}
-
 }

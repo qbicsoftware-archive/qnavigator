@@ -71,7 +71,13 @@ public class ProjectView extends Panel {
 		VerticalLayout statistics = new VerticalLayout();
 		
 		
-		statistics.addComponent(new Label(String.format("Description: %s", projectInformation.description)));
+		Label description = new Label(projectInformation.description);
+		description.setWidth("400px");
+		Label des = new Label("Description: ");
+		HorizontalLayout projDescription = new HorizontalLayout();
+		projDescription.addComponent(des);
+		projDescription.addComponent(description);
+		statistics.addComponent(projDescription);
 		statistics.addComponent(new Label(String.format("Number of Experiments: %s", projectInformation.numberOfExperiments)));
 		statistics.addComponent(new Label(String.format("Number of Samples: %s", projectInformation.numberOfSamples)));
 		statistics.addComponent(new Label(String.format("Number of Datasets: %s", projectInformation.numberOfDatasets)));
