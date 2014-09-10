@@ -14,11 +14,19 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.navigator.Navigator;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -59,10 +67,42 @@ public class QbicmainportletUI extends UI {
 	}
 	
 	private void buildNoUserLogin() {
+		final GridLayout grid = new GridLayout(3, 3);
+		HorizontalLayout layout = new HorizontalLayout();
+		ExternalResource resource = new ExternalResource("mailto:info@qbic.uni-tuebingen.de");
+		Link mailToQbicLink = new Link("", resource);
+		mailToQbicLink.setIcon(new ThemeResource("mail9.png"));
 		mainLayout = new VerticalLayout();
-        mainLayout.setMargin(false);	
-		mainLayout.addComponent(new Label("You have to 'Sign in', in order to see your data."));
-        setContent(mainLayout);
+        mainLayout.setMargin(false);
+        System.out.println(VaadinService.getCurrentRequest().getRemoteHost());
+        System.out.println(VaadinService.getCurrentRequest().getRemoteAddr());
+        System.out.println(VaadinService.getCurrentRequest().getRemotePort());
+        Link loginPortalLink = new Link("Sign in", new ExternalResource("/c/portal/login"));
+		loginPortalLink.setIcon(new ThemeResource("sign_in.png"));
+        
+		VerticalLayout signIn = new VerticalLayout();
+		
+		
+		
+		signIn.addComponent(new Label("You have to"));
+		signIn.addComponent(loginPortalLink);
+		signIn.addComponent(new Label("in order to see your data"));
+		
+		VerticalLayout contact = new VerticalLayout();
+		contact.addComponent(new Label("Contact us:"));
+		contact.addComponent(mailToQbicLink);
+		grid.addComponent(signIn);
+		grid.addComponent(contact);
+		grid.setMargin(true);
+		grid.setSpacing(true);
+		grid.setComponentAlignment(signIn, Alignment.MIDDLE_LEFT);
+		Label spaceing = new Label("&nbsp;", ContentMode.HTML);
+		grid.addComponent(spaceing);
+		grid.setComponentAlignment(spaceing, Alignment.MIDDLE_CENTER);
+		grid.setComponentAlignment(contact, Alignment.MIDDLE_RIGHT);
+		mainLayout.addComponent(grid);
+        
+		setContent(grid);
 		
 	}
 

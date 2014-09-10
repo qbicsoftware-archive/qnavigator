@@ -8,7 +8,13 @@ import com.vaadin.ui.Label;
  */
 public class ButtonLink extends Label {
     String caption;
-	public ButtonLink(String caption, ExternalResource externalResource) {
+	
+    /**
+     * Link that looks like a Button, that is actually a Label. Set the caption of the "Button" and the externalResource which should contain a url
+     * @param caption
+     * @param externalResource
+     */
+    public ButtonLink(String caption, ExternalResource externalResource) {
 		super(
             "<a href='"+externalResource.getURL()+"' style='text-decoration: display: block;'>" +
                 // The following lines are copy pasted from rendered Vaadin v6.1 buttons.
