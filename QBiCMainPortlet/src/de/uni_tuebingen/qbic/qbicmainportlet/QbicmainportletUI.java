@@ -215,7 +215,7 @@ public class QbicmainportletUI extends UI {
 		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state),new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
 		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),createTreeView(tc,state), new DatasetView());
 		LevelView sampleView = new LevelView(new ToolBar(ToolBar.View.Space),createTreeView(tc,state) ,new SampleView());
-		LevelView homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new Label("Welcome, your data"));
+		LevelView homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new HomeView());
 		LevelView projectView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new ProjectView());
 		LevelView experimentView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new ExperimentView());
 		
@@ -230,16 +230,17 @@ public class QbicmainportletUI extends UI {
 		navigator.addView("project", projectView);
 		navigator.addView("experiment", experimentView);
 		
-		navigator.navigateTo("");
 		setNavigator(navigator);
 		//Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do this
 		JavaScript.getCurrent().execute("window.location.reload();");
         
+		
 		mainLayout = new VerticalLayout();
-        mainLayout.setMargin(false);	
+        mainLayout.setMargin(true);	
 		mainLayout.addComponent(navigatorContent);
         setContent(mainLayout);
-		
+        
+		navigator.navigateTo("");
 	}
 
 	private TreeView createTreeView(HierarchicalContainer tc, State st){
@@ -261,6 +262,7 @@ public class QbicmainportletUI extends UI {
 
 	private  void initConnection() {
 		ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
+		
 		//System.out.println(manager.getDataSourceURL() + manager.getDataSourceUser() + manager.getDataSourcePassword());
 		// TODO LiferayUtils ?!
 		this.openBisConnection = new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(), manager.getDataSourceURL(), true); //LiferayAndVaadinUtils.getOpenBisClient();

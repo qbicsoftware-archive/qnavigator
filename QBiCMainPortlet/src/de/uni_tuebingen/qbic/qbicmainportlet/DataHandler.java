@@ -266,7 +266,7 @@ public class DataHandler {
 			else {
 				experiment_list = this.openBisClient.getExperimentsofProject(id);
 				experiments = this.createExperimentContainer(experiment_list, id);
-				this.project_to_samples.put(id, experiments);
+				this.project_to_experiments.put(id, experiments);
 			}
 		}
 		else {
@@ -290,7 +290,7 @@ public class DataHandler {
 			else {
 				project_list = this.openBisClient.getProjectsofSpace(id);
 				projects = this.createProjectContainer(project_list, id);
-				this.space_to_experiments.put(id, projects);
+				this.space_to_projects.put(id, projects);
 			}
 		}
 		else {
@@ -680,7 +680,7 @@ public class DataHandler {
 		tc.addContainerProperty("metadata", DummyMetaData.class, new DummyMetaData());
 		tc.addContainerProperty("identifier", String.class, "N/A");
 		tc.addContainerProperty("type", String.class, "N/A");
-		
+	
 		List<SpaceWithProjectsAndRoleAssignments> space_list = this.openBisClient.facade.getSpacesWithProjects();
 		
 		for(SpaceWithProjectsAndRoleAssignments s : space_list) {

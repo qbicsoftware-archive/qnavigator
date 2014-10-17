@@ -191,6 +191,7 @@ public class OpenBisClient {//implements Serializable {
 	 * @return list with all samples of the given space
 	 */
 	public List<Sample> getSamplesofSpace(String space) {
+		//this.openbisInfoService.listSpacesWithProjectsAndRoleAssignments(arg0, arg1)
         SearchCriteria sc = new SearchCriteria();        
         sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.SPACE, space));
         List<Sample> foundSamples = this.openbisInfoService.searchForSamples(sessionToken, sc);
