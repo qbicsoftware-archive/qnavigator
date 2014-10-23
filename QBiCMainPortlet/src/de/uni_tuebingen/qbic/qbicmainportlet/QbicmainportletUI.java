@@ -59,7 +59,7 @@ public class QbicmainportletUI extends UI {
 		}
 		else{
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-			System.out.println("QbicNavigator: User: " + LiferayAndVaadinUtils.getUser().getScreenName() + " at " +dateFormat.format(new Date()) + " UTC.");
+			System.out.println("QbicNavigator\nUser: " + LiferayAndVaadinUtils.getUser().getScreenName() + " at " +dateFormat.format(new Date()) + " UTC.");
 			initConnection();
 			initSessionAttributes();
 			buildLayout();

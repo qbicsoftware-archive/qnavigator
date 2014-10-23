@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.user.server.rpc.UnexpectedException;
+
 import ch.systemsx.cisd.common.api.client.ServiceFinder;
 import ch.systemsx.cisd.common.exceptions.InvalidAuthenticationException;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
@@ -134,7 +136,7 @@ public class OpenBisClient {//implements Serializable {
 						e1.printStackTrace();
 					}
 					if(facade == null){
-						return;//throw new UnexpectedException("OpenBis facade is not available");
+						throw new UnexpectedException("OpenBis facade is not available. Check connection, password and user. ", e);
 					}
 				}
 			}
@@ -826,8 +828,9 @@ public class OpenBisClient {//implements Serializable {
 	    download_url += "?mode=simpleHtml&sessionID=";
 	    download_url += this.getSessionToken();
 	    return new URL(download_url);
-		
 	}
+	
+	
 	
 	public String getSessionToken(){
 	    if(!this.openbisInfoService.isSessionActive(this.sessionToken)){

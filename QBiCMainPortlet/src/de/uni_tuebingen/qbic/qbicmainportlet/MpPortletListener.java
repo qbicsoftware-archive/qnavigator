@@ -77,7 +77,7 @@ public class MpPortletListener implements PortletListener, com.vaadin.data.Prope
 			RenderResponse response, UI uI) {
 		this.resURL = response.createResourceURL();
 		resURL.setResourceID(RESOURCE_ID);
-		System.out.println("resourceURL initialized");
+		//System.out.println("resourceURL initialized");
 		request.setAttribute(RESOURCE_ATTRIBUTE, resURL);
 		open.setResource(new ExternalResource(resURL.toString()));
 		//uI.getSession();

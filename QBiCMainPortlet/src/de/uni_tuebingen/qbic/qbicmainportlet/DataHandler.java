@@ -14,18 +14,14 @@ import java.util.Map;
 import java.util.Set;
 
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.IDataSetDss;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
-//import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.EntityRegistrationDetails;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
-import ch.systemsx.cisd.openbis.generic.shared.basic.dto.Space;
 
-import com.vaadin.data.Container;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.ProgressBar;
@@ -681,7 +677,7 @@ public class DataHandler {
 		tc.addContainerProperty("identifier", String.class, "N/A");
 		tc.addContainerProperty("type", String.class, "N/A");
 	
-		List<SpaceWithProjectsAndRoleAssignments> space_list = this.openBisClient.facade.getSpacesWithProjects();
+		List<SpaceWithProjectsAndRoleAssignments> space_list = this.openBisClient.getFacade().getSpacesWithProjects();
 		
 		for(SpaceWithProjectsAndRoleAssignments s : space_list) {
 			if(s.getUsers().contains(screenName)){
