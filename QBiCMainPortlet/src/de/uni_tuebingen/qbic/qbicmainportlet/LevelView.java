@@ -111,7 +111,7 @@ public class LevelView extends VerticalLayout implements View{
 			try{
 				String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
 				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
-				sv.setContainerDataSource(dh.getDatasets(name, type), name);
+				sv.setContainerDataSource(dh.getSampleInformation(name), name);
 			} catch (Exception e){
 				System.out.println("Exception in LevelView.enter. mainComponent is SampleView");
 				//e.printStackTrace();
@@ -136,7 +136,7 @@ public class LevelView extends VerticalLayout implements View{
 				//String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
 				String name = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
 				//String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-				Project project = dh.openBisClient.getProjectByOpenBisCode(name);
+				Project project = dh.openBisClient.getProjectByCode(name);
 				String projectIdentifier = project.getIdentifier(); 
 				pv.setContainerDataSource(dh.getProjectInformation(projectIdentifier), name);
 			} catch (Exception e){
