@@ -102,6 +102,7 @@ public class ProjectView extends Panel {
 		head.setSpacing(true);
 		vert.addComponent(head);
 		vert.addComponent(this.table);
+		this.table.setColumnAlignment("Status", Table.ALIGN_CENTER);
 	}
 
 

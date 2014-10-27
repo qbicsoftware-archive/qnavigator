@@ -40,6 +40,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.id.project.ProjectIdentifierId;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.id.sample.SampleIdentifierId;
+import ch.systemsx.cisd.openbis.generic.shared.basic.dto.ExperimentType;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.IQueryApiServer;
 
 
@@ -750,6 +751,23 @@ public class OpenBisClient {// implements Serializable {
     }
     return st;
   }
+  
+  /**
+   * Function to get a ExperimentType object of a experiment type
+   * 
+   * @param experimentType the experiment type as string
+   * @return the ExperimentType object of the corresponding experiment type
+   */
+  public ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ExperimentType getExperimentTypeByString(String experimentType) {
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ExperimentType> types = this.getFacade().listExperimentTypes();
+    ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ExperimentType st = null;
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ExperimentType t : types) {
+      if (t.getCode().equals(experimentType)) {
+        st = t;
+      }
+    }
+    return st;
+  }
 
   /**
    * Function to get the labels of all property types of a specific instance type
@@ -866,7 +884,9 @@ public class OpenBisClient {// implements Serializable {
    */
   public String openBIScodeToString(String entityCode) {
     entityCode = WordUtils.capitalizeFully(entityCode.replace("_", " ").toLowerCase());
-    String edit_string = entityCode.replace("Ngs", "NGS").replace("Hla", "HLA");
+    String edit_string =
+        entityCode.replace("Ngs", "NGS").replace("Hla", "HLA").replace("Rna", "RNA")
+            .replace("Dna", "DNA").replace("Ms", "MS");
     if (edit_string.startsWith("Q ")) {
       edit_string = edit_string.replace("Q ", "");
     }

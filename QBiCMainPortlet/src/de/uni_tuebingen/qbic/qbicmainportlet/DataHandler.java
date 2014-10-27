@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,6 +26,11 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRo
 
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinService;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
@@ -69,6 +75,8 @@ class ExperimentInformation{
 	public String lastChangedSample;
 	public Date lastChangedDataset;
 	public IndexedContainer samples;
+	public Map<String,String> properties;
+	public String propertiesFormattedString;
 }
 
 class SampleInformation{
@@ -81,7 +89,7 @@ class SampleInformation{
 	public String propertiesFormattedString;
 	// Map containing parents of the sample and the corresponding sample types
 	public Map<String, String> parents;
-  public String parentsFormattedString;
+    public String parentsFormattedString;
 }
 
 public class DataHandler {
@@ -365,7 +373,7 @@ public class DataHandler {
 			ExperimentInformation ret = new ExperimentInformation();
 			Experiment exp = this.openBisClient.getExperimentByCode(id);
 			
-			ret.experimentType = exp.getExperimentTypeCode();
+			ret.experimentType = this.openBisClient.openBIScodeToString(exp.getExperimentTypeCode());
 			try {
 				ret.samples = this.getSamples(id, "experiment");
 				ret.numberOfSamples = ret.samples.size();
@@ -376,6 +384,25 @@ public class DataHandler {
 				ret.lastChangedDataset = new Date(0,0,0);
 				this.lastDatasetRegistered(datasets, ret.lastChangedDataset, lce, lcs);
 				ret.lastChangedSample = lcs.toString();
+				
+	            Map<String, String> properties = exp.getProperties();
+				
+				ret.properties = exp.getProperties();
+                
+                Map<String,String> typeLabels = this.openBisClient.getLabelsofProperties(this.openBisClient.getExperimentTypeByString(exp.getExperimentTypeCode()));
+				
+                String propertiesHeader = "Properties \n <ul>";
+                String propertiesBottom = "";
+                
+                Iterator it = ret.properties.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pairs = (Map.Entry)it.next();
+                    propertiesBottom +=  "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> "  + pairs.getValue() + "</li>");
+                }
+                propertiesBottom += "</ul>";
+                
+                ret.propertiesFormattedString = propertiesHeader + propertiesBottom;
+				
 				this.experimentInformations.put(id, ret);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -623,7 +650,8 @@ public class DataHandler {
 		experiment_container.addContainerProperty("Experiment Type", String.class, null);
 		experiment_container.addContainerProperty("Registration Date", Timestamp.class, null);
 		experiment_container.addContainerProperty("Registerator", String.class, null);
-		experiment_container.addContainerProperty("Properties", Map.class, null);
+	    experiment_container.addContainerProperty("Status", Image.class, null);
+		//experiment_container.addContainerProperty("Properties", Map.class, null);
 
 
 		
@@ -631,10 +659,18 @@ public class DataHandler {
 			Object new_ds = experiment_container.addItem();
 			
 			String experimentIdentifier = e.getIdentifier();
-			String type = e.getExperimentTypeCode();
+			String type = this.openBisClient.openBIScodeToString(e.getExperimentTypeCode());
 			String space = experimentIdentifier.split("/")[1];
 			String project = experimentIdentifier.split("/")[2];
-						
+			
+			Map<String, String> properties = e.getProperties();
+				
+			String status = "";
+			
+			if(properties.keySet().contains("Q_CURRENT_STATUS")) {
+              status = properties.get("Q_CURRENT_STATUS"); 
+			}
+					
 			Date date = e.getRegistrationDetails().getRegistrationDate();
 			String registrator = e.getRegistrationDetails().getUserId();
 			
@@ -645,7 +681,12 @@ public class DataHandler {
             experiment_container.getContainerProperty(new_ds, "Experiment Type").setValue(type);
             experiment_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
             experiment_container.getContainerProperty(new_ds, "Registerator").setValue(registrator);
-            experiment_container.getContainerProperty(new_ds, "Properties").setValue(e.getProperties());
+            
+            Image statusColor = new Image("",this.setExperimentStatusColor(status));
+            statusColor.setWidth("15px");
+            statusColor.setHeight("15px");
+            experiment_container.getContainerProperty(new_ds, "Status").setValue(statusColor);
+            //experiment_container.getContainerProperty(new_ds, "Properties").setValue(e.getProperties());
 		}
             
 		return experiment_container;
@@ -659,12 +700,12 @@ public class DataHandler {
 		sample_container.addContainerProperty("Description", String.class, null);
 		sample_container.addContainerProperty("Sample Type", String.class, null);
 		sample_container.addContainerProperty("Registration Date", Timestamp.class, null);
-		sample_container.addContainerProperty("Species", String.class, null);
+		//sample_container.addContainerProperty("Species", String.class, null);
 
 		for(Sample s: samples) {
 			Object new_ds = sample_container.addItem();
 			
-			String type = s.getSampleTypeCode();
+			String type = this.openBisClient.openBIScodeToString(s.getSampleTypeCode());
 			
 			Date date = s.getRegistrationDetails().getRegistrationDate();
 			Map<String, String> properties = s.getProperties();
@@ -672,10 +713,11 @@ public class DataHandler {
             String dateString = sd.format(date);
             Timestamp ts = Timestamp.valueOf(dateString);
             sample_container.getContainerProperty(new_ds, "Sample").setValue(s.getCode());
-            sample_container.getContainerProperty(new_ds, "Description").setValue(properties.get("SAMPLE_CLASS"));
+            //sample_container.getContainerProperty(new_ds, "Description").setValue(properties.get("SAMPLE_CLASS"));
+            sample_container.getContainerProperty(new_ds, "Description").setValue(properties.get("Q_SECONDARY_NAME"));
             sample_container.getContainerProperty(new_ds, "Sample Type").setValue(type);
             sample_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
-            sample_container.getContainerProperty(new_ds, "Species").setValue(properties.get("SPECIES"));
+            //sample_container.getContainerProperty(new_ds, "Species").setValue(properties.get("SPECIES"));
 		}
             
 		return sample_container;
@@ -858,5 +900,29 @@ public class DataHandler {
 			}
 		}
 	}
+	
+	 public ThemeResource setExperimentStatusColor(String status) {
+       ThemeResource resource = null;
+       if (status.equals("FINISHED")){
+         resource = new ThemeResource("green_light.png");
+       }
+       else if (status.equals("DELAYED")) {
+         resource = new ThemeResource("yellow_light.png");
+       }
+       else if (status.equals("STARTED")){
+         resource = new ThemeResource("grey_light.png");
+       }
+       else if (status.equals("FAILED")){
+         resource = new ThemeResource("red_light.png");
+       }   
+       else {
+         resource = new ThemeResource("red_light.png");
+       }
+       
+       //image.setWidth("15px");
+       //image.setHeight("15px");\
+       System.out.println(resource);
+       return resource;
+   }
 }
 	
