@@ -1000,5 +1000,30 @@ public class OpenBisClient {// implements Serializable {
     }
     return false;
   }
+  
+  /**
+   * Compute status of project by checking status of the contained experiments
+   * 
+   * @param project the Project object
+   * @return ratio of finished experiments in this project
+   */
+  public float computeProjectStatus(Project project) {
+    float finishedExperiments = 0f;
 
+    List<Experiment> experiments = this.getExperimentsOfProjectByCode(project.getCode());
+    float numberExperiments = experiments.size();
+
+    for (Experiment e : experiments) {
+      if (e.getProperties().keySet().contains("Q_CURRENT_STATUS")) {
+        if (e.getProperties().get("Q_CURRENT_STATUS").equals("FINISHED")) {
+          finishedExperiments += 1.0;
+        };
+      }
+    }
+    if (numberExperiments > 0) {
+      return finishedExperiments / experiments.size();
+    } else {
+      return 0f;
+    }
+  }
 }

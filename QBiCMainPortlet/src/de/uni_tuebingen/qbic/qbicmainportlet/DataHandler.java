@@ -1,6 +1,5 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,10 +25,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRo
 
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FileResource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
 
@@ -344,14 +340,12 @@ public class DataHandler {
 				List<Sample> samples = this.openBisClient.getSamplesOfProject(project.getCode());
 				ret.numberOfSamples = samples.size();
 				//TODO status message
-				//TODO progressBar
-				ret.statusMessage = "Not implemented";
+				ret.statusMessage = "";
+				
 				ret.progressBar = new ProgressBar();
-				ret.progressBar.setValue(0.7f);
+				ret.progressBar.setValue(this.openBisClient.computeProjectStatus(project));
+				
 				ret.contact = String.format("Some QBiC Stuff\nWith a phone number\nAnd an adress");
-				
-				
-				
 				
 				this.projectInformations.put(id, ret);
 			} catch (Exception e) {
@@ -373,8 +367,8 @@ public class DataHandler {
 			ExperimentInformation ret = new ExperimentInformation();
 			Experiment exp = this.openBisClient.getExperimentByCode(id);
 			
-			ret.experimentType = this.openBisClient.openBIScodeToString(exp.getExperimentTypeCode());
 			try {
+			    ret.experimentType = this.openBisClient.openBIScodeToString(exp.getExperimentTypeCode());
 				ret.samples = this.getSamples(id, "experiment");
 				ret.numberOfSamples = ret.samples.size();
 				List<DataSet> datasets  = this.openBisClient.getDataSetsOfExperiment(exp.getPermId());
@@ -544,6 +538,8 @@ public class DataHandler {
 		
 		space_container.addContainerProperty("Project", String.class, "");
 		space_container.addContainerProperty("Description", String.class, "");
+	    space_container.addContainerProperty("Progress", ProgressBar.class, "");
+
 		
 		//List<Project> projects = this.openBisClient.getProjectsofSpace(id);
 		int number_of_samples = 0;
@@ -581,6 +577,7 @@ public class DataHandler {
 			Object new_s = space_container.addItem();
 			space_container.getContainerProperty(new_s, "Project").setValue(p.getCode());
 			space_container.getContainerProperty(new_s, "Description").setValue(p.getDescription());
+	        space_container.getContainerProperty(new_s, "Progress").setValue(new ProgressBar(this.openBisClient.computeProjectStatus(p)));
 		}
 		spaceInformation.projects = space_container;
 		
@@ -616,6 +613,7 @@ public class DataHandler {
 		project_container.addContainerProperty("Space", String.class, null);
 		project_container.addContainerProperty("Registration Date", Timestamp.class, null);
 		project_container.addContainerProperty("Registerator", String.class, null);
+		project_container.addContainerProperty("Progress", ProgressBar.class, null);
 		
 		for(Project p: projs) {
 			Object new_p = project_container.addItem();
@@ -632,10 +630,15 @@ public class DataHandler {
             String dateString = sd.format(date);
             Timestamp ts = Timestamp.valueOf(dateString);
             
+            ProgressBar progressBar = new ProgressBar();
+            progressBar.setValue(this.openBisClient.computeProjectStatus(p));
+
+            
             project_container.getContainerProperty(new_p, "Space").setValue(space);
             project_container.getContainerProperty(new_p, "Description").setValue(desc);
             project_container.getContainerProperty(new_p, "Registration Date").setValue(ts);
             project_container.getContainerProperty(new_p, "Registerator").setValue(registrator);
+            project_container.getContainerProperty(new_p, "Progress").setValue(progressBar);
 		}
 		
 		return project_container;
@@ -921,8 +924,8 @@ public class DataHandler {
        
        //image.setWidth("15px");
        //image.setHeight("15px");\
-       System.out.println(resource);
        return resource;
    }
+	 
 }
 	

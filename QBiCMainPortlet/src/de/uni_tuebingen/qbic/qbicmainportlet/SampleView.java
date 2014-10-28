@@ -14,6 +14,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 
+@SuppressWarnings("deprecation")
 public class SampleView extends Panel {
 
   /**

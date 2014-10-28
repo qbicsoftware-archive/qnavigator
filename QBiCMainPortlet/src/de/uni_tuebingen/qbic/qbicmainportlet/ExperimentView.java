@@ -1,28 +1,14 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.util.ArrayList;
-
 import org.tepi.filtertable.FilterTable;
 
-import com.apple.eawt.Application;
-import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.Resource;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
 
 public class ExperimentView extends Panel {
 
