@@ -1,32 +1,22 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.util.ArrayList;
+import org.tepi.filtertable.FilterTable;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.Image;
 import com.liferay.portal.model.User;
-import com.liferay.portal.service.ImageLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 
 
 public class SpaceView extends Panel{
@@ -36,16 +26,15 @@ public class SpaceView extends Panel{
 	 */
 	private static final long serialVersionUID = 2699910993266409192L;
 	
-	Table table;
+	FilterTable table;
 	VerticalLayout vert;
 
 	private String id;
-	public SpaceView(Table table, SpaceInformation datasource, String id) {
+	public SpaceView(FilterTable table, SpaceInformation datasource, String id) {
 		vert = new VerticalLayout();
 		
-		this.table = table;
-		this.table.setSelectable(true);
-		this.setSizeFull();
+	    this.table = buildFilterTable();
+	    this.table.setSizeFull();
 		
 		vert.addComponent(this.table);
 		vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
@@ -58,7 +47,7 @@ public class SpaceView extends Panel{
 	
 	public SpaceView(){
 		//execute the above constructor with default settings, in order to have the same settings
-		this(new Table(), new SpaceInformation(), "No space selected");
+		this(new FilterTable(), new SpaceInformation(), "No space selected");
 	}
 	
 	public void setSizeFull(){
@@ -140,5 +129,28 @@ public class SpaceView extends Panel{
 		table.setImmediate(true);
 		this.table.addValueChangeListener(new ViewTablesClickListener(table, "Project"));
 	}
+	
+	private FilterTable buildFilterTable() {
+	    FilterTable filterTable = new FilterTable();
+	    filterTable.setSizeFull();
+
+	    filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
+	    filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
+
+	    filterTable.setFilterBarVisible(true);
+
+	    filterTable.setSelectable(true);
+	    filterTable.setImmediate(true);
+
+	    filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
+
+	    filterTable.setColumnCollapsingAllowed(true);
+
+	    filterTable.setColumnReorderingAllowed(true);
+
+	    filterTable.setCaption("Registered Projects");
+
+	    return filterTable;
+	  }
 
 }

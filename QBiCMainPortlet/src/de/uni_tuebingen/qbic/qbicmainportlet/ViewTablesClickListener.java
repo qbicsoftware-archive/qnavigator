@@ -2,9 +2,10 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.util.ArrayList;
 
+import org.tepi.filtertable.FilterTable;
+
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
@@ -17,7 +18,7 @@ import com.vaadin.ui.UI;
 public class ViewTablesClickListener implements Property.ValueChangeListener {
 	
 	
-	public ViewTablesClickListener(Table table, String type){
+	public ViewTablesClickListener(FilterTable table, String type){
 		this.viewTable = table;
 		this.type = type;
 	}
@@ -33,7 +34,7 @@ public class ViewTablesClickListener implements Property.ValueChangeListener {
 	/**
 	 * 
 	 */
-	private Table viewTable;
+	private FilterTable viewTable;
 	
 
 	
@@ -41,14 +42,14 @@ public class ViewTablesClickListener implements Property.ValueChangeListener {
 	 * returns the table that the listener is listening to.
 	 * @return
 	 */
-	public Table getViewTable() {
+	public FilterTable getViewTable() {
 		return viewTable;
 	}
 	/**
 	 * sets the table that this listener is listening to.
 	 * @param viewTable
 	 */
-	public void setViewTable(Table viewTable) {
+	public void setViewTable(FilterTable viewTable) {
 		this.viewTable = viewTable;
 	}
 	/**

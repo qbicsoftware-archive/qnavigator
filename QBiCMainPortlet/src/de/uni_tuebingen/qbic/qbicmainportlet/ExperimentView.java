@@ -26,7 +26,6 @@ public class ExperimentView extends Panel {
     this.id = id;
 
     this.table = buildFilterTable();
-    this.table.setSelectable(true);
     this.table.setSizeFull();
 
     vert.addComponent(this.table);
@@ -103,7 +102,7 @@ public class ExperimentView extends Panel {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    //this.table.addValueChangeListener(new ViewTablesClickListener(table, "Sample"));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table, "Sample"));
   }
   
   private FilterTable buildFilterTable() {
@@ -117,7 +116,6 @@ public class ExperimentView extends Panel {
 
     filterTable.setSelectable(true);
     filterTable.setImmediate(true);
-    filterTable.setMultiSelect(true);
 
     filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
 
