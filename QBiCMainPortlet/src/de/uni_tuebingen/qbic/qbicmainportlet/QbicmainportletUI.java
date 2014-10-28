@@ -58,7 +58,7 @@ public class QbicmainportletUI extends UI {
 
   @Override
   protected void init(VaadinRequest request) {
-
+    
     if (LiferayAndVaadinUtils.getUser() == null) {
       buildNoUserLogin();
     } else {
