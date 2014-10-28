@@ -172,7 +172,8 @@ public class QbicmainportletUI extends UI {
     HierarchicalContainer tc = new HierarchicalContainer();
     fillHierarchicalTreeContainer(tc);
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    SpaceInformation homeViewInformation = dh.getHomeInformation();
+    User user = LiferayAndVaadinUtils.getUser();
+    SpaceInformation homeViewInformation = dh.getHomeInformation(user.getScreenName());
 
 
     State state = (State) UI.getCurrent().getSession().getAttribute("state");

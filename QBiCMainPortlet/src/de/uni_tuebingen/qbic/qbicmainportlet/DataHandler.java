@@ -135,7 +135,7 @@ public class DataHandler {
 	 * returns a SpaceInformation that contains statistics about all spaces, as if all of them would be one big space.
 	 * @return
 	 */
-	public SpaceInformation getHomeInformation(){
+	public SpaceInformation getHomeInformation(String userScreenName){
 	  List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpace_list();
 	  SpaceInformation homeInformation = new SpaceInformation();
       IndexedContainer space_container = new IndexedContainer();
@@ -152,6 +152,7 @@ public class DataHandler {
       String lastModifiedSample = "N/A";
       Date lastModifiedDate = new Date(0,0,0);
       for(SpaceWithProjectsAndRoleAssignments space : space_list){
+        if(!space.getUsers().contains(userScreenName)) continue;
         String spaceIdentifier = space.getCode();
         
         number_of_experiments += this.openBisClient.getExperimentsOfSpace(spaceIdentifier).size();//this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(), projects, null);  
