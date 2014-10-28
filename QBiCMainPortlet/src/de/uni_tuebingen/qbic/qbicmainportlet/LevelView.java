@@ -154,6 +154,6 @@ public class LevelView extends VerticalLayout implements View{
 				e.printStackTrace();
 			}
 		}
-	UI.getCurrent().scrollIntoView(mainComponent);
+		//UI.getCurrent().scrollIntoView(mainComponent);
 	}
 }

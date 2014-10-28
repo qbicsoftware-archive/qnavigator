@@ -21,7 +21,7 @@ public class TreeView extends Tree implements Observer {
 	private void init(){
 		this.setImmediate(true);
 		this.registerClickListener();
-		this.setCaption("Workspaces");
+		this.setCaption("Projects");
 	}
 	
 	public TreeView(Container c){
@@ -50,33 +50,6 @@ public class TreeView extends Tree implements Observer {
 				message.add(event.getItemId().toString());
 				state.notifyObservers(message);
 			}
-
-		/*	public void valueChange(ValueChangeEvent event) {
-					State state = (State)UI.getCurrent().getSession().getAttribute("state");
-					ArrayList<String> message = new ArrayList<String>();
-					message.add("expanded");
-					message.add(event.getItemId().toString());
-					state.notifyObservers(message);
-										
-					//notifyObservers(qbic_navtree.getContainerProperty(event.getItemId(), "metadata").getValue());
-
-					//Collection<?> child_ids = qbic_navtree.getChildren(event.getItemId());
-					
-					// item ids are not enough; reference actual items
-					/*Vector<Item> child_nodes = new Vector<Item>();
-					if (child_ids != null) {
-						for (Object c : child_ids) {
-							// System.out.println("child " + c.toString());
-							child_nodes.add(qbic_navtree.getItem(c));
-						}
-						setChanged();	
-					}
-
-					notifyObservers(child_nodes);
-			}*/
-			
-
-
 
 		};
 		

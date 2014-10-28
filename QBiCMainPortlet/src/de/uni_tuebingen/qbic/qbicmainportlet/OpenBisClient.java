@@ -147,7 +147,7 @@ public class OpenBisClient {// implements Serializable {
             e1.printStackTrace();
           }
           if (facade == null) {
-            return;// throw new UnexpectedException("OpenBis facade is not available");
+        	  throw new UnexpectedException("OpenBis facade is not available. Check connection, password and user.", e);
           }
         }
       }

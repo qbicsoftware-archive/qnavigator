@@ -76,7 +76,6 @@ public class ExperimentView extends Panel {
         expInformation.numberOfDatasets)));
 
     statistics.addComponent(new Label(expInformation.propertiesFormattedString, ContentMode.HTML));
-
     if (expInformation.numberOfDatasets > 0) {
 
       String lastSample = "No Samples available";

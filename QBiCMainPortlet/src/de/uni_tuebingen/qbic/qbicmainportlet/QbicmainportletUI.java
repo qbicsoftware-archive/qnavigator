@@ -8,6 +8,8 @@ import java.util.Date;
 
 import javax.servlet.annotation.WebServlet;
 
+import org.tepi.filtertable.FilterTable;
+
 import com.liferay.portal.model.User;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -27,6 +29,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -74,9 +77,6 @@ public class QbicmainportletUI extends UI {
 		mailToQbicLink.setIcon(new ThemeResource("mail9.png"));
 		mainLayout = new VerticalLayout();
         mainLayout.setMargin(false);
-        System.out.println(VaadinService.getCurrentRequest().getRemoteHost());
-        System.out.println(VaadinService.getCurrentRequest().getRemoteAddr());
-        System.out.println(VaadinService.getCurrentRequest().getRemotePort());
         Link loginPortalLink = new Link("", new ExternalResource("/c/portal/login"));
 		loginPortalLink.setIcon(new ThemeResource("lock12.png"));
         
@@ -127,9 +127,6 @@ public class QbicmainportletUI extends UI {
 		}
 		ArrayList<String> spacesDummy  = datareaderDummy.getSpaces();
 
-
-		tc.addContainerProperty("metadata", DummyMetaData.class, new DummyMetaData());
-
 		tc.addContainerProperty("identifier", String.class, "N/A");
 		tc.addContainerProperty("type", String.class, "N/A");
 		
@@ -141,43 +138,15 @@ public class QbicmainportletUI extends UI {
 			tc.getContainerProperty(spaceKey, "identifier").setValue(spaceKey);
 			tc.getContainerProperty(spaceKey, "type").setValue("space");
 
-			DummyMetaData dmd = new DummyMetaData();
-			dmd.setIdentifier(spaceKey);
-			dmd.setType(MetaDataType.QSPACE);
-			dmd.setDescription("This is space " + spaceKey);
-			dmd.setCreationDate(new Date(2014,02,10));
-
 			ArrayList<String> projects = datareaderDummy.getProjects(spaceKey);
 
-			try {
-				dmd.setNumOfChildren(projects.size());
-			} catch (NullPointerException e) {
-				// TODO Auto-generated catch block
-				dmd.setNumOfChildren(0);
-				//e.printStackTrace();
-			}
-
-			tc.getContainerProperty(spaceKey, "metadata").setValue(dmd);
 
 			if(projects != null){
 				for(String proj : projects) {
 					tc.addItem(proj);
 					tc.setParent(proj, spaceKey);
-					DummyMetaData dmd1 = new DummyMetaData();
-					dmd1.setIdentifier(proj);
-					dmd1.setType(MetaDataType.QPROJECT);
-					dmd1.setDescription("This is project " + proj);
-					dmd1.setCreationDate(new Date(2014,02,11));
 
 					ArrayList<String> samples  = datareaderDummy.getSamples(proj);
-					try {
-						dmd1.setNumOfChildren(samples.size());
-					} catch (NullPointerException e) {
-						// TODO Auto-generated catch block
-						dmd.setNumOfChildren(0);
-						e.printStackTrace();
-					}
-					tc.getContainerProperty(proj, "metadata").setValue(dmd1);
 					tc.getContainerProperty(proj, "type").setValue("project");
 
 					if(samples !=null) {
@@ -186,36 +155,38 @@ public class QbicmainportletUI extends UI {
 							tc.addItem(samp);
 							tc.setParent(samp, proj);
 
-							DummyMetaData dmd3 = new DummyMetaData();
-							dmd3.setIdentifier(samp);
-							dmd3.setType(MetaDataType.QSAMPLE);
-							dmd3.setDescription("This is sample " + samp);
-							dmd3.setNumOfChildren(-1);
-							dmd3.setCreationDate(new Date(2014,02,12));
-
-							tc.getContainerProperty(samp, "metadata").setValue(dmd3);
 							tc.getContainerProperty(samp, "type").setValue("sample");
 							tc.setChildrenAllowed(samp, false);
 						}
 					}
 				}
 			}
-			// HALLO
-
 		}		
 	}
 
 	private void buildLayout() {
 		HierarchicalContainer tc = new HierarchicalContainer();
 		fillHierarchicalTreeContainer(tc);
+		DataHandler dh = (DataHandler)UI.getCurrent().getSession().getAttribute("datahandler");
+		SpaceInformation homeViewInformation = dh.getHomeInformation();
 		
+
 		State state = (State) UI.getCurrent().getSession().getAttribute("state");
 		
 		LevelView spaceView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state) , new SpaceView());
-		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state),new Button("I am doing nothing. But you will be able to add a space one day."));// new AddSpaceView(new Table(), spaces));
+		LevelView addspaceView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state),new Button("I am doing nothing. But you will be able to add workspaces some day in the early future."));// new AddSpaceView(new Table(), spaces));
 		LevelView datasetView = new LevelView(new ToolBar(ToolBar.View.Dataset),createTreeView(tc,state), new DatasetView());
+		//Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do this
+		JavaScript.getCurrent().execute("window.location.reload();");
 		LevelView sampleView = new LevelView(new ToolBar(ToolBar.View.Space),createTreeView(tc,state) ,new SampleView());
-		LevelView homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new HomeView());
+		LevelView homeView;
+		
+		if(homeViewInformation.numberOfProjects > 0){
+		  homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state),new HomeView( homeViewInformation, "Your Projects"));
+		}
+		else{
+		  homeView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state),new HomeView());
+		}
 		LevelView projectView =new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc,state), new ProjectView());
 		LevelView experimentView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new ExperimentView());
 		
@@ -231,8 +202,7 @@ public class QbicmainportletUI extends UI {
 		navigator.addView("experiment", experimentView);
 		
 		setNavigator(navigator);
-		//Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do this
-		JavaScript.getCurrent().execute("window.location.reload();");
+		
         
 		
 		mainLayout = new VerticalLayout();

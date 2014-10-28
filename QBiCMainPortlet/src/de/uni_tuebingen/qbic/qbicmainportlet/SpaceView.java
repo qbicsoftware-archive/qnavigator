@@ -120,7 +120,7 @@ public class SpaceView extends Panel{
 
 
 	private void updateCaption() {
-		this.setCaption(String.format("Statistics of Space %s", id));
+		this.setCaption(String.format("Statistics of Space: %s", id));
 		
 	}
 	

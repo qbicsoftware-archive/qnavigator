@@ -37,7 +37,9 @@ public class DatasetView extends VerticalLayout {
 	private final FilterTable table;
 	private IndexedContainer datasets;
 	private ButtonLink download;
-	private final String DOWNLOAD_BUTTON_CAPTION = "Download marked files";
+	private final String DOWNLOAD_BUTTON_CAPTION = "Download";
+	private final String VISUALIZE_BUTTON_CAPTION = "Visualize";
+	
 	private final String[] FILTER_TABLE_COLUMNS = new String[] { "Project", "Sample", "Sample Type",
             "File Name", "File Type", "Dataset Type", "Registration Date" , "Validated", "File Size"};
 	
@@ -85,7 +87,7 @@ public class DatasetView extends VerticalLayout {
 	    
 		this.download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
 		//this.download.setStyleName(Reindeer.BUTTON_SMALL);
-		final Button visualize = new Button("Visualize");
+		final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
 		visualize.setEnabled(false);
 		buttonLayout.addComponent(this.download);
 		buttonLayout.addComponent(visualize);

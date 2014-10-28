@@ -1,9 +1,21 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import org.tepi.filtertable.FilterTable;
+import java.util.Set;
+
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.model.User;
+import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.theme.ThemeDisplay;
 
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -44,7 +56,7 @@ public class ProjectView extends Panel {
     vert.setSizeFull();
     super.setSizeFull();
   }
-
+  
   /**
    * sets the ContainerDataSource for showing it in a table and the id of the current Openbis
    * Project. The id is shown in the caption.
@@ -58,8 +70,8 @@ public class ProjectView extends Panel {
     this.id = id;
     this.updateCaption();
   }
-
-  @SuppressWarnings("deprecation")
+  
+  
   private void setStatistics(ProjectInformation projectInformation) {
     vert.removeAllComponents();
 
@@ -86,7 +98,6 @@ public class ProjectView extends Panel {
     HorizontalLayout temp = new HorizontalLayout();
     temp.addComponent(new Label(String.format("Status: %s", projectInformation.statusMessage)));
     temp.addComponent(projectInformation.progressBar);
-    // temp.setSizeFull();
     temp.setSpacing(true);
     statistics.addComponent(temp);
     if (projectInformation.numberOfDatasets > 0) {
@@ -106,11 +117,10 @@ public class ProjectView extends Panel {
     head.setMargin(true);
     head.setSpacing(true);
     vert.addComponent(head);
+    vert.addComponent(getMemebersComponent(projectInformation.members));
     vert.addComponent(this.table);
-    this.table.setColumnAlignment("Status", FilterTable.ALIGN_CENTER);
+    this.table.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
   }
-
-
   private void updateCaption() {
     this.setCaption(String.format("Statistics of Project: %s", id));
   }
@@ -120,7 +130,7 @@ public class ProjectView extends Panel {
     table.setImmediate(true);
     this.table.addValueChangeListener(new ViewTablesClickListener(table, "Experiment"));
   }
-
+  
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
     filterTable.setSizeFull();
@@ -129,6 +139,7 @@ public class ProjectView extends Panel {
     filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
 
     filterTable.setFilterBarVisible(true);
+
 
     filterTable.setSelectable(true);
     filterTable.setImmediate(true);
@@ -142,5 +153,40 @@ public class ProjectView extends Panel {
     filterTable.setCaption("Registered Experiments");
 
     return filterTable;
+  }
+
+	private Component getMemebersComponent(Set<String> members) {
+	  HorizontalLayout membersLayout = new HorizontalLayout();  
+	  if(members != null){
+	      membersLayout.addComponent(new Label("Members:"));
+	      for(String member : members){
+
+	        try {
+	          //companyId. We have presumable just one portal id, which equals the companyId.
+	          User user = UserLocalServiceUtil.getUserByScreenName(1, member);
+	          VaadinSession.getCurrent().getService();
+	          ThemeDisplay themedisplay = (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
+	          String url = user.getPortraitURL(themedisplay);
+	          ExternalResource er = new ExternalResource(url);
+	          com.vaadin.ui.Image image  = new com.vaadin.ui.Image(user.getFullName(),er);
+	          image.setHeight(80, Unit.PIXELS);
+	          image.setWidth(65, Unit.PIXELS);
+	          membersLayout.addComponent(image);
+
+	        } catch(com.liferay.portal.NoSuchUserException e){
+	          membersLayout.addComponent(new Label(member));
+	        }
+	        catch (PortalException e) {
+	          // TODO Auto-generated catch block
+	          e.printStackTrace();
+	        } catch (SystemException e) {
+	          // TODO Auto-generated catch block
+	          e.printStackTrace();
+	        }
+	      }
+	      membersLayout.setSpacing(true);
+	      membersLayout.setMargin(true);
+	  }
+	  return membersLayout;
   }
 }
