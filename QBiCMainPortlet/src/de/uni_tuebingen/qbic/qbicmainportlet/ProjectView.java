@@ -1,6 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import org.tepi.filtertable.FilterTable;
+
 import java.util.Set;
 
 import com.liferay.portal.kernel.exception.PortalException;
@@ -9,11 +10,12 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
-
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
@@ -75,30 +77,46 @@ public class ProjectView extends Panel {
   private void setStatistics(ProjectInformation projectInformation) {
     vert.removeAllComponents();
 
-    VerticalLayout contact = new VerticalLayout();
-    contact.addComponent(new Label("QBiC contact:"));
-    contact.addComponent(new Label(projectInformation.contact));
+    //VerticalLayout contact = new VerticalLayout();
+    //contact.addComponent(new Label("QBiC contact:"));
+    //contact.addComponent(new Label(projectInformation.contact));
+    
+    //TODO email address according to project ?
+    Label contact = new Label("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20" + this.id + "\" style=\"color: #0068AA; text-decoration: none\">Support</a>", ContentMode.HTML);
+    contact.setIcon(FontAwesome.ENVELOPE);
+    
 
     VerticalLayout statistics = new VerticalLayout();
 
 
     Label description = new Label(projectInformation.description);
-    description.setWidth("400px");
-    Label des = new Label("Description: ");
+    description.setWidth("600px");
+    //Label des = new Label("Description: ");
+    description.setIcon(FontAwesome.COMMENT);
+    description.setCaption("Description");
+    
     HorizontalLayout projDescription = new HorizontalLayout();
-    projDescription.addComponent(des);
+    //projDescription.addComponent(des);
     projDescription.addComponent(description);
+    
     statistics.addComponent(projDescription);
-    statistics.addComponent(new Label(String.format("Number of Experiments: %s",
-        projectInformation.numberOfExperiments)));
+    statistics.addComponent(new Label(""));
+    Label numberExperiments = new Label(String.format("Number of Experiments: %s",
+        projectInformation.numberOfExperiments));
+    numberExperiments.setIcon(FontAwesome.BAR_CHART_O);
+    numberExperiments.setCaption("Statistics");
+    statistics.addComponent(numberExperiments);
     statistics.addComponent(new Label(String.format("Number of Samples: %s",
         projectInformation.numberOfSamples)));
     statistics.addComponent(new Label(String.format("Number of Datasets: %s",
         projectInformation.numberOfDatasets)));
+    
     HorizontalLayout temp = new HorizontalLayout();
+    
     temp.addComponent(new Label(String.format("Status: %s", projectInformation.statusMessage)));
     temp.addComponent(projectInformation.progressBar);
     temp.setSpacing(true);
+    
     statistics.addComponent(temp);
     if (projectInformation.numberOfDatasets > 0) {
 
@@ -113,16 +131,26 @@ public class ProjectView extends Panel {
     }
     HorizontalLayout head = new HorizontalLayout();
     head.addComponent(statistics);
-    head.addComponent(contact);
+    head.addComponent(contact);    
     head.setMargin(true);
     head.setSpacing(true);
+    
+    statistics.setSpacing(true);
+    
+    vert.setMargin(true);
+    vert.setSpacing(true);
     vert.addComponent(head);
-    vert.addComponent(getMemebersComponent(projectInformation.members));
+    Label membersLabel = new Label("");
+    membersLabel.setIcon(FontAwesome.USERS);
+    membersLabel.setCaption("Members");
+    statistics.addComponent(new Label(""));
+    statistics.addComponent(membersLabel);
+    statistics.addComponent(getMembersComponent(projectInformation.members));
     vert.addComponent(this.table);
     this.table.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
   }
   private void updateCaption() {
-    this.setCaption(String.format("Statistics of Project: %s", id));
+    this.setCaption(String.format("Project: %s", id));
   }
 
   private void tableClickChangeTreeView() {
@@ -155,10 +183,10 @@ public class ProjectView extends Panel {
     return filterTable;
   }
 
-	private Component getMemebersComponent(Set<String> members) {
+	private Component getMembersComponent(Set<String> members) {
 	  HorizontalLayout membersLayout = new HorizontalLayout();  
 	  if(members != null){
-	      membersLayout.addComponent(new Label("Members:"));
+	      //membersLayout.addComponent(new Label("Members:"));
 	      for(String member : members){
 
 	        try {
