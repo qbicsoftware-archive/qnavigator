@@ -4,15 +4,19 @@ import org.tepi.filtertable.FilterTable;
 
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinPortletSession;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
 
 @SuppressWarnings("deprecation")
 public class SampleView extends Panel {
@@ -25,6 +29,7 @@ public class SampleView extends Panel {
   VerticalLayout vert;
   private IndexedContainer datasets;
   private ButtonLink download;
+  private Button export;
   private final String DOWNLOAD_BUTTON_CAPTION = "Download";
   private final String[] SAMPLEVIEW_TABLE_COLUMNS = new String[] {"File Name", "File Type",
       "Dataset Type", "Registration Date", "Validated", "File Size"};
@@ -84,12 +89,21 @@ public class SampleView extends Panel {
 
     // this.download.setStyleName(Reindeer.BUTTON_SMALL);
     buttonLayout.addComponent(this.download);
+    
+    this.export = new Button("Export as TSV");
+    buttonLayout.addComponent(this.export);
 
     this.vert.addComponent(buttonLayout);
 
     this.table.setContainerDataSource(sampInformation.datasets);
     this.table.setVisibleColumns((Object[]) SAMPLEVIEW_TABLE_COLUMNS);
     this.id = id;
+    
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    StreamResource sr = dh.getTSVStream(dh.containerToString(sampInformation.datasets), this.id);
+    FileDownloader fileDownloader = new FileDownloader(sr);
+    fileDownloader.extend(this.export);
+    
     this.updateCaption();
   }
 
@@ -143,7 +157,7 @@ public class SampleView extends Panel {
    * @param spaceViewIndexedContainer
    * @param id
    */
-  public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer, String id) {
+  /*public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer, String id) {
     this.datasets = (IndexedContainer) spaceViewIndexedContainer;
     this.table.setContainerDataSource(this.datasets);
 
@@ -155,7 +169,7 @@ public class SampleView extends Panel {
     this.updateCaption();
     this.setSizeFull();
   }
-
+*/
   private void updateCaption() {
     this.setCaption(String.format("Statistics of Sample: %s", id));
   }
@@ -184,5 +198,5 @@ public class SampleView extends Panel {
     filterTable.setCaption("Registered Datasets");
 
     return filterTable;
-  }
+  } 
 }

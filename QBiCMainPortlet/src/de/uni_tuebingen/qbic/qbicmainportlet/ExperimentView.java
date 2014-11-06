@@ -3,11 +3,16 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import org.tepi.filtertable.FilterTable;
 
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 public class ExperimentView extends Panel {
@@ -20,6 +25,7 @@ public class ExperimentView extends Panel {
   VerticalLayout vert;
 
   private String id;
+  private Button export;
 
   public ExperimentView(FilterTable table, IndexedContainer datasource, String id) {
     vert = new VerticalLayout();
@@ -57,8 +63,26 @@ public class ExperimentView extends Panel {
    */
   public void setContainerDataSource(ExperimentInformation expInformation, String id) {
     this.setStatistics(expInformation);
+    
+    HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setHeight(null);
+    buttonLayout.setWidth("100%");
+    buttonLayout.setSpacing(true);
+
+    this.export = new Button("Export as TSV");
+    buttonLayout.addComponent(this.export);
+
+    this.vert.addComponent(buttonLayout);
+
+    
     this.table.setContainerDataSource(expInformation.samples);
     this.id = id;
+    
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    StreamResource sr = dh.getTSVStream(dh.containerToString(expInformation.samples), this.id);
+    FileDownloader fileDownloader = new FileDownloader(sr);
+    fileDownloader.extend(this.export);
+    
     this.updateCaption();
   }
 

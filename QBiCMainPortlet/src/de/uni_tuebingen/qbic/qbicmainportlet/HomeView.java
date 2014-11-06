@@ -10,13 +10,17 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 
@@ -30,6 +34,8 @@ public class HomeView extends Panel {
   private String caption;
   FilterTable table;
   VerticalLayout vert;
+
+  private Button export;
 
   public HomeView(SpaceInformation datasource, String caption){
     vert = new VerticalLayout();
@@ -78,11 +84,25 @@ public class HomeView extends Panel {
    */
   public void setContainerDataSource(SpaceInformation homeViewInformation, String caption){
 
+    HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setHeight(null);
+    buttonLayout.setWidth("100%");
+    buttonLayout.setSpacing(true);
+    
+    this.export = new Button("Export as TSV");
+    buttonLayout.addComponent(this.export);
+    
     //this.table.setContainerDataSource(spaceViewIndexedContainer);
     this.caption = caption;
     this.updateCaption();
     this.setStatistics(homeViewInformation);
+    this.vert.addComponent(buttonLayout);
     this.table.setContainerDataSource(homeViewInformation.projects);
+    
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    StreamResource sr = dh.getTSVStream(dh.containerToString(homeViewInformation.projects), this.caption);
+    FileDownloader fileDownloader = new FileDownloader(sr);
+    fileDownloader.extend(this.export);
   }
 
 

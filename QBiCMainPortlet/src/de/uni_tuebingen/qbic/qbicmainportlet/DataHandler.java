@@ -1,11 +1,13 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,18 +19,19 @@ import java.util.Set;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.EntityRegistrationDetails;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.TextField;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -776,7 +779,7 @@ public class DataHandler {
             experiment_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
             experiment_container.getContainerProperty(new_ds, "Registerator").setValue(registrator);
             
-            Image statusColor = new Image("",this.setExperimentStatusColor(status));
+            Image statusColor = new Image(status,this.setExperimentStatusColor(status));
             statusColor.setWidth("15px");
             statusColor.setHeight("15px");
             experiment_container.getContainerProperty(new_ds, "Status").setValue(statusColor);
@@ -980,5 +983,51 @@ public class DataHandler {
        return resource;
    }
 	 
+  public StreamResource getTSVStream(final String content, String id) {
+    StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
+      @Override
+      public InputStream getStream() {
+        try {
+          InputStream is = new ByteArrayInputStream(content.getBytes());
+          return is;
+        } catch (Exception e) {
+          e.printStackTrace();
+          return null;
+        }
+      }
+    }, String.format("%s_table_contents.tsv", id));
+    return resource;
+  }
+
+  public String containerToString(IndexedContainer container) {
+    String header = "";
+    Collection<?> i = container.getItemIds();
+    String rowString = "";
+    
+    Collection<?> propertyIDs = container.getContainerPropertyIds();
+    
+    for(Object o: propertyIDs) {
+      header += o.toString() + "\t";
+     }
+    
+    for (int x = 1; x <= i.size(); x++) {
+      Item it = container.getItem(x);
+
+      for (Object o : propertyIDs) {
+        // Could be extended to an exclusion list if we don't want to show further columns
+        if (o.toString() == "dl_link") {
+          continue;
+        } else if (o.toString() == "Status") {
+          Image image = (Image) it.getItemProperty(o).getValue();
+          rowString += image.getCaption() + "\t";
+        } else {
+          Property prop = it.getItemProperty(o);
+          rowString += prop.toString() + "\t";
+        }       
+      }
+      rowString += "\n";
+    }
+    return header + "\n" + rowString;
+  }
 }
 	
