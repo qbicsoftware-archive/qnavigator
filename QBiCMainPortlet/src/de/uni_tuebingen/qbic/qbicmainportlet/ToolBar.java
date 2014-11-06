@@ -132,11 +132,10 @@ public class ToolBar extends HorizontalLayout{
 		computer.setIcon(new ThemeResource("computer.png"));
 		this.setButtonSize(computer, 128);
 		DropDown integrationDropDown = new DropDown();
-		
 		// Dataset View
 		integrationDropDown.addComponent("View Datasets","datasetView");
 		computer.setContent(integrationDropDown);
-		
+		computer.setDescription("To see all dataset of a project or an experemint: Select a project or an experiment in the view below, click this button and select 'View Datasets'.");
 		//Experiment
 		PopupButton dna = new PopupButton("Experiment");
 		dna.setIcon(new ThemeResource("dna.png"));
@@ -161,6 +160,9 @@ public class ToolBar extends HorizontalLayout{
 		this.setComponentAlignment(dna, Alignment.TOP_CENTER);
 		this.setComponentAlignment(graph, Alignment.TOP_CENTER);
 		
+		planning.setEnabled(false);
+		dna.setEnabled(false);
+		graph.setEnabled(false);
 		
 	}
 	

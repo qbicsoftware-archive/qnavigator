@@ -181,7 +181,12 @@ public class OpenBisClient {// implements Serializable {
    * Logs out before garbage is collected
    */
   protected void finalize() throws Throwable {
-    this.logout();
+    //check whether it is really logged in. Otherwise, if executed from a portlet, which was
+    //already closed one gets stupid java.lang.IllegalStateException, which pollute the log file.
+  //  if(this.loggedin()){
+   //   this.logout();
+   //   this.facade = null;
+   // }
     super.finalize();
   }
 

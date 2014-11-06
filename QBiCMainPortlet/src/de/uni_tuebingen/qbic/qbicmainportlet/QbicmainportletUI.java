@@ -5,12 +5,19 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.servlet.annotation.WebServlet;
 
+import org.eclipse.jetty.server.Request;
 import org.tepi.filtertable.FilterTable;
 
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
+import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
@@ -18,9 +25,11 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinPortletSession;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.WrappedPortletSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -47,12 +56,6 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 @Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
 public class QbicmainportletUI extends UI {
 
-  @WebServlet(value = "/*", asyncSupported = true)
-  @VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class)
-  public static class Servlet extends VaadinServlet {
-  }
-
-
   private OpenBisClient openBisConnection;
   private VerticalLayout mainLayout;
 
@@ -68,6 +71,7 @@ public class QbicmainportletUI extends UI {
       initConnection();
       initSessionAttributes();
       buildLayout();
+
     }
   }
 
@@ -79,7 +83,8 @@ public class QbicmainportletUI extends UI {
     mailToQbicLink.setIcon(new ThemeResource("mail9.png"));
     mainLayout = new VerticalLayout();
     mainLayout.setMargin(false);
-    Link loginPortalLink = new Link("", new ExternalResource("/c/portal/login"));
+    ThemeDisplay themedisplay = (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
+    Link loginPortalLink = new Link("", new ExternalResource(themedisplay.getURLSignIn()));
     loginPortalLink.setIcon(new ThemeResource("lock12.png"));
 
     VerticalLayout signIn = new VerticalLayout();
@@ -263,5 +268,13 @@ public class QbicmainportletUI extends UI {
     this.openBisConnection =
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
             manager.getDataSourceURL(), true); // LiferayAndVaadinUtils.getOpenBisClient();
+    addDetachListener(new DetachListener() {
+
+      @Override
+      public void detach(DetachEvent event) {
+        openBisConnection.logout();
+      }
+    });
   }
+    
 }

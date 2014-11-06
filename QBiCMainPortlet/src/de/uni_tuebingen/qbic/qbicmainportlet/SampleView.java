@@ -25,7 +25,7 @@ public class SampleView extends Panel {
   VerticalLayout vert;
   private IndexedContainer datasets;
   private ButtonLink download;
-  private final String DOWNLOAD_BUTTON_CAPTION = "Download marked files";
+  private final String DOWNLOAD_BUTTON_CAPTION = "Download";
   private final String[] SAMPLEVIEW_TABLE_COLUMNS = new String[] {"File Name", "File Type",
       "Dataset Type", "Registration Date", "Validated", "File Size"};
 
@@ -48,7 +48,7 @@ public class SampleView extends Panel {
     this.table.setContainerDataSource(datasource);
 
     this.download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
-
+    this.download.setEnabled(false);
     MpPortletListener mppl = new MpPortletListener(this.download, this.table);
     this.table.addValueChangeListener(mppl);
     if (VaadinSession.getCurrent() instanceof VaadinPortletSession) {
@@ -56,7 +56,7 @@ public class SampleView extends Panel {
 
       // Add a custom listener to handle action and
       // render requests.
-      portletsession.addPortletListener(mppl);
+     // portletsession.addPortletListener(mppl);
 
     }
     // this.tableClickChangeTreeView();

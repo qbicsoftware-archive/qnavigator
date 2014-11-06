@@ -86,6 +86,7 @@ public class DatasetView extends VerticalLayout {
 	    buttonLayout.setSpacing(false);
 	    
 		this.download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
+		this.download.setEnabled(false);
 		//this.download.setStyleName(Reindeer.BUTTON_SMALL);
 		final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
 		visualize.setEnabled(false);
