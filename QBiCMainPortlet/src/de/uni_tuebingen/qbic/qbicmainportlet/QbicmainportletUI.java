@@ -46,7 +46,7 @@ public class QbicmainportletUI extends UI {
 
   @Override
   protected void init(VaadinRequest request) {
-    
+
     if (LiferayAndVaadinUtils.getUser() == null) {
       buildNoUserLogin();
     } else {
@@ -68,7 +68,8 @@ public class QbicmainportletUI extends UI {
     mailToQbicLink.setIcon(new ThemeResource("mail9.png"));
     mainLayout = new VerticalLayout();
     mainLayout.setMargin(false);
-    ThemeDisplay themedisplay = (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
+    ThemeDisplay themedisplay =
+        (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
     Link loginPortalLink = new Link("", new ExternalResource(themedisplay.getURLSignIn()));
     loginPortalLink.setIcon(new ThemeResource("lock12.png"));
 
@@ -261,5 +262,5 @@ public class QbicmainportletUI extends UI {
       }
     });
   }
-    
+
 }

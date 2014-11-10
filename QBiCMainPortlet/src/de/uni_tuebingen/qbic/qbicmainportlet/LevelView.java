@@ -47,17 +47,17 @@ public class LevelView extends VerticalLayout implements View {
   }
 
   public void buildLayout() {
-    
+
     this.treeComponentLayout.removeAllComponents();
     this.removeAllComponents();
     this.treeComponentLayout.addComponent(this.treeView);
     this.treeComponentLayout.addComponent(this.mainComponent);
     // this.treeComponentLayout.setSplitPosition(20, Sizeable.UNITS_PERCENTAGE);
-    this.treeComponentLayout.setExpandRatio(this.treeView, 0.2f);
-    this.treeComponentLayout.setExpandRatio(this.mainComponent, 0.8f);
-    //this.mainComponent.setSizeFull();
+    this.treeComponentLayout.setExpandRatio(this.treeView, 0.15f);
+    this.treeComponentLayout.setExpandRatio(this.mainComponent, 0.75f);
+    // this.mainComponent.setSizeFull();
     this.mainComponent.setHeight("800px");
-    
+
     this.treeComponentLayout.setSizeFull();
     this.treeComponentLayout.setStyleName(Reindeer.SPLITPANEL_SMALL);
     this.treeComponentLayout.setMargin(true);

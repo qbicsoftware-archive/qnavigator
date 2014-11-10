@@ -37,14 +37,14 @@ public class HomeView extends Panel {
 
   private Button export;
 
-  public HomeView(SpaceInformation datasource, String caption){
+  public HomeView(SpaceInformation datasource, String caption) {
     vert = new VerticalLayout();
     vert.setMargin(true);
-    //this.setHeight("800px");
+    // this.setHeight("800px");
     this.table = buildFilterTable();
     vert.addComponent(new Label("Huhu"));
     vert.addComponent(this.table);
-    //this.table.setHeight("800px");
+    // this.table.setHeight("800px");
     this.table.setSizeFull();
     vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
     this.setContent(vert);
@@ -52,13 +52,13 @@ public class HomeView extends Panel {
     this.setContainerDataSource(datasource, caption);
     this.tableClickChangeTreeView();
   }
-  
+
   public HomeView(FilterTable table, SpaceInformation datasource, String caption) {
     vert = new VerticalLayout();
     vert.setMargin(true);
     this.table = table;
     this.table.setSelectable(true);
-    
+
     this.setSizeFull();
 
     vert.addComponent(this.table);
@@ -70,12 +70,13 @@ public class HomeView extends Panel {
   }
 
 
-  public HomeView(){
-    //execute the above constructor with default settings, in order to have the same settings
-    this(new FilterTable(), new SpaceInformation(), "You seem to have no registered projects. Please contact QBiC.");
+  public HomeView() {
+    // execute the above constructor with default settings, in order to have the same settings
+    this(new FilterTable(), new SpaceInformation(),
+        "You seem to have no registered projects. Please contact QBiC.");
   }
 
-  public void setSizeFull(){
+  public void setSizeFull() {
     vert.setSizeFull();
     super.setSizeFull();
     this.table.setSizeFull();
@@ -84,29 +85,32 @@ public class HomeView extends Panel {
   }
 
   /**
-   * sets the ContainerDataSource of this view. Should usually contains project information. Caption is caption.
+   * sets the ContainerDataSource of this view. Should usually contains project information. Caption
+   * is caption.
+   * 
    * @param homeViewInformation
    * @param caption
    */
-  public void setContainerDataSource(SpaceInformation homeViewInformation, String caption){
+  public void setContainerDataSource(SpaceInformation homeViewInformation, String caption) {
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
-    
+
     this.export = new Button("Export as TSV");
     buttonLayout.addComponent(this.export);
-    
-    //this.table.setContainerDataSource(spaceViewIndexedContainer);
+
+    // this.table.setContainerDataSource(spaceViewIndexedContainer);
     this.caption = caption;
     this.updateCaption();
     this.setStatistics(homeViewInformation);
     this.vert.addComponent(buttonLayout);
     this.table.setContainerDataSource(homeViewInformation.projects);
-    
+
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr = dh.getTSVStream(dh.containerToString(homeViewInformation.projects), this.caption);
+    StreamResource sr =
+        dh.getTSVStream(dh.containerToString(homeViewInformation.projects), this.caption);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
   }
@@ -114,17 +118,24 @@ public class HomeView extends Panel {
 
   private void setStatistics(SpaceInformation generalOpenBISInformation) {
     vert.removeAllComponents();
-    vert.addComponent(new Label(String.format("Number of Projects: %s", generalOpenBISInformation.numberOfProjects)));
-    vert.addComponent(new Label(String.format("Number of Experiments: %s", generalOpenBISInformation.numberOfExperiments)));
-    vert.addComponent(new Label(String.format("Number of Samples: %s", generalOpenBISInformation.numberOfSamples)));
-    vert.addComponent(new Label(String.format("Number of Datasets: %s", generalOpenBISInformation.numberOfDatasets)));
+    vert.addComponent(new Label(String.format("Number of Projects: %s",
+        generalOpenBISInformation.numberOfProjects)));
+    vert.addComponent(new Label(String.format("Number of Experiments: %s",
+        generalOpenBISInformation.numberOfExperiments)));
+    vert.addComponent(new Label(String.format("Number of Samples: %s",
+        generalOpenBISInformation.numberOfSamples)));
+    vert.addComponent(new Label(String.format("Number of Datasets: %s",
+        generalOpenBISInformation.numberOfDatasets)));
+    vert.addComponent(new Label(""));
 
-    if(generalOpenBISInformation.numberOfDatasets > 0){
+    if (generalOpenBISInformation.numberOfDatasets > 0) {
       String lastSample = "No Sample available";
-      if(generalOpenBISInformation.lastChangedSample != null){
-          lastSample = generalOpenBISInformation.lastChangedSample.split("/")[2];
+      if (generalOpenBISInformation.lastChangedSample != null) {
+        lastSample = generalOpenBISInformation.lastChangedSample.split("/")[2];
       }
-      vert.addComponent(new Label(String.format("Last Change: %s", String.format("In Sample: %s. Date: %s",generalOpenBISInformation.lastChangedSample.split("/")[2], generalOpenBISInformation.lastChangedDataset.toString()))));
+      vert.addComponent(new Label(String.format("Last Change: %s", String.format(
+          "In Sample: %s. Date: %s", generalOpenBISInformation.lastChangedSample.split("/")[2],
+          generalOpenBISInformation.lastChangedDataset.toString()))));
     }
     vert.addComponent(this.table);
   }
@@ -135,13 +146,13 @@ public class HomeView extends Panel {
 
   }
 
-  private void tableClickChangeTreeView(){
+  private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
     this.table.addValueChangeListener(new ViewTablesClickListener(table, "Project"));
   }
 
-  
+
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
     filterTable.setSizeFull();
@@ -164,5 +175,5 @@ public class HomeView extends Panel {
 
     return filterTable;
   }
-  
+
 }

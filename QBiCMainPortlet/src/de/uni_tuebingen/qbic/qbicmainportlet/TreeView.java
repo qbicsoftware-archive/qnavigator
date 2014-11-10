@@ -42,7 +42,7 @@ public class TreeView extends Panel implements Observer {
     this.setWidth("250px");
     this.setHeight("800px");
     this.setContent(vl);
-    
+
     this.registerClickListener();
 
   }
