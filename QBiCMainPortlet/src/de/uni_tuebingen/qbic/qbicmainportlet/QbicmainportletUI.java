@@ -228,7 +228,7 @@ public class QbicmainportletUI extends UI {
 
   private TreeView createTreeView(HierarchicalContainer tc, State st) {
     TreeView t = new TreeView();
-    t.setContainerDataSource(tc);
+    t.tree.setContainerDataSource(tc);
     st.addObserver(t);
     return t;
 
