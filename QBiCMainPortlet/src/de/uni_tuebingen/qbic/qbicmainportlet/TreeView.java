@@ -39,7 +39,7 @@ public class TreeView extends Panel implements Observer {
     tree.setSizeFull();
     vl.addComponent(tree);
     this.setCaption("Project Browser");
-    this.setWidth("250px");
+    // this.setWidth("250px");
     this.setHeight("800px");
     this.setContent(vl);
 

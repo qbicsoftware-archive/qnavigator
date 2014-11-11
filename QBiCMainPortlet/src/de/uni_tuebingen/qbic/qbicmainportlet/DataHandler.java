@@ -421,9 +421,8 @@ public class DataHandler {
 				
 				ret.contact = String.format("Some QBiC Stuff\nWith a phone number\nAnd an adress");
 				//QBic Staff is removed from member set.
-				ret.members = this.removeQBiCStaffFromMemeberSet(this.getSpaceMembers(project.getSpaceCode()));
+				ret.members = this.removeQBiCStaffFromMemberSet(this.getSpaceMembers(project.getSpaceCode()));
 				
-				ret.contact = String.format("Some QBiC Stuff\nWith a phone number\nAnd an adress");
 				
 				this.projectInformations.put(id, ret);
 			} catch (Exception e) {
@@ -665,7 +664,7 @@ public class DataHandler {
 		spaceInformation.lastChangedSample = lastModifiedSample;
 		spaceInformation.lastChangedExperiment = lastModifiedExperiment;
 		
-		spaceInformation.members = removeQBiCStaffFromMemeberSet(tmp_space.getUsers());
+		spaceInformation.members = removeQBiCStaffFromMemberSet(tmp_space.getUsers());
 		
 		for(Project p: projects ){
 			Object new_s = space_container.addItem();
@@ -684,7 +683,7 @@ public class DataHandler {
 	 * @param users a set of all space users or members
 	 * @return a new set which exculdes qbic staff and functional members
 	 */
-	private Set<String> removeQBiCStaffFromMemeberSet(Set<String> users) {
+	private Set<String> removeQBiCStaffFromMemberSet(Set<String> users) {
 		Set<String> ret = new LinkedHashSet<String>(users);
 		ret.remove("iiswo01"); //QBiC Staff
 		ret.remove("iisfr01"); //QBiC Staff

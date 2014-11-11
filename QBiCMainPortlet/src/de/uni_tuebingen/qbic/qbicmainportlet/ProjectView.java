@@ -2,7 +2,10 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import org.tepi.filtertable.FilterTable;
 
+import java.util.ArrayList;
 import java.util.Set;
+
+import ch.systemsx.cisd.common.shared.basic.string.StringUtils;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -63,7 +66,7 @@ public class ProjectView extends Panel {
     vert.setSizeFull();
     super.setSizeFull();
   }
-  
+
   /**
    * sets the ContainerDataSource for showing it in a table and the id of the current Openbis
    * Project. The id is shown in the caption.
@@ -73,7 +76,7 @@ public class ProjectView extends Panel {
    */
   public void setContainerDataSource(ProjectInformation projectInformation, String id) {
     this.setStatistics(projectInformation);
-    
+
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
@@ -83,62 +86,79 @@ public class ProjectView extends Panel {
     buttonLayout.addComponent(this.export);
 
     this.vert.addComponent(buttonLayout);
-    
+
     this.table.setContainerDataSource(projectInformation.experiments);
     this.id = id;
-    
+
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr = dh.getTSVStream(dh.containerToString(projectInformation.experiments), this.id);
+    StreamResource sr =
+        dh.getTSVStream(dh.containerToString(projectInformation.experiments), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
-    
+
     this.updateCaption();
   }
-  
-  
+
+
   private void setStatistics(ProjectInformation projectInformation) {
     vert.removeAllComponents();
 
-    //VerticalLayout contact = new VerticalLayout();
-    //contact.addComponent(new Label("QBiC contact:"));
-    //contact.addComponent(new Label(projectInformation.contact));
+    Label vertical_spacer_small = new Label();
+    Label vertical_spacer_big1 = new Label();
+    Label vertical_spacer_big2 = new Label();
     
-    //TODO email address according to project ?
-    Label contact = new Label("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20" + this.id + "\" style=\"color: #0068AA; text-decoration: none\">Support</a>", ContentMode.HTML);
+    
+    vertical_spacer_small.setHeight("0.5em");
+    vertical_spacer_big1.setHeight("1.5em");
+    vertical_spacer_big2.setHeight("1.5em");
+    
+    
+    // VerticalLayout contact = new VerticalLayout();
+    // contact.addComponent(new Label("QBiC contact:"));
+    // contact.addComponent(new Label(projectInformation.contact));
+
+    // TODO email address according to project ?
+    Label contact =
+        new Label(
+            "<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+                + this.id + "\" style=\"color: #0068AA; text-decoration: none\">Support</a>",
+            ContentMode.HTML);
     contact.setIcon(FontAwesome.ENVELOPE);
-    
+
 
     VerticalLayout statistics = new VerticalLayout();
 
 
     Label description = new Label(projectInformation.description);
-    description.setWidth("600px");
-    //Label des = new Label("Description: ");
+    // description.setWidth("600px"); should be dictated by the container
+    // Label des = new Label("Description: ");
     description.setIcon(FontAwesome.COMMENT);
     description.setCaption("Description");
-    
+
     HorizontalLayout projDescription = new HorizontalLayout();
-    //projDescription.addComponent(des);
+    // projDescription.addComponent(des);
     projDescription.addComponent(description);
-    
+
     statistics.addComponent(projDescription);
-    statistics.addComponent(new Label(""));
-    Label numberExperiments = new Label(String.format("Number of Experiments: %s",
-        projectInformation.numberOfExperiments));
+    statistics.addComponent(vertical_spacer_big1);
+    
+    
+    Label numberExperiments =
+        new Label(String.format("Total Experiments: %s", projectInformation.numberOfExperiments));
     numberExperiments.setIcon(FontAwesome.BAR_CHART_O);
     numberExperiments.setCaption("Statistics");
     statistics.addComponent(numberExperiments);
-    statistics.addComponent(new Label(String.format("Number of Samples: %s",
+    statistics.addComponent(new Label(String.format("Total Samples: %s",
         projectInformation.numberOfSamples)));
-    statistics.addComponent(new Label(String.format("Number of Datasets: %s",
+    statistics.addComponent(new Label(String.format("Total Datasets: %s",
         projectInformation.numberOfDatasets)));
-    
+
     HorizontalLayout temp = new HorizontalLayout();
-    
+
     temp.addComponent(new Label(String.format("Status: %s", projectInformation.statusMessage)));
     temp.addComponent(projectInformation.progressBar);
     temp.setSpacing(true);
-    
+
     statistics.addComponent(temp);
     if (projectInformation.numberOfDatasets > 0) {
 
@@ -146,33 +166,34 @@ public class ProjectView extends Panel {
       if (projectInformation.lastChangedSample != null) {
         lastSample = projectInformation.lastChangedSample.split("/")[2];
       }
-      statistics
-          .addComponent(new Label(String.format("Last Change: %s", String.format(
-              "In Sample: %s. Date: %s", lastSample,
+      statistics.addComponent(new Label(String.format(
+          "Last Change %s",
+          String.format("in Sample: %s (%s)", lastSample,
               projectInformation.lastChangedDataset.toString()))));
     }
     HorizontalLayout head = new HorizontalLayout();
     head.addComponent(statistics);
-    head.addComponent(contact);    
+    head.addComponent(contact);
     head.setMargin(true);
     head.setSpacing(true);
-    
+
     statistics.setSpacing(true);
-    
+    statistics.addComponent(vertical_spacer_big2);
     vert.setMargin(true);
     vert.setSpacing(true);
     vert.addComponent(head);
-    Label membersLabel = new Label("");
+    Label membersLabel = new Label(getMembersString(projectInformation.members));
     membersLabel.setIcon(FontAwesome.USERS);
     membersLabel.setCaption("Members");
-    statistics.addComponent(new Label(""));
+    
     statistics.addComponent(membersLabel);
-    statistics.addComponent(getMembersComponent(projectInformation.members));
+    //statistics.addComponent(getMembersComponent(projectInformation.members));
     vert.addComponent(this.table);
     this.table.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
   }
+
   private void updateCaption() {
-    this.setCaption(String.format("Project: %s", id));
+    this.setCaption(String.format("Viewing Project %s", id));
   }
 
   private void tableClickChangeTreeView() {
@@ -180,7 +201,7 @@ public class ProjectView extends Panel {
     table.setImmediate(true);
     this.table.addValueChangeListener(new ViewTablesClickListener(table, "Experiment"));
   }
-  
+
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
     filterTable.setSizeFull();
@@ -205,38 +226,60 @@ public class ProjectView extends Panel {
     return filterTable;
   }
 
-	private Component getMembersComponent(Set<String> members) {
-	  HorizontalLayout membersLayout = new HorizontalLayout();  
-	  if(members != null){
-	      //membersLayout.addComponent(new Label("Members:"));
-	      for(String member : members){
+  private String getMembersString(Set<String> members) {
+    String concat = new String("");
+    if (members != null) {
+      Object[] tmp = members.toArray();
+      concat = (String)tmp[0];
+      
+      if (tmp.length > 1) {
+        for (int i = 1; i < tmp.length; ++i) {
+          concat = concat + ", " + tmp[i];
+        }
+      }
+    }
+  
+    return concat;
+  }
+  
+  
+  private Component getMembersComponent(Set<String> members) {
+    HorizontalLayout membersLayout = new HorizontalLayout();
+    if (members != null) {
+      // membersLayout.addComponent(new Label("Members:"));
+      for (String member : members) {
 
-	        try {
-	          //companyId. We have presumable just one portal id, which equals the companyId.
-	          User user = UserLocalServiceUtil.getUserByScreenName(1, member);
-	          VaadinSession.getCurrent().getService();
-	          ThemeDisplay themedisplay = (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
-	          String url = user.getPortraitURL(themedisplay);
-	          ExternalResource er = new ExternalResource(url);
-	          com.vaadin.ui.Image image  = new com.vaadin.ui.Image(user.getFullName(),er);
-	          image.setHeight(80, Unit.PIXELS);
-	          image.setWidth(65, Unit.PIXELS);
-	          membersLayout.addComponent(image);
+        // Cool idea, but let's do this when we have more portrait pictures in Liferay
 
-	        } catch(com.liferay.portal.NoSuchUserException e){
-	          membersLayout.addComponent(new Label(member));
-	        }
-	        catch (PortalException e) {
-	          // TODO Auto-generated catch block
-	          e.printStackTrace();
-	        } catch (SystemException e) {
-	          // TODO Auto-generated catch block
-	          e.printStackTrace();
-	        }
-	      }
-	      membersLayout.setSpacing(true);
-	      membersLayout.setMargin(true);
-	  }
-	  return membersLayout;
+        // try {
+        // //companyId. We have presumable just one portal id, which equals the companyId.
+        // User user = UserLocalServiceUtil.getUserByScreenName(1, member);
+        // VaadinSession.getCurrent().getService();
+        // ThemeDisplay themedisplay = (ThemeDisplay)
+        // VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
+        // String url = user.getPortraitURL(themedisplay);
+        // ExternalResource er = new ExternalResource(url);
+        // com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(),er);
+        // image.setHeight(80, Unit.PIXELS);
+        // image.setWidth(65, Unit.PIXELS);
+        // membersLayout.addComponent(image);
+        //
+        // } catch(com.liferay.portal.NoSuchUserException e){
+        // membersLayout.addComponent(new Label(member));
+        // }
+        // catch (PortalException e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // } catch (SystemException e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+
+        membersLayout.addComponent(new Label(member));
+      }
+      membersLayout.setSpacing(true);
+      // membersLayout.setMargin(true);
+    }
+    return membersLayout;
   }
 }

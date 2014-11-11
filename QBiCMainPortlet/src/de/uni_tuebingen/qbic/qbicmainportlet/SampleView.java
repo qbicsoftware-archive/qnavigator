@@ -113,8 +113,8 @@ public class SampleView extends Panel {
     VerticalLayout statistics = new VerticalLayout();
 
     statistics
-        .addComponent(new Label(String.format("Sample Type: %s", sampInformation.sampleType)));
-    statistics.addComponent(new Label(String.format("Number of Datasets: %s",
+        .addComponent(new Label(String.format("Kind: %s", sampInformation.sampleType)));
+    statistics.addComponent(new Label(String.format("# Datasets: %s",
         sampInformation.numberOfDatasets)));
 
     statistics.addComponent(new Label(sampInformation.propertiesFormattedString, ContentMode.HTML));
@@ -171,7 +171,7 @@ public class SampleView extends Panel {
   }
 */
   private void updateCaption() {
-    this.setCaption(String.format("Statistics of Sample: %s", id));
+    this.setCaption(String.format("Viewing Sample %s", id));
   }
 
   private FilterTable buildFilterTable() {

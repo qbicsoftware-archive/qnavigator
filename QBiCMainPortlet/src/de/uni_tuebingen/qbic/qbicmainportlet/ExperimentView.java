@@ -63,7 +63,7 @@ public class ExperimentView extends Panel {
    */
   public void setContainerDataSource(ExperimentInformation expInformation, String id) {
     this.setStatistics(expInformation);
-    
+
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
@@ -74,35 +74,42 @@ public class ExperimentView extends Panel {
 
     this.vert.addComponent(buttonLayout);
 
-    
+
     this.table.setContainerDataSource(expInformation.samples);
     this.id = id;
-    
+
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     StreamResource sr = dh.getTSVStream(dh.containerToString(expInformation.samples), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
-    
+
     this.updateCaption();
   }
 
   private void setStatistics(ExperimentInformation expInformation) {
     this.vert.removeAllComponents();
 
+    Label vertical_spacer_small = new Label();
+    Label vertical_spacer_big = new Label();
+    
+    vertical_spacer_small.setHeight("0.5em");
+    vertical_spacer_big.setHeight("2em");
+    
     VerticalLayout statistics = new VerticalLayout();
 
 
-    statistics.addComponent(new Label(String.format("Experiment Type: %s",
-        expInformation.experimentType)));
-    statistics.addComponent(new Label(String.format("Number of Samples: %s",
+    statistics.addComponent(new Label(String.format("Kind:\t %s", expInformation.experimentType)));
+    statistics.addComponent(new Label(String.format("# Samples:\t %s",
         expInformation.numberOfSamples)));
-    statistics.addComponent(new Label(String.format("Number of Datasets: %s",
+    statistics.addComponent(new Label(String.format("# Datasets:\t %s",
         expInformation.numberOfDatasets)));
 
-    statistics.addComponent(new Label(expInformation.propertiesFormattedString, ContentMode.HTML));
+    // statistics.addComponent(new Label(expInformation.propertiesFormattedString,
+    // ContentMode.HTML));
+
     if (expInformation.numberOfDatasets > 0) {
 
-      String lastSample = "No Samples available";
+      String lastSample = "No samples available";
       if (expInformation.lastChangedSample != null) {
         lastSample = expInformation.lastChangedSample.split("/")[2];
       }
@@ -114,12 +121,13 @@ public class ExperimentView extends Panel {
     this.vert.setSpacing(true);
     this.vert.setMargin(true);
     this.vert.addComponent(statistics);
+    this.vert.addComponent(vertical_spacer_big);
     this.vert.addComponent(this.table);
   }
 
 
   private void updateCaption() {
-    this.setCaption(String.format("Statistics of Experiment: %s", id));
+    this.setCaption(String.format("Viewing Experiment %s", id));
   }
 
   private void tableClickChangeTreeView() {
@@ -127,7 +135,7 @@ public class ExperimentView extends Panel {
     table.setImmediate(true);
     this.table.addValueChangeListener(new ViewTablesClickListener(table, "Sample"));
   }
-  
+
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
     filterTable.setSizeFull();
