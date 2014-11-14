@@ -4,6 +4,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -52,25 +53,25 @@ public class LevelView extends VerticalLayout implements View {
     this.removeAllComponents();
     this.treeComponentLayout.addComponent(this.treeView);
     this.treeComponentLayout.addComponent(this.mainComponent);
-    // this.treeComponentLayout.setSplitPosition(20, Sizeable.UNITS_PERCENTAGE);
+    //this.treeComponentLayout.setSplitPosition(20, Sizeable.UNITS_PERCENTAGE);
     this.treeComponentLayout.setExpandRatio(this.treeView, 0.15f);
     this.treeComponentLayout.setExpandRatio(this.mainComponent, 0.75f);
     // this.mainComponent.setSizeFull();
     this.mainComponent.setHeight("800px");
 
-    this.treeComponentLayout.setSizeFull();
+    //this.treeComponentLayout.setSizeFull();
     this.treeComponentLayout.setStyleName(Reindeer.SPLITPANEL_SMALL);
     this.treeComponentLayout.setMargin(true);
     this.setMargin(true);
     this.setSpacing(true);
-    this.setSizeFull();
+    //this.setSizeFull();
 
     // this.headerLayout.addComponent(this.statusMonitor);
     this.headerLayout.addComponent(this.toolbar);
     this.headerLayout.setMargin(true);
     // this.headerLayout.setExpandRatio(this.statusMonitor, 0.2f);
     this.headerLayout.setExpandRatio(this.toolbar, 0.8f);
-    this.statusMonitor.setSizeFull();
+    //this.statusMonitor.setSizeFull();
     this.toolbar.setSizeFull();
     this.headerLayout.setSizeFull();
     this.addComponent(this.headerLayout);
@@ -178,7 +179,16 @@ public class LevelView extends VerticalLayout implements View {
       } catch (Exception e) {
         e.printStackTrace();
       }
-    }
-    // UI.getCurrent().scrollIntoView(mainComponent);
-  }
+    } else if(this.mainComponent instanceof ChangePropertiesView){
+	        ChangePropertiesView cpv = (ChangePropertiesView) this.mainComponent;
+            try{
+              String name = this.treeView.tree.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
+              //String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+              cpv.setContainerDataSource(dh.getExperimentInformation(name), name);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+		//UI.getCurrent().scrollIntoView(mainComponent);
+	}
 }

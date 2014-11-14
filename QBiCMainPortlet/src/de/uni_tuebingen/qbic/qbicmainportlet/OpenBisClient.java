@@ -789,6 +789,18 @@ public class OpenBisClient {// implements Serializable {
     }
     return prop_types_labels;
   }
+  
+  /**
+   * Function to trigger ingestion services registered in openBIS
+   * 
+   * @param serviceName name of the ingestion service which should be triggered
+   * @param parameters map with needed information for registration process
+   * @return object name of the QueryTableModel which is returned by the aggregation service
+   */
+  public String triggerIngestionService(String serviceName, Map<String, Object> parameters) {
+    return this.openbisDssService.createReportFromAggregationService(this.sessionToken, "DSS1",
+        serviceName, parameters).toString();
+  }
 
   // TODO specify parameters needed for ingestion service
   /**

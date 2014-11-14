@@ -39,13 +39,14 @@ public class HomeView extends Panel {
 
   public HomeView(SpaceInformation datasource, String caption) {
     vert = new VerticalLayout();
-    vert.setMargin(true);
-    // this.setHeight("800px");
+    //vert.setMargin(true);
+    //this.setHeight("800px");
     this.table = buildFilterTable();
-    vert.addComponent(new Label("Huhu"));
+    this.table.setSizeFull();
+    //vert.addComponent(new Label("Huhu"));
     vert.addComponent(this.table);
     // this.table.setHeight("800px");
-    this.table.setSizeFull();
+    //this.table.setSizeFull();
     vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
     this.setContent(vert);
 
@@ -55,11 +56,11 @@ public class HomeView extends Panel {
 
   public HomeView(FilterTable table, SpaceInformation datasource, String caption) {
     vert = new VerticalLayout();
-    vert.setMargin(true);
+    //vert.setMargin(true);
     this.table = table;
     this.table.setSelectable(true);
 
-    this.setSizeFull();
+    //this.setSizeFull();
 
     vert.addComponent(this.table);
     vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);

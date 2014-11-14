@@ -120,7 +120,6 @@ public class ToolBar extends HorizontalLayout{
 		
 		planningDropDown.addComponent("Add Space","addspaceView");
 		planningDropDown.addComponent("Add User","spaceView");
-
 		planningDropDown.addComponent("Download","addspaceView");
 
 		planning.setContent(planningDropDown);
@@ -134,6 +133,8 @@ public class ToolBar extends HorizontalLayout{
 		DropDown integrationDropDown = new DropDown();
 		// Dataset View
 		integrationDropDown.addComponent("View Datasets","datasetView");
+		//integrationDropDown.addComponent("Change Status", "changePropertiesView");
+
 		computer.setContent(integrationDropDown);
 		computer.setDescription("To see all dataset of a project or an experemint: Select a project or an experiment in the view below, click this button and select 'View Datasets'.");
 		//Experiment

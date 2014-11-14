@@ -203,6 +203,9 @@ public class QbicmainportletUI extends UI {
     LevelView experimentView =
         new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state),
             new ExperimentView());
+    LevelView changeView = 
+        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state),
+            new ChangePropertiesView());
 
 
     VerticalLayout navigatorContent = new VerticalLayout();
@@ -214,6 +217,7 @@ public class QbicmainportletUI extends UI {
     navigator.addView("", homeView);
     navigator.addView("project", projectView);
     navigator.addView("experiment", experimentView);
+    navigator.addView("changePropertiesView", changeView);
 
     setNavigator(navigator);
 

@@ -21,6 +21,7 @@ import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 
@@ -78,7 +79,10 @@ class ExperimentInformation{
 	public IndexedContainer samples;
 	public Map<String,String> properties;
 	public String propertiesFormattedString;
+    public Map<String,List<String>> controlledVocabularies;
+    public String identifier;
 }
+
 
 class SampleInformation{
 	
@@ -458,10 +462,13 @@ public class DataHandler {
 			return this.experimentInformations.get(id);
 		}else {
 			ExperimentInformation ret = new ExperimentInformation();
-			Experiment exp = this.openBisClient.getExperimentByCode(id);
-			
 			try {
-			    ret.experimentType = this.openBisClient.openBIScodeToString(exp.getExperimentTypeCode());
+			  // TODO check for source of nullpointer exception !
+			  // seems like first the project id gets here
+			    System.out.println(id);
+	            Experiment exp = this.openBisClient.getExperimentByCode(id);
+	            ret.identifier = exp.getIdentifier();
+	            ret.experimentType = this.openBisClient.openBIScodeToString(exp.getExperimentTypeCode());
 				ret.samples = this.getSamples(id, "experiment");
 				ret.numberOfSamples = ret.samples.size();
 				List<DataSet> datasets  = this.openBisClient.getDataSetsOfExperiment(exp.getPermId());
@@ -471,12 +478,33 @@ public class DataHandler {
 				ret.lastChangedDataset = new Date(0,0,0);
 				this.lastDatasetRegistered(datasets, ret.lastChangedDataset, lce, lcs);
 				ret.lastChangedSample = lcs.toString();
+				 
+				//TODO TEST
+				// We want to get all properties for metadata changes, not only those with values
 				
-	            Map<String, String> properties = exp.getProperties();
+				Map<String, String> assignedProperties = exp.getProperties();
+	            List<PropertyType> completeProperties = openBisClient.listPropertiesForType(openBisClient.getExperimentTypeByString(exp.getExperimentTypeCode()));
+	            
+	            Map<String, String> properties = new HashMap<String,String>();
+	            Map<String, List<String>> controlledVocabularies = new HashMap<String,List<String>>();
+	            
+	            for(PropertyType p: completeProperties) {
+
+	              if(p.getDataType().toString().equals("CONTROLLEDVOCABULARY")) {
+	                controlledVocabularies.put(p.getCode(),openBisClient.listVocabularyTermsForProperty(p));
+	              }
+	              
+	              if(assignedProperties.keySet().contains(p.getCode())) {
+	                properties.put(p.getCode(), assignedProperties.get(p.getCode()));
+	              } else {
+	                properties.put(p.getCode(), "");
+	              }
+	            }
+								
+				ret.properties = properties;
+                ret.controlledVocabularies = controlledVocabularies;
 				
-				ret.properties = exp.getProperties();
-                
-                Map<String,String> typeLabels = this.openBisClient.getLabelsofProperties(this.openBisClient.getExperimentTypeByString(exp.getExperimentTypeCode()));
+                //Map<String,String> typeLabels = this.openBisClient.getLabelsofProperties(this.openBisClient.getExperimentTypeByString(exp.getExperimentTypeCode()));
 				
                 String propertiesHeader = "Properties \n <ul>";
                 String propertiesBottom = "";
@@ -484,7 +512,12 @@ public class DataHandler {
                 Iterator it = ret.properties.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry pairs = (Map.Entry)it.next();
-                    propertiesBottom +=  "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> "  + pairs.getValue() + "</li>");
+                    if(pairs.getValue().equals("")){
+                      continue;
+                    }else {
+                    //propertiesBottom +=  "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> "  + pairs.getValue() + "</li>");
+                    propertiesBottom +=  "<li><b>" + (this.openBisClient.openBIScodeToString(pairs.getKey().toString()) + ":</b> "  + pairs.getValue() + "</li>");
+                    }
                 }
                 propertiesBottom += "</ul>";
                 
@@ -530,7 +563,7 @@ public class DataHandler {
 				this.lastDatasetRegistered(datasets, ret.lastChangedDataset, lce, lcs);
 				
 				ret.properties = samp.getProperties();
-				
+																
 				Map<String,String> typeLabels = this.openBisClient.getLabelsofProperties(this.openBisClient.getSampleTypeByString(samp.getSampleTypeCode()));
 				
 				String propertiesHeader = "Properties \n <ul>";
@@ -760,7 +793,7 @@ public class DataHandler {
 			String project = experimentIdentifier.split("/")[2];
 			
 			Map<String, String> properties = e.getProperties();
-				
+			
 			String status = "";
 			
 			if(properties.keySet().contains("Q_CURRENT_STATUS")) {
@@ -1028,5 +1061,12 @@ public class DataHandler {
     }
     return header + "\n" + rowString;
   }
+  
+  public void callIngestionService(String serviceName, Map<String, Object> parameters) {
+    System.out.println(serviceName);
+    System.out.println(parameters);
+    this.openBisClient.triggerIngestionService("notify-user", parameters);
+  }
 }
+
 	
