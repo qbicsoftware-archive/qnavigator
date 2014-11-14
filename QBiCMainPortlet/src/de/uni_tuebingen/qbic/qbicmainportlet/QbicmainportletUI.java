@@ -222,11 +222,11 @@ public class QbicmainportletUI extends UI {
     setNavigator(navigator);
 
 
-
-    mainLayout = new VerticalLayout();
-    mainLayout.setMargin(true);
-    mainLayout.addComponent(navigatorContent);
-    setContent(mainLayout);
+//    mainLayout = new VerticalLayout();
+//    mainLayout.setMargin(true);
+//    mainLayout.addComponent(navigatorContent);
+    
+    setContent(navigatorContent);
 
     navigator.navigateTo("");
   }

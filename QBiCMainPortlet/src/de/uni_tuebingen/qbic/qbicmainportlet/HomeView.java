@@ -33,56 +33,53 @@ public class HomeView extends Panel {
 
   private String caption;
   FilterTable table;
-  VerticalLayout vert;
+  VerticalLayout homeview_content;
+
+  DataHandler dh;
+  StreamResource sr;
 
   private Button export;
 
   public HomeView(SpaceInformation datasource, String caption) {
-    vert = new VerticalLayout();
-    //vert.setMargin(true);
-    //this.setHeight("800px");
+    homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
-    this.table.setSizeFull();
-    //vert.addComponent(new Label("Huhu"));
-    vert.addComponent(this.table);
-    // this.table.setHeight("800px");
-    //this.table.setSizeFull();
-    vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    this.setContent(vert);
 
     this.setContainerDataSource(datasource, caption);
+    dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    sr = dh.getTSVStream(dh.containerToString(datasource.projects), this.caption);
     this.tableClickChangeTreeView();
+
+    this.buildLayout(datasource);
   }
 
   public HomeView(FilterTable table, SpaceInformation datasource, String caption) {
-    vert = new VerticalLayout();
-    //vert.setMargin(true);
+    homeview_content = new VerticalLayout();
     this.table = table;
-    this.table.setSelectable(true);
-
-    //this.setSizeFull();
-
-    vert.addComponent(this.table);
-    vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    this.setContent(vert);
 
     this.setContainerDataSource(datasource, caption);
+    dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    sr = dh.getTSVStream(dh.containerToString(datasource.projects), this.caption);
     this.tableClickChangeTreeView();
+
+    this.buildLayout(datasource);
+
   }
 
 
+  /**
+   * execute the above constructor with default settings, in order to have the same settings
+   */
   public HomeView() {
-    // execute the above constructor with default settings, in order to have the same settings
     this(new FilterTable(), new SpaceInformation(),
         "You seem to have no registered projects. Please contact QBiC.");
   }
 
   public void setSizeFull() {
-    vert.setSizeFull();
+    homeview_content.setSizeFull();
     super.setSizeFull();
     this.table.setSizeFull();
-    vert.setSpacing(true);
-    vert.setMargin(true);
+    homeview_content.setSpacing(true);
+    homeview_content.setMargin(true);
   }
 
   /**
@@ -94,51 +91,65 @@ public class HomeView extends Panel {
    */
   public void setContainerDataSource(SpaceInformation homeViewInformation, String caption) {
 
-    HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setHeight(null);
-    buttonLayout.setWidth("100%");
-    buttonLayout.setSpacing(true);
-
-    this.export = new Button("Export as TSV");
-    buttonLayout.addComponent(this.export);
-
-    // this.table.setContainerDataSource(spaceViewIndexedContainer);
     this.caption = caption;
     this.updateCaption();
-    this.setStatistics(homeViewInformation);
-    this.vert.addComponent(buttonLayout);
+    // this.setStatistics(homeViewInformation);
+
     this.table.setContainerDataSource(homeViewInformation.projects);
 
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr =
-        dh.getTSVStream(dh.containerToString(homeViewInformation.projects), this.caption);
-    FileDownloader fileDownloader = new FileDownloader(sr);
-    fileDownloader.extend(this.export);
+
+
   }
 
 
-  private void setStatistics(SpaceInformation generalOpenBISInformation) {
-    vert.removeAllComponents();
-    vert.addComponent(new Label(String.format("Number of Projects: %s",
+  private void buildLayout(SpaceInformation generalOpenBISInformation) {
+    // clean up first
+    homeview_content.removeAllComponents();
+    
+    homeview_content.setMargin(true);
+    
+    this.setHeight("600px");
+    
+    // view overall statistics
+    homeview_content.addComponent(new Label(String.format("Number of Projects: %s",
         generalOpenBISInformation.numberOfProjects)));
-    vert.addComponent(new Label(String.format("Number of Experiments: %s",
+    homeview_content.addComponent(new Label(String.format("Number of Experiments: %s",
         generalOpenBISInformation.numberOfExperiments)));
-    vert.addComponent(new Label(String.format("Number of Samples: %s",
+    homeview_content.addComponent(new Label(String.format("Number of Samples: %s",
         generalOpenBISInformation.numberOfSamples)));
-    vert.addComponent(new Label(String.format("Number of Datasets: %s",
+    homeview_content.addComponent(new Label(String.format("Number of Datasets: %s",
         generalOpenBISInformation.numberOfDatasets)));
-    vert.addComponent(new Label(""));
-
+    
+    Label vertical_spacer1 = new Label("");
+    vertical_spacer1.setHeight("0.5em");
+    homeview_content.addComponent(vertical_spacer1);
+    
     if (generalOpenBISInformation.numberOfDatasets > 0) {
       String lastSample = "No Sample available";
       if (generalOpenBISInformation.lastChangedSample != null) {
         lastSample = generalOpenBISInformation.lastChangedSample.split("/")[2];
       }
-      vert.addComponent(new Label(String.format("Last Change: %s", String.format(
+      homeview_content.addComponent(new Label(String.format("Last Change: %s", String.format(
           "In Sample: %s. Date: %s", generalOpenBISInformation.lastChangedSample.split("/")[2],
           generalOpenBISInformation.lastChangedDataset.toString()))));
     }
-    vert.addComponent(this.table);
+    
+    this.table.setSelectable(true);
+    this.table.setWidth("100%");
+    homeview_content.addComponent(this.table);
+    // homeview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
+
+    HorizontalLayout button_bar = new HorizontalLayout();
+
+    this.export = new Button("Export as TSV");
+    button_bar.addComponent(this.export);
+    homeview_content.addComponent(button_bar);
+
+
+    FileDownloader fileDownloader = new FileDownloader(sr);
+    fileDownloader.extend(this.export);
+
+    this.setContent(homeview_content);
   }
 
 
@@ -156,7 +167,7 @@ public class HomeView extends Panel {
 
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
-    filterTable.setSizeFull();
+    // filterTable.setSizeFull();
 
     filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
     filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
