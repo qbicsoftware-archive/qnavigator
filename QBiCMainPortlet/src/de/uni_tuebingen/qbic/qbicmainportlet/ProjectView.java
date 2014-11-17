@@ -35,21 +35,21 @@ import com.vaadin.ui.VerticalLayout;
 public class ProjectView extends Panel {
 
   FilterTable table;
-  VerticalLayout vert;
+  VerticalLayout projectview_content;
 
   private String id;
   private Button export;
 
   public ProjectView(FilterTable table, IndexedContainer datasource, String id) {
-    vert = new VerticalLayout();
+    projectview_content = new VerticalLayout();
     this.id = id;
 
     this.table = this.buildFilterTable();
     this.table.setSizeFull();
 
-    vert.addComponent(this.table);
-    vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    this.setContent(vert);
+    projectview_content.addComponent(this.table);
+    projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
+    this.setContent(projectview_content);
 
     this.table.setContainerDataSource(datasource);
     this.tableClickChangeTreeView();
@@ -63,7 +63,7 @@ public class ProjectView extends Panel {
 
   public void setSizeFull() {
     this.table.setSizeFull();
-    vert.setSizeFull();
+    projectview_content.setSizeFull();
     super.setSizeFull();
   }
 
@@ -85,7 +85,7 @@ public class ProjectView extends Panel {
     this.export = new Button("Export as TSV");
     buttonLayout.addComponent(this.export);
 
-    this.vert.addComponent(buttonLayout);
+    this.projectview_content.addComponent(buttonLayout);
 
     this.table.setContainerDataSource(projectInformation.experiments);
     this.id = id;
@@ -101,16 +101,40 @@ public class ProjectView extends Panel {
 
 
   private void setStatistics(ProjectInformation projectInformation) {
-    vert.removeAllComponents();
-
-    Label vertical_spacer_small = new Label();
-    Label vertical_spacer_big1 = new Label();
-    Label vertical_spacer_big2 = new Label();
+    projectview_content.removeAllComponents();
 
 
-    vertical_spacer_small.setHeight("0.5em");
-    vertical_spacer_big1.setHeight("1.5em");
-    vertical_spacer_big2.setHeight("1.5em");
+
+    // Project description
+    VerticalLayout projDescription = new VerticalLayout();
+    VerticalLayout projDescriptionContent = new VerticalLayout();
+    
+    
+    Label descContent = new Label("none");
+    if (!projectInformation.description.isEmpty()) {
+      descContent = new Label(projectInformation.description);
+    }
+
+    Label contact =
+        new Label(
+            "<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+                + this.id
+                + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
+                + this.id + "</a>", ContentMode.HTML);
+    // contact.setIcon(FontAwesome.ENVELOPE);
+
+    projDescriptionContent.addComponent(descContent);
+    projDescriptionContent.addComponent(contact);
+    projDescriptionContent.setMargin(true);
+    projDescriptionContent.setCaption("Description");
+    projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
+
+    projDescription.addComponent(projDescriptionContent);
+    projDescription.setMargin(true);
+    projectview_content.addComponent(projDescription);
+
+    // statistics.addComponent(projDescription);
+    // statistics.addComponent(vertical_spacer_big1);
 
 
     // VerticalLayout contact = new VerticalLayout();
@@ -118,79 +142,102 @@ public class ProjectView extends Panel {
     // contact.addComponent(new Label(projectInformation.contact));
 
     // TODO email address according to project ?
-    Label contact =
-        new Label(
-            "<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
-                + this.id + "\" style=\"color: #0068AA; text-decoration: none\">Support</a>",
-            ContentMode.HTML);
-    contact.setIcon(FontAwesome.ENVELOPE);
+
+    // members section
+    VerticalLayout members_section = new VerticalLayout();
+    Component membersContent = getMembersComponent(projectInformation.members);
+    membersContent.setIcon(FontAwesome.USERS);
+    membersContent.setCaption("Members");
+    members_section.addComponent(membersContent);
+    members_section.setMargin(true);
+
+    projectview_content.addComponent(members_section);
 
 
+
+    // statistics section
     VerticalLayout statistics = new VerticalLayout();
 
-
-    Label description = new Label(projectInformation.description);
-    // description.setWidth("600px"); should be dictated by the container
-    // Label des = new Label("Description: ");
-    description.setIcon(FontAwesome.COMMENT);
-    description.setCaption("Description");
-
-    HorizontalLayout projDescription = new HorizontalLayout();
-    // projDescription.addComponent(des);
-    projDescription.addComponent(description);
-
-    statistics.addComponent(projDescription);
-    statistics.addComponent(vertical_spacer_big1);
-
-
-    Label numberExperiments =
-        new Label(String.format("Total Experiments: %s", projectInformation.numberOfExperiments));
-    numberExperiments.setIcon(FontAwesome.BAR_CHART_O);
-    numberExperiments.setCaption("Statistics");
-    statistics.addComponent(numberExperiments);
-    statistics.addComponent(new Label(String.format("Total Samples: %s",
+    HorizontalLayout statContent = new HorizontalLayout();
+    statContent.setCaption("Statistics");
+    statContent.setIcon(FontAwesome.BAR_CHART_O);
+    statContent.addComponent(new Label(String.format("%s experiment(s),",
+        projectInformation.numberOfExperiments)));
+    statContent.addComponent(new Label(String.format("%s sample(s),",
         projectInformation.numberOfSamples)));
-    statistics.addComponent(new Label(String.format("Total Datasets: %s",
+    statContent.addComponent(new Label(String.format("%s dataset(s).",
         projectInformation.numberOfDatasets)));
+    statContent.setMargin(true);
+    statContent.setSpacing(true);
 
-    HorizontalLayout temp = new HorizontalLayout();
-
-    temp.addComponent(new Label(String.format("Status: %s", projectInformation.statusMessage)));
-    temp.addComponent(projectInformation.progressBar);
-    temp.setSpacing(true);
-
-    statistics.addComponent(temp);
     if (projectInformation.numberOfDatasets > 0) {
 
-      String lastSample = "No Sample available";
+      String lastSample = "No samples available";
       if (projectInformation.lastChangedSample != null) {
         lastSample = projectInformation.lastChangedSample.split("/")[2];
       }
-      statistics.addComponent(new Label(String.format(
-          "Last Change %s",
-          String.format("in Sample: %s (%s)", lastSample,
+      statContent.addComponent(new Label(String.format(
+          "Last change %s",
+          String.format("occurred in sample %s (%s)", lastSample,
               projectInformation.lastChangedDataset.toString()))));
     }
-    HorizontalLayout head = new HorizontalLayout();
-    head.addComponent(statistics);
-    head.addComponent(contact);
-    head.setMargin(true);
-    head.setSpacing(true);
 
-    statistics.setSpacing(true);
-    statistics.addComponent(vertical_spacer_big2);
-    vert.setMargin(true);
-    vert.setSpacing(true);
-    vert.addComponent(head);
+
+    statistics.addComponent(statContent);
+    statistics.setMargin(true);
+    projectview_content.addComponent(statistics);
+
+
+    // status bar section
+
+    VerticalLayout status = new VerticalLayout();
+    HorizontalLayout statusContent = new HorizontalLayout();
+    statusContent.setCaption("Status");
+    statusContent.setIcon(FontAwesome.CLOCK_O);
+    
+    statusContent.addComponent(projectInformation.progressBar);
+    statusContent.addComponent(new Label(projectInformation.statusMessage));
+    statusContent.setSpacing(true);
+    statusContent.setMargin(true);
+    
+    status.addComponent(statusContent);
+    status.setMargin(true);
+
+    projectview_content.addComponent(status);
+
+
+
+    // table section
+    VerticalLayout tableSection = new VerticalLayout();
+    VerticalLayout tableSectionContent = new VerticalLayout();
+    
+    tableSectionContent.setCaption("Registered Experiments");
+    tableSectionContent.setIcon(FontAwesome.FLASK);
+    tableSectionContent.addComponent(this.table);
+ 
+    tableSectionContent.setMargin(true);
+    tableSection.setMargin(true);
+    
+    tableSection.addComponent(tableSectionContent);
+    projectview_content.addComponent(tableSection);
+
+
+    // HorizontalLayout head = new HorizontalLayout();
+    // head.addComponent(statistics);
+    // head.addComponent(contact);
+    // head.setMargin(true);
+    // head.setSpacing(true);
+
+    // statistics.setSpacing(true);
+
+    //
+    // statistics.addComponent(vertical_spacer_big2);
+    // projectview_content.setMargin(true);
+    // projectview_content.setSpacing(true);
+    // projectview_content.addComponent(head);
     // Label membersLabel = new Label(getMembersString(projectInformation.members));
-    Label membersLabel = new Label("");
-    membersLabel.setIcon(FontAwesome.USERS);
-    membersLabel.setCaption("Members");
 
-    statistics.addComponent(membersLabel);
-    statistics.addComponent(getMembersComponent(projectInformation.members));
-    vert.addComponent(this.table);
-    this.table.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
+
   }
 
   private void updateCaption() {
@@ -222,7 +269,8 @@ public class ProjectView extends Panel {
 
     filterTable.setColumnReorderingAllowed(true);
 
-    filterTable.setCaption("Registered Experiments");
+    //filterTable.setCaption("Registered Experiments");
+    filterTable.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
 
     return filterTable;
   }
@@ -268,7 +316,9 @@ public class ProjectView extends Panel {
           // image.setHeight(80, Unit.PIXELS);
           // image.setWidth(65, Unit.PIXELS);
           // membersLayout.addComponent(image);
-          String labelString = new String("<a href=\"mailto:" + email + "\">" + fullname + "</a>");
+          String labelString =
+              new String("<a href=\"mailto:" + email
+                  + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
           Label userLabel = new Label(labelString, ContentMode.HTML);
           membersLayout.addComponent(userLabel);
 
@@ -286,7 +336,7 @@ public class ProjectView extends Panel {
         // membersLayout.addComponent(new Label(member));
       }
       membersLayout.setSpacing(true);
-      // membersLayout.setMargin(true);
+      membersLayout.setMargin(true);
     }
     return membersLayout;
   }
