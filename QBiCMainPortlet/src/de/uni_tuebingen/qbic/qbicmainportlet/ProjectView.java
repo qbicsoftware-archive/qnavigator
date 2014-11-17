@@ -106,13 +106,13 @@ public class ProjectView extends Panel {
     Label vertical_spacer_small = new Label();
     Label vertical_spacer_big1 = new Label();
     Label vertical_spacer_big2 = new Label();
-    
-    
+
+
     vertical_spacer_small.setHeight("0.5em");
     vertical_spacer_big1.setHeight("1.5em");
     vertical_spacer_big2.setHeight("1.5em");
-    
-    
+
+
     // VerticalLayout contact = new VerticalLayout();
     // contact.addComponent(new Label("QBiC contact:"));
     // contact.addComponent(new Label(projectInformation.contact));
@@ -141,8 +141,8 @@ public class ProjectView extends Panel {
 
     statistics.addComponent(projDescription);
     statistics.addComponent(vertical_spacer_big1);
-    
-    
+
+
     Label numberExperiments =
         new Label(String.format("Total Experiments: %s", projectInformation.numberOfExperiments));
     numberExperiments.setIcon(FontAwesome.BAR_CHART_O);
@@ -182,12 +182,13 @@ public class ProjectView extends Panel {
     vert.setMargin(true);
     vert.setSpacing(true);
     vert.addComponent(head);
-    Label membersLabel = new Label(getMembersString(projectInformation.members));
+    // Label membersLabel = new Label(getMembersString(projectInformation.members));
+    Label membersLabel = new Label("");
     membersLabel.setIcon(FontAwesome.USERS);
     membersLabel.setCaption("Members");
-    
+
     statistics.addComponent(membersLabel);
-    //statistics.addComponent(getMembersComponent(projectInformation.members));
+    statistics.addComponent(getMembersComponent(projectInformation.members));
     vert.addComponent(this.table);
     this.table.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
   }
@@ -230,19 +231,19 @@ public class ProjectView extends Panel {
     String concat = new String("");
     if (members != null) {
       Object[] tmp = members.toArray();
-      concat = (String)tmp[0];
-      
+      concat = (String) tmp[0];
+
       if (tmp.length > 1) {
         for (int i = 1; i < tmp.length; ++i) {
           concat = concat + ", " + tmp[i];
         }
       }
     }
-  
+
     return concat;
   }
-  
-  
+
+
   private Component getMembersComponent(Set<String> members) {
     HorizontalLayout membersLayout = new HorizontalLayout();
     if (members != null) {
@@ -251,31 +252,38 @@ public class ProjectView extends Panel {
 
         // Cool idea, but let's do this when we have more portrait pictures in Liferay
 
-        // try {
-        // //companyId. We have presumable just one portal id, which equals the companyId.
-        // User user = UserLocalServiceUtil.getUserByScreenName(1, member);
-        // VaadinSession.getCurrent().getService();
-        // ThemeDisplay themedisplay = (ThemeDisplay)
-        // VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
-        // String url = user.getPortraitURL(themedisplay);
-        // ExternalResource er = new ExternalResource(url);
-        // com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(),er);
-        // image.setHeight(80, Unit.PIXELS);
-        // image.setWidth(65, Unit.PIXELS);
-        // membersLayout.addComponent(image);
-        //
-        // } catch(com.liferay.portal.NoSuchUserException e){
-        // membersLayout.addComponent(new Label(member));
-        // }
-        // catch (PortalException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // } catch (SystemException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
+        try {
+          // companyId. We have presumable just one portal id, which equals the companyId.
+          User user = UserLocalServiceUtil.getUserByScreenName(1, member);
+          String fullname = user.getFullName();
+          String email = user.getEmailAddress();
 
-        membersLayout.addComponent(new Label(member));
+
+          // VaadinSession.getCurrent().getService();
+          // ThemeDisplay themedisplay =
+          // (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
+          // String url = user.getPortraitURL(themedisplay);
+          // ExternalResource er = new ExternalResource(url);
+          // com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(), er);
+          // image.setHeight(80, Unit.PIXELS);
+          // image.setWidth(65, Unit.PIXELS);
+          // membersLayout.addComponent(image);
+          String labelString = new String("<a href=\"mailto:" + email + "\">" + fullname + "</a>");
+          Label userLabel = new Label(labelString, ContentMode.HTML);
+          membersLayout.addComponent(userLabel);
+
+        } catch (com.liferay.portal.NoSuchUserException e) {
+          membersLayout.addComponent(new Label(member));
+        } catch (PortalException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (SystemException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+
+
+        // membersLayout.addComponent(new Label(member));
       }
       membersLayout.setSpacing(true);
       // membersLayout.setMargin(true);
