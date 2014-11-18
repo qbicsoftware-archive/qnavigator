@@ -11,6 +11,7 @@ import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileDownloader;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
@@ -105,37 +106,69 @@ public class HomeView extends Panel {
   private void buildLayout(SpaceInformation generalOpenBISInformation) {
     // clean up first
     homeview_content.removeAllComponents();
-    
+
     homeview_content.setMargin(true);
-    
+    homeview_content.setWidth("100%");
+
     this.setHeight("600px");
-    
+
+    //System.out.println(UI.getCurrent().getPage().getBrowserWindowHeight());
+    //System.out.println(UI.getCurrent().getPage().getBrowserWindowWidth());
+
+
     // view overall statistics
-    homeview_content.addComponent(new Label(String.format("Number of Projects: %s",
+    VerticalLayout statistics = new VerticalLayout();
+
+    HorizontalLayout statContent = new HorizontalLayout();
+    statContent.setCaption("Statistics");
+
+    statContent.addComponent(new Label(String.format("You have %s project(s),",
         generalOpenBISInformation.numberOfProjects)));
-    homeview_content.addComponent(new Label(String.format("Number of Experiments: %s",
+    statContent.addComponent(new Label(String.format("%s experiment(s),",
         generalOpenBISInformation.numberOfExperiments)));
-    homeview_content.addComponent(new Label(String.format("Number of Samples: %s",
+    statContent.addComponent(new Label(String.format("%s sample(s),",
         generalOpenBISInformation.numberOfSamples)));
-    homeview_content.addComponent(new Label(String.format("Number of Datasets: %s",
+    statContent.addComponent(new Label(String.format("and %s dataset(s).",
         generalOpenBISInformation.numberOfDatasets)));
-    
-    Label vertical_spacer1 = new Label("");
-    vertical_spacer1.setHeight("0.5em");
-    homeview_content.addComponent(vertical_spacer1);
-    
+    statContent.setMargin(true);
+    statContent.setSpacing(true);
+
+    statistics.addComponent(statContent);
+    statistics.setMargin(true);
+    homeview_content.addComponent(statistics);
+
+
     if (generalOpenBISInformation.numberOfDatasets > 0) {
-      String lastSample = "No Sample available";
+      String lastSample = "No samples available";
       if (generalOpenBISInformation.lastChangedSample != null) {
         lastSample = generalOpenBISInformation.lastChangedSample.split("/")[2];
       }
-      homeview_content.addComponent(new Label(String.format("Last Change: %s", String.format(
-          "In Sample: %s. Date: %s", generalOpenBISInformation.lastChangedSample.split("/")[2],
+      statContent.addComponent(new Label(String.format("Last change %s", String.format(
+          "occurred in sample %s (%s)", lastSample,
           generalOpenBISInformation.lastChangedDataset.toString()))));
     }
-    
+
+
     this.table.setSelectable(true);
-    this.table.setWidth("100%");
+
+
+    int browser_window_width = UI.getCurrent().getPage().getBrowserWindowWidth();
+    int table_width;
+
+    if (browser_window_width > 1440) {
+      table_width = (int) Math.floor(0.5 * browser_window_width);
+    }
+    else {
+      table_width = (int) Math.floor(0.7 * browser_window_width);
+    }
+    
+    // using an absolute width here; otherwise it leads broken homeView visualization
+    this.table.setWidth(table_width, Unit.PIXELS);
+    
+    this.table.setCaption("Registered Projects");
+    this.table.setIcon(FontAwesome.FLASK);
+    
+    
     homeview_content.addComponent(this.table);
     // homeview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
 
@@ -183,7 +216,7 @@ public class HomeView extends Panel {
 
     filterTable.setColumnReorderingAllowed(true);
 
-    filterTable.setCaption("Registered Projects");
+    //filterTable.setCaption("Registered Projects");
 
     return filterTable;
   }

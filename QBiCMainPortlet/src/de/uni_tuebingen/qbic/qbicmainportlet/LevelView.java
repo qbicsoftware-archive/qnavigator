@@ -53,6 +53,8 @@ public class LevelView extends VerticalLayout implements View {
     this.compositeLayout.removeAllComponents();
     this.removeAllComponents();
     
+    // set maximum width according to browser info
+    // this.compositeLayout.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth(), Unit.PIXELS);
     // header layout first
     this.headerLayout.setWidth("100%");
     this.headerLayout.addComponent(this.toolbar);
@@ -79,6 +81,8 @@ public class LevelView extends VerticalLayout implements View {
     
     this.compositeLayout.setExpandRatio(treeLayout, 1);
     this.compositeLayout.setExpandRatio(mainLayout, 4);
+    
+    
     
     //this.treeComponentLayout.setSplitPosition(20, Sizeable.UNITS_PERCENTAGE);
     //this.treeComponentLayout.setExpandRatio(this.treeView, 0.15f);
