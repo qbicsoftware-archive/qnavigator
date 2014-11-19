@@ -23,6 +23,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.CustomTable.Align;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 
 public class HomeView extends Panel {
@@ -112,8 +113,8 @@ public class HomeView extends Panel {
 
     this.setHeight("600px");
 
-    //System.out.println(UI.getCurrent().getPage().getBrowserWindowHeight());
-    //System.out.println(UI.getCurrent().getPage().getBrowserWindowWidth());
+    // System.out.println(UI.getCurrent().getPage().getBrowserWindowHeight());
+    // System.out.println(UI.getCurrent().getPage().getBrowserWindowWidth());
 
 
     // view overall statistics
@@ -121,6 +122,7 @@ public class HomeView extends Panel {
 
     HorizontalLayout statContent = new HorizontalLayout();
     statContent.setCaption("Statistics");
+    statContent.setIcon(FontAwesome.BAR_CHART_O);
 
     statContent.addComponent(new Label(String.format("You have %s project(s),",
         generalOpenBISInformation.numberOfProjects)));
@@ -149,33 +151,45 @@ public class HomeView extends Panel {
     }
 
 
+    // table section
     this.table.setSelectable(true);
 
-
+    // using an absolute width here; otherwise it leads broken homeView visualization in Chrome
     int browser_window_width = UI.getCurrent().getPage().getBrowserWindowWidth();
     int table_width;
 
     if (browser_window_width > 1440) {
-      table_width = (int) Math.floor(0.5 * browser_window_width);
-    }
-    else {
+      table_width = (int) Math.floor(0.45 * browser_window_width);
+    } else {
       table_width = (int) Math.floor(0.7 * browser_window_width);
     }
+
     
-    // using an absolute width here; otherwise it leads broken homeView visualization
     this.table.setWidth(table_width, Unit.PIXELS);
+    //this.table.setWidth("100%");
+    this.table.setColumnExpandRatio("Identifier", 1);
+    this.table.setColumnExpandRatio("Description", 3);
+    this.table.setColumnExpandRatio("Contains datasets", 1);
+    this.table.setColumnAlignment("Contains datasets", Align.CENTER);
     
-    this.table.setCaption("Registered Projects");
-    this.table.setIcon(FontAwesome.FLASK);
-    
-    
-    homeview_content.addComponent(this.table);
-    // homeview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
+    VerticalLayout tableSection = new VerticalLayout();
+    VerticalLayout tableSectionContent = new VerticalLayout();
+
+    tableSectionContent.setCaption("Registered Projects");
+    tableSectionContent.setIcon(FontAwesome.FLASK);
+    tableSectionContent.addComponent(this.table);
+
+    tableSectionContent.setMargin(true);
+    tableSection.setMargin(true);
+
+    tableSection.addComponent(tableSectionContent);
+    homeview_content.addComponent(tableSection);
 
     HorizontalLayout button_bar = new HorizontalLayout();
 
     this.export = new Button("Export as TSV");
     button_bar.addComponent(this.export);
+    button_bar.setMargin(true);
     homeview_content.addComponent(button_bar);
 
 
@@ -215,8 +229,10 @@ public class HomeView extends Panel {
     filterTable.setColumnCollapsingAllowed(true);
 
     filterTable.setColumnReorderingAllowed(true);
-
-    //filterTable.setCaption("Registered Projects");
+    
+    
+    
+    // filterTable.setCaption("Registered Projects");
 
     return filterTable;
   }

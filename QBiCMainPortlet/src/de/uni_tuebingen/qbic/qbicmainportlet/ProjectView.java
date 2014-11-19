@@ -45,7 +45,7 @@ public class ProjectView extends Panel {
     this.id = id;
 
     this.table = this.buildFilterTable();
-    this.table.setSizeFull();
+    //this.table.setSizeFull();
 
     projectview_content.addComponent(this.table);
     projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
@@ -209,12 +209,12 @@ public class ProjectView extends Panel {
 
     // table section
     VerticalLayout tableSection = new VerticalLayout();
-    VerticalLayout tableSectionContent = new VerticalLayout();
+    HorizontalLayout tableSectionContent = new HorizontalLayout();
     
     tableSectionContent.setCaption("Registered Experiments");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
- 
+    
     tableSectionContent.setMargin(true);
     tableSection.setMargin(true);
     
@@ -252,7 +252,7 @@ public class ProjectView extends Panel {
 
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
-    filterTable.setSizeFull();
+    //filterTable.setSizeFull();
 
     filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
     filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
