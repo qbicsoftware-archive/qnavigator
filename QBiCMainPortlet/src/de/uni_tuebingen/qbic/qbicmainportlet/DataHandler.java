@@ -154,7 +154,7 @@ public class DataHandler {
     List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpace_list();
     SpaceInformation homeInformation = new SpaceInformation();
     IndexedContainer space_container = new IndexedContainer();
-    space_container.addContainerProperty("Identifier", String.class, "");
+    space_container.addContainerProperty("Project", String.class, "");
     space_container.addContainerProperty("Description", String.class, "");
     // space_container.addContainerProperty("Number of Samples", String.class, "");
     space_container.addContainerProperty("Contains datasets", String.class, "");
@@ -192,16 +192,15 @@ public class DataHandler {
       number_of_projects += projects.size();// projects.size();
       for (Project p : projects) {
         Object new_s = space_container.addItem();
-        space_container.getContainerProperty(new_s, "Identifier").setValue(p.getCode());
+        space_container.getContainerProperty(new_s, "Project").setValue(p.getCode());
 
         // Project descriptions can be long; truncate the string to provide a brief preview
         String desc = p.getDescription();
-        int UPPER_LIMIT = 100;
-        
+
         if (desc != null && desc.length() > 0) {
-          desc = desc.substring(0, Math.min(desc.length(), UPPER_LIMIT));
+          desc = desc.substring(0, Math.min(desc.length(), 100));
           
-          if (desc.length() == UPPER_LIMIT)
+          if (desc.length() == 100)
           {
             desc += "...";
           }
@@ -708,7 +707,7 @@ public class DataHandler {
     SpaceInformation spaceInformation = new SpaceInformation();
     IndexedContainer space_container = new IndexedContainer();
 
-    space_container.addContainerProperty("Identifier", String.class, "");
+    space_container.addContainerProperty("Project", String.class, "");
     space_container.addContainerProperty("Description", String.class, "");
     space_container.addContainerProperty("Progress", ProgressBar.class, "");
 
@@ -749,7 +748,7 @@ public class DataHandler {
 
     for (Project p : projects) {
       Object new_s = space_container.addItem();
-      space_container.getContainerProperty(new_s, "Identifier").setValue(p.getCode());
+      space_container.getContainerProperty(new_s, "Project").setValue(p.getCode());
       space_container.getContainerProperty(new_s, "Description").setValue(p.getDescription());
       space_container.getContainerProperty(new_s, "Progress").setValue(
           new ProgressBar(this.openBisClient.computeProjectStatus(p)));
@@ -825,7 +824,7 @@ public class DataHandler {
 
     IndexedContainer experiment_container = new IndexedContainer();
 
-    experiment_container.addContainerProperty("Identifier", String.class, null);
+    experiment_container.addContainerProperty("Experiment", String.class, null);
     experiment_container.addContainerProperty("Experiment Type", String.class, null);
     experiment_container.addContainerProperty("Registration Date", Timestamp.class, null);
     experiment_container.addContainerProperty("Registerator", String.class, null);
@@ -856,7 +855,7 @@ public class DataHandler {
       SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
       String dateString = sd.format(date);
       Timestamp ts = Timestamp.valueOf(dateString);
-      experiment_container.getContainerProperty(new_ds, "Identifier").setValue(e.getCode());
+      experiment_container.getContainerProperty(new_ds, "Experiment").setValue(e.getCode());
       experiment_container.getContainerProperty(new_ds, "Experiment Type").setValue(type);
       experiment_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       experiment_container.getContainerProperty(new_ds, "Registerator").setValue(registrator);
@@ -911,7 +910,7 @@ public class DataHandler {
 
     IndexedContainer dataset_container = new IndexedContainer();
 
-    dataset_container.addContainerProperty("Identifier", String.class, null);
+    dataset_container.addContainerProperty("Project", String.class, null);
     dataset_container.addContainerProperty("Sample", String.class, null);
     dataset_container.addContainerProperty("Sample Type", String.class, null);
     dataset_container.addContainerProperty("File Name", String.class, null);
@@ -941,7 +940,7 @@ public class DataHandler {
       String file_name = download_link.split("/")[1];
 
       String fileSize = DashboardUtil.humanReadableByteCount(filelist[0].getFileSize(), true);
-      dataset_container.getContainerProperty(new_ds, "Identifier").setValue(project);
+      dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
       dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
           this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode());
