@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.bind.JAXBElement;
+
+import parser.Parser;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
@@ -99,6 +102,7 @@ class SampleInformation {
   // Map containing parents of the sample and the corresponding sample types
   public Map<String, String> parents;
   public String parentsFormattedString;
+  public String xmlPropertiesFormattedString;
 }
 
 
@@ -386,6 +390,7 @@ public class DataHandler {
         this.project_to_experiments.put(id, experiments);
       }
     } else {
+      System.out.println("Unknown");
       throw new Exception("Unknown datatype!");
     }
 
@@ -601,31 +606,53 @@ public class DataHandler {
             this.openBisClient.getLabelsofProperties(this.openBisClient.getSampleTypeByString(samp
                 .getSampleTypeCode()));
 
-        String propertiesHeader = "Properties \n <ul>";
-        String propertiesBottom = "";
+        
+        
+        //String propertiesHeader = "Properties \n <ul>";
+        String propertiesBottom = "<ul> ";
+        String xmlPropertiesBottom = "<ul> ";
 
         Iterator it = ret.properties.entrySet().iterator();
         while (it.hasNext()) {
           Map.Entry pairs = (Map.Entry) it.next();
-          propertiesBottom +=
+          if (pairs.getKey().equals("Q_PROPERTIES")) {
+            Parser xmlParser = new Parser();
+            JAXBElement<xml.Qproperties> xmlProperties = xmlParser.parseXMLString(pairs.getValue().toString());
+            Map<String, String> xmlPropertiesMap = xmlParser.getMap(xmlProperties);
+            
+            Iterator itProperties = xmlPropertiesMap.entrySet().iterator();
+            while (itProperties.hasNext()) {
+              Map.Entry pairsProperties = (Map.Entry) itProperties.next();
+              
+              xmlPropertiesBottom +=
+                "<li><b>" + (pairsProperties.getKey() + ":</b> " + pairsProperties.getValue() + "</li>");
+            }
+          } else {
+            propertiesBottom +=
               "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
+          }
         }
         propertiesBottom += "</ul>";
 
-        ret.propertiesFormattedString = propertiesHeader + propertiesBottom;
+        ret.propertiesFormattedString = propertiesBottom;
+        ret.xmlPropertiesFormattedString = xmlPropertiesBottom;
 
-        String parentsHeader = "The following samples have been derived from this sample: \n <ul>";
-        String parentsBottom = "";
+        String parentsHeader = "Sample(s) derived from this sample: ";
+        String parentsBottom = "<ul>";
 
-        Iterator parentsIt = ret.parents.entrySet().iterator();
-        while (parentsIt.hasNext()) {
-          Map.Entry pairs = (Map.Entry) parentsIt.next();
-          parentsBottom += "<li><b>" + pairs.getKey() + "</b> (" + pairs.getValue() + ") </li>";
+        if (ret.parents.isEmpty()) {
+          ret.parentsFormattedString = parentsHeader += "None";
+          
+        } else {
+          Iterator parentsIt = ret.parents.entrySet().iterator();
+          while (parentsIt.hasNext()) {
+            Map.Entry pairs = (Map.Entry) parentsIt.next();
+            parentsBottom += "<li><b>" + pairs.getKey() + "</b> (" + pairs.getValue() + ") </li>";
+          }
+          parentsBottom += "</ul>"; 
+          ret.parentsFormattedString = parentsHeader + parentsBottom;
         }
-        parentsBottom += "</ul>";
-
-        ret.parentsFormattedString = parentsHeader + parentsBottom;
-
+                
         this.sampleInformations.put(id, ret);
 
       } catch (Exception e) {
@@ -827,7 +854,7 @@ public class DataHandler {
     experiment_container.addContainerProperty("Experiment", String.class, null);
     experiment_container.addContainerProperty("Experiment Type", String.class, null);
     experiment_container.addContainerProperty("Registration Date", Timestamp.class, null);
-    experiment_container.addContainerProperty("Registerator", String.class, null);
+    experiment_container.addContainerProperty("Registrator", String.class, null);
     experiment_container.addContainerProperty("Status", Image.class, null);
     // experiment_container.addContainerProperty("Properties", Map.class, null);
 
@@ -858,7 +885,7 @@ public class DataHandler {
       experiment_container.getContainerProperty(new_ds, "Experiment").setValue(e.getCode());
       experiment_container.getContainerProperty(new_ds, "Experiment Type").setValue(type);
       experiment_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
-      experiment_container.getContainerProperty(new_ds, "Registerator").setValue(registrator);
+      experiment_container.getContainerProperty(new_ds, "Registrator").setValue(registrator);
 
       Image statusColor = new Image(status, this.setExperimentStatusColor(status));
       statusColor.setWidth("15px");

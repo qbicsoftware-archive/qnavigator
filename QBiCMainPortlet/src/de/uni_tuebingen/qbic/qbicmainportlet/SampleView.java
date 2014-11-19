@@ -5,6 +5,7 @@ import org.tepi.filtertable.FilterTable;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileDownloader;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinPortletSession;
 import com.vaadin.server.VaadinSession;
@@ -42,13 +43,13 @@ public class SampleView extends Panel {
 
     this.table = buildFilterTable();
     this.table.setSelectable(true);
-    this.table.setSizeFull();
+    //this.table.setSizeFull();
 
     vert.addComponent(this.table);
     vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
     this.setContent(vert);
 
-    this.vert.setSpacing(true);
+    //this.vert.setSpacing(true);
 
     this.table.setContainerDataSource(datasource);
 
@@ -109,8 +110,68 @@ public class SampleView extends Panel {
 
   private void setStatistics(SampleInformation sampInformation) {
     this.vert.removeAllComponents();
-
+    
+    // Description of sample   
+    VerticalLayout sampleDescription = new VerticalLayout();
+    VerticalLayout sampleDescriptionContent = new VerticalLayout();
+    sampleDescriptionContent.setMargin(true);
+    sampleDescriptionContent.setCaption("Description");
+    sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
+    sampleDescriptionContent.addComponent(new Label(String.format("%s.", sampInformation.sampleType)));
+    sampleDescriptionContent.addComponent(new Label(sampInformation.parentsFormattedString, ContentMode.HTML));
+    sampleDescription.addComponent(sampleDescriptionContent);
+    sampleDescription.setMargin(true);
+    this.vert.addComponent(sampleDescription);
+    
+    
+    // Statistics of sample
     VerticalLayout statistics = new VerticalLayout();
+    HorizontalLayout statContent = new HorizontalLayout();
+    statContent.setCaption("Statistics");
+    statContent.setIcon(FontAwesome.BAR_CHART_O);
+    statContent.addComponent(new Label(String.format("%s dataset(s).",
+        sampInformation.numberOfDatasets)));
+    statContent.setMargin(true);
+    statContent.setSpacing(true);   
+    if (sampInformation.numberOfDatasets > 0) {
+
+      String lastDataset = "No Datasets available!";
+      if (sampInformation.lastChangedDataset != null) {
+        lastDataset = sampInformation.lastChangedDataset.toString();
+        statContent.addComponent(new Label(String.format(
+            "Last Change: %s",
+            String.format("Dataset added on %s",
+                lastDataset))));
+      } else {
+        statContent.addComponent(new Label(lastDataset));
+      }
+    }  
+    statistics.addComponent(statContent);
+    statistics.setMargin(true);
+    this.vert.addComponent(statistics);
+    
+    
+    // Properties of sample
+    VerticalLayout properties = new VerticalLayout();
+    VerticalLayout propertiesContent = new VerticalLayout();
+    propertiesContent.setCaption("Properties");
+    propertiesContent.setIcon(FontAwesome.LIST_UL);
+    propertiesContent.addComponent(new Label(sampInformation.propertiesFormattedString, ContentMode.HTML));  
+    properties.addComponent(propertiesContent);
+    properties.setMargin(true);
+    this.vert.addComponent(properties);
+
+    // Experimental factors of sample
+    VerticalLayout experimentalFactors = new VerticalLayout();
+    VerticalLayout experimentalFactorsContent = new VerticalLayout();
+    experimentalFactorsContent.setCaption("Experimental Factors");
+    experimentalFactorsContent.setIcon(FontAwesome.TH);
+    experimentalFactorsContent.addComponent(new Label(sampInformation.xmlPropertiesFormattedString, ContentMode.HTML));  
+    experimentalFactors.addComponent(experimentalFactorsContent);
+    experimentalFactors.setMargin(true);
+    this.vert.addComponent(experimentalFactors);
+    
+    /*VerticalLayout statistics = new VerticalLayout();
 
     statistics
         .addComponent(new Label(String.format("Kind: %s", sampInformation.sampleType)));
@@ -140,8 +201,20 @@ public class SampleView extends Panel {
         statistics.addComponent(new Label(lastDataset));
       }
     }
-
-    this.vert.addComponent(this.table);
+    */
+    // Table (containing datasets) section
+    VerticalLayout tableSection = new VerticalLayout();
+    HorizontalLayout tableSectionContent = new HorizontalLayout();
+    
+    tableSectionContent.setCaption("Registered Datasets");
+    tableSectionContent.setIcon(FontAwesome.FLASK);
+    tableSectionContent.addComponent(this.table);
+    
+    tableSectionContent.setMargin(true);
+    tableSection.setMargin(true);
+    
+    tableSection.addComponent(tableSectionContent);
+    this.vert.addComponent(tableSection);
   }
 
   public void setSizeFull() {
@@ -176,7 +249,7 @@ public class SampleView extends Panel {
 
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
-    filterTable.setSizeFull();
+    //filterTable.setSizeFull();
 
     filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
     filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
@@ -195,7 +268,7 @@ public class SampleView extends Panel {
 
     filterTable.setContainerDataSource(this.datasets);
 
-    filterTable.setCaption("Registered Datasets");
+    //filterTable.setCaption("Registered Datasets");
 
     return filterTable;
   } 
