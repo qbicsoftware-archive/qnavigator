@@ -4,6 +4,7 @@ import org.tepi.filtertable.FilterTable;
 
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FileDownloader;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -21,21 +22,21 @@ public class ExperimentView extends Panel {
    */
   private static final long serialVersionUID = -9156593640161721690L;
   FilterTable table;
-  VerticalLayout vert;
+  VerticalLayout expview_content;
 
   private String id;
   private Button export;
 
   public ExperimentView(FilterTable table, IndexedContainer datasource, String id) {
-    vert = new VerticalLayout();
+    expview_content = new VerticalLayout();
     this.id = id;
 
     this.table = buildFilterTable();
     this.table.setSizeFull();
 
-    vert.addComponent(this.table);
-    vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    this.setContent(vert);
+    expview_content.addComponent(this.table);
+    expview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
+    this.setContent(expview_content);
 
     this.table.setContainerDataSource(datasource);
     this.tableClickChangeTreeView();
@@ -49,7 +50,7 @@ public class ExperimentView extends Panel {
 
   public void setSizeFull() {
     this.table.setSizeFull();
-    vert.setSizeFull();
+    expview_content.setSizeFull();
     super.setSizeFull();
   }
 
@@ -71,7 +72,7 @@ public class ExperimentView extends Panel {
     this.export = new Button("Export as TSV");
     buttonLayout.addComponent(this.export);
 
-    this.vert.addComponent(buttonLayout);
+    this.expview_content.addComponent(buttonLayout);
 
 
     this.table.setContainerDataSource(expInformation.samples);
@@ -86,25 +87,35 @@ public class ExperimentView extends Panel {
   }
 
   private void setStatistics(ExperimentInformation expInformation) {
-    this.vert.removeAllComponents();
-
-    Label vertical_spacer_small = new Label();
-    Label vertical_spacer_big = new Label();
+    this.expview_content.removeAllComponents();
     
-    vertical_spacer_small.setHeight("0.5em");
-    vertical_spacer_big.setHeight("2em");
+
+    // general information
+    VerticalLayout generalInfo = new VerticalLayout();
+    VerticalLayout generalInfoContent = new VerticalLayout();
+    generalInfoContent.setCaption("General Information");
+    generalInfoContent.setIcon(FontAwesome.INFO);
+    generalInfoContent.addComponent(new Label(String.format("Kind:\t %s", expInformation.experimentType)));
+    generalInfoContent.setMargin(true);
+    generalInfo.setMargin(true);
+    
+    generalInfo.addComponent(generalInfoContent);
+    expview_content.addComponent(generalInfo);
+    
     
     VerticalLayout statistics = new VerticalLayout();
 
+    HorizontalLayout statContent = new HorizontalLayout();
+    statContent.setCaption("Statistics");
+    statContent.setIcon(FontAwesome.BAR_CHART_O);
 
-    statistics.addComponent(new Label(String.format("Kind:\t %s", expInformation.experimentType)));
-    statistics.addComponent(new Label(String.format("# Samples:\t %s",
+    
+    statContent.addComponent(new Label(String.format("%s sample(s),",
         expInformation.numberOfSamples)));
-    statistics.addComponent(new Label(String.format("# Datasets:\t %s",
+    statContent.addComponent(new Label(String.format("%s dataset(s).",
         expInformation.numberOfDatasets)));
-
-    // statistics.addComponent(new Label(expInformation.propertiesFormattedString,
-    // ContentMode.HTML));
+    statContent.setMargin(true);
+    statContent.setSpacing(true);
 
     if (expInformation.numberOfDatasets > 0) {
 
@@ -112,16 +123,34 @@ public class ExperimentView extends Panel {
       if (expInformation.lastChangedSample != null) {
         lastSample = expInformation.lastChangedSample.split("/")[2];
       }
-      statistics.addComponent(new Label(String.format(
-          "Last Change: %s",
-          String.format("In Sample: %s. Date: %s", lastSample,
+      statContent.addComponent(new Label(String.format(
+          "Last change %s",
+          String.format("occurred in sample %s (%s)", lastSample,
               expInformation.lastChangedDataset.toString()))));
     }
-    this.vert.setSpacing(true);
-    this.vert.setMargin(true);
-    this.vert.addComponent(statistics);
-    this.vert.addComponent(vertical_spacer_big);
-    this.vert.addComponent(this.table);
+
+
+    statistics.addComponent(statContent);
+    statistics.setMargin(true);
+    expview_content.addComponent(statistics);
+
+    // statistics.addComponent(new Label(expInformation.propertiesFormattedString,
+    // ContentMode.HTML));
+
+    // table section
+    VerticalLayout tableSection = new VerticalLayout();
+    HorizontalLayout tableSectionContent = new HorizontalLayout();
+    tableSectionContent.setWidth("100%");
+    tableSectionContent.setCaption("Registered Samples");
+    tableSectionContent.setIcon(FontAwesome.FLASK);
+    tableSectionContent.addComponent(this.table);
+
+    tableSectionContent.setMargin(true);
+    tableSection.setMargin(true);
+
+    tableSection.addComponent(tableSectionContent);
+    expview_content.addComponent(tableSection);
+
   }
 
 
@@ -153,7 +182,6 @@ public class ExperimentView extends Panel {
 
     filterTable.setColumnReorderingAllowed(true);
 
-    filterTable.setCaption("Registered Samples");
 
     return filterTable;
   }
