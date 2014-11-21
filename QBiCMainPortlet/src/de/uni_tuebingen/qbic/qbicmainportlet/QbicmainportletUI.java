@@ -206,6 +206,18 @@ public class QbicmainportletUI extends UI {
     LevelView changeView = 
         new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state),
             new ChangePropertiesView());
+    LevelView maxQuantWorkflowView =
+        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new Button(
+            "maxQuantWorkflowView"));
+    QcMlWorkflowView qcmlView = new QcMlWorkflowView();
+    state.addObserver(qcmlView);
+    LevelView qcMlWorkflowView =
+        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state),
+            qcmlView);
+    LevelView testRunWorkflowView =
+        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new Button(
+            "testRunWorkflowView"));
+
 
 
     VerticalLayout navigatorContent = new VerticalLayout();
@@ -218,6 +230,10 @@ public class QbicmainportletUI extends UI {
     navigator.addView("project", projectView);
     navigator.addView("experiment", experimentView);
     navigator.addView("changePropertiesView", changeView);
+    navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
+    navigator.addView("qcMlWorkflow", qcMlWorkflowView);
+    navigator.addView("testRunWorkflow", testRunWorkflowView);
+  
 
     setNavigator(navigator);
 

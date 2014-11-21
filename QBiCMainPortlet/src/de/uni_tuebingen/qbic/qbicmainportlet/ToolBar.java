@@ -1,5 +1,9 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
+
 import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.vaadin.server.ThemeResource;
@@ -7,6 +11,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -109,6 +114,27 @@ public class ToolBar extends HorizontalLayout{
 		
 	}
 	
+	  class DropDownStateObserver extends DropDown implements Observer {
+	    PopupButton graph;
+	    public DropDownStateObserver(PopupButton graph) {
+	      this.graph = graph;
+	    }
+
+	    @Override
+	    public void update(Observable o, Object arg) {
+	      ArrayList<String> message = (ArrayList<String>) arg;
+	      this.removeAllComponents();
+	      if (message.get(1).equals("MZML")) {
+	        this.addComponent("MaxQuant", "maxQuantWorkflow");
+	        this.addComponent("qcML run", "qcMlWorkflow");
+	        this.addComponent("Test run", "testRunWorkflow");
+	        graph.setDescription("Execute Workflows for selected DataSet(s)");
+	        return;
+	      }
+	      graph.setDescription("No workflows available for current DataSet selection.");
+	    }
+	  }
+	
 	//Be aware that some style information are in the scss or css files!
 	private void createSpaceButtonSet() {
 		
@@ -147,9 +173,10 @@ public class ToolBar extends HorizontalLayout{
 		PopupButton graph = new PopupButton("Analysis");
 		graph.setIcon(new ThemeResource("graph.png"));
 		this.setButtonSize(graph, 128);
-		DropDown graphDropDown = new DropDown();
-		graphDropDown.addComponent("Execute Workflow");
-		graph.setContent(graphDropDown);
+		DropDownStateObserver graphDropDown = new DropDownStateObserver(graph);
+        State state = (State)UI.getCurrent().getSession().getAttribute("state");
+        state.addObserver(graphDropDown);
+        graph.setContent(graphDropDown);
 		
 		this.addComponent(planning);
 		this.addComponent(computer);

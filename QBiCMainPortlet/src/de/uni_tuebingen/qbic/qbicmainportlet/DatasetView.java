@@ -2,6 +2,7 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -11,6 +12,8 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Resource;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinPortletSession;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.BrowserFrame;
@@ -127,8 +130,48 @@ public class DatasetView extends VerticalLayout {
 				}else{
 					visualize.setEnabled(false);
 				}
+				 State state = (State)UI.getCurrent().getSession().getAttribute("state");
+	             ArrayList<String> message = new ArrayList<String>();
+	             message.add("DataSetView");
+	             message.add(datasetType);
+        String project = (String) table.getItem(next).getItemProperty("Project").getValue();
+        message.add(project);
+        message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
+        message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
+        message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
+        message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
+        DataHandler datahandler =
+            (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+        String space = datahandler.openBisClient.getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
+        message.add(space);
+        state.notifyObservers(message);
 			}
 		});
+		this.table.addValueChangeListener(new ValueChangeListener(){
+          @Override
+          public void valueChange(ValueChangeEvent event) {
+              //Nothing selected or more than one selected.
+              Set<Object> selectedValues = (Set<Object>)event.getProperty().getValue();
+              State state = (State)UI.getCurrent().getSession().getAttribute("state");
+              ArrayList<String> message = new ArrayList<String>();
+              message.add("DataSetView");
+              if(selectedValues != null && selectedValues.size() == 1){
+                Iterator<Object> iterator = selectedValues.iterator();
+                Object next = iterator.next();
+                String datasetType = (String)table.getItem(next).getItemProperty("Dataset Type").getValue();
+                message.add(datasetType);
+                message.add((String)table.getItem(next).getItemProperty("dl_link").getValue());
+                //TODO: communicate with workflow view via session attribute. What does a workflow need from openbis? We will see.
+                UI.getCurrent().getSession().setAttribute("DataSetView", message);
+              }else{
+                message.add("null");
+              }
+              
+              state.notifyObservers(message);
+              
+
+          }
+      });
 		//Assumes that table Value Change listner is enabling or disabling the button if preconditions are not fullfilled
 		visualize.addClickListener(new ClickListener(){
 			@Override
@@ -148,7 +191,18 @@ public class DatasetView extends VerticalLayout {
 			        subWindow.setContent(subContent);
 			        QbicmainportletUI ui = (QbicmainportletUI)UI.getCurrent();
 			        // Put some components in it
-			        BrowserFrame frame = new BrowserFrame("", new ExternalResource(url));
+			        Resource res = null;
+                    String dataset_type = (String)table.getItem(next).getItemProperty("Dataset Type").getValue();
+                    if(dataset_type.equals("QCML")){
+                      QcMlOpenbisSource re =  new QcMlOpenbisSource(url);
+                      StreamResource streamres = new StreamResource(re, "test-file");
+                      streamres.setMIMEType("application/xml");
+                      res = streamres;
+                    }
+                    else{
+                      res = new ExternalResource(url);
+                    }
+                    BrowserFrame frame = new BrowserFrame("", res);
 			        frame.setSizeFull();
 			        subContent.addComponent(frame);
 			        
