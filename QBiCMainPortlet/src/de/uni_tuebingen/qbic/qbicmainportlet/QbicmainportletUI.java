@@ -51,7 +51,7 @@ public class QbicmainportletUI extends UI {
       buildNoUserLogin();
     } else {
       DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-      System.out.println("QbicNavigator\nUser: " + LiferayAndVaadinUtils.getUser().getScreenName()
+      System.out.println("QbicNavigator\nUser logged in: " + LiferayAndVaadinUtils.getUser().getScreenName()
           + " at " + dateFormat.format(new Date()) + " UTC.");
       initConnection();
       initSessionAttributes();
@@ -161,12 +161,20 @@ public class QbicmainportletUI extends UI {
 
   private void buildLayout() {
     HierarchicalContainer tc = new HierarchicalContainer();
+    System.out.println("Filling HierarchicalTreeContainer..");
+    long startTime = System.nanoTime();
     fillHierarchicalTreeContainer(tc);
+    long endTime = System.nanoTime();
+    System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
+    
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     User user = LiferayAndVaadinUtils.getUser();
+    System.out.println("Preparing HomeView..");
+    startTime = System.nanoTime();
     SpaceInformation homeViewInformation = dh.getHomeInformation(user.getScreenName());
-
-
+    endTime = System.nanoTime();
+    System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
+    System.out.println("User " +user.getScreenName() + " has " + homeViewInformation.numberOfProjects + " projects.");
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
 
     LevelView spaceView =
@@ -183,9 +191,8 @@ public class QbicmainportletUI extends UI {
     LevelView datasetView =
         new LevelView(new ToolBar(ToolBar.View.Dataset), createTreeView(tc, state),
             new DatasetView());
-    // Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do
-    // this
-    JavaScript.getCurrent().execute("window.location.reload();");
+
+    
     LevelView sampleView =
         new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new SampleView());
     LevelView homeView;
@@ -218,7 +225,9 @@ public class QbicmainportletUI extends UI {
         new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new Button(
             "testRunWorkflowView"));
 
-
+    // Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do
+    // this
+    JavaScript.getCurrent().execute("window.location.reload();");
 
     VerticalLayout navigatorContent = new VerticalLayout();
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);

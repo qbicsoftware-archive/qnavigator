@@ -125,12 +125,14 @@ public class ToolBar extends HorizontalLayout{
 	      ArrayList<String> message = (ArrayList<String>) arg;
 	      this.removeAllComponents();
 	      if (message.get(1).equals("MZML")) {
+	        graph.setEnabled(true);
 	        this.addComponent("MaxQuant", "maxQuantWorkflow");
 	        this.addComponent("qcML run", "qcMlWorkflow");
 	        this.addComponent("Test run", "testRunWorkflow");
 	        graph.setDescription("Execute Workflows for selected DataSet(s)");
 	        return;
 	      }
+	      graph.setEnabled(false);
 	      graph.setDescription("No workflows available for current DataSet selection.");
 	    }
 	  }
