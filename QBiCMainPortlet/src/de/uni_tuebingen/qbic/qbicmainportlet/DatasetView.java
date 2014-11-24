@@ -109,7 +109,10 @@ public class DatasetView extends VerticalLayout {
 			// render requests.
 			portletsession.addPortletListener(mppl);
 		}
-		
+		/*
+		 * Update the visualize button.
+		 * It is only enabled, if the files can be visualized.
+		 */
 		this.table.addValueChangeListener(new ValueChangeListener(){
 			@Override
 			public void valueChange(ValueChangeEvent event) {
@@ -130,23 +133,11 @@ public class DatasetView extends VerticalLayout {
 				}else{
 					visualize.setEnabled(false);
 				}
-				 State state = (State)UI.getCurrent().getSession().getAttribute("state");
-	             ArrayList<String> message = new ArrayList<String>();
-	             message.add("DataSetView");
-	             message.add(datasetType);
-        String project = (String) table.getItem(next).getItemProperty("Project").getValue();
-        message.add(project);
-        message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
-        message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
-        message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
-        message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
-        DataHandler datahandler =
-            (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-        String space = datahandler.openBisClient.getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
-        message.add(space);
-        state.notifyObservers(message);
 			}
 		});
+		/*
+		 * Send message that in datasetview the following was selected. WorkflowViews get those messages and save them, if it is valid information for them.
+		 */
 		this.table.addValueChangeListener(new ValueChangeListener(){
           @Override
           public void valueChange(ValueChangeEvent event) {
@@ -160,18 +151,26 @@ public class DatasetView extends VerticalLayout {
                 Object next = iterator.next();
                 String datasetType = (String)table.getItem(next).getItemProperty("Dataset Type").getValue();
                 message.add(datasetType);
-                message.add((String)table.getItem(next).getItemProperty("dl_link").getValue());
-                //TODO: communicate with workflow view via session attribute. What does a workflow need from openbis? We will see.
-                UI.getCurrent().getSession().setAttribute("DataSetView", message);
+                String project = (String) table.getItem(next).getItemProperty("Project").getValue();
+                DataHandler datahandler =
+                    (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+                String space = datahandler.openBisClient.getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
+                message.add(project);
+                message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
+                message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
+                message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
+                message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
+                message.add(space);
+                state.notifyObservers(message);
               }else{
                 message.add("null");
               }
-              
               state.notifyObservers(message);
               
 
           }
       });
+		
 		//Assumes that table Value Change listner is enabling or disabling the button if preconditions are not fullfilled
 		visualize.addClickListener(new ClickListener(){
 			@Override
