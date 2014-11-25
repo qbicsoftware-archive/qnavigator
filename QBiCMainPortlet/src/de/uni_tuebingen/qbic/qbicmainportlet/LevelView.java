@@ -155,7 +155,7 @@ public class LevelView extends VerticalLayout implements View {
         System.out.println("Exception in LevelView.enter. mainComponent is DatasetView");
         // e.printStackTrace();
       }
-      ds.setInfo(name, type);
+      //ds.setInfo(name, type);
 
     } else if (this.mainComponent instanceof SampleView) {
       SampleView sv = (SampleView) this.mainComponent;

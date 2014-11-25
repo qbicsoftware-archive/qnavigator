@@ -952,9 +952,14 @@ public class DataHandler {
     for (DataSet d : datasets) {
 
       Object new_ds = dataset_container.addItem();
-      String code = d.getSampleIdentifierOrNull();
-      String sample = code.split("/")[2];
-      String project = sample.substring(0, 5);
+      String identifier = d.getSampleIdentifierOrNull();
+      Sample sampleObject = this.openBisClient.getSampleByIdentifier(identifier);
+      String sample = sampleObject.getCode();
+      Project projectObject = this.openBisClient.getProjectOfExperimentByIdentifier(sampleObject.getExperimentIdentifierOrNull());
+      String project = projectObject.getCode();
+      //String code = d.getSampleIdentifierOrNull();
+      //String sample = code.split("/")[2];
+      //String project = sample.substring(0, 5);
       Date date = d.getRegistrationDate();
 
       SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");

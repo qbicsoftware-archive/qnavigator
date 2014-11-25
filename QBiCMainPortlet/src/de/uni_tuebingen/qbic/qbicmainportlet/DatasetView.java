@@ -13,6 +13,8 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Resource;
+import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinPortletSession;
 import com.vaadin.server.VaadinSession;
@@ -24,11 +26,12 @@ import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class DatasetView extends VerticalLayout {
+public class DatasetView extends Panel {
 	
 	
 	/**
@@ -39,6 +42,7 @@ public class DatasetView extends VerticalLayout {
 	private Label general_information;
 	private final FilterTable table;
 	private IndexedContainer datasets;
+	VerticalLayout vert;
 	private ButtonLink download;
 	private final String DOWNLOAD_BUTTON_CAPTION = "Download";
 	private final String VISUALIZE_BUTTON_CAPTION = "Visualize";
@@ -47,42 +51,78 @@ public class DatasetView extends VerticalLayout {
             "File Name", "File Type", "Dataset Type", "Registration Date" , "Validated", "File Size"};
 	
 	public DatasetView() {
-		this.table = buildFilterTable();
-		this.buildLayout();
+	    this.vert = new VerticalLayout();
+	    this.table = buildFilterTable();
+		//this.buildLayout();
+	    this.setContent(vert);
 	}
 	
 	public DatasetView(IndexedContainer dataset){
+	    this.vert = new VerticalLayout();
 		this.datasets = dataset;
 		this.table = buildFilterTable();
 		this.buildLayout();
 		this.setContainerDataSource(this.datasets);
-		
+		this.setContent(vert);
 	}
 	
 	
 	public void setContainerDataSource(IndexedContainer newDataSource){
 		this.datasets = (IndexedContainer) newDataSource;
+		this.buildLayout();
 		this.table.setContainerDataSource(this.datasets);
 		
 		this.table.setColumnCollapsed("state", true);
 
 		this.table.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
 		
-		this.setSizeFull();
 		this.table.setSizeFull();
 	}
 	
-	public void setInfo(String name, String entity) {		
-		this.general_information.setValue(String.format("Name: %s\nEntity Type: %s\n",name));
-	}
+
+  //public void setInfo(String name, String entity) {		
+	//	this.general_information.setValue(String.format("Name: %s\nEntity Type: %s\n",name));
+	//}
+	
 	/**
 	 * Precondition: {DatasetView#table} has to be initialized. e.g. with {DatasetView#buildFilterTable} If it is not, strange behaviour has to be expected.
 	 * builds the Layout of this view. 
 	 */
 	private void buildLayout(){
 		//Layout
-		this.setSizeFull();
-		this.setVisible(true);
+		//this.setSizeFull();
+		//this.setVisible(true);
+	    this.vert.removeAllComponents();
+	    
+	    VerticalLayout statistics = new VerticalLayout();
+	      HorizontalLayout statContent = new HorizontalLayout();
+	      statContent.setCaption("Statistics");
+	      statContent.setIcon(FontAwesome.BAR_CHART_O);
+	      statContent.addComponent(new Label(String.format("%s dataset(s).",
+	          this.datasets.size())));
+	      statContent.setMargin(true);
+	      statContent.setSpacing(true);
+	      statistics.addComponent(statContent);
+	      statistics.setMargin(true);
+	      this.vert.addComponent(statistics);
+	      
+	      
+	      // Table (containing datasets) section
+	      VerticalLayout tableSection = new VerticalLayout();
+	      HorizontalLayout tableSectionContent = new HorizontalLayout();
+	      
+	      tableSectionContent.setCaption("Registered Datasets");
+	      tableSectionContent.setIcon(FontAwesome.FLASK);
+	      tableSectionContent.addComponent(this.table);
+	      
+	      tableSectionContent.setMargin(true);
+	      tableSection.setMargin(true);
+	      
+	      tableSection.addComponent(tableSectionContent);
+	      this.vert.addComponent(tableSection);
+	      
+	      this.table.setSizeFull();
+	    
 		HorizontalLayout buttonLayout = new HorizontalLayout();
 	    buttonLayout.setHeight(null);
 	    buttonLayout.setWidth("100%");
@@ -95,9 +135,6 @@ public class DatasetView extends VerticalLayout {
 		visualize.setEnabled(false);
 		buttonLayout.addComponent(this.download);
 		buttonLayout.addComponent(visualize);
-		
-		
-		
 		
 		
 		MpPortletListener mppl  = new MpPortletListener(this.download, this.table);
@@ -220,14 +257,12 @@ public class DatasetView extends VerticalLayout {
 			}
 		});
 		
-		this.general_information = new Label("Name: \nEntity Type: \nOwner: \n", Label.CONTENT_PREFORMATTED);
-		this.general_information.setCaption("General Information: ");
+		//this.general_information = new Label("Name: \nEntity Type: \nOwner: \n", Label.CONTENT_PREFORMATTED);
+		//this.general_information.setCaption("General Information: ");
 		
-		this.addComponent(this.general_information);
+		//this.addComponent(this.general_information);
+        this.vert.addComponent(buttonLayout);  
 		
-		this.addComponent(this.table);
-		this.table.setSizeFull();
-		this.addComponent(buttonLayout);
 	}
 	
 	private FilterTable buildFilterTable() {
