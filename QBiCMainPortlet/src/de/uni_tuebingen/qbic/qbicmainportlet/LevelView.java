@@ -198,6 +198,7 @@ public class LevelView extends VerticalLayout implements View {
         // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
         Project project = dh.openBisClient.getProjectByCode(name);
         String projectIdentifier = project.getIdentifier();
+
         pv.setContainerDataSource(dh.getProjectInformation(projectIdentifier), name);
       } catch (Exception e) {
         System.out.println("Exception in LevelView.enter. mainComponent is ProjectView");

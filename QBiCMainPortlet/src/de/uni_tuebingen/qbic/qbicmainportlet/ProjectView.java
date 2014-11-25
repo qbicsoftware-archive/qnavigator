@@ -103,15 +103,12 @@ public class ProjectView extends Panel {
   private void setStatistics(ProjectInformation projectInformation) {
     projectview_content.removeAllComponents();
 
-
-
     // Project description
     VerticalLayout projDescription = new VerticalLayout();
     VerticalLayout projDescriptionContent = new VerticalLayout();
     
-    
     Label descContent = new Label("none");
-    if (!projectInformation.description.isEmpty()) {
+    if (!("".equals(projectInformation.description))) {
       descContent = new Label(projectInformation.description);
     }
 
@@ -144,8 +141,10 @@ public class ProjectView extends Panel {
     // TODO email address according to project ?
 
     // members section
+
     VerticalLayout members_section = new VerticalLayout();
     Component membersContent = getMembersComponent(projectInformation.members);
+
     membersContent.setIcon(FontAwesome.USERS);
     membersContent.setCaption("Members");
     members_section.addComponent(membersContent);
@@ -163,10 +162,13 @@ public class ProjectView extends Panel {
     statContent.setIcon(FontAwesome.BAR_CHART_O);
     statContent.addComponent(new Label(String.format("%s experiment(s),",
         projectInformation.numberOfExperiments)));
+
     statContent.addComponent(new Label(String.format("%s sample(s),",
         projectInformation.numberOfSamples)));
+
     statContent.addComponent(new Label(String.format("%s dataset(s).",
         projectInformation.numberOfDatasets)));
+
     statContent.setMargin(true);
     statContent.setSpacing(true);
 
