@@ -900,6 +900,10 @@ public class OpenBisClient {// implements Serializable {
    * @return entity code as string in human readable text
    */
   public String openBIScodeToString(String entityCode) {
+    if(entityCode == null) {
+      return "";
+    }
+    else {
     entityCode = WordUtils.capitalizeFully(entityCode.replace("_", " ").toLowerCase());
     String edit_string =
         entityCode.replace("Ngs", "NGS").replace("Hla", "HLA").replace("Rna", "RNA")
@@ -908,6 +912,7 @@ public class OpenBisClient {// implements Serializable {
       edit_string = edit_string.replace("Q ", "");
     }
     return edit_string;
+    }
   }
 
   /**

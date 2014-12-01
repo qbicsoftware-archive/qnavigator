@@ -83,7 +83,6 @@ public class ProjectView extends Panel {
     this.id = id;
 
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    System.out.println(dh.connectedPersons);
     StreamResource sr =
         dh.getTSVStream(dh.containerToString(projectInformation.experiments), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);

@@ -200,15 +200,28 @@ public class DataHandler {
                                                                                                 // projects,
                                                                                                 // null);
       //List<Sample> samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);// this.openBisClient.facade.listSamplesForProjects(tmp_list_str);
-      List<String> experiment_identifiers_tmp = new ArrayList<String>();
-      for(Experiment exp: experiments_tmp) {
-        experiment_identifiers_tmp.add(exp.getIdentifier());
+      List<Sample> samplesOfSpace = new ArrayList<Sample>();
+      List<String> project_identifiers_tmp = new ArrayList<String>();
+      for(Project p: projects) {
+        project_identifiers_tmp.add(p.getIdentifier());
       }
-      List<Sample> samplesOfSpace = this.openBisClient.facade.listSamplesForExperiments(experiment_identifiers_tmp);
-      number_of_samples += samplesOfSpace.size();
       
+      if(project_identifiers_tmp.size() > 0) {
+        samplesOfSpace = this.openBisClient.facade.listSamplesForProjects(project_identifiers_tmp);
+      } else {
+        samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);
+      }
+      //samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);
+      number_of_samples += samplesOfSpace.size();
+      List<String> sample_identifiers_tmp = new ArrayList<String>();
+      for(Sample s: samplesOfSpace) {
+        sample_identifiers_tmp.add(s.getIdentifier());
+      }
       //List<DataSet> datasets = this.openBisClient.getDataSetsOfSpaceByIdentifier(spaceIdentifier);// this.openBisClient.facade.listDataSetsForExperiments(tmp_experiment_identifier_lis);
-      List<DataSet> datasets = this.openBisClient.facade.listDataSetsForExperiments(experiment_identifiers_tmp);
+      List<DataSet> datasets = new ArrayList<DataSet>();
+      if (sample_identifiers_tmp.size() > 0) {
+        datasets = this.openBisClient.facade.listDataSetsForSamples(sample_identifiers_tmp);
+      }
       long end = System.currentTimeMillis();
       System.out.println("Took " + (end - start)/1000.0);
 
@@ -553,7 +566,7 @@ public class DataHandler {
         // TODO check for source of nullpointer exception !
         // seems like first the project id gets here
         Experiment exp = this.openBisClient.getExperimentByCode(id);
-        ret.identifier = exp.getIdentifier();
+        //ret.identifier = exp.getIdentifier();
         ret.experimentType = this.openBisClient.openBIScodeToString(exp.getExperimentTypeCode());
         ret.samples = this.getSamples(id, "experiment");
         ret.numberOfSamples = ret.samples.size();
