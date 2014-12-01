@@ -224,7 +224,8 @@ public class QbicmainportletUI extends UI {
     LevelView testRunWorkflowView =
         new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new Button(
             "testRunWorkflowView"));
-
+    LevelView searchView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), 
+        new SearchForUsers());
     // Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do
     // this
     JavaScript.getCurrent().execute("window.location.reload();");
@@ -242,6 +243,8 @@ public class QbicmainportletUI extends UI {
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
     navigator.addView("qcMlWorkflow", qcMlWorkflowView);
     navigator.addView("testRunWorkflow", testRunWorkflowView);
+    navigator.addView("searchView", searchView);
+
   
 
     setNavigator(navigator);

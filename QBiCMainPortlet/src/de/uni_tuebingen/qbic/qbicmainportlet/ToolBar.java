@@ -161,6 +161,7 @@ public class ToolBar extends HorizontalLayout{
 		DropDown integrationDropDown = new DropDown();
 		// Dataset View
 		integrationDropDown.addComponent("View Datasets","datasetView");
+		integrationDropDown.addComponent("Search for users", "searchView");
 		//integrationDropDown.addComponent("Change Status", "changePropertiesView");
 
 		computer.setContent(integrationDropDown);
@@ -193,7 +194,6 @@ public class ToolBar extends HorizontalLayout{
 		planning.setEnabled(false);
 		dna.setEnabled(false);
 		graph.setEnabled(false);
-		
 	}
 	
 	private void setButtonSize(PopupButton button, Integer button_size_px){

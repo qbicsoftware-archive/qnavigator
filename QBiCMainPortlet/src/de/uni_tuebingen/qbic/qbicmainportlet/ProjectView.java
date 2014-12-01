@@ -1,30 +1,22 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import org.tepi.filtertable.FilterTable;
-
-import java.util.ArrayList;
 import java.util.Set;
 
-import ch.systemsx.cisd.common.shared.basic.string.StringUtils;
+import org.tepi.filtertable.FilterTable;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -91,6 +83,7 @@ public class ProjectView extends Panel {
     this.id = id;
 
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    System.out.println(dh.connectedPersons);
     StreamResource sr =
         dh.getTSVStream(dh.containerToString(projectInformation.experiments), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
