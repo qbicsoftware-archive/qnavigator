@@ -6,8 +6,8 @@
         <portlet-name>QbicmainportletApplicationPortlet</portlet-name>
         <display-name>QBiCMainPortlet</display-name>
 
-       <!-- <portlet-class>de.uni_tuebingen.qbic.qbicmainportlet.CustomVaadinPortlet</portlet-class> -->
-       <portlet-class>com.vaadin.server.VaadinPortlet</portlet-class>
+        <portlet-class>de.uni_tuebingen.qbic.qbicmainportlet.CustomVaadinPortlet</portlet-class>
+       <!--<portlet-class>com.vaadin.server.VaadinPortlet</portlet-class> -->
         <init-param>
             <name>UI</name>
             <value>de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletUI</value>

@@ -1,22 +1,58 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletSession;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
+import javax.portlet.ResourceURL;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
+import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.RequestHandler;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinPortletService;
+import com.vaadin.server.VaadinPortletSession;
+import com.vaadin.server.WrappedPortletSession;
+import com.vaadin.server.VaadinPortletSession.PortletListener;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinResponse;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.GridLayout;
@@ -39,6 +75,7 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
 @Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
+
 public class QbicmainportletUI extends UI {
 
   private OpenBisClient openBisConnection;
@@ -46,17 +83,15 @@ public class QbicmainportletUI extends UI {
 
   @Override
   protected void init(VaadinRequest request) {
-
     if (LiferayAndVaadinUtils.getUser() == null) {
-      buildNoUserLogin();
+      buildNoUserLogin();    
     } else {
       DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
       System.out.println("QbicNavigator\nUser logged in: " + LiferayAndVaadinUtils.getUser().getScreenName()
           + " at " + dateFormat.format(new Date()) + " UTC.");
       initConnection();
       initSessionAttributes();
-      buildLayout();
-
+      buildLayout(); 
     }
   }
 
@@ -267,7 +302,14 @@ public class QbicmainportletUI extends UI {
 
 
   }
-
+  
+  public PortletSession getPortletSession(){
+    VaadinRequest vaadinRequest= UI.getCurrent().getSession().getService().getCurrentRequest();
+    WrappedPortletSession wrappedPortletSession = (WrappedPortletSession)vaadinRequest.getWrappedSession();
+    return wrappedPortletSession.getPortletSession();
+  }
+  
+  
   private void initSessionAttributes() {
     if (this.openBisConnection == null) {
       this.initConnection();
@@ -285,7 +327,7 @@ public class QbicmainportletUI extends UI {
     // TODO LiferayUtils ?!
     this.openBisConnection =
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
-            manager.getDataSourceURL(), true); // LiferayAndVaadinUtils.getOpenBisClient();
+            manager.getDataSourceUrl(), true); // LiferayAndVaadinUtils.getOpenBisClient();
     addDetachListener(new DetachListener() {
 
       @Override

@@ -249,8 +249,9 @@ public class DataHandler {
         
         for(Experiment exp :experiments) {
           experiment_identifiers.add(exp.getIdentifier());
-          if (exp.getExperimentTypeCode().equals("Q_PROJECT_DETAILS")) {
-           List<Qperson> persons = this.parseConnectedPeopleInformation(exp.getProperties().get("Q_PERSONS"));
+          if (exp.getExperimentTypeCode().equals("Q_PROJECT_DETAILS") && exp.getProperties().get("Q_PERSONS") != null) {
+           
+            List<Qperson> persons = this.parseConnectedPeopleInformation(exp.getProperties().get("Q_PERSONS"));
            
            for(Qperson person: persons) {
              
@@ -877,6 +878,8 @@ public class DataHandler {
     ret.remove("etlserver"); // OpenBIS user
     ret.remove("admin"); // OpenBIS user
     ret.remove("QBIC"); // OpenBIS user
+    ret.remove("sauron");
+    //ret.remove("babysauron");
     return ret;
   }
 

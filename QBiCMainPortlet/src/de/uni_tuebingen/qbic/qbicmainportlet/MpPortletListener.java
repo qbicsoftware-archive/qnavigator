@@ -76,7 +76,9 @@ public class MpPortletListener implements PortletListener,
   @Override
   public void handleRenderRequest(RenderRequest request, RenderResponse response, UI uI) {
     this.resURL = response.createResourceURL();
+    System.out.println("MPPORTLETLISTENER URL = " + resURL.toString());
     resURL.setResourceID(RESOURCE_ID);
+    System.out.println("MPPORTLETLISTENER URL = " + resURL.toString());
     // System.out.println("resourceURL initialized");
     request.setAttribute(RESOURCE_ATTRIBUTE, resURL);
     open.setResource(new ExternalResource(resURL.toString()));
@@ -99,6 +101,7 @@ public class MpPortletListener implements PortletListener,
   @Override
   public void handleResourceRequest(ResourceRequest request, ResourceResponse response, UI uI) {
     // resource url was clicked
+    System.out.println("Request resource id: " + request.getResourceID());
     if (RESOURCE_ID.equals(request.getResourceID()) && this.currentSelectedTableIndices != null) {
       handleRequestHelper2(response, request, uI);
     }
@@ -107,7 +110,6 @@ public class MpPortletListener implements PortletListener,
 
   private boolean handleRequestHelper2(ResourceResponse response, ResourceRequest request, UI uI) {
     boolean ret = true;
-    try {
       // int bufferSize = 0;
       // if (bufferSize <= 0 || bufferSize > MAX_BUFFER_SIZE) {
       int bufferSize = DEFAULT_BUFFER_SIZE;
@@ -132,6 +134,7 @@ public class MpPortletListener implements PortletListener,
           file_sizes[i] =
               (Long) this.table.getItem(iterator.next()).getItemProperty("file_size_bytes")
                   .getValue();
+          System.out.println(file_sizes[i]);
           i++;
         }
 
@@ -156,10 +159,13 @@ public class MpPortletListener implements PortletListener,
           Object next = iterator.next();
           String fileName =
               (String) this.table.getItem(next).getItemProperty("File Name").getValue();
+          System.out.println(fileName);
           int bytesRead = 0;
 
           fis =
               dataHandler.getDatasetStream((String) this.table.getItem(next)
+                  .getItemProperty("CODE").getValue());
+          System.out.println((String) this.table.getItem(next)
                   .getItemProperty("CODE").getValue());
 
           BufferedInputStream fif = new BufferedInputStream(fis);
@@ -195,8 +201,8 @@ public class MpPortletListener implements PortletListener,
           }
 
         }
-
-      } finally {
+        out.close();
+ /*
         try {
           // try to close stream
           if (zipWriter != null) {
@@ -207,9 +213,7 @@ public class MpPortletListener implements PortletListener,
           }
         } catch (IOException e1) {
           // NOP
-        }
-      }
-      // }
+        }  */
 
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -217,6 +221,7 @@ public class MpPortletListener implements PortletListener,
       ret = false;
     }
     System.out.println("Download finished.");
+    System.out.println("return " + ret);
     return ret;
   }
 
@@ -253,6 +258,7 @@ public class MpPortletListener implements PortletListener,
             file_sizes[i] =
                 (Long) this.table.getItem(iterator.next()).getItemProperty("file_size_bytes")
                     .getValue();
+            System.out.println(file_sizes[i]);
             i++;
           }
 
@@ -276,12 +282,14 @@ public class MpPortletListener implements PortletListener,
             Object next = iterator.next();
             String fileName =
                 (String) this.table.getItem(next).getItemProperty("File Name").getValue();
+            System.out.println(fileName);
             int bytesRead = 0;
 
             fis =
                 dataHandler.getDatasetStream((String) this.table.getItem(next)
                     .getItemProperty("CODE").getValue());
-
+            System.out.println((String) this.table.getItem(next)
+                    .getItemProperty("CODE").getValue());
             BufferedInputStream fif = new BufferedInputStream(fis);
 
             TarEntry tar_entry = new TarEntry(fileName + String.valueOf(i));
@@ -410,8 +418,12 @@ public class MpPortletListener implements PortletListener,
         }
         this.currentSelectedTableIndices = null;
       } else if (this.currentSelectedTableIndices.size() > 1) {
+        if(this.resURL == null){System.out.println("res is null");}
+        if(this.open == null) {System.out.println("open is null??");}
+        this.resURL.setResourceID(RESOURCE_ID);
+        System.out.println(this.resURL);
         this.open.setResource(new ExternalResource(this.resURL.toString()));
-        this.open.setEnabled(UI.getCurrent().getPage().getWebBrowser().isChrome());
+        this.open.setEnabled(true);//UI.getCurrent().getPage().getWebBrowser().isChrome());
       } else {
         // nothing selected. Probably will never occur, because then the set is probably null
         this.currentSelectedTableIndices = null;

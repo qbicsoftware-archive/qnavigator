@@ -1,11 +1,35 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.AbstractMap;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.portlet.PortletException;
+import javax.portlet.PortletSession;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
+import javax.portlet.ResourceURL;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarOutputStream;
+
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.UI;
+
+import de.uni_tuebingen.qbic.main.ConfigurationManager;
+import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 
 /**
  * 
@@ -36,10 +60,73 @@ public class CustomVaadinPortlet extends VaadinPortlet {
      */
     @Override
     public String getStaticFileLocation(final VaadinRequest request) {
-      return request.getContextPath();
+      return super.getStaticFileLocation(request);
+      //self contained approach:
+      //return request.getContextPath();
     }
   }
-
+  
+  private boolean resUrlNotSet = true;
+  public static final String RESOURCE_ID = "mainPortletResourceId";
+  public static final String RESOURCE_ATTRIBUTE = "resURL";
+  @Override
+  protected void doDispatch(javax.portlet.RenderRequest request,
+      javax.portlet.RenderResponse response)
+throws javax.portlet.PortletException,
+      java.io.IOException{
+    if(resUrlNotSet){
+      ResourceURL resURL = response.createResourceURL();
+      resURL.setResourceID(RESOURCE_ID);
+      request.getPortletSession().setAttribute(RESOURCE_ATTRIBUTE,resURL,PortletSession.APPLICATION_SCOPE);
+      resUrlNotSet = false;
+    }
+    super.doDispatch(request, response);
+  }
+  @Override
+  public void  serveResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
+    if(request.getResourceID().equals("openbisUnreachable")){
+      response.setContentType("text/plain");
+      response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_GATEWAY_TIMEOUT));
+      response.getWriter().append(
+          "Internal Error.\nRetry later or contact your project manager.\n"+
+          "Time: " + (new Date()).toString());
+    }else if(request.getResourceID().equals(RESOURCE_ID)){
+      serveDownloadResource(request, response);
+    }else{
+      super.serveResource(request, response);
+    }
+  }
+  
+  public void serveDownloadResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
+    DataHandler dataHandler = (DataHandler)request.getPortletSession().getAttribute("datahandler",PortletSession.APPLICATION_SCOPE);
+    Map<String, AbstractMap.SimpleEntry<InputStream, Long>> entries = (Map<String, AbstractMap.SimpleEntry<InputStream, Long>>)request.getPortletSession().getAttribute("qbic_download",PortletSession.APPLICATION_SCOPE);
+    request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
+    if(dataHandler == null || entries == null || !(dataHandler instanceof DataHandler) || !(entries instanceof Map<?,?>)){
+      response.setContentType("text/plain");
+      response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_NOT_FOUND));
+      response.getWriter().append(
+          "Oh Dear. Something went wrong.\nRetry later or contact your project manager.\n"+
+          "Time: " + (new Date()).toString());
+      return;
+    }
+    OutputStream out = null;
+    TarWriter tarWriter = new TarWriter();
+    String filename = "all.tar";
+      // Sets content type
+      response.setContentType("application/x-tar");
+      String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
+      response.setProperty("Content-Disposition", contentDispositionValue);
+      
+      long tarFileLength = tarWriter.computeTarLength(entries);
+      // response.setContentLength((int) tarFileLength);
+      // For some reason setContentLength does not work
+      response.setProperty("Content-Length", String.valueOf(tarFileLength));
+      tarWriter.setOutputStream(response.getPortletOutputStream());
+      tarWriter.writeEntry(entries);
+      tarWriter.closeStream();
+  }
+  
+  
   @Override
   protected VaadinPortletService createPortletService(
       final DeploymentConfiguration deploymentConfiguration) throws ServiceException {
