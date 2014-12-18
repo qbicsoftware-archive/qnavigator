@@ -74,7 +74,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       javax.portlet.RenderResponse response)
 throws javax.portlet.PortletException,
       java.io.IOException{
-    if(resUrlNotSet){
+    if(request.getPortletSession().getAttribute(RESOURCE_ATTRIBUTE,PortletSession.APPLICATION_SCOPE) == null){
       ResourceURL resURL = response.createResourceURL();
       // get Resource ID ?
       resURL.setResourceID(RESOURCE_ID);

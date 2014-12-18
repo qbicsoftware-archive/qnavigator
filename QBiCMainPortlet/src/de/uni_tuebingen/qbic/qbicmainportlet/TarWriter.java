@@ -124,15 +124,20 @@ public class TarWriter {
       long totalWritten = 0;
       int bytesRead = 0;
       final byte[] buffer = new byte[BUFFER_SIZE];
+      System.out.println("File: " + entryName + ", Size: " + Long.toString(fileSize));
+      
 
       while ((bytesRead = entry.read(buffer)) > 0) {
+        //System.out.println("bytes read: " + Integer.toString(bytesRead) + " buffer.length: " + Integer.toString(buffer.length));
         tar.write(buffer, 0, bytesRead);
         totalWritten += bytesRead;
+        //System.out.println("totalWritten: " + totalWritten);
         if (totalWritten >= buffer.length) {
           // Avoid chunked encoding for small resources
           tar.flush();
         }
       }
+      //System.out.println("bytesRead");
       tar.closeEntry();
 
       // try to close input stream
