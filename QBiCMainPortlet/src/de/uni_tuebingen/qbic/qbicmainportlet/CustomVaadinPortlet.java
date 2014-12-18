@@ -78,7 +78,7 @@ throws javax.portlet.PortletException,
       ResourceURL resURL = response.createResourceURL();
       // get Resource ID ?
       resURL.setResourceID(RESOURCE_ID);
-      request.getPortletSession().setAttribute(RESOURCE_ATTRIBUTE,resURL,PortletSession.APPLICATION_SCOPE);
+      request.getPortletSession().setAttribute(RESOURCE_ATTRIBUTE,resURL.toString(),PortletSession.APPLICATION_SCOPE);
       resUrlNotSet = false;
     }
     super.doDispatch(request, response);
@@ -104,7 +104,7 @@ throws javax.portlet.PortletException,
   public void serveDownloadResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
     DataHandler dataHandler = (DataHandler)request.getPortletSession().getAttribute("datahandler",PortletSession.APPLICATION_SCOPE);
     Map<String, AbstractMap.SimpleEntry<InputStream, Long>> entries = (Map<String, AbstractMap.SimpleEntry<InputStream, Long>>)request.getPortletSession().getAttribute("qbic_download",PortletSession.APPLICATION_SCOPE);
-    request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
+    //request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
     System.out.println(entries);
     /*
     if(dataHandler == null || entries == null || !(dataHandler instanceof DataHandler) || !(entries instanceof Map<?,?>)){

@@ -140,7 +140,8 @@ public class TarWriter {
         entry.close();
       }
     } catch (IOException e1) {
-      System.out.println("TarTest::writeEntry failed for some reason");
+      e1.printStackTrace();
+      //System.out.println("TarTest::writeEntry failed for some reason");
     }
   }
   /**

@@ -194,8 +194,8 @@ public class DatasetView extends Panel {
                 (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
             PortletSession portletSession =
                 ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-            ResourceURL resourceUrl =
-                (ResourceURL) portletSession.getAttribute("resURL",
+            String resourceUrl =
+                (String) portletSession.getAttribute("resURL",
                     PortletSession.APPLICATION_SCOPE);
             
             // TODO use table to create map and save it in portletSession!!    
@@ -217,7 +217,7 @@ public class DatasetView extends Panel {
                   String datasetChildName =
                       (String) table.getItem(itemID).getItemProperty("File Name").getValue();
                   InputStream datasetChildStream =
-                      dataHandler.getDatasetStream(datasetChildCode);
+                      dataHandler.getDatasetStream(datasetChildCode, folderName);
                   Long datasetChildSize =
                       (Long) table.getItem(itemID).getItemProperty("file_size_bytes").getValue();
                   
@@ -243,9 +243,9 @@ public class DatasetView extends Panel {
             
             System.out.println(selected_datasets);
             // set Map with marked datasets as session attribute
-            UI.getCurrent().getSession().setAttribute("qbic_download",selected_datasets);
-        
-            download.setResource(new ExternalResource(resourceUrl.toString()));
+            portletSession.setAttribute("qbic_download", selected_datasets, PortletSession.APPLICATION_SCOPE);
+            
+            download.setResource(new ExternalResource(resourceUrl));
             download.setEnabled(true);// UI.getCurrent().getPage().getWebBrowser().isChrome());
           } else {
             // nothing selected. Probably will never occur, because then the set is probably null

@@ -1049,7 +1049,6 @@ public class DataHandler {
       Timestamp ts = Timestamp.valueOf(dateString);
 
       FileInfoDssDTO[] filelist = d.listFiles("original", true);
-      System.out.println(filelist[0]);
 
       // recursive test
       registerDatasetInTable(d,filelist, dataset_container, project, sample, ts, sampleType, null);
@@ -1147,6 +1146,14 @@ public class DataHandler {
     IOpenbisServiceFacade facade = openBisClient.getFacade();
     DataSet dataSet = facade.getDataSet(datasetCode);
     FileInfoDssDTO[] filelist = dataSet.listFiles("original", false);
+    return dataSet.getFile(filelist[0].getPathInDataSet());
+  }
+  
+  public InputStream getDatasetStream(String datasetCode, String folder) {
+
+    IOpenbisServiceFacade facade = openBisClient.getFacade();
+    DataSet dataSet = facade.getDataSet(datasetCode);
+    FileInfoDssDTO[] filelist = dataSet.listFiles("original/" + folder, false);
     return dataSet.getFile(filelist[0].getPathInDataSet());
   }
 
