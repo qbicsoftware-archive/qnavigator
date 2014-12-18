@@ -76,6 +76,7 @@ throws javax.portlet.PortletException,
       java.io.IOException{
     if(resUrlNotSet){
       ResourceURL resURL = response.createResourceURL();
+      // get Resource ID ?
       resURL.setResourceID(RESOURCE_ID);
       request.getPortletSession().setAttribute(RESOURCE_ATTRIBUTE,resURL,PortletSession.APPLICATION_SCOPE);
       resUrlNotSet = false;
@@ -84,13 +85,16 @@ throws javax.portlet.PortletException,
   }
   @Override
   public void  serveResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
+    System.out.println(request.getResourceID());
+    System.out.println(RESOURCE_ID);
     if(request.getResourceID().equals("openbisUnreachable")){
       response.setContentType("text/plain");
       response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_GATEWAY_TIMEOUT));
       response.getWriter().append(
           "Internal Error.\nRetry later or contact your project manager.\n"+
           "Time: " + (new Date()).toString());
-    }else if(request.getResourceID().equals(RESOURCE_ID)){
+    }
+    else if(request.getResourceID().equals(RESOURCE_ID)){
       serveDownloadResource(request, response);
     }else{
       super.serveResource(request, response);
@@ -101,6 +105,8 @@ throws javax.portlet.PortletException,
     DataHandler dataHandler = (DataHandler)request.getPortletSession().getAttribute("datahandler",PortletSession.APPLICATION_SCOPE);
     Map<String, AbstractMap.SimpleEntry<InputStream, Long>> entries = (Map<String, AbstractMap.SimpleEntry<InputStream, Long>>)request.getPortletSession().getAttribute("qbic_download",PortletSession.APPLICATION_SCOPE);
     request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
+    System.out.println(entries);
+    /*
     if(dataHandler == null || entries == null || !(dataHandler instanceof DataHandler) || !(entries instanceof Map<?,?>)){
       response.setContentType("text/plain");
       response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_NOT_FOUND));
@@ -109,20 +115,24 @@ throws javax.portlet.PortletException,
           "Time: " + (new Date()).toString());
       return;
     }
+    */
     OutputStream out = null;
     TarWriter tarWriter = new TarWriter();
     String filename = "all.tar";
       // Sets content type
-      response.setContentType("application/x-tar");
-      String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
-      response.setProperty("Content-Disposition", contentDispositionValue);
-      
+     response.setContentType("application/x-tar");
+     String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
+     response.setProperty("Content-Disposition", contentDispositionValue);
+     
+     if(entries != null) {
       long tarFileLength = tarWriter.computeTarLength(entries);
       // response.setContentLength((int) tarFileLength);
       // For some reason setContentLength does not work
       response.setProperty("Content-Length", String.valueOf(tarFileLength));
       tarWriter.setOutputStream(response.getPortletOutputStream());
       tarWriter.writeEntry(entries);
+      }
+     
       tarWriter.closeStream();
   }
   

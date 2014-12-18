@@ -1,8 +1,9 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import org.tepi.filtertable.FilterTable;
+import org.tepi.filtertable.FilterTreeTable;
 
-import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
@@ -26,9 +27,11 @@ public class SampleView extends Panel {
    * 
    */
   private static final long serialVersionUID = 377522772714840963L;
-  FilterTable table;
+  //FilterTable table;
+  FilterTreeTable table;
   VerticalLayout vert;
-  private IndexedContainer datasets;
+  //private IndexedContainer datasets;
+  private HierarchicalContainer datasets;
   private ButtonLink download;
   private Button export;
   private final String DOWNLOAD_BUTTON_CAPTION = "Download";
@@ -37,7 +40,7 @@ public class SampleView extends Panel {
 
   private String id;
 
-  public SampleView(FilterTable table, IndexedContainer datasource, String id) {
+  public SampleView(FilterTable table, HierarchicalContainer datasource, String id) {
     this.vert = new VerticalLayout();
     this.id = id;
 
@@ -55,8 +58,8 @@ public class SampleView extends Panel {
 
     this.download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
     this.download.setEnabled(false);
-    MpPortletListener mppl = new MpPortletListener(this.download, this.table);
-    this.table.addValueChangeListener(mppl);
+    //MpPortletListener mppl = new MpPortletListener(this.download, this.table);
+    //this.table.addValueChangeListener(mppl);
     if (VaadinSession.getCurrent() instanceof VaadinPortletSession) {
       VaadinPortletSession portletsession = (VaadinPortletSession) VaadinSession.getCurrent();
 
@@ -70,7 +73,7 @@ public class SampleView extends Panel {
 
   public SampleView() {
     // execute the above constructor with default settings, in order to have the same settings
-    this(new FilterTable(), new IndexedContainer(), "No Sample has been selected!");
+    this(new FilterTable(), new HierarchicalContainer(), "No Sample has been selected!");
   }
 
   /**
@@ -247,8 +250,9 @@ public class SampleView extends Panel {
     this.setCaption(String.format("Viewing Sample %s", id));
   }
 
-  private FilterTable buildFilterTable() {
-    FilterTable filterTable = new FilterTable();
+  private FilterTreeTable buildFilterTable() {
+    FilterTreeTable filterTable = new FilterTreeTable();
+    
     //filterTable.setSizeFull();
 
     filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
@@ -266,8 +270,9 @@ public class SampleView extends Panel {
 
     filterTable.setColumnReorderingAllowed(true);
 
-    filterTable.setContainerDataSource(this.datasets);
-
+    if(this.datasets != null) {
+      filterTable.setContainerDataSource(this.datasets);
+    }
     //filterTable.setCaption("Registered Datasets");
 
     return filterTable;

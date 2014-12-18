@@ -2,6 +2,7 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -39,6 +40,7 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
 
@@ -101,7 +103,7 @@ class SampleInformation {
   public String sampleType;
   public int numberOfDatasets;
   public Date lastChangedDataset;
-  public IndexedContainer datasets;
+  public HierarchicalContainer datasets;
   public Map<String, String> properties;
   public String propertiesFormattedString;
   // Map containing parents of the sample and the corresponding sample types
@@ -129,10 +131,10 @@ public class DataHandler {
   Map<String, IndexedContainer> project_to_samples = new HashMap<String, IndexedContainer>();
   Map<String, IndexedContainer> experiment_to_samples = new HashMap<String, IndexedContainer>();
 
-  Map<String, IndexedContainer> space_to_datasets = new HashMap<String, IndexedContainer>();
-  Map<String, IndexedContainer> project_to_datasets = new HashMap<String, IndexedContainer>();
-  Map<String, IndexedContainer> experiment_to_datasets = new HashMap<String, IndexedContainer>();
-  Map<String, IndexedContainer> sample_to_datasets = new HashMap<String, IndexedContainer>();
+  Map<String, HierarchicalContainer> space_to_datasets = new HashMap<String, HierarchicalContainer>();
+  Map<String, HierarchicalContainer> project_to_datasets = new HashMap<String, HierarchicalContainer>();
+  Map<String, HierarchicalContainer> experiment_to_datasets = new HashMap<String, HierarchicalContainer>();
+  Map<String, HierarchicalContainer> sample_to_datasets = new HashMap<String, HierarchicalContainer>();
 
   List<SpaceWithProjectsAndRoleAssignments> space_list = null;
   //Map<String, IndexedContainer> connectedPersons = new HashMap<String, IndexedContainer>();
@@ -150,14 +152,6 @@ public class DataHandler {
 
   public DataHandler(OpenBisClient client) {
     reset();
-
-    this.connectedPersons.addContainerProperty("Title", String.class, null);
-    this.connectedPersons.addContainerProperty("First Name", String.class, null);
-    this.connectedPersons.addContainerProperty("Last Name", String.class, null);
-    this.connectedPersons.addContainerProperty("Position", String.class, null);
-    this.connectedPersons.addContainerProperty("E-Mail", String.class, null);
-    this.connectedPersons.addContainerProperty("Phone", String.class, null);
-    this.connectedPersons.addContainerProperty("Project", String.class, null);
     this.openBisClient = client;
     // initConnection();
   }
@@ -187,14 +181,19 @@ public class DataHandler {
     Date lastModifiedDate = new Date(0, 0, 0);
     long endTime = 0;
     for (SpaceWithProjectsAndRoleAssignments space : space_list) {
-      if (!space.getUsers().contains(userScreenName))
+      if (!space.getUsers().contains(userScreenName)) {
         continue;
+      }
       String spaceIdentifier = space.getCode();
 
-       long start = System.currentTimeMillis();
-      List<Experiment> experiments_tmp = this.openBisClient.getExperimentsOfSpace(spaceIdentifier);
-       
-       List<Project> projects = space.getProjects();
+      long start = System.currentTimeMillis();
+     List<Experiment> experiments_tmp = this.openBisClient.getExperimentsOfSpace(spaceIdentifier);
+      
+      List<Project> projects = space.getProjects();
+
+      if (spaceIdentifier.equals("QBIC_USER_SPACE")) {
+        fillPersonsContainer(spaceIdentifier);
+      }
       number_of_experiments += experiments_tmp.size();
       //number_of_experiments += this.openBisClient.getExperimentsOfSpace(spaceIdentifier).size();// this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
                                                                                                 // projects,
@@ -247,6 +246,10 @@ public class DataHandler {
         List<Experiment> experiments = this.openBisClient.facade.listExperimentsForProjects(project_identifier);
         List<String> experiment_identifiers = new ArrayList<String>();
         
+        for(Experiment exp :experiments)
+          experiment_identifiers.add(exp.getIdentifier());
+        
+        /*
         for(Experiment exp :experiments) {
           experiment_identifiers.add(exp.getIdentifier());
           if (exp.getExperimentTypeCode().equals("Q_PROJECT_DETAILS") && exp.getProperties().get("Q_PERSONS") != null) {
@@ -269,7 +272,7 @@ public class DataHandler {
            break;
            }
           }
-
+         */
         // Project descriptions can be long; truncate the string to provide a brief preview
         String desc = p.getDescription();
 
@@ -309,6 +312,7 @@ public class DataHandler {
 
   }
 
+
   // id in this case meaning the openBIS instance ?!
   public SpaceInformation getSpace(String identifier) throws Exception {
 
@@ -335,10 +339,10 @@ public class DataHandler {
   }
 
 
-  public IndexedContainer getDatasets(String id, String type) throws Exception {
+  public HierarchicalContainer getDatasets(String id, String type) throws Exception {
 
     List<DataSet> dataset_list = null;
-    IndexedContainer datasets = null;
+    HierarchicalContainer datasets = null;
 
     // TODO change return type of dataset retrieval methods if possible
     if (type.equals("space")) {
@@ -778,7 +782,7 @@ public class DataHandler {
     // this.projects = new HashMap<String,IndexedContainer>();
     // this.experiments = new HashMap<String,IndexedContainer>();
     // this.samples = new HashMap<String,IndexedContainer>();
-    this.space_to_datasets = new HashMap<String, IndexedContainer>();
+    this.space_to_datasets = new HashMap<String, HierarchicalContainer>();
   }
 
 
@@ -1010,10 +1014,11 @@ public class DataHandler {
   }
 
   @SuppressWarnings("unchecked")
-  private IndexedContainer createDatasetContainer(List<DataSet> datasets, String id) {
+  private HierarchicalContainer createDatasetContainer(List<DataSet> datasets, String id) {
 
-    IndexedContainer dataset_container = new IndexedContainer();
+    HierarchicalContainer dataset_container = new HierarchicalContainer();
 
+    dataset_container.addContainerProperty("Select", CheckBox.class, null);
     dataset_container.addContainerProperty("Project", String.class, null);
     dataset_container.addContainerProperty("Sample", String.class, null);
     dataset_container.addContainerProperty("Sample Type", String.class, null);
@@ -1026,12 +1031,12 @@ public class DataHandler {
     dataset_container.addContainerProperty("file_size_bytes", Long.class, null);
     dataset_container.addContainerProperty("dl_link", String.class, null);
     dataset_container.addContainerProperty("CODE", String.class, null);
+    
     for (DataSet d : datasets) {
-
-      Object new_ds = dataset_container.addItem();
-      String identifier = d.getSampleIdentifierOrNull();
+            String identifier = d.getSampleIdentifierOrNull();
       Sample sampleObject = this.openBisClient.getSampleByIdentifier(identifier);
       String sample = sampleObject.getCode();
+      String sampleType =  this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
       Project projectObject = this.openBisClient.getProjectOfExperimentByIdentifier(sampleObject.getExperimentIdentifierOrNull());
       String project = projectObject.getCode();
       //String code = d.getSampleIdentifierOrNull();
@@ -1043,33 +1048,94 @@ public class DataHandler {
       String dateString = sd.format(date);
       Timestamp ts = Timestamp.valueOf(dateString);
 
-      FileInfoDssDTO[] filelist = d.listFiles("original", false);
+      FileInfoDssDTO[] filelist = d.listFiles("original", true);
+      System.out.println(filelist[0]);
 
+      // recursive test
+      registerDatasetInTable(d,filelist, dataset_container, project, sample, ts, sampleType, null);
+      
+    }
+
+    return dataset_container;
+  }
+
+  public void registerDatasetInTable(DataSet d, FileInfoDssDTO[] filelist, HierarchicalContainer dataset_container, String project, String sample, Timestamp ts, String sampleType, Object parent) {
+    if(filelist[0].isDirectory()) {
+      
+      Object new_ds = dataset_container.addItem();
+      
+      String folderPath = filelist[0].getPathInDataSet();
+      FileInfoDssDTO[] subList = d.listFiles(folderPath, false);
+      
+      long totalFileSize = 0L;
+      dataset_container.setChildrenAllowed(new_ds, true);
       String download_link = filelist[0].getPathInDataSet();
-      String file_name = download_link.split("/")[1];
+      String[] splitted_link = download_link.split("/");
+      String file_name = download_link.split("/")[splitted_link.length -1];
+      System.out.println(file_name);
 
-      String fileSize = DashboardUtil.humanReadableByteCount(filelist[0].getFileSize(), true);
+      dataset_container.getContainerProperty(new_ds, "Select").setValue(new CheckBox());
+
       dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
       dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
           this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(file_name);
-      dataset_container.getContainerProperty(new_ds, "File Type").setValue(d.getDataSetTypeCode());
+      dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
       dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(
-          d.getDataSetTypeCode());
+          "-");
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
-      dataset_container.getContainerProperty(new_ds, "File Size").setValue(fileSize);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(
           d.getDataSetDss().tryGetInternalPathInDataStore() + "/" + filelist[0].getPathInDataSet());
       dataset_container.getContainerProperty(new_ds, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(
           filelist[0].getFileSize());
-    }
-    // System.out.println("datasets size: " + datasets.size());
-    return dataset_container;
-  }
+        
+      System.out.println("Now it should be a folder: " + filelist[0].getPathInDataSet());
+      
+      if(parent != null) {
+        dataset_container.setParent(new_ds, parent);
+      }
+      
+      for(FileInfoDssDTO file : subList) {
+        FileInfoDssDTO[] childList = {file};
+        registerDatasetInTable(d, childList, dataset_container, project, sample, ts,sampleType, new_ds);
+      }
+      
+    } else {
+      System.out.println("Now it should be a file: " + filelist[0].getPathInDataSet());
+      
+      Object new_file = dataset_container.addItem();
 
+      String download_link = filelist[0].getPathInDataSet();
+      String[] splitted_link = download_link.split("/");
+      String file_name = download_link.split("/")[splitted_link.length -1];
+      // String file_name = download_link.split("/")[1];
+      String fileSize = DashboardUtil.humanReadableByteCount(filelist[0].getFileSize(), true);
+
+      dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
+      dataset_container.getContainerProperty(new_file, "Project").setValue(project);
+      dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
+      dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
+      dataset_container.getContainerProperty(new_file, "File Name").setValue(file_name);
+      dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getDataSetTypeCode());
+      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(
+          d.getDataSetTypeCode());
+      dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
+      dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
+      dataset_container.getContainerProperty(new_file, "File Size").setValue(fileSize);
+      dataset_container.getContainerProperty(new_file, "dl_link").setValue(
+      d.getDataSetDss().tryGetInternalPathInDataStore() + "/" + filelist[0].getPathInDataSet());
+      dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
+      dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(
+          filelist[0].getFileSize());
+      
+      if(parent != null) {
+        dataset_container.setParent(new_file, parent);
+      }
+    }
+  }
 
   public URL getUrlForDataset(String datasetCode, String datasetName) throws MalformedURLException {
 
@@ -1247,4 +1313,33 @@ public class DataHandler {
         }
         return xmlPersons;
     }
+  
+  private void fillPersonsContainer(String spaceIdentifier) {
+    List<Sample> samplesOfSpace = new ArrayList<Sample>();
+    samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);
+    
+    if (this.connectedPersons.size() == 0) {
+      for (PropertyType p : this.openBisClient.listPropertiesForType(this.openBisClient
+          .getSampleTypeByString(("Q_USER")))) {
+        this.connectedPersons.addContainerProperty(p.getLabel(), String.class, null);
+      }
+      this.connectedPersons.addContainerProperty("Project", String.class, null);
+    }
+
+    for (Sample s : samplesOfSpace) {
+        List<Sample> parents = this.openBisClient.getParents(s.getCode());
+        Map<String, String> labelMap = this.openBisClient.getLabelsofProperties(this.openBisClient.getSampleTypeByString(s.getSampleTypeCode()));
+
+        for (Sample parent : parents) {
+          Object newPerson = this.connectedPersons.addItem();    
+          Iterator it = s.getProperties().entrySet().iterator();
+          while (it.hasNext()) {
+            Map.Entry pairs = (Map.Entry) it.next();
+            this.connectedPersons.getContainerProperty(newPerson,labelMap.get(pairs.getKey())).setValue(pairs.getValue());
+      }
+          this.connectedPersons.getContainerProperty(newPerson,"Project").setValue(this.openBisClient.getProjectOfExperimentByIdentifier(parent.getExperimentIdentifierOrNull()).getCode().toString());
+
+        }
+    }
+  }
 }

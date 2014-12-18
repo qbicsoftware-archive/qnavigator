@@ -1048,4 +1048,24 @@ public class OpenBisClient {// implements Serializable {
       return 0f;
     }
   }
+  
+  /**
+   * Function to retrieve all samples of a given experiment
+   * 
+   * @param experimentIdentifier identifier/code (both should work) of the openBIS experiment
+   * @return list with all samples of the given experiment
+   */
+  public List<Sample> getParents(String sampleCode) {
+    ensureLoggedIn();
+    SearchCriteria sc = new SearchCriteria();
+    sc.addMatchClause(SearchCriteria.MatchClause.createAttributeMatch(SearchCriteria.MatchClauseAttribute.CODE, sampleCode));
+    List<Sample> foundSample = this.facade.searchForSamples(sc);
+
+    SearchCriteria sampleSc = new SearchCriteria();
+    sampleSc.addSubCriteria(SearchSubCriteria.createSampleChildCriteria(sc));
+    List<Sample> foundParentSamples = this.facade.searchForSamples(sampleSc);
+
+    return foundParentSamples;
+    }
+  
 }

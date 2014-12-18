@@ -9,9 +9,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -317,6 +319,7 @@ public class QbicmainportletUI extends UI {
     UI.getCurrent().getSession().setAttribute("state", new State());
     UI.getCurrent().getSession()
         .setAttribute("datahandler", new DataHandler(this.openBisConnection));
+    UI.getCurrent().getSession().setAttribute("qbic_download", new HashMap<String, AbstractMap.SimpleEntry<InputStream, Long>>());
   }
 
   private void initConnection() {
