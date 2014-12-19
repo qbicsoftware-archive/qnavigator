@@ -319,7 +319,7 @@ public class QbicmainportletUI extends UI {
     UI.getCurrent().getSession().setAttribute("state", new State());
     UI.getCurrent().getSession()
         .setAttribute("datahandler", new DataHandler(this.openBisConnection));
-    UI.getCurrent().getSession().setAttribute("qbic_download", new HashMap<String, AbstractMap.SimpleEntry<InputStream, Long>>());
+    UI.getCurrent().getSession().setAttribute("qbic_download", new HashMap<String, AbstractMap.SimpleEntry<String, Long>>());
   }
 
   private void initConnection() {

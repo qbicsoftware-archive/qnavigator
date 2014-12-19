@@ -10,6 +10,9 @@ import java.util.AbstractMap;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletSession;
@@ -103,7 +106,7 @@ throws javax.portlet.PortletException,
   
   public void serveDownloadResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
     DataHandler dataHandler = (DataHandler)request.getPortletSession().getAttribute("datahandler",PortletSession.APPLICATION_SCOPE);
-    Map<String, AbstractMap.SimpleEntry<InputStream, Long>> entries = (Map<String, AbstractMap.SimpleEntry<InputStream, Long>>)request.getPortletSession().getAttribute("qbic_download",PortletSession.APPLICATION_SCOPE);
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = (Map<String, AbstractMap.SimpleEntry<String, Long>>)request.getPortletSession().getAttribute("qbic_download",PortletSession.APPLICATION_SCOPE);
     //request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
     System.out.println(entries);
     /*
@@ -125,12 +128,28 @@ throws javax.portlet.PortletException,
      response.setProperty("Content-Disposition", contentDispositionValue);
      
      if(entries != null) {
-      long tarFileLength = tarWriter.computeTarLength(entries);
+      long tarFileLength = tarWriter.computeTarLength2(entries);
       // response.setContentLength((int) tarFileLength);
       // For some reason setContentLength does not work
       response.setProperty("Content-Length", String.valueOf(tarFileLength));
       tarWriter.setOutputStream(response.getPortletOutputStream());
-      tarWriter.writeEntry(entries);
+      
+      Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+      Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+      while (it.hasNext()) {
+        Entry<String, SimpleEntry<String, Long>> entry = it.next();
+        
+        String[] splittedFilePath = entry.getKey().split("/");
+
+        if((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
+        }
+        else {
+          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey(), splittedFilePath[0]), entry.getValue().getValue());
+        }
+      }
+      
+     // tarWriter.writeEntry(entries);
       }
      
       tarWriter.closeStream();

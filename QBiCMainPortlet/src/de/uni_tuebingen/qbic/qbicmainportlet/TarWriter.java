@@ -116,7 +116,7 @@ public class TarWriter {
    * @param fileSize
    */
   public void writeEntry(String entryName, InputStream entry, long fileSize) {
-
+    System.out.println(entryName + entry + fileSize);
     TarEntry tar_entry = new TarEntry(entryName);
     tar_entry.setSize(fileSize);
     try {
@@ -170,6 +170,19 @@ public class TarWriter {
     int i = 0;
     while (it.hasNext()) {
       Entry<String, SimpleEntry<InputStream, Long>> entry = it.next();
+      tarLen[i] = entry.getValue().getValue();
+      i++;
+    }
+    return computeTarLength(tarLen, tar_record_size, tar_block_size);
+  }
+  
+  public long computeTarLength2(Map<String, AbstractMap.SimpleEntry<String, Long>> entries){
+    Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+    Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+    long [] tarLen = new long[entrySet.size()];
+    int i = 0;
+    while (it.hasNext()) {
+      Entry<String, SimpleEntry<String, Long>> entry = it.next();
       tarLen[i] = entry.getValue().getValue();
       i++;
     }

@@ -198,8 +198,12 @@ public class DatasetView extends Panel {
                 (String) portletSession.getAttribute("resURL",
                     PortletSession.APPLICATION_SCOPE);
             
+            portletSession.setAttribute("datahandler", dataHandler, PortletSession.APPLICATION_SCOPE);
+            
             // TODO use table to create map and save it in portletSession!!    
-            Map<String, AbstractMap.SimpleEntry<InputStream, Long>> selected_datasets = new HashMap<String, AbstractMap.SimpleEntry<InputStream, Long>>();
+            //Map<String, AbstractMap.SimpleEntry<InputStream, Long>> selected_datasets = new HashMap<String, AbstractMap.SimpleEntry<InputStream, Long>>();
+            Map<String, AbstractMap.SimpleEntry<String, Long>> selected_datasets = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+            
             Iterator<Object> itemIterator = currentSelectedTableIndices.iterator();
             
             while (itemIterator.hasNext()){
@@ -221,7 +225,7 @@ public class DatasetView extends Panel {
                   Long datasetChildSize =
                       (Long) table.getItem(itemID).getItemProperty("file_size_bytes").getValue();
                   
-                  selected_datasets.put(String.format("%s/%s", folderName, datasetChildName) , new AbstractMap.SimpleEntry<InputStream, Long>(datasetChildStream, datasetChildSize));                  
+                  selected_datasets.put(String.format("%s/%s", folderName, datasetChildName) , new AbstractMap.SimpleEntry<String, Long>(datasetChildCode, datasetChildSize));                  
                 }
               }
                 else {
@@ -233,7 +237,7 @@ public class DatasetView extends Panel {
                   Long datasetFileSize =
                       (Long) table.getItem(next).getItemProperty("file_size_bytes").getValue();
                   
-                  selected_datasets.put(datasetFileName, new AbstractMap.SimpleEntry<InputStream, Long>(datasetFileStream, datasetFileSize));
+                  selected_datasets.put(datasetFileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode, datasetFileSize));
                 }
             
               
