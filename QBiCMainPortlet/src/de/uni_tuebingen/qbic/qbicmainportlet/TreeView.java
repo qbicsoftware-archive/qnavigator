@@ -118,6 +118,7 @@ public class TreeView extends Panel implements Observer {
     if (itemId == null) {
       return;
     }
+    filterBasedOnSelection(itemId);
     tree.setValue(itemId);
     this.expandNode(itemId);
   }
@@ -133,7 +134,6 @@ public class TreeView extends Panel implements Observer {
       itemId = tree.getParent(itemId);
     }
     tree.expandItem(itemId);
-    filterBasedOnSelection(itemId);
   }
 
   private void filterBasedOnSelection(Object itemId) {
