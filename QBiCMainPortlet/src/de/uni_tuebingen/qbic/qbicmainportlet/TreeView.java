@@ -11,8 +11,10 @@ import com.vaadin.data.util.filter.Not;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
@@ -24,6 +26,7 @@ import com.vaadin.ui.VerticalLayout;
 public class TreeView extends Panel implements Observer {
 
   public Tree tree = new Tree();
+  public Button backButton = new Button("Back");
 
   public TreeView() {
     super();
@@ -39,9 +42,25 @@ public class TreeView extends Panel implements Observer {
   private void init() {
     VerticalLayout vl = new VerticalLayout();
     vl.setMargin(true);
+    vl.setSpacing(true);
+    
     tree.setImmediate(true);
     tree.setSizeFull();
+    
     vl.addComponent(tree);
+    vl.addComponent(backButton);
+    backButton.setSizeFull();
+    backButton.addClickListener(new Button.ClickListener() {
+      
+      @Override
+      public void buttonClick(ClickEvent event) {
+        removeFilter();
+        tree.collapseItem(tree.getValue());
+        tree.unselect(tree.getValue());
+        UI.getCurrent().getNavigator().navigateTo("");
+      }
+      
+    });
     this.setCaption("Project Browser");
     // this.setWidth("250px");
     // this.setHeight("800px");
@@ -137,15 +156,17 @@ public class TreeView extends Panel implements Observer {
   }
 
   private void filterBasedOnSelection(Object itemId) {
-    if (this.getItemType(itemId).equals("project") && !tree.getValue().equals(itemId)) {
+    if (this.getItemType(itemId).equals("project") && !(itemId.equals(tree.getValue()))) {
       String projName = tree.getItem(itemId).getItemProperty("identifier").getValue().toString();
       SimpleStringFilter thisProjectFilter =
           new SimpleStringFilter("identifier", projName, true, false);
       SimpleStringFilter otherProjectsFilter =
           new SimpleStringFilter("type", "project", true, false);
-      And filter = new And(new Not(thisProjectFilter), otherProjectsFilter);
+      And filter = new And(thisProjectFilter, new Not(otherProjectsFilter));
       // Add the new filter
+      System.out.println("Adding Filter");
       ((HierarchicalContainer) tree.getContainerDataSource()).addContainerFilter(filter);
+      System.out.println("Filter added");
     }
   }
 
