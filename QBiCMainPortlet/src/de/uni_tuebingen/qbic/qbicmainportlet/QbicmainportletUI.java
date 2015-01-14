@@ -56,6 +56,7 @@ import com.vaadin.server.VaadinResponse;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -215,54 +216,46 @@ public class QbicmainportletUI extends UI {
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
 
     LevelView spaceView =
-        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new SpaceView());
+        new LevelView(new SpaceView());
     LevelView addspaceView =
         new LevelView(
-            new ToolBar(ToolBar.View.Space),
-            createTreeView(tc, state),
             new Button(
                 "I am doing nothing. But you will be able to add workspaces some day in the early future."));// new
                                                                                                              // AddSpaceView(new
                                                                                                              // Table(),
                                                                                                              // spaces));
     LevelView datasetView =
-        new LevelView(new ToolBar(ToolBar.View.Dataset), createTreeView(tc, state),
-            new DatasetView());
+        new LevelView(new DatasetView());
 
     
     LevelView sampleView =
-        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new SampleView());
+        new LevelView( new SampleView());
     LevelView homeView;
 
     if (homeViewInformation.numberOfProjects > 0) {
       homeView =
-          new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new HomeView(
+          new LevelView( new HomeView(
               homeViewInformation, "Your Projects"));
     } else {
       homeView =
-          new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new HomeView());
+          new LevelView( new HomeView());
     }
     LevelView projectView =
-        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new ProjectView());
+        new LevelView( new ProjectView());
     LevelView experimentView =
-        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state),
-            new ExperimentView());
+        new LevelView(new ExperimentView());
     LevelView changeView = 
-        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state),
-            new ChangePropertiesView());
+        new LevelView(new ChangePropertiesView());
     LevelView maxQuantWorkflowView =
-        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new Button(
-            "maxQuantWorkflowView"));
+        new LevelView( new Button("maxQuantWorkflowView"));
     QcMlWorkflowView qcmlView = new QcMlWorkflowView();
     state.addObserver(qcmlView);
     LevelView qcMlWorkflowView =
-        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state),
-            qcmlView);
+        new LevelView(qcmlView);
     LevelView testRunWorkflowView =
-        new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), new Button(
+        new LevelView( new Button(
             "testRunWorkflowView"));
-    LevelView searchView = new LevelView(new ToolBar(ToolBar.View.Space), createTreeView(tc, state), 
-        new SearchForUsers());
+    LevelView searchView = new LevelView(new SearchForUsers());
     // Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do
     // this
     JavaScript.getCurrent().execute("window.location.reload();");
@@ -274,7 +267,9 @@ public class QbicmainportletUI extends UI {
     navigator.addView("datasetView", datasetView);
     navigator.addView("sample", sampleView);
     navigator.addView("", homeView);
-    navigator.addView("project", projectView);
+    //navigator.addView("project", projectView);
+    
+    navigator.addView(ProjectView.navigateToLabel,new ProjectView());
     navigator.addView("experiment", experimentView);
     navigator.addView("changePropertiesView", changeView);
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
@@ -287,11 +282,29 @@ public class QbicmainportletUI extends UI {
     setNavigator(navigator);
 
 
-//    mainLayout = new VerticalLayout();
-//    mainLayout.setMargin(true);
-//    mainLayout.addComponent(navigatorContent);
+    mainLayout = new VerticalLayout();
+    mainLayout.setMargin(true);
     
-    setContent(navigatorContent);
+    ToolBar toolbar = new ToolBar(ToolBar.View.Space);
+    HorizontalLayout headerLayout = new HorizontalLayout();
+    headerLayout.setWidth("100%");
+    headerLayout.addComponent(toolbar);
+    headerLayout.setComponentAlignment(toolbar, Alignment.MIDDLE_CENTER);
+    mainLayout.addComponent(headerLayout);
+    
+    
+    
+    TreeView tv = createTreeView(tc, state);
+    tv.setHeight("600px");
+    HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
+    treeViewAndLevelView.addComponent(tv);
+    
+    treeViewAndLevelView.addComponent(navigatorContent);
+    treeViewAndLevelView.setExpandRatio(tv, 1);
+    treeViewAndLevelView.setExpandRatio(navigatorContent, 4);
+    mainLayout.addComponent(treeViewAndLevelView);
+    
+    setContent(mainLayout);
 
     navigator.navigateTo("");
   }

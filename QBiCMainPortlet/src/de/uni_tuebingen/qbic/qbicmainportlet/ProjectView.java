@@ -4,11 +4,15 @@ import java.util.Set;
 
 import org.tepi.filtertable.FilterTable;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
@@ -24,8 +28,10 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class ProjectView extends Panel {
+public class ProjectView extends Panel implements View {
 
+  static String navigateToLabel = "project";
+  
   FilterTable table;
   VerticalLayout projectview_content;
 
@@ -58,7 +64,10 @@ public class ProjectView extends Panel {
     projectview_content.setSizeFull();
     super.setSizeFull();
   }
-
+  public String getNavigatorLabel(){
+    return navigateToLabel;
+  }
+  
   /**
    * sets the ContainerDataSource for showing it in a table and the id of the current Openbis
    * Project. The id is shown in the caption.
@@ -67,6 +76,7 @@ public class ProjectView extends Panel {
    * @param id
    */
   public void setContainerDataSource(ProjectInformation projectInformation, String id) {
+    this.id = id;
     this.setStatistics(projectInformation);
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -80,8 +90,7 @@ public class ProjectView extends Panel {
     this.projectview_content.addComponent(buttonLayout);
 
     this.table.setContainerDataSource(projectInformation.experiments);
-    this.id = id;
-
+    
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     StreamResource sr =
         dh.getTSVStream(dh.containerToString(projectInformation.experiments), this.id);
@@ -93,6 +102,7 @@ public class ProjectView extends Panel {
 
 
   private void setStatistics(ProjectInformation projectInformation) {
+    this.setWidth("100%");
     projectview_content.removeAllComponents();
 
     // Project description
@@ -333,5 +343,27 @@ public class ProjectView extends Panel {
       membersLayout.setMargin(true);
     }
     return membersLayout;
+  }
+
+
+  @Override
+  public void enter(ViewChangeEvent event) {
+    String currentValue = event.getParameters();
+    System.out.println("currentValue: " + currentValue);
+    System.out.println("navigateToLabel: " + navigateToLabel);
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    try {
+      Project project = dh.openBisClient.getProjectByCode(currentValue);
+      String projectIdentifier = project.getIdentifier();
+
+      this.setContainerDataSource(dh.getProjectInformation(projectIdentifier), currentValue);
+    } catch (Exception e) {
+      System.out.println("Exception in LevelView.enter. mainComponent is ProjectView");
+      // e.printStackTrace();
+    }
+    
+    
+    
+    
   }
 }

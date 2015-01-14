@@ -137,7 +137,7 @@ public class TreeView extends Panel implements Observer {
     if (itemId == null) {
       return;
     }
-    filterBasedOnSelection(itemId);
+    //filterBasedOnSelection(itemId);
     tree.setValue(itemId);
     this.expandNode(itemId);
   }
@@ -157,7 +157,7 @@ public class TreeView extends Panel implements Observer {
 
   private void filterBasedOnSelection(Object itemId) {
     if (this.getItemType(itemId).equals("project") && !(itemId.equals(tree.getValue()))) {
-      String projName = tree.getItem(itemId).getItemProperty("identifier").getValue().toString();
+      String projName = this.getItemIdentifier(itemId);
       SimpleStringFilter thisProjectFilter =
           new SimpleStringFilter("identifier", projName, true, false);
       SimpleStringFilter otherProjectsFilter =
@@ -173,6 +173,9 @@ public class TreeView extends Panel implements Observer {
   private String getItemType(Object itemId) {
     return tree.getItem(itemId).getItemProperty("type").getValue().toString();
   }
+  private String getItemIdentifier(Object itemId){
+    return tree.getItem(itemId).getItemProperty("identifier").getValue().toString();
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -184,7 +187,7 @@ public class TreeView extends Panel implements Observer {
       tree.collapseItem(((ArrayList<String>) arg).get(1));
     } else if (((ArrayList<String>) arg).get(0).equals("clicked")) {
       this.setValue(((ArrayList<String>) arg).get(1));
-      UI.getCurrent().getNavigator().navigateTo(this.getItemType(tree.getValue()));
+      UI.getCurrent().getNavigator().navigateTo(this.getItemType(tree.getValue()) + "/" + this.getItemIdentifier(tree.getValue()));
     }
   }
 

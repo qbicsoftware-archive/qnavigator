@@ -29,59 +29,39 @@ public class LevelView extends VerticalLayout implements View {
   // Label statusMonitor = new Label("Here we could put some job status or general information.");
   // TextArea statusMonitor = new TextArea("Status monitor",
   // "Here we could put some job status or general information.");
-  ToolBar toolbar;
-  TreeView treeView;
   Component mainComponent;
-  HorizontalLayout headerLayout = new HorizontalLayout();
-  HorizontalLayout compositeLayout = new HorizontalLayout();
-  String currentValue;
+  String navigateToLabel;
 
   public LevelView() {
-    currentValue = "_____empty_____";
   }
-
-  public LevelView(ToolBar toolbar, TreeView treeView, Component component) {
-    this.toolbar = toolbar;
-    this.treeView = treeView;
+  
+  public LevelView(Component component){
+    this(component,"");
+  }
+  
+  
+  public LevelView( Component component, String navigateToLabel) {
+    this.navigateToLabel = navigateToLabel;
     this.mainComponent = component;
-    currentValue = "_____empty_____";
     this.buildLayout();
   }
 
   public void buildLayout() {
     // clean up
-    this.compositeLayout.removeAllComponents();
     this.removeAllComponents();
 
     // set maximum width according to browser info
     // this.compositeLayout.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth(),
     // Unit.PIXELS);
     // header layout first
-    this.headerLayout.setWidth("100%");
-    this.headerLayout.addComponent(this.toolbar);
-    this.headerLayout.setComponentAlignment(this.toolbar, Alignment.MIDDLE_CENTER);
-    this.addComponent(this.headerLayout);
 
-    this.compositeLayout.setWidth("100%");
-
-
-
-    // now the tree and content components
-    // treeLayout
-    VerticalLayout treeLayout = new VerticalLayout();
-    treeLayout.addComponent(this.treeView);
-    treeLayout.setMargin(true);
-    this.treeView.setHeight("600px");
-    this.compositeLayout.addComponent(treeLayout);
+    this.setWidth("100%");
 
     // mainLayout
     VerticalLayout mainLayout = new VerticalLayout();
     mainLayout.addComponent(this.mainComponent);
     mainLayout.setMargin(true);
-    this.compositeLayout.addComponent(mainLayout);
-
-    this.compositeLayout.setExpandRatio(treeLayout, 1);
-    this.compositeLayout.setExpandRatio(mainLayout, 4);
+    this.addComponent(mainLayout);
 
 
 
@@ -96,8 +76,8 @@ public class LevelView extends VerticalLayout implements View {
     // this.mainComponent.setHeight("100%");
 
     // this.treeComponentLayout.setSizeFull();
-    this.compositeLayout.setStyleName(Reindeer.SPLITPANEL_SMALL);
-    this.compositeLayout.setMargin(true);
+    this.setStyleName(Reindeer.SPLITPANEL_SMALL);
+    this.setMargin(true);
 
     // this.setMargin(true);
     // this.setSpacing(true);
@@ -119,7 +99,6 @@ public class LevelView extends VerticalLayout implements View {
     // Label space2 = new Label("<hr width=\"100%\">", Label.CONTENT_XHTML);
     // this.addComponent(space1);
     // this.addComponent(space2);
-    this.addComponent(this.compositeLayout);
 
     // this.setExpandRatio(this.headerLayout, 1);
     // this.setExpandRatio(this.treeComponentLayout, 3);
@@ -127,13 +106,10 @@ public class LevelView extends VerticalLayout implements View {
 
   @Override
   public void enter(ViewChangeEvent event) {
-    Object currentValue = this.treeView.tree.getValue();
 
-    if (currentValue == null || currentValue.equals(this.currentValue)) {
-      return;
-    }
-
-    // System.out.println(currentValue);
+    String currentValue = event.getParameters();
+    System.out.println("currentValue: " + currentValue);
+    System.out.println("navigateToLabel: " + navigateToLabel);
     // System.out.println("type: " +
     // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue());
     // System.out.println("ID: " +
@@ -141,33 +117,19 @@ public class LevelView extends VerticalLayout implements View {
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
 
     if (this.mainComponent instanceof DatasetView) {
-      String name =
-          this.treeView.tree.getContainerDataSource().getItem(currentValue)
-              .getItemProperty("identifier").getValue().toString();
-      String type =
-          this.treeView.tree.getContainerDataSource().getItem(currentValue).getItemProperty("type")
-              .getValue().toString();
-      // System.out.println("Name: " +name + " type " + type + " value " + this.treeView.getValue()
-      // );
       DatasetView ds = (DatasetView) this.mainComponent;
       try {
-        ds.setContainerDataSource(dh.getDatasets((String) currentValue, type));
+        ds.setContainerDataSource(dh.getDatasets((String) currentValue, navigateToLabel));
       } catch (Exception e) {
         System.out.println("Exception in LevelView.enter. mainComponent is DatasetView");
-        // e.printStackTrace();
+         e.printStackTrace();
       }
       // ds.setInfo(name, type);
 
     } else if (this.mainComponent instanceof SampleView) {
       SampleView sv = (SampleView) this.mainComponent;
       try {
-        String type =
-            this.treeView.tree.getContainerDataSource().getItem(currentValue)
-                .getItemProperty("type").getValue().toString();
-        String name =
-            this.treeView.tree.getContainerDataSource().getItem(currentValue)
-                .getItemProperty("identifier").getValue().toString();
-        sv.setContainerDataSource(dh.getSampleInformation(name), name);
+        sv.setContainerDataSource(dh.getSampleInformation(currentValue), currentValue);
       } catch (Exception e) {
         System.out.println("Exception in LevelView.enter. mainComponent is SampleView");
         // e.printStackTrace();
@@ -178,54 +140,43 @@ public class LevelView extends VerticalLayout implements View {
 
         // String type =
         // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        String name =
-            this.treeView.tree.getContainerDataSource().getItem(currentValue)
-                .getItemProperty("identifier").getValue().toString();
-        sv.setContainerDataSource(dh.getSpace(name), name);
+        sv.setContainerDataSource(dh.getSpace(currentValue), currentValue);
       } catch (Exception e) {
         System.out.println("Exception in LevelView.enter. mainComponent is SpaceView");
         // e.printStackTrace();
       }
-    } else if (this.mainComponent instanceof ProjectView) {
+    } /*else if (this.mainComponent instanceof ProjectView) {
       ProjectView pv = (ProjectView) this.mainComponent;
       try {
 
         // String type =
         // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        String name =
-            this.treeView.tree.getContainerDataSource().getItem(currentValue)
-                .getItemProperty("identifier").getValue().toString();
+
         // String type =
         // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        Project project = dh.openBisClient.getProjectByCode(name);
+        Project project = dh.openBisClient.getProjectByCode(currentValue);
         String projectIdentifier = project.getIdentifier();
 
-        pv.setContainerDataSource(dh.getProjectInformation(projectIdentifier), name);
+        pv.setContainerDataSource(dh.getProjectInformation(projectIdentifier), currentValue);
       } catch (Exception e) {
         System.out.println("Exception in LevelView.enter. mainComponent is ProjectView");
         // e.printStackTrace();
       }
-    } else if (this.mainComponent instanceof ExperimentView) {
+    } */else if (this.mainComponent instanceof ExperimentView) {
       ExperimentView ev = (ExperimentView) this.mainComponent;
       try {
-        String name =
-            this.treeView.tree.getContainerDataSource().getItem(currentValue)
-                .getItemProperty("identifier").getValue().toString();
         // String type =
         // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        ev.setContainerDataSource(dh.getExperimentInformation(name), name);
+        ev.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
       } catch (Exception e) {
         e.printStackTrace();
       }
     } else if (this.mainComponent instanceof ChangePropertiesView) {
       ChangePropertiesView cpv = (ChangePropertiesView) this.mainComponent;
       try {
-        String name =
-            this.treeView.tree.getContainerDataSource().getItem(currentValue)
-                .getItemProperty("identifier").getValue().toString();
         // String type =
         // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        cpv.setContainerDataSource(dh.getExperimentInformation(name), name);
+        cpv.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
       } catch (Exception e) {
         e.printStackTrace();
       }

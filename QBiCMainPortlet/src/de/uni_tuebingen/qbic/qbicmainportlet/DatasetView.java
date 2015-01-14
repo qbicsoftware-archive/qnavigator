@@ -387,17 +387,17 @@ public class DatasetView extends Panel {
             String filePath = (String) table.getItem(next).getItemProperty("dl_link").getValue();
             filePath = String.format("/store%s", filePath.split("store")[1]);
             String fileId = (String) table.getItem(next).getItemProperty("File Name").getValue();
-            fileId = "control.1kg.panel.samples.vcf.gz";
+            //fileId = "control.1kg.panel.samples.vcf.gz";
             // UI.getCurrent().getSession().addRequestHandler(rh);
             rhAttached = true;
             ThemeDisplay themedisplay =
                 (ThemeDisplay) VaadinService.getCurrentRequest()
                     .getAttribute(WebKeys.THEME_DISPLAY);
             String hostTmp =
-                "http://localhost:8080/web/guest/mainportlet?p_p_id=QbicmainportletApplicationPortlet_WAR_QBiCMainPortlet_INSTANCE_5pPd5JQ8uGOt&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_count=1";
-            hostTmp +=
-                "&qbicsession=" + UI.getCurrent().getSession().getAttribute("gv-restapi-session")
-                    + "&someblabla=";
+                "http://localhost:7778/vizrest/rest";//"http://localhost:8080/web/guest/mainportlet?p_p_id=QbicmainportletApplicationPortlet_WAR_QBiCMainPortlet_INSTANCE_5pPd5JQ8uGOt&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_count=1";
+       //     hostTmp +=
+            //    "&qbicsession=" + UI.getCurrent().getSession().getAttribute("gv-restapi-session")
+           //         + "&someblabla=";
             // String hostTmp = themedisplay.getURLPortal() +
             // UI.getCurrent().getPage().getLocation().getPath() + "?qbicsession=" +
             // UI.getCurrent().getSession().getAttribute("gv-restapi-session") + "&someblabla=" ;
@@ -409,7 +409,7 @@ public class DatasetView extends Panel {
                 new ExternalResource(
                     String
                         .format(
-                            "http://localhost:7777/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
+                            "http://localhost:7778/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
                             host, title, fileId, filePath));
           }
           System.out.println(res.toString());
