@@ -1192,6 +1192,7 @@ public class DataHandler {
         }
 
         List<Project> projects = s.getProjects();
+        number_of_projects += projects.size();
         List<String> project_identifiers_tmp = new ArrayList<String>();
         for (Project project : projects) {
 
