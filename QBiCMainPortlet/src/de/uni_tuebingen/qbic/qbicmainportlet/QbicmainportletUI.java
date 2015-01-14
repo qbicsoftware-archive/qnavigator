@@ -144,12 +144,6 @@ public class QbicmainportletUI extends UI {
     setContent(test);
   }
 
-  private void fillHierarchicalTreeContainer(HierarchicalContainer tc) {
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    User user = LiferayAndVaadinUtils.getUser();
-    dh.fillHierarchicalTreeContainer(tc, user.getScreenName());
-  }
-
   private void fillHierarchicalTreeContainerWithDummyData(HierarchicalContainer tc) {
     DummyDataReader datareaderDummy = null;
     try {
@@ -199,19 +193,16 @@ public class QbicmainportletUI extends UI {
 
   private void buildLayout() {
     HierarchicalContainer tc = new HierarchicalContainer();
-    System.out.println("Filling HierarchicalTreeContainer..");
+    System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
     long startTime = System.nanoTime();
-    fillHierarchicalTreeContainer(tc);
-    long endTime = System.nanoTime();
-    System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
     
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     User user = LiferayAndVaadinUtils.getUser();
-    System.out.println("Preparing HomeView..");
-    startTime = System.nanoTime();
-    SpaceInformation homeViewInformation = dh.getHomeInformation(user.getScreenName());
-    endTime = System.nanoTime();
+    SpaceInformation homeViewInformation = dh.initTreeAndHomeInfo(tc, user.getScreenName());
+    
+    long endTime = System.nanoTime();
     System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
+    
     System.out.println("User " +user.getScreenName() + " has " + homeViewInformation.numberOfProjects + " projects.");
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
 
@@ -220,7 +211,7 @@ public class QbicmainportletUI extends UI {
     LevelView addspaceView =
         new LevelView(
             new Button(
-                "I am doing nothing. But you will be able to add workspaces some day in the early future."));// new
+                "I am doing nothing. But you will be able to add workspaces some day in the \"early\" future."));// new
                                                                                                              // AddSpaceView(new
                                                                                                              // Table(),
                                                                                                              // spaces));
