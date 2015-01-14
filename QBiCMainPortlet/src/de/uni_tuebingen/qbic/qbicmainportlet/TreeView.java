@@ -137,7 +137,7 @@ public class TreeView extends Panel implements Observer {
   }
 
   private void filterBasedOnSelection(Object itemId) {
-    if (this.getItemType(itemId).equals("project")) {
+    if (this.getItemType(itemId).equals("project") && !tree.getValue().equals(itemId)) {
       String projName = tree.getItem(itemId).getItemProperty("identifier").getValue().toString();
       SimpleStringFilter thisProjectFilter =
           new SimpleStringFilter("identifier", projName, true, false);
