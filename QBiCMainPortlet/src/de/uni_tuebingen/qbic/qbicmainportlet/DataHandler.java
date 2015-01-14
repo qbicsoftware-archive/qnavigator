@@ -2,7 +2,6 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -22,7 +21,6 @@ import javax.xml.bind.JAXBException;
 
 import parser.Parser;
 import parser.PersonParser;
-import persons.Persons;
 import persons.Qperson;
 import properties.Qproperties;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
@@ -1157,6 +1155,140 @@ public class DataHandler {
     return dataSet.getFile(filelist[0].getPathInDataSet());
   }
 
+  /**
+   * Function to fill tree container and collect statistical information of spaces. Should replace the two functions and be somewhat faster. Still not pretty. Needs work
+   * @param tc HierarchicalContainer for the Tree
+   * @param userName Screenname of the Liferay User
+   * @return SpaceInformation object
+   */
+  public SpaceInformation initTreeAndHomeInfo(HierarchicalContainer tc, String userName) {
+
+    List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpace_list();
+
+    // Initialization of Tree Container
+    tc.addContainerProperty("identifier", String.class, "N/A");
+    tc.addContainerProperty("type", String.class, "N/A");
+
+    // Initialization of Home Information
+    SpaceInformation homeInformation = new SpaceInformation();
+    IndexedContainer space_container = new IndexedContainer();
+    space_container.addContainerProperty("Project", String.class, "");
+    space_container.addContainerProperty("Description", String.class, "");
+    space_container.addContainerProperty("Contains datasets", String.class, "");
+    int number_of_projects = 0;
+    int number_of_experiments = 0;
+    int number_of_samples = 0;
+    int number_of_datasets = 0;
+    String lastModifiedExperiment = "N/A";
+    String lastModifiedSample = "N/A";
+    Date lastModifiedDate = new Date(0, 0, 0);
+    for (SpaceWithProjectsAndRoleAssignments s : space_list) {
+      if (s.getUsers().contains(userName)) {
+        String space_name = s.getCode();
+
+        // TODO does this work for everyone? should it? empty container would be the aim, probably
+        if (space_name.equals("QBIC_USER_SPACE")) {
+          fillPersonsContainer(space_name);
+        }
+
+        List<Project> projects = s.getProjects();
+        List<String> project_identifiers_tmp = new ArrayList<String>();
+        for (Project project : projects) {
+
+          String project_name = project.getCode();
+          if (tc.containsId(project_name)) {
+            project_name = project.getIdentifier();
+          }
+          Object new_s = space_container.addItem();
+          space_container.getContainerProperty(new_s, "Project").setValue(project_name);
+
+          // Project descriptions can be long; truncate the string to provide a brief preview
+          String desc = project.getDescription();
+
+          if (desc != null && desc.length() > 0) {
+            desc = desc.substring(0, Math.min(desc.length(), 100));
+            if (desc.length() == 100) {
+              desc += "...";
+            }
+          }
+          space_container.getContainerProperty(new_s, "Description").setValue(desc);
+
+          // System.out.println("|--Project: " + project_name);
+          tc.addItem(project_name);
+
+          tc.getContainerProperty(project_name, "type").setValue("project");
+          tc.getContainerProperty(project_name, "identifier").setValue(project_name);
+          List<Project> tmp_list = new ArrayList<Project>();
+          tmp_list.add(project);
+          List<Experiment> experiments =
+              this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
+                  tmp_list, null);
+
+          // Add number of experiments for every project
+          number_of_experiments += experiments.size();
+
+          List<String> experiment_identifiers = new ArrayList<String>();
+
+          for (Experiment experiment : experiments) {
+            experiment_identifiers.add(experiment.getIdentifier());
+            String experiment_name = experiment.getCode();
+            if (tc.containsId(experiment_name)) {
+              experiment_name = experiment.getIdentifier();
+            }
+            // System.out.println(" |--Experiment: " + experiment_name);
+            tc.addItem(experiment_name);
+            tc.setParent(experiment_name, project_name);
+
+            tc.getContainerProperty(experiment_name, "type").setValue("experiment");
+            tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
+          }
+          if (experiment_identifiers.size() > 0
+              && this.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers).size() > 0) {
+            space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
+          } else {
+            space_container.getContainerProperty(new_s, "Contains datasets").setValue("no");
+          }
+        }
+        List<Sample> samplesOfSpace = new ArrayList<Sample>();
+        if (project_identifiers_tmp.size() > 0) {
+          samplesOfSpace = this.openBisClient.getFacade().listSamplesForProjects(project_identifiers_tmp);
+        } else {
+          samplesOfSpace = this.openBisClient.getSamplesofSpace(space_name); // TODO code or identifier
+                                                                       // needed?
+        }
+        number_of_samples += samplesOfSpace.size();
+        List<String> sample_identifiers_tmp = new ArrayList<String>();
+        for (Sample sa : samplesOfSpace) {
+          sample_identifiers_tmp.add(sa.getIdentifier());
+        }
+        List<DataSet> datasets = new ArrayList<DataSet>();
+        if (sample_identifiers_tmp.size() > 0) {
+          datasets = this.openBisClient.getFacade().listDataSetsForSamples(sample_identifiers_tmp);
+        }
+        number_of_datasets += datasets.size();
+        StringBuilder lce = new StringBuilder();
+        StringBuilder lcs = new StringBuilder();
+        this.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
+        String tmplastModifiedExperiment = lce.toString();
+        String tmplastModifiedSample = lcs.toString();
+        if (!tmplastModifiedSample.equals("N/A")) {
+          lastModifiedExperiment = tmplastModifiedExperiment;
+          lastModifiedSample = tmplastModifiedSample;
+        }
+      }
+    }
+    homeInformation.numberOfProjects = number_of_projects;
+    homeInformation.numberOfExperiments = number_of_experiments;
+    homeInformation.numberOfSamples = number_of_samples;
+    homeInformation.numberOfDatasets = number_of_datasets;
+    homeInformation.lastChangedDataset = lastModifiedDate;
+    homeInformation.lastChangedSample = lastModifiedSample;
+    homeInformation.lastChangedExperiment = lastModifiedExperiment;
+    homeInformation.projects = space_container;
+
+    return homeInformation;
+  }
+  
   /**
    * This method fills the Hierarchical tree container for the user with the given screenName. It
    * contains the Openbis data model hierarchy including, projects, experiments and samples.
