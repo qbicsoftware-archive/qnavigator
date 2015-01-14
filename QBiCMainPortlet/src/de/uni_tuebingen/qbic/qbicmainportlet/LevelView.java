@@ -18,7 +18,7 @@ import com.vaadin.ui.themes.Reindeer;
  * Implements the vaadin View interface. LevelViews show their main component in the same manner,
  * whether it is a button a table or any other vaadin component.
  * 
- *
+ * 
  */
 public class LevelView extends VerticalLayout implements View {
   /**
@@ -27,8 +27,8 @@ public class LevelView extends VerticalLayout implements View {
   private static final long serialVersionUID = 4753771416181038820L;
 
   // Label statusMonitor = new Label("Here we could put some job status or general information.");
-//  TextArea statusMonitor = new TextArea("Status monitor",
-//      "Here we could put some job status or general information.");
+  // TextArea statusMonitor = new TextArea("Status monitor",
+  // "Here we could put some job status or general information.");
   ToolBar toolbar;
   TreeView treeView;
   Component mainComponent;
@@ -52,19 +52,20 @@ public class LevelView extends VerticalLayout implements View {
     // clean up
     this.compositeLayout.removeAllComponents();
     this.removeAllComponents();
-    
+
     // set maximum width according to browser info
-    // this.compositeLayout.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth(), Unit.PIXELS);
+    // this.compositeLayout.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth(),
+    // Unit.PIXELS);
     // header layout first
     this.headerLayout.setWidth("100%");
     this.headerLayout.addComponent(this.toolbar);
     this.headerLayout.setComponentAlignment(this.toolbar, Alignment.MIDDLE_CENTER);
     this.addComponent(this.headerLayout);
-    
+
     this.compositeLayout.setWidth("100%");
-    
-    
-    
+
+
+
     // now the tree and content components
     // treeLayout
     VerticalLayout treeLayout = new VerticalLayout();
@@ -72,56 +73,56 @@ public class LevelView extends VerticalLayout implements View {
     treeLayout.setMargin(true);
     this.treeView.setHeight("600px");
     this.compositeLayout.addComponent(treeLayout);
-    
+
     // mainLayout
     VerticalLayout mainLayout = new VerticalLayout();
     mainLayout.addComponent(this.mainComponent);
     mainLayout.setMargin(true);
     this.compositeLayout.addComponent(mainLayout);
-    
+
     this.compositeLayout.setExpandRatio(treeLayout, 1);
     this.compositeLayout.setExpandRatio(mainLayout, 4);
-    
-    
-    
-    //this.treeComponentLayout.setSplitPosition(20, Sizeable.UNITS_PERCENTAGE);
-    //this.treeComponentLayout.setExpandRatio(this.treeView, 0.15f);
-    //this.treeComponentLayout.setExpandRatio(this.mainComponent, 0.75f);
+
+
+
+    // this.treeComponentLayout.setSplitPosition(20, Sizeable.UNITS_PERCENTAGE);
+    // this.treeComponentLayout.setExpandRatio(this.treeView, 0.15f);
+    // this.treeComponentLayout.setExpandRatio(this.mainComponent, 0.75f);
     // this.mainComponent.setSizeFull();
-    //this.mainComponent.setHeight("800px");
-    //this.mainComponent.setWidth("800px");
-//    this.mainComponent.setSizeUndefined();
-//    this.mainComponent.setWidth("90%");
-//    this.mainComponent.setHeight("100%");
-    
-    //this.treeComponentLayout.setSizeFull();
+    // this.mainComponent.setHeight("800px");
+    // this.mainComponent.setWidth("800px");
+    // this.mainComponent.setSizeUndefined();
+    // this.mainComponent.setWidth("90%");
+    // this.mainComponent.setHeight("100%");
+
+    // this.treeComponentLayout.setSizeFull();
     this.compositeLayout.setStyleName(Reindeer.SPLITPANEL_SMALL);
     this.compositeLayout.setMargin(true);
-    
-//    this.setMargin(true);
-//    this.setSpacing(true);
-//    //this.setSizeFull();
+
+    // this.setMargin(true);
+    // this.setSpacing(true);
+    // //this.setSizeFull();
 
     // this.headerLayout.addComponent(this.statusMonitor);
-    
+
     // this.headerLayout.setMargin(true);
     // this.headerLayout.setExpandRatio(this.statusMonitor, 0.2f);
-    //this.headerLayout.setExpandRatio(this.toolbar, 0.8f);
-    //this.statusMonitor.setSizeFull();
-    //this.toolbar.setSizeFull();
-    //this.headerLayout.setSizeFull();
-   
+    // this.headerLayout.setExpandRatio(this.toolbar, 0.8f);
+    // this.statusMonitor.setSizeFull();
+    // this.toolbar.setSizeFull();
+    // this.headerLayout.setSizeFull();
+
     // Label space1 = new
     // Label("<div style=\"font-size:xx-small; border-color:blue;border-style:dotted hidden dashed hidden;\">&nbsp;</div>",
     // Label.CONTENT_XHTML);
     // space1.setHeight("1em");
-    //Label space2 = new Label("<hr width=\"100%\">", Label.CONTENT_XHTML);
+    // Label space2 = new Label("<hr width=\"100%\">", Label.CONTENT_XHTML);
     // this.addComponent(space1);
-    //this.addComponent(space2);
+    // this.addComponent(space2);
     this.addComponent(this.compositeLayout);
 
-//    this.setExpandRatio(this.headerLayout, 1);
-//    this.setExpandRatio(this.treeComponentLayout, 3);
+    // this.setExpandRatio(this.headerLayout, 1);
+    // this.setExpandRatio(this.treeComponentLayout, 3);
   }
 
   @Override
@@ -155,7 +156,7 @@ public class LevelView extends VerticalLayout implements View {
         System.out.println("Exception in LevelView.enter. mainComponent is DatasetView");
         // e.printStackTrace();
       }
-      //ds.setInfo(name, type);
+      // ds.setInfo(name, type);
 
     } else if (this.mainComponent instanceof SampleView) {
       SampleView sv = (SampleView) this.mainComponent;
@@ -216,16 +217,19 @@ public class LevelView extends VerticalLayout implements View {
       } catch (Exception e) {
         e.printStackTrace();
       }
-    } else if(this.mainComponent instanceof ChangePropertiesView){
-	        ChangePropertiesView cpv = (ChangePropertiesView) this.mainComponent;
-            try{
-              String name = this.treeView.tree.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue().toString();
-              //String type = this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-              cpv.setContainerDataSource(dh.getExperimentInformation(name), name);
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-		//UI.getCurrent().scrollIntoView(mainComponent);
-	}
+    } else if (this.mainComponent instanceof ChangePropertiesView) {
+      ChangePropertiesView cpv = (ChangePropertiesView) this.mainComponent;
+      try {
+        String name =
+            this.treeView.tree.getContainerDataSource().getItem(currentValue)
+                .getItemProperty("identifier").getValue().toString();
+        // String type =
+        // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+        cpv.setContainerDataSource(dh.getExperimentInformation(name), name);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    // UI.getCurrent().scrollIntoView(mainComponent);
+  }
 }

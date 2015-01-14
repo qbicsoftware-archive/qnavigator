@@ -5,6 +5,10 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.vaadin.data.Container;
+import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.data.util.filter.And;
+import com.vaadin.data.util.filter.Not;
+import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.ui.Panel;
@@ -40,7 +44,7 @@ public class TreeView extends Panel implements Observer {
     vl.addComponent(tree);
     this.setCaption("Project Browser");
     // this.setWidth("250px");
-    //this.setHeight("800px");
+    // this.setHeight("800px");
     this.setContent(vl);
 
     this.registerClickListener();
@@ -118,6 +122,10 @@ public class TreeView extends Panel implements Observer {
     this.expandNode(itemId);
   }
 
+  public void removeFilter() {
+    ((HierarchicalContainer) tree.getContainerDataSource()).removeAllContainerFilters();
+  }
+
   public void expandNode(Object itemId) {
     // this.expandItemsRecursively(itemId);
     while (!tree.isRoot(itemId)) {
@@ -125,6 +133,24 @@ public class TreeView extends Panel implements Observer {
       itemId = tree.getParent(itemId);
     }
     tree.expandItem(itemId);
+    filterBasedOnSelection(itemId);
+  }
+
+  private void filterBasedOnSelection(Object itemId) {
+    if (this.getItemType(itemId).equals("project")) {
+      String projName = tree.getItem(itemId).getItemProperty("identifier").getValue().toString();
+      SimpleStringFilter thisProjectFilter =
+          new SimpleStringFilter("identifier", projName, true, false);
+      SimpleStringFilter otherProjectsFilter =
+          new SimpleStringFilter("type", "project", true, false);
+      And filter = new And(new Not(thisProjectFilter), otherProjectsFilter);
+      // Add the new filter
+      ((HierarchicalContainer) tree.getContainerDataSource()).addContainerFilter(filter);
+    }
+  }
+
+  private String getItemType(Object itemId) {
+    return tree.getItem(itemId).getItemProperty("type").getValue().toString();
   }
 
   @SuppressWarnings("unchecked")
@@ -137,8 +163,7 @@ public class TreeView extends Panel implements Observer {
       tree.collapseItem(((ArrayList<String>) arg).get(1));
     } else if (((ArrayList<String>) arg).get(0).equals("clicked")) {
       this.setValue(((ArrayList<String>) arg).get(1));
-      UI.getCurrent().getNavigator()
-          .navigateTo(tree.getItem(tree.getValue()).getItemProperty("type").getValue().toString());
+      UI.getCurrent().getNavigator().navigateTo(this.getItemType(tree.getValue()));
     }
   }
 
