@@ -4,6 +4,8 @@ import org.tepi.filtertable.FilterTable;
 import org.tepi.filtertable.FilterTreeTable;
 
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
@@ -21,16 +23,15 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("deprecation")
-public class SampleView extends Panel {
+public class SampleView extends Panel implements View{
 
   /**
    * 
    */
   private static final long serialVersionUID = 377522772714840963L;
-  //FilterTable table;
+  static String navigateToLabel = "sample";
   FilterTreeTable table;
   VerticalLayout vert;
-  //private IndexedContainer datasets;
   private HierarchicalContainer datasets;
   private ButtonLink download;
   private Button export;
@@ -276,5 +277,20 @@ public class SampleView extends Panel {
     //filterTable.setCaption("Registered Datasets");
 
     return filterTable;
+  }
+
+  @Override
+  public void enter(ViewChangeEvent event) {
+    String currentValue = event.getParameters();
+    System.out.println("currentValue: " + currentValue);
+    System.out.println("navigateToLabel: " + navigateToLabel);
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    try {
+      this.setContainerDataSource(dh.getSampleInformation(currentValue), currentValue);
+    } catch (Exception e) {
+      System.out.println("Exception in SampleView.enter");
+      // e.printStackTrace();
+    }
+    
   } 
 }

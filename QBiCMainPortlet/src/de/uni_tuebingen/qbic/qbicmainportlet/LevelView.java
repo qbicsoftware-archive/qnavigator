@@ -126,7 +126,7 @@ public class LevelView extends VerticalLayout implements View {
       }
       // ds.setInfo(name, type);
 
-    } else if (this.mainComponent instanceof SampleView) {
+    } /*else if (this.mainComponent instanceof SampleView) {
       SampleView sv = (SampleView) this.mainComponent;
       try {
         sv.setContainerDataSource(dh.getSampleInformation(currentValue), currentValue);
@@ -134,7 +134,7 @@ public class LevelView extends VerticalLayout implements View {
         System.out.println("Exception in LevelView.enter. mainComponent is SampleView");
         // e.printStackTrace();
       }
-    } else if (this.mainComponent instanceof SpaceView) {
+    } */else if (this.mainComponent instanceof SpaceView) {
       SpaceView sv = (SpaceView) this.mainComponent;
       try {
 
@@ -162,7 +162,7 @@ public class LevelView extends VerticalLayout implements View {
         System.out.println("Exception in LevelView.enter. mainComponent is ProjectView");
         // e.printStackTrace();
       }
-    } */else if (this.mainComponent instanceof ExperimentView) {
+    } *//*else if (this.mainComponent instanceof ExperimentView) {
       ExperimentView ev = (ExperimentView) this.mainComponent;
       try {
         // String type =
@@ -171,7 +171,7 @@ public class LevelView extends VerticalLayout implements View {
       } catch (Exception e) {
         e.printStackTrace();
       }
-    } else if (this.mainComponent instanceof ChangePropertiesView) {
+    }*//* else if (this.mainComponent instanceof ChangePropertiesView) {
       ChangePropertiesView cpv = (ChangePropertiesView) this.mainComponent;
       try {
         // String type =
@@ -180,7 +180,7 @@ public class LevelView extends VerticalLayout implements View {
       } catch (Exception e) {
         e.printStackTrace();
       }
-    }
+    }*/
     // UI.getCurrent().scrollIntoView(mainComponent);
   }
 }

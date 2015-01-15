@@ -1168,7 +1168,8 @@ public class DataHandler {
     // Initialization of Tree Container
     tc.addContainerProperty("identifier", String.class, "N/A");
     tc.addContainerProperty("type", String.class, "N/A");
-
+    tc.addContainerProperty("project", String.class, "N/A");
+    
     // Initialization of Home Information
     SpaceInformation homeInformation = new SpaceInformation();
     IndexedContainer space_container = new IndexedContainer();
@@ -1216,9 +1217,10 @@ public class DataHandler {
 
           // System.out.println("|--Project: " + project_name);
           tc.addItem(project_name);
-
+          
           tc.getContainerProperty(project_name, "type").setValue("project");
           tc.getContainerProperty(project_name, "identifier").setValue(project_name);
+          tc.getContainerProperty(project_name, "project").setValue(project_name);
           List<Project> tmp_list = new ArrayList<Project>();
           tmp_list.add(project);
           List<Experiment> experiments =
@@ -1239,9 +1241,10 @@ public class DataHandler {
             // System.out.println(" |--Experiment: " + experiment_name);
             tc.addItem(experiment_name);
             tc.setParent(experiment_name, project_name);
-
             tc.getContainerProperty(experiment_name, "type").setValue("experiment");
             tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
+            tc.getContainerProperty(experiment_name, "project").setValue(project_name);
+            tc.setChildrenAllowed(experiment_name, false);
           }
           if (experiment_identifiers.size() > 0
               && this.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers).size() > 0) {
@@ -1301,7 +1304,8 @@ public class DataHandler {
   public void fillHierarchicalTreeContainer(HierarchicalContainer tc, String screenName) {
     tc.addContainerProperty("identifier", String.class, "N/A");
     tc.addContainerProperty("type", String.class, "N/A");
-
+    tc.addContainerProperty("project", String.class, "N/A");
+    
     List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpace_list();
 
     for (SpaceWithProjectsAndRoleAssignments s : space_list) {
@@ -1323,9 +1327,10 @@ public class DataHandler {
           // System.out.println("|--Project: " + project_name);
           tc.addItem(project_name);
           tc.setParent(project_name, space_name);
-
+          
           tc.getContainerProperty(project_name, "type").setValue("project");
           tc.getContainerProperty(project_name, "identifier").setValue(project_name);
+          tc.getContainerProperty(project_name, "project").setValue(project_name);
           List<Project> tmp_list = new ArrayList<Project>();
           tmp_list.add(project);
           List<Experiment> experiments =
@@ -1340,18 +1345,20 @@ public class DataHandler {
             // System.out.println("	|--Experiment: " + experiment_name);
             tc.addItem(experiment_name);
             tc.setParent(experiment_name, project_name);
-
+            
             tc.getContainerProperty(experiment_name, "type").setValue("experiment");
             tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
-            List<Sample> samples =
+            tc.getContainerProperty(experiment_name, "project").setValue(project_name);
+            tc.setChildrenAllowed(experiment_name, false);
+          /*  List<Sample> samples =
                 this.openBisClient.openbisInfoService.listSamplesForExperiment(
                     this.openBisClient.getSessionToken(), experiment.getIdentifier());
             for (Sample sample : samples) {
               // The commented code allows only biological samples to be shown in TreeView. We show
               // all samples for now.
-              // if (!sample.getSampleTypeCode().equals("BIOLOGICAL")){
-              // continue;
-              // }
+               if (!sample.getSampleTypeCode().equals("BIOLOGICAL")){
+               continue;
+               }
               String samp = sample.getCode();
               if (tc.containsId(samp)) {
                 samp = sample.getIdentifier();
@@ -1363,7 +1370,7 @@ public class DataHandler {
               tc.getContainerProperty(samp, "type").setValue("sample");
               tc.getContainerProperty(samp, "identifier").setValue(samp);
               tc.setChildrenAllowed(samp, false);
-            }
+            }*/
           }
         }
       }

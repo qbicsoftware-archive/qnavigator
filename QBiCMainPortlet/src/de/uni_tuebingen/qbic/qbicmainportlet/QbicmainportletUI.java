@@ -199,6 +199,8 @@ public class QbicmainportletUI extends UI {
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     User user = LiferayAndVaadinUtils.getUser();
     SpaceInformation homeViewInformation = dh.initTreeAndHomeInfo(tc, user.getScreenName());
+    //dh.fillHierarchicalTreeContainer(tc,user.getScreenName());
+    //SpaceInformation homeViewInformation = dh.getHomeInformation(user.getScreenName());
     
     long endTime = System.nanoTime();
     System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
@@ -218,9 +220,6 @@ public class QbicmainportletUI extends UI {
     LevelView datasetView =
         new LevelView(new DatasetView());
 
-    
-    LevelView sampleView =
-        new LevelView( new SampleView());
     LevelView homeView;
 
     if (homeViewInformation.numberOfProjects > 0) {
@@ -231,12 +230,6 @@ public class QbicmainportletUI extends UI {
       homeView =
           new LevelView( new HomeView());
     }
-    LevelView projectView =
-        new LevelView( new ProjectView());
-    LevelView experimentView =
-        new LevelView(new ExperimentView());
-    LevelView changeView = 
-        new LevelView(new ChangePropertiesView());
     LevelView maxQuantWorkflowView =
         new LevelView( new Button("maxQuantWorkflowView"));
     QcMlWorkflowView qcmlView = new QcMlWorkflowView();
@@ -256,13 +249,13 @@ public class QbicmainportletUI extends UI {
     navigator.addView("space", spaceView);
     navigator.addView("addspaceView", addspaceView);
     navigator.addView("datasetView", datasetView);
-    navigator.addView("sample", sampleView);
+    navigator.addView(SampleView.navigateToLabel, new SampleView());
     navigator.addView("", homeView);
     //navigator.addView("project", projectView);
     
     navigator.addView(ProjectView.navigateToLabel,new ProjectView());
-    navigator.addView("experiment", experimentView);
-    navigator.addView("changePropertiesView", changeView);
+    navigator.addView(ExperimentView.navigateToLabel, new ExperimentView());
+    navigator.addView(ChangePropertiesView.navigateToLabel, new ChangePropertiesView());
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
     navigator.addView("qcMlWorkflow", qcMlWorkflowView);
     navigator.addView("testRunWorkflow", testRunWorkflowView);
@@ -287,6 +280,7 @@ public class QbicmainportletUI extends UI {
     
     TreeView tv = createTreeView(tc, state);
     tv.setHeight("600px");
+    navigator.addViewChangeListener(tv);
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
     treeViewAndLevelView.addComponent(tv);
     

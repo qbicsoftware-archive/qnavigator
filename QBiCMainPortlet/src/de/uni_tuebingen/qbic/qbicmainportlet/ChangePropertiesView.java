@@ -17,6 +17,8 @@ import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.VaadinPortletSession;
 import com.vaadin.server.VaadinSession;
@@ -46,14 +48,14 @@ import com.vaadin.ui.Image;
 
 
 
-  public class ChangePropertiesView extends Panel {
+  public class ChangePropertiesView extends Panel implements View{
       
       
       /**
        * 
        */
       private static final long serialVersionUID = 8672873911284888801L;
-
+      static String navigateToLabel =  "changePropertiesView";
       private IndexedContainer datasets;
       private FormLayout form;
       private FieldGroup fieldGroup;
@@ -160,6 +162,24 @@ import com.vaadin.ui.Image;
     }
     this.fieldGroup = fieldGroup;
     this.form = form2;    
+  }
+
+
+  @Override
+  public void enter(ViewChangeEvent event) {
+    String currentValue = event.getParameters();
+    System.out.println("currentValue: " + currentValue);
+    System.out.println("navigateToLabel: " + navigateToLabel);
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    try {
+      // String type =
+      // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+      this.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
+    } catch (Exception e) {
+      System.out.println("Exception in SampleView.enter");
+      //e.printStackTrace();
+    }
+    
   }
 }
       

@@ -8,9 +8,11 @@ import com.vaadin.data.Container;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.filter.And;
 import com.vaadin.data.util.filter.Not;
+import com.vaadin.data.util.filter.Or;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
@@ -23,7 +25,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class TreeView extends Panel implements Observer {
+public class TreeView extends Panel implements Observer, ViewChangeListener {
 
   public Tree tree = new Tree();
   public Button backButton = new Button("Back");
@@ -137,7 +139,7 @@ public class TreeView extends Panel implements Observer {
     if (itemId == null) {
       return;
     }
-    //filterBasedOnSelection(itemId);
+    filterBasedOnSelection(itemId);
     tree.setValue(itemId);
     this.expandNode(itemId);
   }
@@ -148,9 +150,11 @@ public class TreeView extends Panel implements Observer {
 
   public void expandNode(Object itemId) {
     // this.expandItemsRecursively(itemId);
-    while (!tree.isRoot(itemId)) {
+    int i = 0;
+    while (!tree.isRoot(itemId) && i < 20) {
       tree.expandItem(itemId);
       itemId = tree.getParent(itemId);
+      i++;
     }
     tree.expandItem(itemId);
   }
@@ -158,15 +162,10 @@ public class TreeView extends Panel implements Observer {
   private void filterBasedOnSelection(Object itemId) {
     if (this.getItemType(itemId).equals("project") && !(itemId.equals(tree.getValue()))) {
       String projName = this.getItemIdentifier(itemId);
-      SimpleStringFilter thisProjectFilter =
-          new SimpleStringFilter("identifier", projName, true, false);
-      SimpleStringFilter otherProjectsFilter =
-          new SimpleStringFilter("type", "project", true, false);
-      And filter = new And(thisProjectFilter, new Not(otherProjectsFilter));
+
+      SimpleStringFilter filter = new SimpleStringFilter("project", (String)itemId,true,false);
       // Add the new filter
-      System.out.println("Adding Filter");
       ((HierarchicalContainer) tree.getContainerDataSource()).addContainerFilter(filter);
-      System.out.println("Filter added");
     }
   }
 
@@ -187,8 +186,25 @@ public class TreeView extends Panel implements Observer {
       tree.collapseItem(((ArrayList<String>) arg).get(1));
     } else if (((ArrayList<String>) arg).get(0).equals("clicked")) {
       this.setValue(((ArrayList<String>) arg).get(1));
+      System.out.println(this.getItemType(tree.getValue()) + "/" + this.getItemIdentifier(tree.getValue()));
       UI.getCurrent().getNavigator().navigateTo(this.getItemType(tree.getValue()) + "/" + this.getItemIdentifier(tree.getValue()));
     }
+  }
+
+  @Override
+  public boolean beforeViewChange(ViewChangeEvent event) {
+    return true;
+  }
+
+  @Override
+  public void afterViewChange(ViewChangeEvent event) {
+    String param = event.getParameters();
+    //try{
+    //  this.setValue(param);
+    //}catch(NullPointerException e){
+      //nothing to do here. It just means that treeView does not need any update
+    //}
+    
   }
 
 }

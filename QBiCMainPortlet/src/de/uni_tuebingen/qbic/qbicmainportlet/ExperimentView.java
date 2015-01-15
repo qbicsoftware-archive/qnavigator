@@ -3,6 +3,8 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import org.tepi.filtertable.FilterTable;
 
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
@@ -15,12 +17,13 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-public class ExperimentView extends Panel {
+public class ExperimentView extends Panel implements View{
 
   /**
    * 
    */
   private static final long serialVersionUID = -9156593640161721690L;
+  static String navigateToLabel = "experiment";
   FilterTable table;
   VerticalLayout expview_content;
 
@@ -184,6 +187,24 @@ public class ExperimentView extends Panel {
 
 
     return filterTable;
+  }
+
+
+  @Override
+  public void enter(ViewChangeEvent event) {
+    String currentValue = event.getParameters();
+    System.out.println("currentValue: " + currentValue);
+    System.out.println("navigateToLabel: " + navigateToLabel);
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    try {
+      // String type =
+      // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+      this.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
+    } catch (Exception e) {
+      System.out.println("Exception in ExperimentView.enter");
+      //e.printStackTrace();
+    }
+    
   }
 
 }
