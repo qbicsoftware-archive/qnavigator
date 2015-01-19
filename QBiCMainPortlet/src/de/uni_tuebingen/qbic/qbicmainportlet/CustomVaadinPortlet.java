@@ -145,7 +145,7 @@ throws javax.portlet.PortletException,
           tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
         }
         else {
-          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey(), splittedFilePath[0]), entry.getValue().getValue());
+          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey(), entry.getKey()), entry.getValue().getValue());
         }
       }
       

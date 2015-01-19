@@ -96,7 +96,21 @@ public class ToolBar extends HorizontalLayout{
 				 
 				@Override
 				public void buttonClick(ClickEvent event) {
-					getUI().getNavigator().navigateTo(view);
+				    System.out.println(UI.getCurrent().getPage().getLocation().getPath());
+				    System.out.println(UI.getCurrent().getPage().getLocation().getScheme());
+				    System.out.println(UI.getCurrent().getPage().getLocation().getFragment());
+				    System.out.println(UI.getCurrent().getPage().getLocation().getAuthority());
+				    System.out.println(UI.getCurrent().getPage().getLocation().getQuery());
+				    String fragment = UI.getCurrent().getPage().getLocation().getFragment();
+				    fragment = fragment.substring(1);
+				    String [] typeAndId = fragment.split("/");
+				    System.out.println(fragment);
+				    String navigateTo = view;
+				    if(typeAndId != null && typeAndId.length ==2){
+				      navigateTo += "/type=" + typeAndId[0] +"&id="+typeAndId[1];
+				    }
+				    System.out.println(navigateTo);
+					getUI().getNavigator().navigateTo(navigateTo);
 				}
 			});
 			button.setSizeFull();

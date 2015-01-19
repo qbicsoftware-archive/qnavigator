@@ -217,8 +217,6 @@ public class QbicmainportletUI extends UI {
                                                                                                              // AddSpaceView(new
                                                                                                              // Table(),
                                                                                                              // spaces));
-    LevelView datasetView =
-        new LevelView(new DatasetView());
 
     LevelView homeView;
 
@@ -248,7 +246,7 @@ public class QbicmainportletUI extends UI {
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
     navigator.addView("space", spaceView);
     navigator.addView("addspaceView", addspaceView);
-    navigator.addView("datasetView", datasetView);
+    navigator.addView("datasetView", new DatasetView());
     navigator.addView(SampleView.navigateToLabel, new SampleView());
     navigator.addView("", homeView);
     //navigator.addView("project", projectView);
@@ -315,9 +313,18 @@ public class QbicmainportletUI extends UI {
       this.initConnection();
     }
     UI.getCurrent().getSession().setAttribute("state", new State());
+    DataHandler dataHandler = new DataHandler(this.openBisConnection);
     UI.getCurrent().getSession()
-        .setAttribute("datahandler", new DataHandler(this.openBisConnection));
+        .setAttribute("datahandler", dataHandler);
     UI.getCurrent().getSession().setAttribute("qbic_download", new HashMap<String, AbstractMap.SimpleEntry<String, Long>>());
+    
+    
+    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+    portletSession.setAttribute("datahandler", dataHandler, PortletSession.APPLICATION_SCOPE);
+    
+    portletSession.setAttribute("qbic_download", new HashMap<String, AbstractMap.SimpleEntry<String, Long>>(),
+        PortletSession.APPLICATION_SCOPE);
+    
   }
 
   private void initConnection() {

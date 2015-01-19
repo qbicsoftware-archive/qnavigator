@@ -106,7 +106,7 @@ public class LevelView extends VerticalLayout implements View {
 
   @Override
   public void enter(ViewChangeEvent event) {
-
+    /*
     String currentValue = event.getParameters();
     System.out.println("currentValue: " + currentValue);
     System.out.println("navigateToLabel: " + navigateToLabel);
@@ -115,8 +115,8 @@ public class LevelView extends VerticalLayout implements View {
     // System.out.println("ID: " +
     // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue());
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-
-    if (this.mainComponent instanceof DatasetView) {
+*/
+    /*if (this.mainComponent instanceof DatasetView) {
       DatasetView ds = (DatasetView) this.mainComponent;
       try {
         ds.setContainerDataSource(dh.getDatasets((String) currentValue, navigateToLabel));
@@ -126,7 +126,7 @@ public class LevelView extends VerticalLayout implements View {
       }
       // ds.setInfo(name, type);
 
-    } /*else if (this.mainComponent instanceof SampleView) {
+    }*/ /*else if (this.mainComponent instanceof SampleView) {
       SampleView sv = (SampleView) this.mainComponent;
       try {
         sv.setContainerDataSource(dh.getSampleInformation(currentValue), currentValue);
@@ -134,7 +134,7 @@ public class LevelView extends VerticalLayout implements View {
         System.out.println("Exception in LevelView.enter. mainComponent is SampleView");
         // e.printStackTrace();
       }
-    } */else if (this.mainComponent instanceof SpaceView) {
+    } *//*else if (this.mainComponent instanceof SpaceView) {
       SpaceView sv = (SpaceView) this.mainComponent;
       try {
 
@@ -145,7 +145,7 @@ public class LevelView extends VerticalLayout implements View {
         System.out.println("Exception in LevelView.enter. mainComponent is SpaceView");
         // e.printStackTrace();
       }
-    } /*else if (this.mainComponent instanceof ProjectView) {
+    } *//*else if (this.mainComponent instanceof ProjectView) {
       ProjectView pv = (ProjectView) this.mainComponent;
       try {
 

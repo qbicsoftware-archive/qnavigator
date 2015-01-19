@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,6 +18,10 @@ import java.util.Set;
 
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarOutputStream;
+
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
+import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
+import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 
 
 public class TarWriter {
@@ -116,7 +121,7 @@ public class TarWriter {
    * @param fileSize
    */
   public void writeEntry(String entryName, InputStream entry, long fileSize) {
-    System.out.println(entryName + entry + fileSize);
+    //System.out.println(entryName + entry + fileSize);
     TarEntry tar_entry = new TarEntry(entryName);
     tar_entry.setSize(fileSize);
     try {
@@ -124,7 +129,7 @@ public class TarWriter {
       long totalWritten = 0;
       int bytesRead = 0;
       final byte[] buffer = new byte[BUFFER_SIZE];
-      System.out.println("File: " + entryName + ", Size: " + Long.toString(fileSize));
+      //System.out.println("File: " + entryName + ", Size: " + Long.toString(fileSize));
       
 
       while ((bytesRead = entry.read(buffer)) > 0) {
@@ -267,12 +272,91 @@ public static void test1(){
   System.out.println("tar finished");
 }
 
+public static void test_write_openbisStreams(){
+  
+  OpenBisClient openbisClient = new OpenBisClient("admin", "ohsaup7ahChie1Aen2eeBeagh", "https://qbis.qbic.uni-tuebingen.de:443", false);
+  IOpenbisServiceFacade facade = openbisClient.getFacade();
+  String datasetCodeMaxQuantResults = "20141121122213779-4640";
+  String datasetCodeMaxQuantOriginOut = "20141121122213743-4639";
+  DataSet dataSetResults = facade.getDataSet(datasetCodeMaxQuantResults);
+  String MaxQuantResultsFolder = "results";
+  FileInfoDssDTO[] fileInfoResults = dataSetResults.listFiles("original/" + MaxQuantResultsFolder, true);
+  
+  System.out.println("folder size is: " + fileInfoResults.length + " should be: " + 6);
+  System.out.println("Size is: " + fileInfoResults[0].getFileSize() + " should be: " + 0);
+  System.out.println("Size is: " + fileInfoResults[1].getFileSize() + " should be: " + 0);
+  System.out.println("Size is: " + fileInfoResults[2].getFileSize() + " should be: " + 0);
+  System.out.println("Size is: " + fileInfoResults[3].getFileSize() + " should be: " + 0);
+  System.out.println("Size is: " + fileInfoResults[4].getFileSize() + " should be: " + 2);
+  
+  DataSet dataSetOriginOut = facade.getDataSet(datasetCodeMaxQuantOriginOut);
+  FileInfoDssDTO[] fileInfoOriginOut = dataSetOriginOut.listFiles("original", false);
+  System.out.println("Size is: " + fileInfoOriginOut.length + " should be: " + 1);
+  System.out.println("Size is: " + fileInfoOriginOut[0].getFileSize() + " should be: " + 958);
+  
+  
+  Map<String, AbstractMap.SimpleEntry<String, Long>> entries = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+  
+  entries.put(String.format("%s/%s", MaxQuantResultsFolder, getFileName(fileInfoResults[0])) , new AbstractMap.SimpleEntry<String, Long>("20141121122213779-4640", fileInfoResults[0].getFileSize()));
+  entries.put(String.format("%s/%s", MaxQuantResultsFolder,  getFileName(fileInfoResults[1])) , new AbstractMap.SimpleEntry<String, Long>("20141121122213779-4640", fileInfoResults[1].getFileSize()));
+  entries.put(String.format("%s/%s", MaxQuantResultsFolder,  getFileName(fileInfoResults[2])) , new AbstractMap.SimpleEntry<String, Long>("20141121122213779-4640", fileInfoResults[2].getFileSize()));
+  entries.put(String.format("%s/%s", MaxQuantResultsFolder,  getFileName(fileInfoResults[3])) , new AbstractMap.SimpleEntry<String, Long>("20141121122213779-4640", fileInfoResults[3].getFileSize()));
+  entries.put(String.format("%s/%s", MaxQuantResultsFolder,  getFileName(fileInfoResults[4])) , new AbstractMap.SimpleEntry<String, Long>("20141121122213779-4640", fileInfoResults[4].getFileSize()));
+  entries.put(String.format("%s/%s", MaxQuantResultsFolder,  getFileName(fileInfoResults[5])) , new AbstractMap.SimpleEntry<String, Long>("20141121122213779-4640", fileInfoResults[5].getFileSize()));
+  
+  entries.put(String.format("%s",  getFileName(fileInfoOriginOut[0])) , new AbstractMap.SimpleEntry<String, Long>("20141121122213743-4639", fileInfoOriginOut[0].getFileSize()));
+  
+  TarWriter tarWriter = new TarWriter();
+  long tarFileLength = tarWriter.computeTarLength2(entries);
+  System.out.println("Theoretical Length of tarFile: " + tarFileLength + " should be: " + 10240);
+  
+  
+  OutputStream out = null;
+  try {
+    out = new FileOutputStream("/home/wojnar/QBiC/tar_test/testfile_wsimulation_withOpenbis.tar");
+  } catch (FileNotFoundException e) {
+    System.out.println("file outputstream should create that file. Yet it did not?");
+    return;
+  }
+  tarWriter.setOutputStream(out);
+  
+  Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+  Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+  while (it.hasNext()) {
+    Entry<String, SimpleEntry<String, Long>> entry = it.next();
+    
+    String[] splittedFilePath = entry.getKey().split("/");
+
+    if((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+      IOpenbisServiceFacade f = openbisClient.getFacade();
+      DataSet dataSet = f.getDataSet(entry.getValue().getKey());
+      FileInfoDssDTO[] filelist = dataSet.listFiles("original", false);
+      tarWriter.writeEntry(entry.getKey(), dataSet.getFile(filelist[0].getPathInDataSet()), entry.getValue().getValue());
+    }
+    else {
+      IOpenbisServiceFacade f = openbisClient.getFacade();
+      DataSet dataSet = f.getDataSet(entry.getValue().getKey());
+      FileInfoDssDTO[] filelist = dataSet.listFiles("original/" + entry.getKey(), false);
+      
+      System.out.println("File size: " + filelist[0].getFileSize() +  " should be " + entry.getValue().getValue());
+      tarWriter.writeEntry(entry.getKey(), dataSet.getFile(filelist[0].getPathInDataSet()), entry.getValue().getValue());
+    }
+  }
+  tarWriter.closeStream();
+  System.out.println("Stream written.");
+}
+public static String getFileName(FileInfoDssDTO f){
+  String download_link = f.getPathInDataSet();
+  String[] splitted_link = download_link.split("/");
+  String file_name = download_link.split("/")[splitted_link.length -1];
+  return file_name;
+}
 public static void test2(){
   TarWriter tarTest = new TarWriter();
   System.out.println(tarTest.getPath("simple", "test","/blabla"));
 }
   public static void main(String args[]) {
-    test2();
+    test_write_openbisStreams();
     // tarTest.handleTar();
   }
 

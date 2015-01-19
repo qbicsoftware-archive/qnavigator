@@ -193,18 +193,19 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
   @Override
   public boolean beforeViewChange(ViewChangeEvent event) {
+    String param = event.getParameters();
+    try{
+      this.setValue(param);
+    }catch(NullPointerException e){
+      //nothing to do here. It just means that treeView does not need any update
+    }
+    
     return true;
   }
 
   @Override
   public void afterViewChange(ViewChangeEvent event) {
-    String param = event.getParameters();
-    //try{
-    //  this.setValue(param);
-    //}catch(NullPointerException e){
-      //nothing to do here. It just means that treeView does not need any update
-    //}
-    
+  //nothing to do here
   }
 
 }
