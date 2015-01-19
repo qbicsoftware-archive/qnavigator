@@ -1104,7 +1104,7 @@ public class DataHandler {
       System.out.println("Now it should be a file: " + filelist[0].getPathInDataSet());
       
       Object new_file = dataset_container.addItem();
-
+      dataset_container.setChildrenAllowed(new_file,false);
       String download_link = filelist[0].getPathInDataSet();
       String[] splitted_link = download_link.split("/");
       String file_name = download_link.split("/")[splitted_link.length -1];
@@ -1127,7 +1127,6 @@ public class DataHandler {
       dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(
           filelist[0].getFileSize());
-      
       if(parent != null) {
         dataset_container.setParent(new_file, parent);
       }

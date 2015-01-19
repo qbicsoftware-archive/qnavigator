@@ -3,7 +3,9 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -83,7 +85,6 @@ public class DatasetView extends Panel implements View {
 
   public void setContainerDataSource(HierarchicalContainer newDataSource) {
     this.datasets = (HierarchicalContainer) newDataSource;
-    this.buildLayout();
     this.table.setContainerDataSource(this.datasets);
 
     this.table.setColumnCollapsed("state", true);
@@ -91,6 +92,7 @@ public class DatasetView extends Panel implements View {
     this.table.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
 
     this.table.setSizeFull();
+    this.buildLayout();
   }
 
   /**
@@ -140,132 +142,29 @@ public class DatasetView extends Panel implements View {
     buttonLayout.addComponent(this.download);
     buttonLayout.addComponent(visualize);
 
-    
+
     /**
      * prepare download.
      */
-    /*Map<String, AbstractMap.SimpleEntry<String, Long>> selected_datasets =
+    Map<String, AbstractMap.SimpleEntry<String, Long>> selected_datasets =
         new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-    
+
     PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-    
+    portletSession.setAttribute("qbic_download",
+        new HashMap<String, AbstractMap.SimpleEntry<String, Long>>(),
+        PortletSession.APPLICATION_SCOPE);
     String resourceUrl =
         (String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE);
-    
-    for(Object itemId: this.table.getItemIds()){
-      CheckBox itemCheckBox = (CheckBox)this.table.getItem(itemId).getItemProperty("Select").getValue();
-      itemCheckBox.addValueChangeListener(new ValueChangeListener(){
-
-        @Override
-        public void valueChange(ValueChangeEvent event) {
-          // TODO Auto-generated method stub
-          
-        }
-        
-      });
-    }*/
-    
-    this.table.addValueChangeListener(new ValueChangeListener() {
-      @Override
-      public void valueChange(ValueChangeEvent event) {
-        Set<Object> currentSelectedTableIndices = (Set<Object>) event.getProperty().getValue();
-        System.out.println(currentSelectedTableIndices);
-        Object next;
-        
-        if (currentSelectedTableIndices == null || currentSelectedTableIndices.size() < 1) {
-          currentSelectedTableIndices = null;
-          download.setEnabled(false);
-          return;
-        }
-
-        if (currentSelectedTableIndices.size() == 1) {
-          DataHandler dataHanlder =
-              (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-          Iterator<Object> iterator = currentSelectedTableIndices.iterator();
-          next = iterator.next();
-          boolean checked = ((CheckBox)table.getItem(next).getItemProperty("Select").getValue()).getValue();
-          ((CheckBox)table.getItem(next).getItemProperty("Select").getValue()).setValue(!checked);    
-          
-          String datasetCode = (String) table.getItem(next).getItemProperty("CODE").getValue();
-          String datasetType = (String) table.getItem(next).getItemProperty("File Name").getValue();
-          try {
-            download.setResource(new ExternalResource(dataHanlder.getUrlForDataset(datasetCode,
-                datasetType)));
-            download.setEnabled(true);
-          } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-          currentSelectedTableIndices = null;
-        } else if (currentSelectedTableIndices.size() > 1) {
-          DataHandler dataHandler =
-              (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-          PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-          String resourceUrl =
-              (String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE);
-
-          portletSession.setAttribute("datahandler", dataHandler, PortletSession.APPLICATION_SCOPE);
-          // TODO use table to create map and save it in portletSession!!
-          // Map<String, AbstractMap.SimpleEntry<InputStream, Long>> selected_datasets = new
-          // HashMap<String, AbstractMap.SimpleEntry<InputStream, Long>>();
-          Map<String, AbstractMap.SimpleEntry<String, Long>> selected_datasets =
-              new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-
-          Iterator<Object> itemIterator = currentSelectedTableIndices.iterator();
-
-          while (itemIterator.hasNext()) {
-            next = itemIterator.next();
-
-            // TODO change this to some flag or something like that
-            if (table.getItem(next).getItemProperty("File Type").getValue().equals("Folder")) {
-              Collection<?> filesInFolder = table.getChildren(next);
-
-              String folderName =
-                  (String) table.getItem(next).getItemProperty("File Name").getValue();
-
-              for (Object itemID : filesInFolder) {
-                String datasetChildCode =
-                    (String) table.getItem(itemID).getItemProperty("CODE").getValue();
-                String datasetChildName =
-                    (String) table.getItem(itemID).getItemProperty("File Name").getValue();
-                InputStream datasetChildStream =
-                    dataHandler.getDatasetStream(datasetChildCode, folderName);
-                Long datasetChildSize =
-                    (Long) table.getItem(itemID).getItemProperty("file_size_bytes").getValue();
-
-                selected_datasets.put(String.format("%s/%s", folderName, datasetChildName),
-                    new AbstractMap.SimpleEntry<String, Long>(datasetChildCode, datasetChildSize));
-              }
-            } else {
-              String datasetCode = (String) table.getItem(next).getItemProperty("CODE").getValue();
-              String datasetFileName =
-                  (String) table.getItem(next).getItemProperty("File Name").getValue();
-              Long datasetFileSize =
-                  (Long) table.getItem(next).getItemProperty("file_size_bytes").getValue();
-
-              selected_datasets.put(datasetFileName, new AbstractMap.SimpleEntry<String, Long>(
-                  datasetCode, datasetFileSize));
-            }
+    download.setResource(new ExternalResource(resourceUrl));
+    download.setEnabled(true);
 
 
-            // TODO fix file size in datahandler
+    for (final Object itemId : this.table.getItemIds()) {
+      setCheckedBox(itemId, "");
+    }
 
-          }
 
-          System.out.println(selected_datasets);
-          // set Map with marked datasets as session attribute
-          portletSession.setAttribute("qbic_download", selected_datasets,
-              PortletSession.APPLICATION_SCOPE);
 
-          download.setResource(new ExternalResource(resourceUrl));
-          download.setEnabled(true);// UI.getCurrent().getPage().getWebBrowser().isChrome());
-        }
-      }
-    });
-    
-    
-    
-    
     /*
      * Update the visualize button. It is only enabled, if the files can be visualized.
      */
@@ -277,8 +176,8 @@ public class DatasetView extends Panel implements View {
 
 
       /**
-       * check for what selection can be visualized. If so, enable the button.
-       * TODO change to checked.
+       * check for what selection can be visualized. If so, enable the button. TODO change to
+       * checked.
        */
       @Override
       public void valueChange(ValueChangeEvent event) {
@@ -304,8 +203,8 @@ public class DatasetView extends Panel implements View {
       }
     });
 
-    
-    //TODO Workflow Views should get those data and be happy
+
+    // TODO Workflow Views should get those data and be happy
     /*
      * Send message that in datasetview the following was selected. WorkflowViews get those messages
      * and save them, if it is valid information for them.
@@ -348,8 +247,8 @@ public class DatasetView extends Panel implements View {
       }
     });
 
-    
-    //TODO get the GV to work here. Together with reverse proxy
+
+    // TODO get the GV to work here. Together with reverse proxy
     // Assumes that table Value Change listner is enabling or disabling the button if preconditions
     // are not fullfilled
     visualize.addClickListener(new ClickListener() {
@@ -462,6 +361,23 @@ public class DatasetView extends Panel implements View {
   }
 
 
+  private void setCheckedBox(Object itemId, String parentFolder) {
+    CheckBox itemCheckBox =
+        (CheckBox) this.table.getItem(itemId).getItemProperty("Select").getValue();
+    itemCheckBox.addValueChangeListener(new TableCheckBoxValueChangeListener(itemId, parentFolder));
+
+    if (table.hasChildren(itemId)) {
+      for (Object childId : table.getChildren(itemId)) {
+        String newParentFolder =
+            Paths.get(parentFolder,
+                (String) this.table.getItem(itemId).getItemProperty("File Name").getValue())
+                .toString();
+        setCheckedBox(childId, newParentFolder);
+      }
+    }
+
+  }
+
   private FilterTreeTable buildFilterTable() {
     FilterTreeTable filterTable = new FilterTreeTable();
     filterTable.setSizeFull();
@@ -513,4 +429,155 @@ public class DatasetView extends Panel implements View {
       // e.printStackTrace();
     }
   }
+
+  private class TableCheckBoxValueChangeListener implements ValueChangeListener {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -7177199525909283879L;
+    private Object itemId;
+    private String itemFolderName;
+
+    public TableCheckBoxValueChangeListener(final Object itemId, String itemFolderName) {
+      this.itemFolderName = itemFolderName;
+      this.itemId = itemId;
+    }
+
+    @Override
+    public void valueChange(ValueChangeEvent event) {
+
+      PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+      Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
+          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
+              "qbic_download", PortletSession.APPLICATION_SCOPE);
+
+      boolean itemSelected = (Boolean) event.getProperty().getValue();
+      /*
+      String fileName = "";
+      Object parentId = table.getParent(itemId);
+      //In order to prevent infinity loop
+      int folderDepth = 0;
+      while(parentId != null && folderDepth < 100){
+        fileName = Paths.get((String) table.getItem(parentId).getItemProperty("File Name").getValue(), fileName).toString();
+        parentId = table.getParent(parentId);
+        folderDepth++;
+      }*/
+      
+      valueChange(itemId, itemSelected, entries, itemFolderName);
+      portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
+    }
+
+    /**
+     * updates entries (puts and removes) for selected table item and all its children. Means
+     * Checkbox is updated. And in case download button is clicked all checked items will be
+     * downloaded.
+     * 
+     * @param itemId Container id
+     * @param itemSelected checkbox value of the item
+     * @param entries all checked items
+     * @param fileName fileName of current item
+     */
+    private void valueChange(Object itemId, boolean itemSelected,
+        Map<String, SimpleEntry<String, Long>> entries, String fileName) {
+
+      ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
+          .setValue(itemSelected);
+      fileName =
+          Paths.get(fileName, (String) table.getItem(itemId).getItemProperty("File Name").getValue()).toString();
+      
+      System.out.println(fileName);
+      if (table.hasChildren(itemId)) {
+        for (Object childId : table.getChildren(itemId)) {
+          valueChange(childId, itemSelected, entries, fileName);
+        }
+      } else if (itemSelected) {
+        String datasetCode = (String) table.getItem(itemId).getItemProperty("CODE").getValue();
+        Long datasetFileSize =
+            (Long) table.getItem(itemId).getItemProperty("file_size_bytes").getValue();
+        entries.put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode,
+            datasetFileSize));
+      } else {
+        entries.remove(fileName);
+      }
+    }
+
+    /*
+    // @Override
+    public void valueChangeOld(ValueChangeEvent event) {
+      PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+      Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
+          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
+              "qbic_download", PortletSession.APPLICATION_SCOPE);
+
+      boolean checked = (Boolean) event.getProperty().getValue();
+      if (checked) {
+        if (table.getItem(itemId).getItemProperty("File Type").getValue().equals("Folder")) {
+          Collection<?> filesInFolder = table.getChildren(itemId);
+          String folderName =
+              (String) table.getItem(itemId).getItemProperty("File Name").getValue();
+
+          for (Object itemID : filesInFolder) {
+            String datasetChildCode =
+                (String) table.getItem(itemID).getItemProperty("CODE").getValue();
+            String datasetChildName =
+                (String) table.getItem(itemID).getItemProperty("File Name").getValue();
+            Long datasetChildSize =
+                (Long) table.getItem(itemID).getItemProperty("file_size_bytes").getValue();
+
+            entries.put(String.format("%s/%s", folderName, datasetChildName),
+                new AbstractMap.SimpleEntry<String, Long>(datasetChildCode, datasetChildSize));
+            ((CheckBox) table.getItem(itemID).getItemProperty("Select").getValue()).setValue(true);
+          }
+        } else {
+          String datasetCode = (String) table.getItem(itemId).getItemProperty("CODE").getValue();
+          String datasetFileName =
+              (String) table.getItem(itemId).getItemProperty("File Name").getValue();
+          Long datasetFileSize =
+              (Long) table.getItem(itemId).getItemProperty("file_size_bytes").getValue();
+
+          entries.put(itemFolderName + datasetFileName, new AbstractMap.SimpleEntry<String, Long>(
+              datasetCode, datasetFileSize));
+        }
+      } else {
+        if (table.getItem(itemId).getItemProperty("File Type").getValue().equals("Folder")) {
+          Collection<?> filesInFolder = table.getChildren(itemId);
+
+          String folderName =
+              (String) table.getItem(itemId).getItemProperty("File Name").getValue();
+
+          for (Object itemID : filesInFolder) {
+            String datasetChildName =
+                (String) table.getItem(itemID).getItemProperty("File Name").getValue();
+            entries.remove(String.format("%s/%s", folderName, datasetChildName));
+            ((CheckBox) table.getItem(itemID).getItemProperty("Select").getValue()).setValue(false);
+          }
+        } else {
+          Object parentId = table.getParent(itemId);
+          System.out.println("parentId: " + parentId);
+          if (parentId == null) {
+            String datasetFileName =
+                (String) table.getItem(itemId).getItemProperty("File Name").getValue();
+            entries.remove(datasetFileName);
+          } else {
+            String datasetFileName =
+                (String) table.getItem(itemId).getItemProperty("File Name").getValue();
+            String folderName =
+                (String) table.getItem(parentId).getItemProperty("File Name").getValue();
+            AbstractMap.SimpleEntry<String, Long> entry =
+                entries.remove(String.format("%s/%s", folderName, datasetFileName));
+            System.out.println(entry);
+          }
+        }
+      }
+
+
+      portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
+
+    }*/
+
+  }
+
+
+
 }

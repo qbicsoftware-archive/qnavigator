@@ -88,8 +88,8 @@ throws javax.portlet.PortletException,
   }
   @Override
   public void  serveResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
-    System.out.println(request.getResourceID());
-    System.out.println(RESOURCE_ID);
+    //System.out.println(request.getResourceID());
+   // System.out.println(RESOURCE_ID);
     if(request.getResourceID().equals("openbisUnreachable")){
       response.setContentType("text/plain");
       response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_GATEWAY_TIMEOUT));
