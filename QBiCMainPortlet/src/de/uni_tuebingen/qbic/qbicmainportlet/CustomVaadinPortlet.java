@@ -6,6 +6,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.Iterator;
@@ -25,10 +26,12 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarOutputStream;
 
 import com.vaadin.server.DeploymentConfiguration;
+import com.vaadin.server.Page;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
@@ -107,8 +110,17 @@ throws javax.portlet.PortletException,
   public void serveDownloadResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
     DataHandler dataHandler = (DataHandler)request.getPortletSession().getAttribute("datahandler",PortletSession.APPLICATION_SCOPE);
     Map<String, AbstractMap.SimpleEntry<String, Long>> entries = (Map<String, AbstractMap.SimpleEntry<String, Long>>)request.getPortletSession().getAttribute("qbic_download",PortletSession.APPLICATION_SCOPE);
+    if(entries == null || entries.isEmpty()){
+      response.setContentType("text/javascript");
+      response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
+      response.getWriter().append(
+          "<script type=\"text/javascript\"> alert('Please select a dataset for download'); </script>");
+      //super.serveResource(request, response);
+      return;
+    }
+    
     //request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
-    System.out.println(entries);
+    //System.out.println(entries);
     /*
     if(dataHandler == null || entries == null || !(dataHandler instanceof DataHandler) || !(entries instanceof Map<?,?>)){
       response.setContentType("text/plain");
@@ -119,7 +131,6 @@ throws javax.portlet.PortletException,
       return;
     }
     */
-    OutputStream out = null;
     TarWriter tarWriter = new TarWriter();
     String filename = "all.tar";
       // Sets content type
@@ -139,13 +150,15 @@ throws javax.portlet.PortletException,
       while (it.hasNext()) {
         Entry<String, SimpleEntry<String, Long>> entry = it.next();
         
-        String[] splittedFilePath = entry.getKey().split("/");
+        String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+        String[] splittedFilePath = entryKey.split("/");
 
+        
         if((splittedFilePath.length == 0) || (splittedFilePath == null)) {
           tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
         }
         else {
-          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey(), entry.getKey()), entry.getValue().getValue());
+          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
         }
       }
       

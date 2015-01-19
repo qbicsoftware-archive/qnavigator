@@ -142,7 +142,20 @@ public class DatasetView extends Panel implements View {
     buttonLayout.addComponent(this.download);
     buttonLayout.addComponent(visualize);
 
-
+    Button checkAll = new Button("Select all datasets");
+    checkAll.addClickListener(new ClickListener() {
+      
+      @Override
+      public void buttonClick(ClickEvent event) {
+        for(Object itemId: table.getItemIds()){
+          ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
+          .setValue(true);
+        }
+      }
+    });
+    
+    buttonLayout.addComponent(checkAll);
+    
     /**
      * prepare download.
      */
@@ -158,9 +171,9 @@ public class DatasetView extends Panel implements View {
     download.setResource(new ExternalResource(resourceUrl));
     download.setEnabled(true);
 
-
+    
     for (final Object itemId : this.table.getItemIds()) {
-      setCheckedBox(itemId, "");
+      setCheckedBox(itemId, (String)this.table.getItem(itemId).getItemProperty("CODE").getValue());
     }
 
 
