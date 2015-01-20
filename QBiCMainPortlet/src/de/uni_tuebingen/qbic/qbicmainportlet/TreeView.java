@@ -6,18 +6,15 @@ import java.util.Observer;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.filter.And;
-import com.vaadin.data.util.filter.Not;
-import com.vaadin.data.util.filter.Or;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
@@ -104,6 +101,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
         ArrayList<String> message = new ArrayList<String>();
         message.add("clicked");
         message.add(event.getItemId().toString());
+        message.add(getItemType(event.getItemId().toString()));
         state.notifyObservers(message);
       }
 
@@ -113,11 +111,13 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
       @Override
       public void nodeCollapse(CollapseEvent event) {
-        State state = (State) UI.getCurrent().getSession().getAttribute("state");
-        ArrayList<String> message = new ArrayList<String>();
+        tree.collapseItem(event.getItemId().toString());
+        //State state = (State) UI.getCurrent().getSession().getAttribute("state");
+        /*ArrayList<String> message = new ArrayList<String>();
         message.add("collapsed");
         message.add(event.getItemId().toString());
         state.notifyObservers(message);
+        */
       }
     };
 
@@ -125,12 +125,13 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
       @Override
       public void nodeExpand(ExpandEvent event) {
-        State state = (State) UI.getCurrent().getSession().getAttribute("state");
-        ArrayList<String> message = new ArrayList<String>();
+        //State state = (State) UI.getCurrent().getSession().getAttribute("state");
+        expandNode(event.getItemId().toString());
+        /*ArrayList<String> message = new ArrayList<String>();
         message.add("expanded");
         message.add(event.getItemId().toString());
         state.notifyObservers(message);
-
+         */
       }
 
     };
@@ -141,14 +142,8 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     tree.addExpandListener(e_listener);
   }
 
-  // public void buildLayout() {
-  // this.setWidth("200px");
-  // this.setHeight("800px");
-  // tree.setSizeFull();
-  // }
-
   public void setValue(Object itemId) {
-    if (itemId == null) {
+    if (itemId == null || tree.getItem(itemId) == null) {
       return;
     }
     filterBasedOnSelection(itemId);
@@ -173,7 +168,6 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
   private void filterBasedOnSelection(Object itemId) {
     if (this.getItemType(itemId).equals("project") && !(itemId.equals(tree.getValue()))) {
-      String projName = this.getItemIdentifier(itemId);
 
       SimpleStringFilter filter = new SimpleStringFilter("project", (String)itemId,true,false);
       // Add the new filter
@@ -191,15 +185,8 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
   @SuppressWarnings("unchecked")
   @Override
   public void update(Observable o, Object arg) {
-
-    if (((ArrayList<String>) arg).get(0).equals("expanded")) {
-      this.expandNode(((ArrayList<String>) arg).get(1));
-    } else if (((ArrayList<String>) arg).get(0).equals("collapsed")) {
-      tree.collapseItem(((ArrayList<String>) arg).get(1));
-    } else if (((ArrayList<String>) arg).get(0).equals("clicked")) {
+     if (((ArrayList<String>) arg).get(0).equals("clicked")) {
       this.setValue(((ArrayList<String>) arg).get(1));
-      System.out.println(this.getItemType(tree.getValue()) + "/" + this.getItemIdentifier(tree.getValue()));
-      UI.getCurrent().getNavigator().navigateTo(this.getItemType(tree.getValue()) + "/" + this.getItemIdentifier(tree.getValue()));
     }
   }
 

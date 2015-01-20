@@ -240,7 +240,7 @@ public class QbicmainportletUI extends UI {
     LevelView searchView = new LevelView(new SearchForUsers());
     // Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do
     // this
-    JavaScript.getCurrent().execute("window.location.reload();");
+    //JavaScript.getCurrent().execute("window.location.reload();");
 
     VerticalLayout navigatorContent = new VerticalLayout();
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);

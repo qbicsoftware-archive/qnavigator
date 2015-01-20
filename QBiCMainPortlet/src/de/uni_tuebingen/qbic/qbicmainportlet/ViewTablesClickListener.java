@@ -81,6 +81,7 @@ public class ViewTablesClickListener implements Property.ValueChangeListener {
 		ArrayList<String> message = new ArrayList<String>();
 		message.add("clicked");
 		message.add(experiment);
+		message.add(this.type);
 		state.notifyObservers(message);		
 	}
 	/**

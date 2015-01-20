@@ -148,7 +148,7 @@ public class ProjectView extends Panel implements View {
 
     // Another top-level item
     MenuItem snacks = menubar.addItem("Run workflows", null, null);
-    snacks.setIcon(new ThemeResource("graph_test.png"));
+    snacks.setIcon(new ThemeResource("dna_test.png"));
 
     snacks.addItem("Weisswurst", null, null);
     snacks.addItem("Bratwurst",  null, null);
@@ -156,7 +156,7 @@ public class ProjectView extends Panel implements View {
             
     // Yet another top-level item
     MenuItem servs = menubar.addItem("Analyze your data", null, null);
-    servs.setIcon(new ThemeResource("dna_test.png"));
+    servs.setIcon(new ThemeResource("graph_test.png"));
     servs.addItem("Car Service", null, null);
     
     
