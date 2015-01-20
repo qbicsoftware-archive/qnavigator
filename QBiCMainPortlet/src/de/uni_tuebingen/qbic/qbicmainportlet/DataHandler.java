@@ -1011,7 +1011,6 @@ public class DataHandler {
     return sample_container;
   }
 
-  @SuppressWarnings("unchecked")
   private HierarchicalContainer createDatasetContainer(List<DataSet> datasets, String id) {
 
     HierarchicalContainer dataset_container = new HierarchicalContainer();
@@ -1089,7 +1088,7 @@ public class DataHandler {
       dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(
           filelist[0].getFileSize());
         
-      System.out.println("Now it should be a folder: " + filelist[0].getPathInDataSet());
+      //System.out.println("Now it should be a folder: " + filelist[0].getPathInDataSet());
       
       if(parent != null) {
         dataset_container.setParent(new_ds, parent);
@@ -1101,7 +1100,7 @@ public class DataHandler {
       }
       
     } else {
-      System.out.println("Now it should be a file: " + filelist[0].getPathInDataSet());
+      //System.out.println("Now it should be a file: " + filelist[0].getPathInDataSet());
       
       Object new_file = dataset_container.addItem();
       dataset_container.setChildrenAllowed(new_file,false);

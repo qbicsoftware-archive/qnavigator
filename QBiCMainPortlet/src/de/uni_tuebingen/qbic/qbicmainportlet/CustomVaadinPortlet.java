@@ -67,108 +67,116 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     @Override
     public String getStaticFileLocation(final VaadinRequest request) {
       return super.getStaticFileLocation(request);
-      //self contained approach:
-      //return request.getContextPath();
+      // self contained approach:
+      // return request.getContextPath();
     }
   }
-  
+
   private boolean resUrlNotSet = true;
   public static final String RESOURCE_ID = "mainPortletResourceId";
   public static final String RESOURCE_ATTRIBUTE = "resURL";
+
   @Override
   protected void doDispatch(javax.portlet.RenderRequest request,
-      javax.portlet.RenderResponse response)
-throws javax.portlet.PortletException,
-      java.io.IOException{
-    if(request.getPortletSession().getAttribute(RESOURCE_ATTRIBUTE,PortletSession.APPLICATION_SCOPE) == null){
+      javax.portlet.RenderResponse response) throws javax.portlet.PortletException,
+      java.io.IOException {
+    if (request.getPortletSession().getAttribute(RESOURCE_ATTRIBUTE,
+        PortletSession.APPLICATION_SCOPE) == null) {
       ResourceURL resURL = response.createResourceURL();
       // get Resource ID ?
       resURL.setResourceID(RESOURCE_ID);
-      request.getPortletSession().setAttribute(RESOURCE_ATTRIBUTE,resURL.toString(),PortletSession.APPLICATION_SCOPE);
+      request.getPortletSession().setAttribute(RESOURCE_ATTRIBUTE, resURL.toString(),
+          PortletSession.APPLICATION_SCOPE);
       resUrlNotSet = false;
     }
     super.doDispatch(request, response);
   }
+
   @Override
-  public void  serveResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
-    //System.out.println(request.getResourceID());
-   // System.out.println(RESOURCE_ID);
-    if(request.getResourceID().equals("openbisUnreachable")){
+  public void serveResource(javax.portlet.ResourceRequest request,
+      javax.portlet.ResourceResponse response) throws PortletException, IOException {
+    // System.out.println(request.getResourceID());
+    // System.out.println(RESOURCE_ID);
+    if (request.getResourceID().equals("openbisUnreachable")) {
       response.setContentType("text/plain");
-      response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_GATEWAY_TIMEOUT));
+      response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
+          String.valueOf(HttpServletResponse.SC_GATEWAY_TIMEOUT));
       response.getWriter().append(
-          "Internal Error.\nRetry later or contact your project manager.\n"+
-          "Time: " + (new Date()).toString());
-    }
-    else if(request.getResourceID().equals(RESOURCE_ID)){
+          "Internal Error.\nRetry later or contact your project manager.\n" + "Time: "
+              + (new Date()).toString());
+    } else if (request.getResourceID().equals(RESOURCE_ID)) {
       serveDownloadResource(request, response);
-    }else{
+    } else {
       super.serveResource(request, response);
     }
   }
-  
-  public void serveDownloadResource(javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response) throws PortletException, IOException{
-    DataHandler dataHandler = (DataHandler)request.getPortletSession().getAttribute("datahandler",PortletSession.APPLICATION_SCOPE);
-    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = (Map<String, AbstractMap.SimpleEntry<String, Long>>)request.getPortletSession().getAttribute("qbic_download",PortletSession.APPLICATION_SCOPE);
-    if(entries == null || entries.isEmpty()){
+
+  public void serveDownloadResource(javax.portlet.ResourceRequest request,
+      javax.portlet.ResourceResponse response) throws PortletException, IOException {
+    DataHandler dataHandler =
+        (DataHandler) request.getPortletSession().getAttribute("datahandler",
+            PortletSession.APPLICATION_SCOPE);
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
+        (Map<String, AbstractMap.SimpleEntry<String, Long>>) request.getPortletSession()
+            .getAttribute("qbic_download", PortletSession.APPLICATION_SCOPE);
+    if (entries == null || entries.isEmpty()) {
       response.setContentType("text/javascript");
-      response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
-      response.getWriter().append(
-          "<script type=\"text/javascript\"> alert('Please select a dataset for download'); </script>");
-      //super.serveResource(request, response);
+      response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
+          String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
+      response.getWriter().append("Please select at least one dataset for download");
+      // super.serveResource(request, response);
       return;
     }
-    
-    //request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
-    //System.out.println(entries);
+
+    // request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
+    // System.out.println(entries);
     /*
-    if(dataHandler == null || entries == null || !(dataHandler instanceof DataHandler) || !(entries instanceof Map<?,?>)){
-      response.setContentType("text/plain");
-      response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(HttpServletResponse.SC_NOT_FOUND));
-      response.getWriter().append(
-          "Oh Dear. Something went wrong.\nRetry later or contact your project manager.\n"+
-          "Time: " + (new Date()).toString());
-      return;
-    }
-    */
+     * if(dataHandler == null || entries == null || !(dataHandler instanceof DataHandler) ||
+     * !(entries instanceof Map<?,?>)){ response.setContentType("text/plain");
+     * response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
+     * String.valueOf(HttpServletResponse.SC_NOT_FOUND)); response.getWriter().append(
+     * "Oh Dear. Something went wrong.\nRetry later or contact your project manager.\n"+ "Time: " +
+     * (new Date()).toString()); return; }
+     */
     TarWriter tarWriter = new TarWriter();
     String filename = "all.tar";
-      // Sets content type
-     response.setContentType("application/x-tar");
-     String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
-     response.setProperty("Content-Disposition", contentDispositionValue);
-     
-     if(entries != null) {
+    // Sets content type
+    response.setContentType("application/x-tar");
+    String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
+    response.setProperty("Content-Disposition", contentDispositionValue);
+
+    if (entries != null) {
       long tarFileLength = tarWriter.computeTarLength2(entries);
       // response.setContentLength((int) tarFileLength);
       // For some reason setContentLength does not work
       response.setProperty("Content-Length", String.valueOf(tarFileLength));
       tarWriter.setOutputStream(response.getPortletOutputStream());
-      
+
       Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
       Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
       while (it.hasNext()) {
         Entry<String, SimpleEntry<String, Long>> entry = it.next();
-        
+
         String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
         String[] splittedFilePath = entryKey.split("/");
 
-        
-        if((splittedFilePath.length == 0) || (splittedFilePath == null)) {
-          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
-        }
-        else {
-          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
+
+        if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+          tarWriter.writeEntry(entry.getKey(),
+              dataHandler.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
+        } else {
+          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue()
+              .getKey(), entryKey), entry.getValue().getValue());
         }
       }
-      
-     // tarWriter.writeEntry(entries);
-      }
-     
-      tarWriter.closeStream();
+
+      // tarWriter.writeEntry(entries);
+    }
+
+    tarWriter.closeStream();
   }
-  
-  
+
+
   @Override
   protected VaadinPortletService createPortletService(
       final DeploymentConfiguration deploymentConfiguration) throws ServiceException {

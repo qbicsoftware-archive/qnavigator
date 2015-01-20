@@ -1,13 +1,11 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -168,8 +166,8 @@ public class DatasetView extends Panel implements View {
         PortletSession.APPLICATION_SCOPE);
     String resourceUrl =
         (String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE);
-    download.setResource(new ExternalResource(resourceUrl));
-    download.setEnabled(true);
+    download.setResource(new ExternalResource("javascript:"));
+    download.setEnabled(false);
 
     
     for (final Object itemId : this.table.getItemIds()) {
@@ -479,6 +477,17 @@ public class DatasetView extends Panel implements View {
       
       valueChange(itemId, itemSelected, entries, itemFolderName);
       portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
+
+      if (entries == null || entries.isEmpty()) {
+        download.setResource(new ExternalResource("javascript:"));
+        download.setEnabled(false);
+      } else {
+        String resourceUrl =
+            (String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE);
+        download.setResource(new ExternalResource(resourceUrl));
+        download.setEnabled(true);
+      }
+
     }
 
     /**
@@ -514,81 +523,6 @@ public class DatasetView extends Panel implements View {
         entries.remove(fileName);
       }
     }
-
-    /*
-    // @Override
-    public void valueChangeOld(ValueChangeEvent event) {
-      PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-      Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
-          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
-              "qbic_download", PortletSession.APPLICATION_SCOPE);
-
-      boolean checked = (Boolean) event.getProperty().getValue();
-      if (checked) {
-        if (table.getItem(itemId).getItemProperty("File Type").getValue().equals("Folder")) {
-          Collection<?> filesInFolder = table.getChildren(itemId);
-          String folderName =
-              (String) table.getItem(itemId).getItemProperty("File Name").getValue();
-
-          for (Object itemID : filesInFolder) {
-            String datasetChildCode =
-                (String) table.getItem(itemID).getItemProperty("CODE").getValue();
-            String datasetChildName =
-                (String) table.getItem(itemID).getItemProperty("File Name").getValue();
-            Long datasetChildSize =
-                (Long) table.getItem(itemID).getItemProperty("file_size_bytes").getValue();
-
-            entries.put(String.format("%s/%s", folderName, datasetChildName),
-                new AbstractMap.SimpleEntry<String, Long>(datasetChildCode, datasetChildSize));
-            ((CheckBox) table.getItem(itemID).getItemProperty("Select").getValue()).setValue(true);
-          }
-        } else {
-          String datasetCode = (String) table.getItem(itemId).getItemProperty("CODE").getValue();
-          String datasetFileName =
-              (String) table.getItem(itemId).getItemProperty("File Name").getValue();
-          Long datasetFileSize =
-              (Long) table.getItem(itemId).getItemProperty("file_size_bytes").getValue();
-
-          entries.put(itemFolderName + datasetFileName, new AbstractMap.SimpleEntry<String, Long>(
-              datasetCode, datasetFileSize));
-        }
-      } else {
-        if (table.getItem(itemId).getItemProperty("File Type").getValue().equals("Folder")) {
-          Collection<?> filesInFolder = table.getChildren(itemId);
-
-          String folderName =
-              (String) table.getItem(itemId).getItemProperty("File Name").getValue();
-
-          for (Object itemID : filesInFolder) {
-            String datasetChildName =
-                (String) table.getItem(itemID).getItemProperty("File Name").getValue();
-            entries.remove(String.format("%s/%s", folderName, datasetChildName));
-            ((CheckBox) table.getItem(itemID).getItemProperty("Select").getValue()).setValue(false);
-          }
-        } else {
-          Object parentId = table.getParent(itemId);
-          System.out.println("parentId: " + parentId);
-          if (parentId == null) {
-            String datasetFileName =
-                (String) table.getItem(itemId).getItemProperty("File Name").getValue();
-            entries.remove(datasetFileName);
-          } else {
-            String datasetFileName =
-                (String) table.getItem(itemId).getItemProperty("File Name").getValue();
-            String folderName =
-                (String) table.getItem(parentId).getItemProperty("File Name").getValue();
-            AbstractMap.SimpleEntry<String, Long> entry =
-                entries.remove(String.format("%s/%s", folderName, datasetFileName));
-            System.out.println(entry);
-          }
-        }
-      }
-
-
-      portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
-
-    }*/
-
   }
 
 
