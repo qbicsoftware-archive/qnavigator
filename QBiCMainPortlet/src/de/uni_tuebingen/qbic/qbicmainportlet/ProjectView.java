@@ -2,6 +2,8 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.util.Set;
 
+import javax.portlet.PortletSession;
+
 import org.tepi.filtertable.FilterTable;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
@@ -126,18 +128,14 @@ public class ProjectView extends Panel implements View {
     projectview_content.addComponent(menubar);
     
     // A top-level menu item that opens a submenu
-    MenuItem drinks = menubar.addItem("Download your Data", null, null);
-    drinks.setIcon(new ThemeResource("computer_test.png"));
     
-    // Submenu item with a sub-submenu
-    MenuItem hots = drinks.addItem("test1", null, null);
-    
-    hots.addItem("Tea",
-        null, null);
-    hots.addItem("Coffee",
-        null, null);
-
-    MenuItem manage = menubar.addItem("Manage your Data", null, null);
+    //set to true for the hack below
+    menubar.setHtmlContentAllowed(true);
+    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
+    downloadProject.setIcon(new ThemeResource("computer_test.png"));
+    downloadProject.addItem("<a href=\""+(String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE)+"\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project.</a>", null);
+    MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_test.png"));
    
     // Another submenu item with a sub-submenu
