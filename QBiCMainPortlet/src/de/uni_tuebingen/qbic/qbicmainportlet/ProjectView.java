@@ -16,6 +16,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -23,6 +24,8 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -40,6 +43,7 @@ public class ProjectView extends Panel implements View {
 
   public ProjectView(FilterTable table, IndexedContainer datasource, String id) {
     projectview_content = new VerticalLayout();
+        
     this.id = id;
 
     this.table = this.buildFilterTable();
@@ -51,6 +55,7 @@ public class ProjectView extends Panel implements View {
 
     this.table.setContainerDataSource(datasource);
     this.tableClickChangeTreeView();
+   
   }
 
 
@@ -79,15 +84,20 @@ public class ProjectView extends Panel implements View {
     this.id = id;
     this.setStatistics(projectInformation);
 
+    
+    VerticalLayout buttonLayoutSection = new VerticalLayout();
+    buttonLayoutSection.setMargin(true);
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
+    
+    buttonLayoutSection.addComponent(buttonLayout);
 
     this.export = new Button("Export as TSV");
     buttonLayout.addComponent(this.export);
 
-    this.projectview_content.addComponent(buttonLayout);
+    this.projectview_content.addComponent(buttonLayoutSection);
 
     this.table.setContainerDataSource(projectInformation.experiments);
     
@@ -102,9 +112,62 @@ public class ProjectView extends Panel implements View {
 
 
   private void setStatistics(ProjectInformation projectInformation) {
-    this.setWidth("100%");
+    //this.setWidth("100%");
     projectview_content.removeAllComponents();
+    
+    //TODO Toolbar in there or not?
+    //ToolBar toolbar = new ToolBar(ToolBar.View.Space);
+    //projectview_content.addComponent(toolbar);
+    
+    MenuBar menubar = new MenuBar();
+    menubar.addStyleName("qbicmainportlet");
+    menubar.setWidth(100.0f, Unit.PERCENTAGE);
+    
+    projectview_content.addComponent(menubar);
+    
+    // A top-level menu item that opens a submenu
+    MenuItem drinks = menubar.addItem("Download your Data", null, null);
+    drinks.setIcon(new ThemeResource("computer_test.png"));
+    
+    // Submenu item with a sub-submenu
+    MenuItem hots = drinks.addItem("test1", null, null);
+    
+    hots.addItem("Tea",
+        null, null);
+    hots.addItem("Coffee",
+        null, null);
 
+    MenuItem manage = menubar.addItem("Manage your Data", null, null);
+    manage.setIcon(new ThemeResource("barcode_test.png"));
+   
+    // Another submenu item with a sub-submenu
+    MenuItem colds = manage.addItem("test2", null, null);
+
+    colds.addItem("Milk",      null, null);
+    colds.addItem("Weissbier", null, null);
+
+    // Another top-level item
+    MenuItem snacks = menubar.addItem("Run workflows", null, null);
+    snacks.setIcon(new ThemeResource("graph_test.png"));
+
+    snacks.addItem("Weisswurst", null, null);
+    snacks.addItem("Bratwurst",  null, null);
+    snacks.addItem("Currywurst", null, null);
+            
+    // Yet another top-level item
+    MenuItem servs = menubar.addItem("Analyze your data", null, null);
+    servs.setIcon(new ThemeResource("dna_test.png"));
+    servs.addItem("Car Service", null, null);
+    
+    
+    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
+    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
+
+    projectview_content.setWidth("100%");
+    this.setWidth(String.format("%spx", (browserWidth * 0.6)));
+    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+
+    
     // Project description
     VerticalLayout projDescription = new VerticalLayout();
     VerticalLayout projDescriptionContent = new VerticalLayout();
@@ -121,7 +184,12 @@ public class ProjectView extends Panel implements View {
                 + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
                 + this.id + "</a>", ContentMode.HTML);
     // contact.setIcon(FontAwesome.ENVELOPE);
-
+    
+    projDescription.setWidth("100%");
+    projDescriptionContent.setWidth("100%");
+    descContent.setWidth("100%");
+    contact.setWidth("100%");
+    
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
     projDescriptionContent.setMargin(true);
@@ -221,6 +289,9 @@ public class ProjectView extends Panel implements View {
     
     tableSectionContent.setMargin(true);
     tableSection.setMargin(true);
+    this.table.setWidth("100%");
+    tableSection.setWidth("100%");
+    tableSectionContent.setWidth("100%");
     
     tableSection.addComponent(tableSectionContent);
     projectview_content.addComponent(tableSection);

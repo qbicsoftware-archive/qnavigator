@@ -1167,6 +1167,8 @@ public class DataHandler {
     tc.addContainerProperty("identifier", String.class, "N/A");
     tc.addContainerProperty("type", String.class, "N/A");
     tc.addContainerProperty("project", String.class, "N/A");
+    tc.addContainerProperty("caption", String.class, "N/A");
+
     
     // Initialization of Home Information
     SpaceInformation homeInformation = new SpaceInformation();
@@ -1219,6 +1221,8 @@ public class DataHandler {
           tc.getContainerProperty(project_name, "type").setValue("project");
           tc.getContainerProperty(project_name, "identifier").setValue(project_name);
           tc.getContainerProperty(project_name, "project").setValue(project_name);
+          tc.getContainerProperty(project_name, "caption").setValue(project_name);
+
           List<Project> tmp_list = new ArrayList<Project>();
           tmp_list.add(project);
           List<Experiment> experiments =
@@ -1242,6 +1246,8 @@ public class DataHandler {
             tc.getContainerProperty(experiment_name, "type").setValue("experiment");
             tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
             tc.getContainerProperty(experiment_name, "project").setValue(project_name);
+            tc.getContainerProperty(experiment_name, "caption").setValue(String.format("%s (%s)", this.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),experiment_name));
+
             tc.setChildrenAllowed(experiment_name, false);
           }
           if (experiment_identifiers.size() > 0
@@ -1329,6 +1335,8 @@ public class DataHandler {
           tc.getContainerProperty(project_name, "type").setValue("project");
           tc.getContainerProperty(project_name, "identifier").setValue(project_name);
           tc.getContainerProperty(project_name, "project").setValue(project_name);
+
+          
           List<Project> tmp_list = new ArrayList<Project>();
           tmp_list.add(project);
           List<Experiment> experiments =
@@ -1347,6 +1355,7 @@ public class DataHandler {
             tc.getContainerProperty(experiment_name, "type").setValue("experiment");
             tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
             tc.getContainerProperty(experiment_name, "project").setValue(project_name);
+
             tc.setChildrenAllowed(experiment_name, false);
           /*  List<Sample> samples =
                 this.openBisClient.openbisInfoService.listSamplesForExperiment(

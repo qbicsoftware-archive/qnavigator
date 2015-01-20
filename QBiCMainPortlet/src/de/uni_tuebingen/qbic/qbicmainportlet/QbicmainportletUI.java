@@ -267,24 +267,24 @@ public class QbicmainportletUI extends UI {
     mainLayout = new VerticalLayout();
     mainLayout.setMargin(true);
     
-    ToolBar toolbar = new ToolBar(ToolBar.View.Space);
-    HorizontalLayout headerLayout = new HorizontalLayout();
-    headerLayout.setWidth("100%");
-    headerLayout.addComponent(toolbar);
-    headerLayout.setComponentAlignment(toolbar, Alignment.MIDDLE_CENTER);
-    mainLayout.addComponent(headerLayout);
+    //ToolBar toolbar = new ToolBar(ToolBar.View.Space);
+    //HorizontalLayout headerLayout = new HorizontalLayout();
+    //headerLayout.setWidth("100%");
+    //headerLayout.addComponent(toolbar);
+    //headerLayout.setComponentAlignment(toolbar, Alignment.MIDDLE_CENTER);
+    //mainLayout.addComponent(headerLayout);
     
     
     
     TreeView tv = createTreeView(tc, state);
-    tv.setHeight("600px");
+    //tv.setHeight("600px");
     navigator.addViewChangeListener(tv);
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
     treeViewAndLevelView.addComponent(tv);
     
     treeViewAndLevelView.addComponent(navigatorContent);
-    treeViewAndLevelView.setExpandRatio(tv, 1);
-    treeViewAndLevelView.setExpandRatio(navigatorContent, 4);
+    //treeViewAndLevelView.setExpandRatio(tv, 1);
+    //treeViewAndLevelView.setExpandRatio(navigatorContent, 4);
     mainLayout.addComponent(treeViewAndLevelView);
     
     setContent(mainLayout);

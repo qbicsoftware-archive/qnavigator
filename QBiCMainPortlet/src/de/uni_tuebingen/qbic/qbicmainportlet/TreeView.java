@@ -13,6 +13,7 @@ import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
@@ -47,11 +48,16 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     vl.setSpacing(true);
     
     tree.setImmediate(true);
-    tree.setSizeFull();
+    
+    // test to not show code of shown experiments but experiment type (+ name)
+    tree.setItemCaptionPropertyId("caption");
+    tree.setItemCaptionMode(ItemCaptionMode.PROPERTY);
     
     vl.addComponent(tree);
+    //tree.setHeight("100%");
+    
     vl.addComponent(backButton);
-    backButton.setSizeFull();
+    backButton.setWidth("100%");
     backButton.addClickListener(new Button.ClickListener() {
       
       @Override
@@ -64,6 +70,12 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
       
     });
     this.setCaption("Project Browser");
+    
+    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
+    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
+    this.setWidth(String.format("%spx", (browserWidth * 0.15)));
+    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    
     // this.setWidth("250px");
     // this.setHeight("800px");
     this.setContent(vl);
