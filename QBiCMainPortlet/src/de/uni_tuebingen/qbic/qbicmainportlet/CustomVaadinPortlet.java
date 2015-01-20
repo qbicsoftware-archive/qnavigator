@@ -1,41 +1,26 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Paths;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletSession;
-import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceURL;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.tools.tar.TarEntry;
-import org.apache.tools.tar.TarOutputStream;
-
 import com.vaadin.server.DeploymentConfiguration;
-import com.vaadin.server.Page;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-
-import de.uni_tuebingen.qbic.main.ConfigurationManager;
-import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 
 /**
  * 
