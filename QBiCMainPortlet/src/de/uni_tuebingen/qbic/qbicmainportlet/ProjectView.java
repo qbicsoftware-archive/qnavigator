@@ -1,5 +1,10 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.nio.file.Paths;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.portlet.PortletSession;
@@ -12,6 +17,9 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
+import com.vaadin.data.Item;
+import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -131,19 +139,45 @@ public class ProjectView extends Panel implements View {
     
     //set to true for the hack below
     menubar.setHtmlContentAllowed(true);
-    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+    
+    
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test.png"));
-    downloadProject.addItem("<a href=\""+(String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE)+"\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project.</a>", null);
+    
+    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+    DataHandler datahandler =
+        (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    HierarchicalContainer datasetContainer = null;
+    try {
+      datasetContainer = datahandler.getDatasets(this.id, "project");
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      datasetContainer = null;
+    }
+    if(datasetContainer == null || datasetContainer.getItemIds().isEmpty()){
+      downloadProject.setEnabled(false);
+    }
+    else{
+      Map<String, AbstractMap.SimpleEntry<String, Long>> entries = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+      for(Object itemId : datasetContainer.getItemIds()){
+        
+        
+        addentry((Integer)itemId,datasetContainer, entries, (String)datasetContainer.getItem(itemId).getItemProperty("CODE").getValue());
+      }
+      portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
+      downloadProject.addItem("<a href=\""+(String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE)+"\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project.</a>", null);      
+    }
+
+
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_test.png"));
    
     // Another submenu item with a sub-submenu
     MenuItem colds = manage.addItem("test2", null, null);
-
+    
     colds.addItem("Milk",      null, null);
     colds.addItem("Weissbier", null, null);
-
     // Another top-level item
     MenuItem snacks = menubar.addItem("Run workflows", null, null);
     snacks.setIcon(new ThemeResource("dna_test.png"));
@@ -313,6 +347,27 @@ public class ProjectView extends Panel implements View {
 
   }
 
+  private void addentry(Integer itemId, HierarchicalContainer htc,  Map<String, SimpleEntry<String, Long>> entries,
+      String fileName) {
+    fileName =
+        Paths.get(fileName, (String) htc.getItem(itemId).getItemProperty("File Name").getValue()).toString();
+    
+    System.out.println(fileName);
+    if (htc.hasChildren(itemId)) {
+      for (Object childId : htc.getChildren(itemId)) {
+        addentry((Integer)childId, htc, entries, fileName);
+      }
+    } else {
+      String datasetCode = (String) htc.getItem(itemId).getItemProperty("CODE").getValue();
+      Long datasetFileSize =
+          (Long) htc.getItem(itemId).getItemProperty("file_size_bytes").getValue();
+      
+      entries.put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode,
+          datasetFileSize));
+    }
+  }
+
+
   private void updateCaption() {
     this.setCaption(String.format("Viewing Project %s", id));
   }
@@ -427,8 +482,8 @@ public class ProjectView extends Panel implements View {
 
       this.setContainerDataSource(dh.getProjectInformation(projectIdentifier), currentValue);
     } catch (Exception e) {
-      System.out.println("Exception in LevelView.enter. mainComponent is ProjectView");
-      // e.printStackTrace();
+      System.out.println("Exception in ProjectView.enter");
+       e.printStackTrace();
     }
     
     
