@@ -162,7 +162,8 @@ public class ProjectView extends VerticalLayout implements View {
     else{
       Map<String, AbstractMap.SimpleEntry<String, Long>> entries = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
       for(Object itemId : datasetContainer.getItemIds()){
-        if((datasetContainer.getChildren(itemId) != null) && !datasetContainer.getChildren(itemId).isEmpty()) {
+        //if((datasetContainer.getChildren(itemId) != null) && !datasetContainer.getChildren(itemId).isEmpty()) {
+        if(datasetContainer.getParent(itemId) == null) {
         addentry((Integer)itemId,datasetContainer, entries, (String)datasetContainer.getItem(itemId).getItemProperty("CODE").getValue());
         }
        }
@@ -231,6 +232,7 @@ public class ProjectView extends VerticalLayout implements View {
 
     projDescription.addComponent(projDescriptionContent);
     projDescription.setMargin(true);
+    projDescription.setWidth("100%");
     projectview_content.addComponent(projDescription);
 
     // statistics.addComponent(projDescription);
