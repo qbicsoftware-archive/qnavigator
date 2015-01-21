@@ -1468,7 +1468,7 @@ public class DataHandler {
         return xmlPersons;
     }
   
-  private void fillPersonsContainer(String spaceIdentifier) {
+  public void fillPersonsContainer(String spaceIdentifier) {
     List<Sample> samplesOfSpace = new ArrayList<Sample>();
     samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);
     
@@ -1496,4 +1496,31 @@ public class DataHandler {
         }
     }
   }
+  
+  public List<Experiment> listExperimentsOfProjects(List<Project> tmp_list){
+    return this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
+        tmp_list, null);
+
+  }
+  
+  public String openBIScodeToString(String experimentTypeCode){
+    return this.openBisClient.openBIScodeToString(experimentTypeCode);
+  }
+  
+  public List<DataSet> listDataSetsForExperiments(List<String> experimentIdentifiers){
+    return this.openBisClient.getFacade().listDataSetsForExperiments(experimentIdentifiers);
+  }
+  
+  public List<Sample> listSamplesForProjects(List<String> projectIdentifiers){
+    return this.openBisClient.getFacade().listSamplesForProjects(projectIdentifiers);
+  }
+  
+  public List<Sample>  getSamplesofSpace(String spaceName){
+    return this.openBisClient.getSamplesofSpace(spaceName);
+  }
+  
+  public List<DataSet> listDataSetsForSamples(List<String> sampleIdentifier){
+    return this.openBisClient.getFacade().listDataSetsForSamples(sampleIdentifier);
+  }
+  
 }

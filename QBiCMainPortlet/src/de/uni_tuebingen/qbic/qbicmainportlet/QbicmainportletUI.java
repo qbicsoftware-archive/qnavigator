@@ -1,68 +1,41 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
-import javax.portlet.ActionRequest;
-import javax.portlet.ActionResponse;
-import javax.portlet.EventRequest;
-import javax.portlet.EventResponse;
-import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
-import javax.portlet.ResourceRequest;
-import javax.portlet.ResourceResponse;
-import javax.portlet.ResourceURL;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
-import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.RequestHandler;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinPortletService;
-import com.vaadin.server.VaadinPortletSession;
-import com.vaadin.server.WrappedPortletSession;
-import com.vaadin.server.VaadinPortletSession.PortletListener;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinResponse;
 import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
+import com.vaadin.server.WrappedPortletSession;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -94,13 +67,12 @@ public class QbicmainportletUI extends UI {
           + " at " + dateFormat.format(new Date()) + " UTC.");
       initConnection();
       initSessionAttributes();
-      buildLayout(); 
+      initProgressBarAndThreading(request);
+      //buildMainLayout(); 
     }
   }
 
   private void buildNoUserLogin() {
-    final GridLayout grid = new GridLayout(3, 3);
-    HorizontalLayout layout = new HorizontalLayout();
     ExternalResource resource = new ExternalResource("mailto:info@qbic.uni-tuebingen.de");
     Link mailToQbicLink = new Link("", resource);
     mailToQbicLink.setIcon(new ThemeResource("mail9.png"));
@@ -125,87 +97,303 @@ public class QbicmainportletUI extends UI {
     contact.addComponent(mailToQbicLink);
     contact.setStyleName("no-user-login");
 
-    HorizontalLayout test = new HorizontalLayout();
+    HorizontalLayout notSignedInLayout = new HorizontalLayout();
     Label expandingGap1 = new Label();
     expandingGap1.setWidth("100%");
-    test.addComponent(expandingGap1);
-    test.addComponent(signIn);
-    // Label expandingGap2 = new Label();
-    // test.addComponent(expandingGap2);
-    test.addComponent(contact);
-    test.setExpandRatio(expandingGap1, 0.16f);
-    test.setExpandRatio(signIn, 0.36f);
+    notSignedInLayout.addComponent(expandingGap1);
+    notSignedInLayout.addComponent(signIn);
 
-    // test.setExpandRatio(expandingGap2, 0.12f);
-    test.setExpandRatio(contact, 0.36f);
+    notSignedInLayout.addComponent(contact);
+    notSignedInLayout.setExpandRatio(expandingGap1, 0.16f);
+    notSignedInLayout.setExpandRatio(signIn, 0.36f);
 
-    test.setWidth("100%");
-    test.setSpacing(true);
-    setContent(test);
+    notSignedInLayout.setExpandRatio(contact, 0.36f);
+
+    notSignedInLayout.setWidth("100%");
+    notSignedInLayout.setSpacing(true);
+    setContent(notSignedInLayout);
+  }
+  private ProgressBar progress;
+  private Label status;
+  private Button button;
+  protected void initProgressBarAndThreading(VaadinRequest request){
+    HorizontalLayout barbar = new HorizontalLayout();
+    final VerticalLayout layout = new VerticalLayout();
+    layout.addComponent(barbar);
+    this.setContent(layout);
+    
+    // Create the indicator, disabled until progress is started
+    progress = new ProgressBar(new Float(0.0));
+    progress.setEnabled(false);
+    barbar.addComponent(progress);
+            
+    status = new Label("not running");
+    barbar.addComponent(status);
+    final HierarchicalContainer tc = new HierarchicalContainer();
+    final SpaceInformation homeInformation = new SpaceInformation(); 
+    // A button to start progress
+    button = new Button("Update Database");
+    layout.addComponent(button);
+ // Clicking the button creates and runs a work thread
+    button.addClickListener(new Button.ClickListener() {
+        public void buttonClick(ClickEvent event) {
+          final RunnableFillsContainer th = new RunnableFillsContainer(tc, homeInformation, LiferayAndVaadinUtils.getUser().getScreenName());
+            final Thread thread = new Thread(th);
+            Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
+                public void uncaughtException(Thread th, Throwable ex) {
+                    System.out.println("Uncaught exception: " + ex);
+                    layout.addComponent(new Label("Uncaught exception: " + ex));
+                }
+            };
+            thread.setUncaughtExceptionHandler(h);
+            thread.start();
+
+            // Enable polling and set frequency to 0.5 seconds
+            UI.getCurrent().setPollInterval(500);
+
+            // Disable the button until the work is done
+            progress.setEnabled(true);
+            button.setEnabled(false);
+
+            status.setValue("running...");
+        }
+    });
+    
   }
 
-  private void fillHierarchicalTreeContainerWithDummyData(HierarchicalContainer tc) {
-    DummyDataReader datareaderDummy = null;
-    try {
-      datareaderDummy = new DummyDataReader();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+  class RunnableFillsContainer implements Runnable{
+    // Volatile because read in another thread in access()
+    volatile double current = 0.0;
+    private HierarchicalContainer tc;
+    private SpaceInformation homeViewInformation;
+    private String userName;
+    public RunnableFillsContainer(HierarchicalContainer tc, SpaceInformation homeInformation, String user){
+      this.tc = tc;
+      this.homeViewInformation = homeInformation;
+      this.userName = user;
     }
-    ArrayList<String> spacesDummy = datareaderDummy.getSpaces();
+    
+    @Override
+    public void run() {
+      long startTime = System.nanoTime();
 
-    tc.addContainerProperty("identifier", String.class, "N/A");
-    tc.addContainerProperty("type", String.class, "N/A");
+      DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
 
-    for (String spaceKey : spacesDummy) {
+      status.setValue("Connecting to database.");
+        List<SpaceWithProjectsAndRoleAssignments> space_list = dh.getSpace_list();
 
+        // Initialization of Tree Container
+        tc.addContainerProperty("identifier", String.class, "N/A");
+        tc.addContainerProperty("type", String.class, "N/A");
+        tc.addContainerProperty("project", String.class, "N/A");
+        tc.addContainerProperty("caption", String.class, "N/A");
 
-      tc.addItem(spaceKey);
-      tc.setParent(spaceKey, null);
-      tc.getContainerProperty(spaceKey, "identifier").setValue(spaceKey);
-      tc.getContainerProperty(spaceKey, "type").setValue("space");
+        // Initialization of Home Information
+        IndexedContainer space_container = new IndexedContainer();
+        space_container.addContainerProperty("Project", String.class, "");
+        space_container.addContainerProperty("Description", String.class, "");
+        space_container.addContainerProperty("Contains datasets", String.class, "");
+        int number_of_projects = 0;
+        int i = 0;
+        int all = space_list.size();
+        int number_of_experiments = 0;
+        int number_of_samples = 0;
+        int number_of_datasets = 0;
+        String lastModifiedExperiment = "N/A";
+        String lastModifiedSample = "N/A";
+        Date lastModifiedDate = new Date(0, 0, 0);
+        for (SpaceWithProjectsAndRoleAssignments s : space_list) {
+          if (s.getUsers().contains(userName)) {
+            String space_name = s.getCode();
 
-      ArrayList<String> projects = datareaderDummy.getProjects(spaceKey);
+            // TODO does this work for everyone? should it? empty container would be the aim, probably
+            if (space_name.equals("QBIC_USER_SPACE")) {
+              dh.fillPersonsContainer(space_name);
+            }
 
+            List<Project> projects = s.getProjects();
+            number_of_projects += projects.size();
+            List<String> project_identifiers_tmp = new ArrayList<String>();
+            for (Project project : projects) {
 
-      if (projects != null) {
-        for (String proj : projects) {
-          tc.addItem(proj);
-          tc.setParent(proj, spaceKey);
+              String project_name = project.getCode();
+              if (tc.containsId(project_name)) {
+                project_name = project.getIdentifier();
+              }
+              Object new_s = space_container.addItem();
+              space_container.getContainerProperty(new_s, "Project").setValue(project_name);
 
-          ArrayList<String> samples = datareaderDummy.getSamples(proj);
-          tc.getContainerProperty(proj, "type").setValue("project");
+              // Project descriptions can be long; truncate the string to provide a brief preview
+              String desc = project.getDescription();
 
-          if (samples != null) {
-            for (String samp : samples) {
+              if (desc != null && desc.length() > 0) {
+                desc = desc.substring(0, Math.min(desc.length(), 100));
+                if (desc.length() == 100) {
+                  desc += "...";
+                }
+              }
+              space_container.getContainerProperty(new_s, "Description").setValue(desc);
 
-              tc.addItem(samp);
-              tc.setParent(samp, proj);
+              // System.out.println("|--Project: " + project_name);
+              tc.addItem(project_name);
+              
+              tc.getContainerProperty(project_name, "type").setValue("project");
+              tc.getContainerProperty(project_name, "identifier").setValue(project_name);
+              tc.getContainerProperty(project_name, "project").setValue(project_name);
+              tc.getContainerProperty(project_name, "caption").setValue(project_name);
 
-              tc.getContainerProperty(samp, "type").setValue("sample");
-              tc.setChildrenAllowed(samp, false);
+              List<Project> tmp_list = new ArrayList<Project>();
+              tmp_list.add(project);
+              List<Experiment> experiments = dh.listExperimentsOfProjects(tmp_list);
+
+              // Add number of experiments for every project
+              number_of_experiments += experiments.size();
+
+              List<String> experiment_identifiers = new ArrayList<String>();
+
+              for (Experiment experiment : experiments) {
+                experiment_identifiers.add(experiment.getIdentifier());
+                String experiment_name = experiment.getCode();
+                if (tc.containsId(experiment_name)) {
+                  experiment_name = experiment.getIdentifier();
+                }
+                // System.out.println(" |--Experiment: " + experiment_name);
+                tc.addItem(experiment_name);
+                tc.setParent(experiment_name, project_name);
+                tc.getContainerProperty(experiment_name, "type").setValue("experiment");
+                tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
+                tc.getContainerProperty(experiment_name, "project").setValue(project_name);
+                tc.getContainerProperty(experiment_name, "caption").setValue(String.format("%s (%s)", dh.openBIScodeToString(experiment.getExperimentTypeCode()),experiment_name));
+
+                tc.setChildrenAllowed(experiment_name, false);
+              }
+              if (experiment_identifiers.size() > 0
+                  && dh.listDataSetsForExperiments(experiment_identifiers).size() > 0) {
+                space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
+              } else {
+                space_container.getContainerProperty(new_s, "Contains datasets").setValue("no");
+              }
+         
+            }
+            List<Sample> samplesOfSpace = new ArrayList<Sample>();
+            if (project_identifiers_tmp.size() > 0) {
+              samplesOfSpace = dh.listSamplesForProjects(project_identifiers_tmp);
+            } else {
+              samplesOfSpace = dh.getSamplesofSpace(space_name); // TODO code or identifier
+                                                                           // needed?
+            }
+            number_of_samples += samplesOfSpace.size();
+            List<String> sample_identifiers_tmp = new ArrayList<String>();
+            for (Sample sa : samplesOfSpace) {
+              sample_identifiers_tmp.add(sa.getIdentifier());
+            }
+            List<DataSet> datasets = new ArrayList<DataSet>();
+            if (sample_identifiers_tmp.size() > 0) {
+              datasets = dh.listDataSetsForSamples(sample_identifiers_tmp);
+            }
+            number_of_datasets += datasets.size();
+            StringBuilder lce = new StringBuilder();
+            StringBuilder lcs = new StringBuilder();
+            dh.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
+            String tmplastModifiedExperiment = lce.toString();
+            String tmplastModifiedSample = lcs.toString();
+            if (!tmplastModifiedSample.equals("N/A")) {
+              lastModifiedExperiment = tmplastModifiedExperiment;
+              lastModifiedSample = tmplastModifiedSample;
             }
           }
+          UI.getCurrent().access(new UpdateProgressbar(QbicmainportletUI.getCurrent().getProgressBar(),QbicmainportletUI.getCurrent().getStatusLabel(), (double)(i+1)/(double)all));
+          ++i;  
         }
-      }
-    }
-  }
+        homeViewInformation.numberOfProjects = number_of_projects;
+        homeViewInformation.numberOfExperiments = number_of_experiments;
+        homeViewInformation.numberOfSamples = number_of_samples;
+        homeViewInformation.numberOfDatasets = number_of_datasets;
+        homeViewInformation.lastChangedDataset = lastModifiedDate;
+        homeViewInformation.lastChangedSample = lastModifiedSample;
+        homeViewInformation.lastChangedExperiment = lastModifiedExperiment;
+        homeViewInformation.projects = space_container;
+        long endTime = System.nanoTime();
+        System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
+        
+        System.out.println("User " +userName + " has " + homeViewInformation.numberOfProjects + " projects.");
+        try {
+            Thread.currentThread().sleep(100); // Sleep for 100 milliseconds
+        } catch (InterruptedException e) {}
 
-  private void buildLayout() {
-    HierarchicalContainer tc = new HierarchicalContainer();
-    System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
-    long startTime = System.nanoTime();
+        // Update the UI thread-safely
+        UI.getCurrent().access(new Runnable() {
+            @Override
+            public void run() {
+                // Restore the state to initial
+                progress.setValue(new Float(0.0));
+                progress.setEnabled(false);     
+                // Stop polling
+                UI.getCurrent().setPollInterval(-1);
+                
+                QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
+                
+                getButton().setEnabled(true);
+                status.setValue(String.valueOf("done"));
+                
+            }
+        });
+    }
+}  
+  
+  public ProgressBar getProgressBar(){
+    return progress;
+}
+
+public Label getStatusLabel(){
+    return status;
+}
+
+public Button getButton(){
+    return button;
+}
+ 
+public static QbicmainportletUI getCurrent(){
+  return (QbicmainportletUI) UI.getCurrent();
+}
+
+class UpdateProgressbar implements Runnable {
+  ProgressBar progress;
+  Label label;
+  double current;
+  @Override
+  public void run() {
+      progress.setValue(new Float(current));
+      if (current < 1.0)
+          status.setValue("" +
+              ((int)(current*100)) + "% done, ("+ current + ")");
+      else
+          status.setValue("all done");
+  }
+  
+  public UpdateProgressbar(ProgressBar progress, Label label, double current2){
+      this.progress = progress;
+      this.label = label;
+      this.current = current2;
+  }
+}
+
+  
+  public void buildMainLayout( HierarchicalContainer tc, SpaceInformation homeViewInformation) {
+    //HierarchicalContainer tc = new HierarchicalContainer();
+    //System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
+    //long startTime = System.nanoTime();
     
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    User user = LiferayAndVaadinUtils.getUser();
-    SpaceInformation homeViewInformation = dh.initTreeAndHomeInfo(tc, user.getScreenName());
-    //dh.fillHierarchicalTreeContainer(tc,user.getScreenName());
-    //SpaceInformation homeViewInformation = dh.getHomeInformation(user.getScreenName());
     
-    long endTime = System.nanoTime();
-    System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
     
-    System.out.println("User " +user.getScreenName() + " has " + homeViewInformation.numberOfProjects + " projects.");
+    //DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    //User user = LiferayAndVaadinUtils.getUser();
+    //SpaceInformation homeViewInformation = dh.initTreeAndHomeInfo(tc, user.getScreenName());
+    
+    //long endTime = System.nanoTime();
+    //System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
+    
+    //System.out.println("User " +user.getScreenName() + " has " + homeViewInformation.numberOfProjects + " projects.");
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
 
     LevelView spaceView =
@@ -237,9 +425,6 @@ public class QbicmainportletUI extends UI {
         new LevelView( new Button(
             "testRunWorkflowView"));
     LevelView searchView = new LevelView(new SearchForUsers());
-    // Reload so that MpPortletListener is activated. Stupid hack. there must be a better way to do
-    // this
-    //JavaScript.getCurrent().execute("window.location.reload();");
 
     VerticalLayout navigatorContent = new VerticalLayout();
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
@@ -248,7 +433,6 @@ public class QbicmainportletUI extends UI {
     navigator.addView("datasetView", new DatasetView());
     navigator.addView(SampleView.navigateToLabel, new SampleView());
     navigator.addView("", homeView);
-    //navigator.addView("project", projectView);
     
     navigator.addView(ProjectView.navigateToLabel,new ProjectView());
     navigator.addView(ExperimentView.navigateToLabel, new ExperimentView());
@@ -264,26 +448,14 @@ public class QbicmainportletUI extends UI {
 
 
     mainLayout = new VerticalLayout();
-    mainLayout.setMargin(true);
-    
-    //ToolBar toolbar = new ToolBar(ToolBar.View.Space);
-    //HorizontalLayout headerLayout = new HorizontalLayout();
-    //headerLayout.setWidth("100%");
-    //headerLayout.addComponent(toolbar);
-    //headerLayout.setComponentAlignment(toolbar, Alignment.MIDDLE_CENTER);
-    //mainLayout.addComponent(headerLayout);
-    
-    
+    mainLayout.setMargin(true);    
     
     TreeView tv = createTreeView(tc, state);
-    //tv.setHeight("600px");
     navigator.addViewChangeListener(tv);
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
     treeViewAndLevelView.addComponent(tv);
     
     treeViewAndLevelView.addComponent(navigatorContent);
-    //treeViewAndLevelView.setExpandRatio(tv, 1);
-    //treeViewAndLevelView.setExpandRatio(navigatorContent, 4);
     mainLayout.addComponent(treeViewAndLevelView);
     
     setContent(mainLayout);
@@ -301,7 +473,8 @@ public class QbicmainportletUI extends UI {
   }
   
   public PortletSession getPortletSession(){
-    VaadinRequest vaadinRequest= UI.getCurrent().getSession().getService().getCurrentRequest();
+    UI.getCurrent().getSession().getService();
+    VaadinRequest vaadinRequest= VaadinService.getCurrentRequest();
     WrappedPortletSession wrappedPortletSession = (WrappedPortletSession)vaadinRequest.getWrappedSession();
     return wrappedPortletSession.getPortletSession();
   }
@@ -329,12 +502,9 @@ public class QbicmainportletUI extends UI {
   private void initConnection() {
     ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
 
-    // System.out.println(manager.getDataSourceURL() + manager.getDataSourceUser() +
-    // manager.getDataSourcePassword());
-    // TODO LiferayUtils ?!
     this.openBisConnection =
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
-            manager.getDataSourceUrl(), true); // LiferayAndVaadinUtils.getOpenBisClient();
+            manager.getDataSourceUrl(), true);
     addDetachListener(new DetachListener() {
 
       @Override
