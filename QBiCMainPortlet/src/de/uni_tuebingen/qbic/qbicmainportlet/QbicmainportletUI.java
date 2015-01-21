@@ -30,12 +30,14 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.WrappedPortletSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Button.ClickEvent;
 
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
@@ -63,13 +65,35 @@ public class QbicmainportletUI extends UI {
       DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
       System.out.println("QbicNavigator\nUser logged in: " + LiferayAndVaadinUtils.getUser().getScreenName()
           + " at " + dateFormat.format(new Date()) + " UTC.");
-      initConnection();
-      initSessionAttributes();
+      try{    
+        initConnection();
+        initSessionAttributes(); 
+      }catch(Exception e){
+        buildErrorLayout(request);
+        System.out.println(e.getMessage());
+        return;
+      }
       initProgressBarAndThreading(request);
       //buildMainLayout(); 
     }
   }
 
+   private void buildErrorLayout(final VaadinRequest request){
+     VerticalLayout vl = new VerticalLayout();
+     this.setContent(vl);
+     vl.addComponent(new Label("An error occured, while trying to connect to the database. Please try again later, or contact your project manager."));
+     Button button = new Button("retry");
+     button.addClickListener(new ClickListener() {
+      
+      @Override
+      public void buttonClick(ClickEvent event) {
+        QbicmainportletUI.getCurrent().init(request);
+        
+      }
+    });
+     vl.addComponent(button);
+   }
+  
   private void buildNoUserLogin() {
     ExternalResource resource = new ExternalResource("mailto:info@qbic.uni-tuebingen.de");
     Link mailToQbicLink = new Link("", resource);
@@ -129,13 +153,17 @@ public class QbicmainportletUI extends UI {
     final HierarchicalContainer tc = new HierarchicalContainer();
     final SpaceInformation homeInformation = new SpaceInformation(); 
     status.setValue("Connecting to database.");
+
+
+    
+
     
     final RunnableFillsContainer th = new RunnableFillsContainer(tc, homeInformation, LiferayAndVaadinUtils.getUser().getScreenName());
     final Thread thread = new Thread(th);
     Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
         public void uncaughtException(Thread th, Throwable ex) {
             System.out.println("Uncaught exception: " + ex);
-            layout.addComponent(new Label("Uncaught exception: " + ex));
+            status.setValue("An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
         }
     };
     thread.setUncaughtExceptionHandler(h);

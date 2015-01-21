@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletSession;
+import javax.portlet.PortletURL;
 import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceURL;
 import javax.servlet.http.HttpServletResponse;
@@ -72,7 +73,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       resURL.setResourceID(RESOURCE_ID);
       request.getPortletSession().setAttribute(RESOURCE_ATTRIBUTE, resURL.toString(),
           PortletSession.APPLICATION_SCOPE);
-      resUrlNotSet = false;
+      resUrlNotSet = false;   
     }
     super.doDispatch(request, response);
   }
