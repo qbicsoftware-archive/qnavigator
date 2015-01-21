@@ -8,16 +8,20 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-public class ExperimentView extends Panel implements View{
+public class ExperimentView extends VerticalLayout implements View{
 
   /**
    * 
@@ -39,8 +43,9 @@ public class ExperimentView extends Panel implements View{
 
     expview_content.addComponent(this.table);
     expview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    this.setContent(expview_content);
-
+    //this.setContent(expview_content);
+    this.addComponent(expview_content);
+    
     this.table.setContainerDataSource(datasource);
     this.tableClickChangeTreeView();
   }
@@ -86,12 +91,52 @@ public class ExperimentView extends Panel implements View{
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
 
-    this.updateCaption();
+   // this.updateCaption();
   }
 
   private void setStatistics(ExperimentInformation expInformation) {
     this.expview_content.removeAllComponents();
     
+    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
+    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
+
+    expview_content.setWidth("100%");
+    this.setWidth(String.format("%spx", (browserWidth * 0.6)));
+    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    
+    MenuBar menubar = new MenuBar();
+    // A top-level menu item that opens a submenu
+    
+    //set to true for the hack below
+    menubar.setHtmlContentAllowed(true);
+    expview_content.addComponent(menubar);
+
+    menubar.addStyleName("qbicmainportlet");
+    menubar.setWidth(100.0f, Unit.PERCENTAGE);    
+    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
+    downloadProject.setIcon(new ThemeResource("computer_test2.png"));
+    
+    MenuItem manage = menubar.addItem("Manage your data", null, null);
+    manage.setIcon(new ThemeResource("barcode_test2.png"));
+   
+    // Another submenu item with a sub-submenu
+    MenuItem colds = manage.addItem("test2", null, null);
+
+    colds.addItem("Milk",      null, null);
+    colds.addItem("Weissbier", null, null);
+
+    // Another top-level item
+    MenuItem snacks = menubar.addItem("Run workflows", null, null);
+    snacks.setIcon(new ThemeResource("dna_test2.png"));
+
+    snacks.addItem("Weisswurst", null, null);
+    snacks.addItem("Bratwurst",  null, null);
+    snacks.addItem("Currywurst", null, null);
+            
+    // Yet another top-level item
+    MenuItem servs = menubar.addItem("Analyze your data", null, null);
+    servs.setIcon(new ThemeResource("graph_test2.png"));
+    servs.addItem("Car Service", null, null);
 
     // general information
     VerticalLayout generalInfo = new VerticalLayout();
@@ -131,7 +176,7 @@ public class ExperimentView extends Panel implements View{
           String.format("occurred in sample %s (%s)", lastSample,
               expInformation.lastChangedDataset.toString()))));
     }
-
+    
 
     statistics.addComponent(statContent);
     statistics.setMargin(true);
@@ -144,6 +189,8 @@ public class ExperimentView extends Panel implements View{
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
     tableSectionContent.setWidth("100%");
+    tableSectionContent.setWidth("100%");
+    table.setWidth("100%");
     tableSectionContent.setCaption("Registered Samples");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);

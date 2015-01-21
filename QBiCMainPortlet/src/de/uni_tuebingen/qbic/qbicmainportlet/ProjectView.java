@@ -41,7 +41,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class ProjectView extends Panel implements View {
+public class ProjectView extends VerticalLayout implements View {
 
   static String navigateToLabel = "project";
   
@@ -61,8 +61,9 @@ public class ProjectView extends Panel implements View {
 
     projectview_content.addComponent(this.table);
     projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    this.setContent(projectview_content);
-
+    //this.setContent(projectview_content);
+    this.addComponent(projectview_content);
+    
     this.table.setContainerDataSource(datasource);
     this.tableClickChangeTreeView();
    
@@ -117,7 +118,7 @@ public class ProjectView extends Panel implements View {
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
 
-    this.updateCaption();
+    //this.updateCaption();
   }
 
 
@@ -142,7 +143,7 @@ public class ProjectView extends Panel implements View {
     
     
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setIcon(new ThemeResource("computer_test.png"));
+    downloadProject.setIcon(new ThemeResource("computer_test2.png"));
     
     PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
     DataHandler datahandler =
@@ -161,17 +162,17 @@ public class ProjectView extends Panel implements View {
     else{
       Map<String, AbstractMap.SimpleEntry<String, Long>> entries = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
       for(Object itemId : datasetContainer.getItemIds()){
-        
-        
+        if((datasetContainer.getChildren(itemId) != null) && !datasetContainer.getChildren(itemId).isEmpty()) {
         addentry((Integer)itemId,datasetContainer, entries, (String)datasetContainer.getItem(itemId).getItemProperty("CODE").getValue());
-      }
+        }
+       }
       portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
       downloadProject.addItem("<a href=\""+(String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE)+"\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project.</a>", null);      
     }
 
 
     MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_test.png"));
+    manage.setIcon(new ThemeResource("barcode_test2.png"));
    
     // Another submenu item with a sub-submenu
     MenuItem colds = manage.addItem("test2", null, null);
@@ -180,7 +181,7 @@ public class ProjectView extends Panel implements View {
     colds.addItem("Weissbier", null, null);
     // Another top-level item
     MenuItem snacks = menubar.addItem("Run workflows", null, null);
-    snacks.setIcon(new ThemeResource("dna_test.png"));
+    snacks.setIcon(new ThemeResource("dna_test2.png"));
 
     snacks.addItem("Weisswurst", null, null);
     snacks.addItem("Bratwurst",  null, null);
@@ -188,7 +189,7 @@ public class ProjectView extends Panel implements View {
             
     // Yet another top-level item
     MenuItem servs = menubar.addItem("Analyze your data", null, null);
-    servs.setIcon(new ThemeResource("graph_test.png"));
+    servs.setIcon(new ThemeResource("graph_test2.png"));
     servs.addItem("Car Service", null, null);
     
     
@@ -217,10 +218,10 @@ public class ProjectView extends Panel implements View {
                 + this.id + "</a>", ContentMode.HTML);
     // contact.setIcon(FontAwesome.ENVELOPE);
     
-    projDescription.setWidth("100%");
-    projDescriptionContent.setWidth("100%");
-    descContent.setWidth("100%");
-    contact.setWidth("100%");
+    //projDescription.setWidth("100%");
+    //projDescriptionContent.setWidth("100%");
+    //descContent.setWidth("100%");
+    //contact.setWidth("100%");
     
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
@@ -354,9 +355,11 @@ public class ProjectView extends Panel implements View {
     
     System.out.println(fileName);
     if (htc.hasChildren(itemId)) {
+      
       for (Object childId : htc.getChildren(itemId)) {
         addentry((Integer)childId, htc, entries, fileName);
       }
+      
     } else {
       String datasetCode = (String) htc.getItem(itemId).getItemProperty("CODE").getValue();
       Long datasetFileSize =

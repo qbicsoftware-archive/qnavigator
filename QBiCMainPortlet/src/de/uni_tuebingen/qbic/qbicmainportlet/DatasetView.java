@@ -28,22 +28,26 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class DatasetView extends Panel implements View {
+public class DatasetView extends VerticalLayout implements View {
 
 
   /**
@@ -68,7 +72,8 @@ public class DatasetView extends Panel implements View {
   public DatasetView() {
     this.vert = new VerticalLayout();
     this.table = buildFilterTable();
-    this.setContent(vert);
+    //this.setContent(vert);
+    this.addComponent(vert);
   }
 
   public DatasetView(HierarchicalContainer dataset) {
@@ -77,7 +82,8 @@ public class DatasetView extends Panel implements View {
     this.table = buildFilterTable();
     this.buildLayout();
     this.setContainerDataSource(this.datasets);
-    this.setContent(vert);
+    //this.setContent(vert);
+    this.addComponent(vert);
   }
 
 
@@ -100,6 +106,47 @@ public class DatasetView extends Panel implements View {
    */
   private void buildLayout() {
     this.vert.removeAllComponents();
+    
+    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
+    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
+
+    this.vert.setWidth("100%");
+    this.setWidth(String.format("%spx", (browserWidth * 0.6)));
+    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    
+    MenuBar menubar = new MenuBar();
+    // A top-level menu item that opens a submenu
+    
+    //set to true for the hack below
+    menubar.setHtmlContentAllowed(true);
+    this.vert.addComponent(menubar);
+
+    menubar.addStyleName("qbicmainportlet");
+    menubar.setWidth(100.0f, Unit.PERCENTAGE);    
+    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
+    downloadProject.setIcon(new ThemeResource("computer_test2.png"));
+    
+    MenuItem manage = menubar.addItem("Manage your data", null, null);
+    manage.setIcon(new ThemeResource("barcode_test2.png"));
+   
+    // Another submenu item with a sub-submenu
+    MenuItem colds = manage.addItem("test2", null, null);
+
+    colds.addItem("Milk",      null, null);
+    colds.addItem("Weissbier", null, null);
+
+    // Another top-level item
+    MenuItem snacks = menubar.addItem("Run workflows", null, null);
+    snacks.setIcon(new ThemeResource("dna_test2.png"));
+
+    snacks.addItem("Weisswurst", null, null);
+    snacks.addItem("Bratwurst",  null, null);
+    snacks.addItem("Currywurst", null, null);
+            
+    // Yet another top-level item
+    MenuItem servs = menubar.addItem("Analyze your data", null, null);
+    servs.setIcon(new ThemeResource("graph_test2.png"));
+    servs.addItem("Car Service", null, null);
 
     VerticalLayout statistics = new VerticalLayout();
     HorizontalLayout statContent = new HorizontalLayout();
@@ -127,7 +174,11 @@ public class DatasetView extends Panel implements View {
     tableSection.addComponent(tableSectionContent);
     this.vert.addComponent(tableSection);
 
-    this.table.setSizeFull();
+    table.setWidth("100%");
+    tableSection.setWidth("100%");
+    tableSectionContent.setWidth("100%");
+    
+    //this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
@@ -249,7 +300,7 @@ public class DatasetView extends Panel implements View {
           message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
           message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
           message.add(space);
-          state.notifyObservers(message);
+          //state.notifyObservers(message);
         } else {
           message.add("null");
         }

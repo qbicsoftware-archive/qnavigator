@@ -10,20 +10,24 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinPortletSession;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("deprecation")
-public class SampleView extends Panel implements View{
+public class SampleView extends VerticalLayout implements View{
 
   /**
    * 
@@ -51,8 +55,9 @@ public class SampleView extends Panel implements View{
 
     vert.addComponent(this.table);
     vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    this.setContent(vert);
-
+    //this.setContent(vert);
+    this.addComponent(vert);
+    
     //this.vert.setSpacing(true);
 
     this.table.setContainerDataSource(datasource);
@@ -109,11 +114,52 @@ public class SampleView extends Panel implements View{
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
     
-    this.updateCaption();
+   // this.updateCaption();
   }
 
   private void setStatistics(SampleInformation sampInformation) {
     this.vert.removeAllComponents();
+    
+    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
+    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
+
+    vert.setWidth("100%");
+    this.setWidth(String.format("%spx", (browserWidth * 0.6)));
+    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    
+    MenuBar menubar = new MenuBar();
+    // A top-level menu item that opens a submenu
+    
+    //set to true for the hack below
+    menubar.setHtmlContentAllowed(true);
+    this.vert.addComponent(menubar);
+
+    menubar.addStyleName("qbicmainportlet");
+    menubar.setWidth(100.0f, Unit.PERCENTAGE);    
+    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
+    downloadProject.setIcon(new ThemeResource("computer_test2.png"));
+    
+    MenuItem manage = menubar.addItem("Manage your data", null, null);
+    manage.setIcon(new ThemeResource("barcode_test2.png"));
+   
+    // Another submenu item with a sub-submenu
+    MenuItem colds = manage.addItem("test2", null, null);
+
+    colds.addItem("Milk",      null, null);
+    colds.addItem("Weissbier", null, null);
+
+    // Another top-level item
+    MenuItem snacks = menubar.addItem("Run workflows", null, null);
+    snacks.setIcon(new ThemeResource("dna_test2.png"));
+
+    snacks.addItem("Weisswurst", null, null);
+    snacks.addItem("Bratwurst",  null, null);
+    snacks.addItem("Currywurst", null, null);
+            
+    // Yet another top-level item
+    MenuItem servs = menubar.addItem("Analyze your data", null, null);
+    servs.setIcon(new ThemeResource("graph_test2.png"));
+    servs.addItem("Car Service", null, null);
     
     // Description of sample   
     VerticalLayout sampleDescription = new VerticalLayout();
@@ -216,6 +262,10 @@ public class SampleView extends Panel implements View{
     
     tableSectionContent.setMargin(true);
     tableSection.setMargin(true);
+    
+    tableSectionContent.setWidth("100%");
+    tableSection.setWidth("100%");
+    this.table.setWidth("100%");
     
     tableSection.addComponent(tableSectionContent);
     this.vert.addComponent(tableSection);

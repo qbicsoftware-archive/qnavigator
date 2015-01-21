@@ -145,7 +145,6 @@ public class CustomVaadinPortlet extends VaadinPortlet {
         String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
         String[] splittedFilePath = entryKey.split("/");
 
-
         if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
           tarWriter.writeEntry(entry.getKey(),
               dataHandler.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());

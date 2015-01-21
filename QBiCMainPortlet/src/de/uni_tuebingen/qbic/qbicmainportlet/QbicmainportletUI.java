@@ -218,15 +218,14 @@ public class QbicmainportletUI extends UI {
                                                                                                              // Table(),
                                                                                                              // spaces));
 
-    LevelView homeView;
+    HomeView homeView;
 
     if (homeViewInformation.numberOfProjects > 0) {
       homeView =
-          new LevelView( new HomeView(
-              homeViewInformation, "Your Projects"));
+          new HomeView(
+              homeViewInformation, "Your Projects");
     } else {
-      homeView =
-          new LevelView( new HomeView());
+      homeView =new HomeView();
     }
     LevelView maxQuantWorkflowView =
         new LevelView( new Button("maxQuantWorkflowView"));

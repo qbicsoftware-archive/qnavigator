@@ -10,9 +10,12 @@ import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.CollapseEvent;
@@ -21,6 +24,7 @@ import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.Runo;
 
 @SuppressWarnings("serial")
 public class TreeView extends Panel implements Observer, ViewChangeListener {
@@ -41,8 +45,14 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
   private void init() {
     VerticalLayout vl = new VerticalLayout();
-    vl.setMargin(true);
+    vl.setMargin(false);
     vl.setSpacing(true);
+    
+    MenuBar menubar = new MenuBar();
+    MenuItem pseudoItem = menubar.addItem("", null);
+    pseudoItem.setIcon(new ThemeResource("qbic_logo.png"));
+    menubar.setWidth("100%");
+    vl.addComponent(menubar);
     
     tree.setImmediate(true);
     
@@ -51,7 +61,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     tree.setItemCaptionMode(ItemCaptionMode.PROPERTY);
     
     vl.addComponent(tree);
-    //tree.setHeight("100%");
+    tree.setHeight("100%");
     
     vl.addComponent(backButton);
     backButton.setWidth("100%");
@@ -66,17 +76,20 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
       }
       
     });
-    this.setCaption("Project Browser");
+    //this.setCaption("Project Browser");
     
     int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
     int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
-    this.setWidth(String.format("%spx", (browserWidth * 0.15)));
+    this.setWidth(String.format("%spx", (browserWidth * 0.12)));
     this.setHeight(String.format("%spx", (browserHeight * 0.8)));
     
     // this.setWidth("250px");
     // this.setHeight("800px");
+    this.addStyleName(Runo.PANEL_LIGHT);
     this.setContent(vl);
-
+    //this.addComponent(vl);
+    //this.setMargin(false);
+    
     this.registerClickListener();
 
   }
