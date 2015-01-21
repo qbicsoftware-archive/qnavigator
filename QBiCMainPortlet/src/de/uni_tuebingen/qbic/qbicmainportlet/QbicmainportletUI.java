@@ -17,7 +17,6 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
@@ -31,7 +30,6 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.WrappedPortletSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
@@ -115,7 +113,6 @@ public class QbicmainportletUI extends UI {
   }
   private ProgressBar progress;
   private Label status;
-  private Button button;
   protected void initProgressBarAndThreading(VaadinRequest request){
     HorizontalLayout barbar = new HorizontalLayout();
     final VerticalLayout layout = new VerticalLayout();
@@ -131,33 +128,25 @@ public class QbicmainportletUI extends UI {
     barbar.addComponent(status);
     final HierarchicalContainer tc = new HierarchicalContainer();
     final SpaceInformation homeInformation = new SpaceInformation(); 
-    // A button to start progress
-    button = new Button("Update Database");
-    layout.addComponent(button);
- // Clicking the button creates and runs a work thread
-    button.addClickListener(new Button.ClickListener() {
-        public void buttonClick(ClickEvent event) {
-          final RunnableFillsContainer th = new RunnableFillsContainer(tc, homeInformation, LiferayAndVaadinUtils.getUser().getScreenName());
-            final Thread thread = new Thread(th);
-            Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
-                public void uncaughtException(Thread th, Throwable ex) {
-                    System.out.println("Uncaught exception: " + ex);
-                    layout.addComponent(new Label("Uncaught exception: " + ex));
-                }
-            };
-            thread.setUncaughtExceptionHandler(h);
-            thread.start();
-
-            // Enable polling and set frequency to 0.5 seconds
-            UI.getCurrent().setPollInterval(500);
-
-            // Disable the button until the work is done
-            progress.setEnabled(true);
-            button.setEnabled(false);
-
-            status.setValue("running...");
+    status.setValue("Connecting to database.");
+    
+    final RunnableFillsContainer th = new RunnableFillsContainer(tc, homeInformation, LiferayAndVaadinUtils.getUser().getScreenName());
+    final Thread thread = new Thread(th);
+    Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
+        public void uncaughtException(Thread th, Throwable ex) {
+            System.out.println("Uncaught exception: " + ex);
+            layout.addComponent(new Label("Uncaught exception: " + ex));
         }
-    });
+    };
+    thread.setUncaughtExceptionHandler(h);
+    thread.start();
+
+    // Enable polling and set frequency to 0.5 seconds
+    UI.getCurrent().setPollInterval(500);
+
+    // Disable the button until the work is done
+    progress.setEnabled(true);
+
     
   }
 
@@ -331,11 +320,7 @@ public class QbicmainportletUI extends UI {
                 // Stop polling
                 UI.getCurrent().setPollInterval(-1);
                 
-                QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
-                
-                getButton().setEnabled(true);
-                status.setValue(String.valueOf("done"));
-                
+                QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);          
             }
         });
     }
@@ -347,10 +332,6 @@ public class QbicmainportletUI extends UI {
 
 public Label getStatusLabel(){
     return status;
-}
-
-public Button getButton(){
-    return button;
 }
  
 public static QbicmainportletUI getCurrent(){
@@ -365,8 +346,8 @@ class UpdateProgressbar implements Runnable {
   public void run() {
       progress.setValue(new Float(current));
       if (current < 1.0)
-          status.setValue("" +
-              ((int)(current*100)) + "% done, ("+ current + ")");
+          status.setValue(
+              String.valueOf(((int)(current*100))) + "%");
       else
           status.setValue("all done");
   }
@@ -409,11 +390,11 @@ class UpdateProgressbar implements Runnable {
     HomeView homeView;
 
     if (homeViewInformation.numberOfProjects > 0) {
-      homeView =
-          new HomeView(
-              homeViewInformation, "Your Projects");
+      homeView =          new HomeView(
+          homeViewInformation, "Your Projects");
     } else {
-      homeView =new HomeView();
+      homeView =
+          new HomeView();
     }
     LevelView maxQuantWorkflowView =
         new LevelView( new Button("maxQuantWorkflowView"));
