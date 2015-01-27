@@ -1,4 +1,4 @@
-package de.uni_tuebingen.qbic.qbicmainportlet;
+package model;
 
 import java.util.ArrayList;
 import java.util.Arrays;

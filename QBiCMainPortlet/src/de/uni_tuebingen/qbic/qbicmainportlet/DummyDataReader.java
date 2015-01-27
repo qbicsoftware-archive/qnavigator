@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import model.SampleBean;
+
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.UI;
 

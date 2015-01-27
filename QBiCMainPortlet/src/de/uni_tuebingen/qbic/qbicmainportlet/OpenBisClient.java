@@ -941,24 +941,21 @@ public class OpenBisClient {// implements Serializable {
   }
 
   /**
-   * Returns a HashMap that maps sample codes to a list of sample codes of their parent samples
+   * Returns a Map that maps samples to a list of samples of their parent samples
    * 
    * @param samples A list of openBIS samples
-   * @return HashMap<String, ArrayList<String>> containing a mapping between children and parent
-   *         codes of samples
+   * @return Map<Sample, List<Sample>> containing a mapping between children and parents of samples
    */
-  public HashMap<String, ArrayList<String>> getParentMap(List<Sample> samples) {
-    HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+  public Map<Sample, List<Sample>> getParentMap(List<Sample> samples) {
+    Map<Sample, List<Sample>> results = new HashMap<Sample, List<Sample>>();
     for (Sample p : samples) {
-      String pID = p.getCode();
       String permID = p.getPermId();
       List<Sample> children = getFacade().listSamplesOfSample(permID);
       for (Sample c : children) {
-        String cID = c.getCode();
-        if (results.containsKey(cID))
-          results.get(cID).add(pID);
+        if (results.containsKey(c))
+          results.get(c).add(p);
         else
-          results.put(cID, new ArrayList<String>(Arrays.asList(pID)));
+          results.put(c, new ArrayList<Sample>(Arrays.asList(p)));
       }
     }
     return results;

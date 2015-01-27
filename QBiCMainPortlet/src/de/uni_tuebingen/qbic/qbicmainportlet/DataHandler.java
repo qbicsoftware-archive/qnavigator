@@ -19,6 +19,8 @@ import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import model.ExperimentBarcodeSummaryBean;
+
 import parser.Parser;
 import parser.PersonParser;
 import persons.Qperson;
@@ -32,8 +34,10 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 
+import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.StreamResource;
@@ -63,7 +67,6 @@ class SpaceInformation {
 
   }
 }
-
 
 class ProjectInformation {
   public IndexedContainer experiments;
@@ -129,15 +132,19 @@ public class DataHandler {
   Map<String, IndexedContainer> project_to_samples = new HashMap<String, IndexedContainer>();
   Map<String, IndexedContainer> experiment_to_samples = new HashMap<String, IndexedContainer>();
 
-  Map<String, HierarchicalContainer> space_to_datasets = new HashMap<String, HierarchicalContainer>();
-  Map<String, HierarchicalContainer> project_to_datasets = new HashMap<String, HierarchicalContainer>();
-  Map<String, HierarchicalContainer> experiment_to_datasets = new HashMap<String, HierarchicalContainer>();
-  Map<String, HierarchicalContainer> sample_to_datasets = new HashMap<String, HierarchicalContainer>();
+  Map<String, HierarchicalContainer> space_to_datasets =
+      new HashMap<String, HierarchicalContainer>();
+  Map<String, HierarchicalContainer> project_to_datasets =
+      new HashMap<String, HierarchicalContainer>();
+  Map<String, HierarchicalContainer> experiment_to_datasets =
+      new HashMap<String, HierarchicalContainer>();
+  Map<String, HierarchicalContainer> sample_to_datasets =
+      new HashMap<String, HierarchicalContainer>();
 
   List<SpaceWithProjectsAndRoleAssignments> space_list = null;
-  //Map<String, IndexedContainer> connectedPersons = new HashMap<String, IndexedContainer>();
+  // Map<String, IndexedContainer> connectedPersons = new HashMap<String, IndexedContainer>();
   IndexedContainer connectedPersons = new IndexedContainer();
-  
+
   public List<SpaceWithProjectsAndRoleAssignments> getSpace_list() {
     if (space_list == null) {
       space_list = this.openBisClient.getFacade().getSpacesWithProjects();
@@ -185,42 +192,47 @@ public class DataHandler {
       String spaceIdentifier = space.getCode();
 
       long start = System.currentTimeMillis();
-     List<Experiment> experiments_tmp = this.openBisClient.getExperimentsOfSpace(spaceIdentifier);
-      
+      List<Experiment> experiments_tmp = this.openBisClient.getExperimentsOfSpace(spaceIdentifier);
+
       List<Project> projects = space.getProjects();
 
       if (spaceIdentifier.equals("QBIC_USER_SPACE")) {
         fillPersonsContainer(spaceIdentifier);
       }
       number_of_experiments += experiments_tmp.size();
-      //number_of_experiments += this.openBisClient.getExperimentsOfSpace(spaceIdentifier).size();// this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
-                                                                                                // projects,
-                                                                                                // null);
-      //List<Sample> samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);// this.openBisClient.facade.listSamplesForProjects(tmp_list_str);
+      // number_of_experiments +=
+      // this.openBisClient.getExperimentsOfSpace(spaceIdentifier).size();//
+      // this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
+      // projects,
+      // null);
+      // List<Sample> samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);//
+      // this.openBisClient.facade.listSamplesForProjects(tmp_list_str);
       List<Sample> samplesOfSpace = new ArrayList<Sample>();
       List<String> project_identifiers_tmp = new ArrayList<String>();
-      for(Project p: projects) {
+      for (Project p : projects) {
         project_identifiers_tmp.add(p.getIdentifier());
       }
-      
-      if(project_identifiers_tmp.size() > 0) {
+
+      if (project_identifiers_tmp.size() > 0) {
         samplesOfSpace = this.openBisClient.facade.listSamplesForProjects(project_identifiers_tmp);
       } else {
         samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);
       }
-      //samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);
+      // samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);
       number_of_samples += samplesOfSpace.size();
       List<String> sample_identifiers_tmp = new ArrayList<String>();
-      for(Sample s: samplesOfSpace) {
+      for (Sample s : samplesOfSpace) {
         sample_identifiers_tmp.add(s.getIdentifier());
       }
-      //List<DataSet> datasets = this.openBisClient.getDataSetsOfSpaceByIdentifier(spaceIdentifier);// this.openBisClient.facade.listDataSetsForExperiments(tmp_experiment_identifier_lis);
+      // List<DataSet> datasets =
+      // this.openBisClient.getDataSetsOfSpaceByIdentifier(spaceIdentifier);//
+      // this.openBisClient.facade.listDataSetsForExperiments(tmp_experiment_identifier_lis);
       List<DataSet> datasets = new ArrayList<DataSet>();
       if (sample_identifiers_tmp.size() > 0) {
         datasets = this.openBisClient.facade.listDataSetsForSamples(sample_identifiers_tmp);
       }
       long end = System.currentTimeMillis();
-      System.out.println("Took " + (end - start)/1000.0);
+      System.out.println("Took " + (end - start) / 1000.0);
 
       number_of_datasets += datasets.size();
       StringBuilder lce = new StringBuilder();
@@ -237,61 +249,67 @@ public class DataHandler {
       for (Project p : projects) {
         Object new_s = space_container.addItem();
         space_container.getContainerProperty(new_s, "Project").setValue(p.getCode());
-        
-       // List<Experiment> experiments = this.openBisClient.getExperimentsOfProjectByCode(p.getCode());
+
+        // List<Experiment> experiments =
+        // this.openBisClient.getExperimentsOfProjectByCode(p.getCode());
         List<String> project_identifier = new ArrayList<String>();
         project_identifier.add(p.getIdentifier());
-        List<Experiment> experiments = this.openBisClient.facade.listExperimentsForProjects(project_identifier);
+        List<Experiment> experiments =
+            this.openBisClient.facade.listExperimentsForProjects(project_identifier);
         List<String> experiment_identifiers = new ArrayList<String>();
-        
-        for(Experiment exp :experiments)
+
+        for (Experiment exp : experiments)
           experiment_identifiers.add(exp.getIdentifier());
-        
+
         /*
-        for(Experiment exp :experiments) {
-          experiment_identifiers.add(exp.getIdentifier());
-          if (exp.getExperimentTypeCode().equals("Q_PROJECT_DETAILS") && exp.getProperties().get("Q_PERSONS") != null) {
-           
-            List<Qperson> persons = this.parseConnectedPeopleInformation(exp.getProperties().get("Q_PERSONS"));
-           
-           for(Qperson person: persons) {
-             
-             //if(connectedPersons.containsKey(person.getFirstname())) {
-               //IndexedContainer personContainer = connectedPersons.get(person.getFirstname());
-               Object newPerson = this.connectedPersons.addItem();
-               this.connectedPersons.getContainerProperty(newPerson,"Title").setValue(person.getTitle());
-               this.connectedPersons.getContainerProperty(newPerson,"First Name").setValue(person.getFirstname());
-               this.connectedPersons.getContainerProperty(newPerson,"Last Name").setValue(person.getLastname());
-               this.connectedPersons.getContainerProperty(newPerson,"Position").setValue(person.getPosition());
-               this.connectedPersons.getContainerProperty(newPerson,"E-Mail").setValue(person.getEmail());
-               this.connectedPersons.getContainerProperty(newPerson,"Phone").setValue(person.getPhone().toString());
-               this.connectedPersons.getContainerProperty(newPerson,"Project").setValue(p.getCode());    
-           }
-           break;
-           }
-          }
+         * for(Experiment exp :experiments) { experiment_identifiers.add(exp.getIdentifier()); if
+         * (exp.getExperimentTypeCode().equals("Q_PROJECT_DETAILS") &&
+         * exp.getProperties().get("Q_PERSONS") != null) {
+         * 
+         * List<Qperson> persons =
+         * this.parseConnectedPeopleInformation(exp.getProperties().get("Q_PERSONS"));
+         * 
+         * for(Qperson person: persons) {
+         * 
+         * //if(connectedPersons.containsKey(person.getFirstname())) { //IndexedContainer
+         * personContainer = connectedPersons.get(person.getFirstname()); Object newPerson =
+         * this.connectedPersons.addItem();
+         * this.connectedPersons.getContainerProperty(newPerson,"Title"
+         * ).setValue(person.getTitle());
+         * this.connectedPersons.getContainerProperty(newPerson,"First Name"
+         * ).setValue(person.getFirstname());
+         * this.connectedPersons.getContainerProperty(newPerson,"Last Name"
+         * ).setValue(person.getLastname());
+         * this.connectedPersons.getContainerProperty(newPerson,"Position"
+         * ).setValue(person.getPosition());
+         * this.connectedPersons.getContainerProperty(newPerson,"E-Mail"
+         * ).setValue(person.getEmail());
+         * this.connectedPersons.getContainerProperty(newPerson,"Phone"
+         * ).setValue(person.getPhone().toString());
+         * this.connectedPersons.getContainerProperty(newPerson,"Project").setValue(p.getCode()); }
+         * break; } }
          */
         // Project descriptions can be long; truncate the string to provide a brief preview
         String desc = p.getDescription();
 
         if (desc != null && desc.length() > 0) {
           desc = desc.substring(0, Math.min(desc.length(), 100));
-          
-          if (desc.length() == 100)
-          {
+
+          if (desc.length() == 100) {
             desc += "...";
           }
         }
-        
-        
+
+
 
         space_container.getContainerProperty(new_s, "Description").setValue(desc);
 
         // True/False is nice for us but not for the customer
-        //if (this.openBisClient.getDataSetsOfProjectByCode(p.getCode()).size() > 0) {
+        // if (this.openBisClient.getDataSetsOfProjectByCode(p.getCode()).size() > 0) {
         // Makes it much faster
-        if (experiment_identifiers.size() > 0 && this.openBisClient.facade.listDataSetsForExperiments(experiment_identifiers).size() > 0) {
-        space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
+        if (experiment_identifiers.size() > 0
+            && this.openBisClient.facade.listDataSetsForExperiments(experiment_identifiers).size() > 0) {
+          space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
         } else {
           space_container.getContainerProperty(new_s, "Contains datasets").setValue("no");
         }
@@ -305,7 +323,7 @@ public class DataHandler {
     homeInformation.lastChangedSample = lastModifiedSample;
     homeInformation.lastChangedExperiment = lastModifiedExperiment;
     homeInformation.projects = space_container;
-    
+
     return homeInformation;
 
   }
@@ -505,10 +523,10 @@ public class DataHandler {
         Project project = this.openBisClient.getProjectByIdentifier(id);
         ret.description = project.getDescription();
         ret.numberOfExperiments = ret.experiments.size();
-      
+
         List<DataSet> datasets =
             this.openBisClient.getDataSetsOfProjectByIdentifier(project.getCode());
-        
+
         ret.numberOfDatasets = datasets.size();
 
         StringBuilder lce = new StringBuilder();
@@ -569,7 +587,7 @@ public class DataHandler {
         // TODO check for source of nullpointer exception !
         // seems like first the project id gets here
         Experiment exp = this.openBisClient.getExperimentByCode(id);
-        //ret.identifier = exp.getIdentifier();
+        // ret.identifier = exp.getIdentifier();
         ret.experimentType = this.openBisClient.openBIScodeToString(exp.getExperimentTypeCode());
         ret.samples = this.getSamples(id, "experiment");
         ret.numberOfSamples = ret.samples.size();
@@ -620,11 +638,9 @@ public class DataHandler {
           Map.Entry pairs = (Map.Entry) it.next();
           if (pairs.getValue().equals("")) {
             continue;
-          }
-          else if(pairs.getKey().equals("Q_PERSONS")) {
+          } else if (pairs.getKey().equals("Q_PERSONS")) {
             continue;
-          }
-          else {
+          } else {
             // propertiesBottom += "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " +
             // pairs.getValue() + "</li>");
             propertiesBottom +=
@@ -684,9 +700,9 @@ public class DataHandler {
             this.openBisClient.getLabelsofProperties(this.openBisClient.getSampleTypeByString(samp
                 .getSampleTypeCode()));
 
-        
-        
-        //String propertiesHeader = "Properties \n <ul>";
+
+
+        // String propertiesHeader = "Properties \n <ul>";
         String propertiesBottom = "<ul> ";
         String xmlPropertiesBottom = "<ul> ";
 
@@ -695,19 +711,22 @@ public class DataHandler {
           Map.Entry pairs = (Map.Entry) it.next();
           if (pairs.getKey().equals("Q_PROPERTIES")) {
             Parser xmlParser = new Parser();
-            JAXBElement<Qproperties> xmlProperties = xmlParser.parseXMLString(pairs.getValue().toString());
+            JAXBElement<Qproperties> xmlProperties =
+                xmlParser.parseXMLString(pairs.getValue().toString());
             Map<String, String> xmlPropertiesMap = xmlParser.getMap(xmlProperties);
-            
+
             Iterator itProperties = xmlPropertiesMap.entrySet().iterator();
             while (itProperties.hasNext()) {
               Map.Entry pairsProperties = (Map.Entry) itProperties.next();
-              
+
               xmlPropertiesBottom +=
-                "<li><b>" + (pairsProperties.getKey() + ":</b> " + pairsProperties.getValue() + "</li>");
+                  "<li><b>"
+                      + (pairsProperties.getKey() + ":</b> " + pairsProperties.getValue() + "</li>");
             }
           } else {
             propertiesBottom +=
-              "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
+                "<li><b>"
+                    + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
           }
         }
         propertiesBottom += "</ul>";
@@ -720,17 +739,17 @@ public class DataHandler {
 
         if (ret.parents.isEmpty()) {
           ret.parentsFormattedString = parentsHeader += "None";
-          
+
         } else {
           Iterator parentsIt = ret.parents.entrySet().iterator();
           while (parentsIt.hasNext()) {
             Map.Entry pairs = (Map.Entry) parentsIt.next();
             parentsBottom += "<li><b>" + pairs.getKey() + "</b> (" + pairs.getValue() + ") </li>";
           }
-          parentsBottom += "</ul>"; 
+          parentsBottom += "</ul>";
           ret.parentsFormattedString = parentsHeader + parentsBottom;
         }
-                
+
         this.sampleInformations.put(id, ret);
 
       } catch (Exception e) {
@@ -881,7 +900,7 @@ public class DataHandler {
     ret.remove("admin"); // OpenBIS user
     ret.remove("QBIC"); // OpenBIS user
     ret.remove("sauron");
-    //ret.remove("babysauron");
+    // ret.remove("babysauron");
     return ret;
   }
 
@@ -914,7 +933,7 @@ public class DataHandler {
 
       ProgressBar progressBar = new ProgressBar();
       progressBar.setValue(this.openBisClient.computeProjectStatus(p));
-      
+
       project_container.getContainerProperty(new_p, "Space").setValue(space);
       project_container.getContainerProperty(new_p, "Description").setValue(desc);
       project_container.getContainerProperty(new_p, "Registration Date").setValue(ts);
@@ -1028,17 +1047,19 @@ public class DataHandler {
     dataset_container.addContainerProperty("file_size_bytes", Long.class, null);
     dataset_container.addContainerProperty("dl_link", String.class, null);
     dataset_container.addContainerProperty("CODE", String.class, null);
-    
+
     for (DataSet d : datasets) {
-            String identifier = d.getSampleIdentifierOrNull();
+      String identifier = d.getSampleIdentifierOrNull();
       Sample sampleObject = this.openBisClient.getSampleByIdentifier(identifier);
       String sample = sampleObject.getCode();
-      String sampleType =  this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
-      Project projectObject = this.openBisClient.getProjectOfExperimentByIdentifier(sampleObject.getExperimentIdentifierOrNull());
+      String sampleType = this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
+      Project projectObject =
+          this.openBisClient.getProjectOfExperimentByIdentifier(sampleObject
+              .getExperimentIdentifierOrNull());
       String project = projectObject.getCode();
-      //String code = d.getSampleIdentifierOrNull();
-      //String sample = code.split("/")[2];
-      //String project = sample.substring(0, 5);
+      // String code = d.getSampleIdentifierOrNull();
+      // String sample = code.split("/")[2];
+      // String project = sample.substring(0, 5);
       Date date = d.getRegistrationDate();
 
       SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -1048,26 +1069,28 @@ public class DataHandler {
       FileInfoDssDTO[] filelist = d.listFiles("original", true);
 
       // recursive test
-      registerDatasetInTable(d,filelist, dataset_container, project, sample, ts, sampleType, null);
-      
+      registerDatasetInTable(d, filelist, dataset_container, project, sample, ts, sampleType, null);
+
     }
 
     return dataset_container;
   }
 
-  public void registerDatasetInTable(DataSet d, FileInfoDssDTO[] filelist, HierarchicalContainer dataset_container, String project, String sample, Timestamp ts, String sampleType, Object parent) {
-    if(filelist[0].isDirectory()) {
-      
+  public void registerDatasetInTable(DataSet d, FileInfoDssDTO[] filelist,
+      HierarchicalContainer dataset_container, String project, String sample, Timestamp ts,
+      String sampleType, Object parent) {
+    if (filelist[0].isDirectory()) {
+
       Object new_ds = dataset_container.addItem();
-      
+
       String folderPath = filelist[0].getPathInDataSet();
       FileInfoDssDTO[] subList = d.listFiles(folderPath, false);
-      
+
       long totalFileSize = 0L;
       dataset_container.setChildrenAllowed(new_ds, true);
       String download_link = filelist[0].getPathInDataSet();
       String[] splitted_link = download_link.split("/");
-      String file_name = download_link.split("/")[splitted_link.length -1];
+      String file_name = download_link.split("/")[splitted_link.length - 1];
       System.out.println(file_name);
 
       dataset_container.getContainerProperty(new_ds, "Select").setValue(new CheckBox());
@@ -1078,8 +1101,7 @@ public class DataHandler {
           this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(file_name);
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
-      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(
-          "-");
+      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue("-");
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(
@@ -1087,26 +1109,27 @@ public class DataHandler {
       dataset_container.getContainerProperty(new_ds, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(
           filelist[0].getFileSize());
-        
-      //System.out.println("Now it should be a folder: " + filelist[0].getPathInDataSet());
-      
-      if(parent != null) {
+
+      // System.out.println("Now it should be a folder: " + filelist[0].getPathInDataSet());
+
+      if (parent != null) {
         dataset_container.setParent(new_ds, parent);
       }
-      
-      for(FileInfoDssDTO file : subList) {
+
+      for (FileInfoDssDTO file : subList) {
         FileInfoDssDTO[] childList = {file};
-        registerDatasetInTable(d, childList, dataset_container, project, sample, ts,sampleType, new_ds);
+        registerDatasetInTable(d, childList, dataset_container, project, sample, ts, sampleType,
+            new_ds);
       }
-      
+
     } else {
-      //System.out.println("Now it should be a file: " + filelist[0].getPathInDataSet());
-      
+      // System.out.println("Now it should be a file: " + filelist[0].getPathInDataSet());
+
       Object new_file = dataset_container.addItem();
-      dataset_container.setChildrenAllowed(new_file,false);
+      dataset_container.setChildrenAllowed(new_file, false);
       String download_link = filelist[0].getPathInDataSet();
       String[] splitted_link = download_link.split("/");
-      String file_name = download_link.split("/")[splitted_link.length -1];
+      String file_name = download_link.split("/")[splitted_link.length - 1];
       // String file_name = download_link.split("/")[1];
       String fileSize = DashboardUtil.humanReadableByteCount(filelist[0].getFileSize(), true);
 
@@ -1115,18 +1138,19 @@ public class DataHandler {
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
       dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(file_name);
-      dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getDataSetTypeCode());
+      dataset_container.getContainerProperty(new_file, "File Type")
+          .setValue(d.getDataSetTypeCode());
       dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(
           d.getDataSetTypeCode());
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_file, "File Size").setValue(fileSize);
       dataset_container.getContainerProperty(new_file, "dl_link").setValue(
-      d.getDataSetDss().tryGetInternalPathInDataStore() + "/" + filelist[0].getPathInDataSet());
+          d.getDataSetDss().tryGetInternalPathInDataStore() + "/" + filelist[0].getPathInDataSet());
       dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(
           filelist[0].getFileSize());
-      if(parent != null) {
+      if (parent != null) {
         dataset_container.setParent(new_file, parent);
       }
     }
@@ -1144,7 +1168,7 @@ public class DataHandler {
     FileInfoDssDTO[] filelist = dataSet.listFiles("original", false);
     return dataSet.getFile(filelist[0].getPathInDataSet());
   }
-  
+
   public InputStream getDatasetStream(String datasetCode, String folder) {
 
     IOpenbisServiceFacade facade = openBisClient.getFacade();
@@ -1154,7 +1178,9 @@ public class DataHandler {
   }
 
   /**
-   * Function to fill tree container and collect statistical information of spaces. Should replace the two functions and be somewhat faster. Still not pretty. Needs work
+   * Function to fill tree container and collect statistical information of spaces. Should replace
+   * the two functions and be somewhat faster. Still not pretty. Needs work
+   * 
    * @param tc HierarchicalContainer for the Tree
    * @param userName Screenname of the Liferay User
    * @return SpaceInformation object
@@ -1169,7 +1195,7 @@ public class DataHandler {
     tc.addContainerProperty("project", String.class, "N/A");
     tc.addContainerProperty("caption", String.class, "N/A");
 
-    
+
     // Initialization of Home Information
     SpaceInformation homeInformation = new SpaceInformation();
     IndexedContainer space_container = new IndexedContainer();
@@ -1217,7 +1243,7 @@ public class DataHandler {
 
           // System.out.println("|--Project: " + project_name);
           tc.addItem(project_name);
-          
+
           tc.getContainerProperty(project_name, "type").setValue("project");
           tc.getContainerProperty(project_name, "identifier").setValue(project_name);
           tc.getContainerProperty(project_name, "project").setValue(project_name);
@@ -1226,8 +1252,8 @@ public class DataHandler {
           List<Project> tmp_list = new ArrayList<Project>();
           tmp_list.add(project);
           List<Experiment> experiments =
-              this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
-                  tmp_list, null);
+              this.openBisClient.openbisInfoService.listExperiments(
+                  this.openBisClient.getSessionToken(), tmp_list, null);
 
           // Add number of experiments for every project
           number_of_experiments += experiments.size();
@@ -1246,12 +1272,16 @@ public class DataHandler {
             tc.getContainerProperty(experiment_name, "type").setValue("experiment");
             tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
             tc.getContainerProperty(experiment_name, "project").setValue(project_name);
-            tc.getContainerProperty(experiment_name, "caption").setValue(String.format("%s (%s)", this.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),experiment_name));
+            tc.getContainerProperty(experiment_name, "caption").setValue(
+                String.format("%s (%s)",
+                    this.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),
+                    experiment_name));
 
             tc.setChildrenAllowed(experiment_name, false);
           }
           if (experiment_identifiers.size() > 0
-              && this.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers).size() > 0) {
+              && this.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers)
+                  .size() > 0) {
             space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
           } else {
             space_container.getContainerProperty(new_s, "Contains datasets").setValue("no");
@@ -1259,10 +1289,12 @@ public class DataHandler {
         }
         List<Sample> samplesOfSpace = new ArrayList<Sample>();
         if (project_identifiers_tmp.size() > 0) {
-          samplesOfSpace = this.openBisClient.getFacade().listSamplesForProjects(project_identifiers_tmp);
+          samplesOfSpace =
+              this.openBisClient.getFacade().listSamplesForProjects(project_identifiers_tmp);
         } else {
-          samplesOfSpace = this.openBisClient.getSamplesofSpace(space_name); // TODO code or identifier
-                                                                       // needed?
+          samplesOfSpace = this.openBisClient.getSamplesofSpace(space_name); // TODO code or
+                                                                             // identifier
+          // needed?
         }
         number_of_samples += samplesOfSpace.size();
         List<String> sample_identifiers_tmp = new ArrayList<String>();
@@ -1296,7 +1328,7 @@ public class DataHandler {
 
     return homeInformation;
   }
-  
+
   /**
    * This method fills the Hierarchical tree container for the user with the given screenName. It
    * contains the Openbis data model hierarchy including, projects, experiments and samples.
@@ -1309,7 +1341,7 @@ public class DataHandler {
     tc.addContainerProperty("identifier", String.class, "N/A");
     tc.addContainerProperty("type", String.class, "N/A");
     tc.addContainerProperty("project", String.class, "N/A");
-    
+
     List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpace_list();
 
     for (SpaceWithProjectsAndRoleAssignments s : space_list) {
@@ -1331,12 +1363,12 @@ public class DataHandler {
           // System.out.println("|--Project: " + project_name);
           tc.addItem(project_name);
           tc.setParent(project_name, space_name);
-          
+
           tc.getContainerProperty(project_name, "type").setValue("project");
           tc.getContainerProperty(project_name, "identifier").setValue(project_name);
           tc.getContainerProperty(project_name, "project").setValue(project_name);
 
-          
+
           List<Project> tmp_list = new ArrayList<Project>();
           tmp_list.add(project);
           List<Experiment> experiments =
@@ -1351,33 +1383,27 @@ public class DataHandler {
             // System.out.println("	|--Experiment: " + experiment_name);
             tc.addItem(experiment_name);
             tc.setParent(experiment_name, project_name);
-            
+
             tc.getContainerProperty(experiment_name, "type").setValue("experiment");
             tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
             tc.getContainerProperty(experiment_name, "project").setValue(project_name);
 
             tc.setChildrenAllowed(experiment_name, false);
-          /*  List<Sample> samples =
-                this.openBisClient.openbisInfoService.listSamplesForExperiment(
-                    this.openBisClient.getSessionToken(), experiment.getIdentifier());
-            for (Sample sample : samples) {
-              // The commented code allows only biological samples to be shown in TreeView. We show
-              // all samples for now.
-               if (!sample.getSampleTypeCode().equals("BIOLOGICAL")){
-               continue;
-               }
-              String samp = sample.getCode();
-              if (tc.containsId(samp)) {
-                samp = sample.getIdentifier();
-              }
-              // System.out.println("		|--Sample: " + samp);
-              tc.addItem(samp);
-              tc.setParent(samp, experiment_name);
-
-              tc.getContainerProperty(samp, "type").setValue("sample");
-              tc.getContainerProperty(samp, "identifier").setValue(samp);
-              tc.setChildrenAllowed(samp, false);
-            }*/
+            /*
+             * List<Sample> samples =
+             * this.openBisClient.openbisInfoService.listSamplesForExperiment(
+             * this.openBisClient.getSessionToken(), experiment.getIdentifier()); for (Sample sample
+             * : samples) { // The commented code allows only biological samples to be shown in
+             * TreeView. We show // all samples for now. if
+             * (!sample.getSampleTypeCode().equals("BIOLOGICAL")){ continue; } String samp =
+             * sample.getCode(); if (tc.containsId(samp)) { samp = sample.getIdentifier(); } //
+             * System.out.println("		|--Sample: " + samp); tc.addItem(samp); tc.setParent(samp,
+             * experiment_name);
+             * 
+             * tc.getContainerProperty(samp, "type").setValue("sample");
+             * tc.getContainerProperty(samp, "identifier").setValue(samp);
+             * tc.setChildrenAllowed(samp, false); }
+             */
           }
         }
       }
@@ -1419,7 +1445,14 @@ public class DataHandler {
     return resource;
   }
 
-  public String containerToString(IndexedContainer container) {
+  // public String beanContainerToString(BeanItemContainer c) {
+  // String header = "";
+  // for (Object o : c.getContainerPropertyIds())
+  // header += o.toString() + "\t";
+  // for (c.get)
+  // }
+
+  public String containerToString(Container container) {
     String header = "";
     Collection<?> i = container.getItemIds();
     String rowString = "";
@@ -1455,23 +1488,23 @@ public class DataHandler {
     System.out.println(parameters);
     this.openBisClient.triggerIngestionService("notify-user", parameters);
   }
-  
+
   public List<Qperson> parseConnectedPeopleInformation(String xmlString) {
-        PersonParser xmlParser = new PersonParser();
-        List<Qperson> xmlPersons = null;
-        try {
-          xmlPersons = xmlParser.getPersonsFromXML(xmlString);
-        } catch (JAXBException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-        return xmlPersons;
+    PersonParser xmlParser = new PersonParser();
+    List<Qperson> xmlPersons = null;
+    try {
+      xmlPersons = xmlParser.getPersonsFromXML(xmlString);
+    } catch (JAXBException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
-  
+    return xmlPersons;
+  }
+
   public void fillPersonsContainer(String spaceIdentifier) {
     List<Sample> samplesOfSpace = new ArrayList<Sample>();
     samplesOfSpace = this.openBisClient.getSamplesofSpace(spaceIdentifier);
-    
+
     if (this.connectedPersons.size() == 0) {
       for (PropertyType p : this.openBisClient.listPropertiesForType(this.openBisClient
           .getSampleTypeByString(("Q_USER")))) {
@@ -1481,46 +1514,52 @@ public class DataHandler {
     }
 
     for (Sample s : samplesOfSpace) {
-        List<Sample> parents = this.openBisClient.getParents(s.getCode());
-        Map<String, String> labelMap = this.openBisClient.getLabelsofProperties(this.openBisClient.getSampleTypeByString(s.getSampleTypeCode()));
+      List<Sample> parents = this.openBisClient.getParents(s.getCode());
+      Map<String, String> labelMap =
+          this.openBisClient.getLabelsofProperties(this.openBisClient.getSampleTypeByString(s
+              .getSampleTypeCode()));
 
-        for (Sample parent : parents) {
-          Object newPerson = this.connectedPersons.addItem();    
-          Iterator it = s.getProperties().entrySet().iterator();
-          while (it.hasNext()) {
-            Map.Entry pairs = (Map.Entry) it.next();
-            this.connectedPersons.getContainerProperty(newPerson,labelMap.get(pairs.getKey())).setValue(pairs.getValue());
-      }
-          this.connectedPersons.getContainerProperty(newPerson,"Project").setValue(this.openBisClient.getProjectOfExperimentByIdentifier(parent.getExperimentIdentifierOrNull()).getCode().toString());
-
+      for (Sample parent : parents) {
+        Object newPerson = this.connectedPersons.addItem();
+        Iterator it = s.getProperties().entrySet().iterator();
+        while (it.hasNext()) {
+          Map.Entry pairs = (Map.Entry) it.next();
+          this.connectedPersons.getContainerProperty(newPerson, labelMap.get(pairs.getKey()))
+              .setValue(pairs.getValue());
         }
+        this.connectedPersons.getContainerProperty(newPerson, "Project").setValue(
+            this.openBisClient
+                .getProjectOfExperimentByIdentifier(parent.getExperimentIdentifierOrNull())
+                .getCode().toString());
+
+      }
     }
   }
-  
-  public List<Experiment> listExperimentsOfProjects(List<Project> tmp_list){
-    return this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
-        tmp_list, null);
+
+  public List<Experiment> listExperimentsOfProjects(List<Project> tmp_list) {
+    return this.openBisClient.openbisInfoService.listExperiments(
+        this.openBisClient.getSessionToken(), tmp_list, null);
 
   }
-  
-  public String openBIScodeToString(String experimentTypeCode){
+
+  public String openBIScodeToString(String experimentTypeCode) {
     return this.openBisClient.openBIScodeToString(experimentTypeCode);
   }
-  
-  public List<DataSet> listDataSetsForExperiments(List<String> experimentIdentifiers){
+
+  public List<DataSet> listDataSetsForExperiments(List<String> experimentIdentifiers) {
     return this.openBisClient.getFacade().listDataSetsForExperiments(experimentIdentifiers);
   }
-  
-  public List<Sample> listSamplesForProjects(List<String> projectIdentifiers){
+
+  public List<Sample> listSamplesForProjects(List<String> projectIdentifiers) {
     return this.openBisClient.getFacade().listSamplesForProjects(projectIdentifiers);
   }
-  
-  public List<Sample>  getSamplesofSpace(String spaceName){
+
+  public List<Sample> getSamplesofSpace(String spaceName) {
     return this.openBisClient.getSamplesofSpace(spaceName);
   }
-  
-  public List<DataSet> listDataSetsForSamples(List<String> sampleIdentifier){
+
+  public List<DataSet> listDataSetsForSamples(List<String> sampleIdentifier) {
     return this.openBisClient.getFacade().listDataSetsForSamples(sampleIdentifier);
   }
-  
+
 }

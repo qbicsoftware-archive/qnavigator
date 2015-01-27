@@ -56,6 +56,7 @@ public class QbicmainportletUI extends UI {
 
   private OpenBisClient openBisConnection;
   private VerticalLayout mainLayout;
+  private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
 
   @Override
   protected void init(VaadinRequest request) {
@@ -444,6 +445,8 @@ class UpdateProgressbar implements Runnable {
     navigator.addView("", homeView);
     
     navigator.addView(ProjectView.navigateToLabel,new ProjectView());
+    navigator.addView(BarcodeView.navigateToLabel, new BarcodeView(manager.getScriptsFolder(),
+        manager.getPathVariable()));
     navigator.addView(ExperimentView.navigateToLabel, new ExperimentView());
     navigator.addView(ChangePropertiesView.navigateToLabel, new ChangePropertiesView());
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
@@ -509,8 +512,6 @@ class UpdateProgressbar implements Runnable {
   }
 
   private void initConnection() {
-    ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
-
     this.openBisConnection =
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
             manager.getDataSourceUrl(), true);
