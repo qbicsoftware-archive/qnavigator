@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
@@ -25,6 +26,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -33,6 +35,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -47,6 +50,7 @@ public class ProjectView extends VerticalLayout implements View {
   
   FilterTable table;
   VerticalLayout projectview_content;
+  VerticalLayout buttonLayoutSection = new VerticalLayout();
 
   private String id;
   private Button export;
@@ -96,7 +100,7 @@ public class ProjectView extends VerticalLayout implements View {
     this.setStatistics(projectInformation);
 
     
-    VerticalLayout buttonLayoutSection = new VerticalLayout();
+    buttonLayoutSection = new VerticalLayout();
     buttonLayoutSection.setMargin(true);
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
@@ -108,7 +112,7 @@ public class ProjectView extends VerticalLayout implements View {
     this.export = new Button("Export as TSV");
     buttonLayout.addComponent(this.export);
 
-    this.projectview_content.addComponent(buttonLayoutSection);
+    //this.projectview_content.addComponent(buttonLayoutSection);
 
     this.table.setContainerDataSource(projectInformation.experiments);
     
@@ -330,6 +334,33 @@ public class ProjectView extends VerticalLayout implements View {
     
     tableSection.addComponent(tableSectionContent);
     projectview_content.addComponent(tableSection);
+    projectview_content.addComponent(buttonLayoutSection);
+    
+    // graph section
+    VerticalLayout graphSection = new VerticalLayout();
+    HorizontalLayout graphSectionContent = new HorizontalLayout();
+    
+    graphSectionContent.setCaption("Project Graph");
+    graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
+    
+    graphSectionContent.setMargin(true);
+    graphSection.setMargin(true);
+    graphSection.setWidth("100%");
+    graphSectionContent.setWidth("100%");
+    
+    try {
+      GraphGenerator graphFrame = new GraphGenerator(this.id);
+      Resource resource = graphFrame.getRes();
+      if(resource != null) {
+        Image graphImage = new Image("", graphFrame.getRes());
+        graphSectionContent.addComponent(graphImage);
+        graphSection.addComponent(graphSectionContent);
+        projectview_content.addComponent(graphSection);
+      }
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
 
     // HorizontalLayout head = new HorizontalLayout();

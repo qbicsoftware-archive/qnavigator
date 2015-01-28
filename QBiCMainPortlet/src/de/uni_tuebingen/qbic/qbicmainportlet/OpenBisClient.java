@@ -739,6 +739,25 @@ public class OpenBisClient {// implements Serializable {
     }
     return terms;
   }
+  
+  /**
+   * Function to get the label of a CV item for some property
+   * 
+   * @param propertyType the property type
+   * @param propertyValue the property value
+   * @return Label of CV item
+   */
+  public String getCVLabelForProperty(PropertyType propertyType, String propertyValue) {
+    ControlledVocabularyPropertyType controlled_vocab = (ControlledVocabularyPropertyType) propertyType;
+    
+    for (VocabularyTerm term : controlled_vocab.getTerms()) {
+      if(term.getCode().equals(propertyValue)) {
+        return term.getLabel();
+      }
+    }
+    return "";
+    }
+  
 
   /**
    * Function to get a SampleType object of a sample type

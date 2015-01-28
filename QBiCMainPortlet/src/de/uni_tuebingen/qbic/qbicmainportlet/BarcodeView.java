@@ -70,7 +70,7 @@ public class BarcodeView extends VerticalLayout implements View {
    */
   private static final long serialVersionUID = 8921847321758727061L;
 
-  static String navigateToLabel = "project";
+  static String navigateToLabel = "barcodeView";
 
   FilterTable table;
   VerticalLayout projectview_content;
