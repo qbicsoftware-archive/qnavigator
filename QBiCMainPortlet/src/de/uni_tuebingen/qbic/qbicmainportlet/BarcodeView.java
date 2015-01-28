@@ -163,12 +163,12 @@ public class BarcodeView extends VerticalLayout implements View {
     prepareButton = new Button("Prepare Barcodes");
     prepareButton.setEnabled(false);
 
-    addComponent(prepareButton);
+    buttonLayout.addComponent(prepareButton);
 
     info = new Label();
     bar = new ProgressBar();
-    addComponent(info);
-    addComponent(bar);
+    buttonLayoutSection.addComponent(info);
+    buttonLayoutSection.addComponent(bar);
 
     sheetDownloadButton = new Button("Download Sample Sheet");
     sheetDownloadButton.setEnabled(false);
@@ -179,10 +179,10 @@ public class BarcodeView extends VerticalLayout implements View {
     comparators = new OptionGroup("Sort Sheet by");
     comparators.addItems(SortBy.values());
     comparators.setValue(SortBy.DESCRIPTION);
-    addComponent(comparators);
-    addComponent(sheetDownloadButton);
-    addComponent(pdfDownloadButton);
-    addComponent(resetButton);
+    buttonLayoutSection.addComponent(comparators);
+    buttonLayout.addComponent(sheetDownloadButton);
+    buttonLayout.addComponent(pdfDownloadButton);
+    buttonLayout.addComponent(resetButton);
 
     this.export = new Button("Export as TSV");
     buttonLayout.addComponent(this.export);
