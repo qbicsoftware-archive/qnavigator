@@ -70,7 +70,7 @@ public class BarcodeView extends VerticalLayout implements View {
    */
   private static final long serialVersionUID = 8921847321758727061L;
 
-  static String navigateToLabel = "barcodeView";
+  static String navigateToLabel = "barcodeview";
 
   FilterTable table;
   VerticalLayout projectview_content;
@@ -120,7 +120,6 @@ public class BarcodeView extends VerticalLayout implements View {
     // beanContainer.addAll(beans);
     // table.setContainerDataSource(beanContainer);
 
-    this.tableClickChangeTreeView();
   }
 
   public BarcodeView(String scripts, String path) {
@@ -402,106 +401,11 @@ public class BarcodeView extends VerticalLayout implements View {
     this.setHeight(String.format("%spx", (browserHeight * 0.8)));
 
 
-    // Project description
-    VerticalLayout projDescription = new VerticalLayout();
-    VerticalLayout projDescriptionContent = new VerticalLayout();
-
-    Label descContent = new Label("none");
-    if (!("".equals(projectInformation.description))) {
-      descContent = new Label(projectInformation.description);
-    }
-
-    Label contact =
-        new Label(
-            "<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
-                + this.id
-                + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
-                + this.id + "</a>", ContentMode.HTML);
-
-    projDescriptionContent.addComponent(descContent);
-    projDescriptionContent.addComponent(contact);
-    projDescriptionContent.setMargin(true);
-    projDescriptionContent.setCaption("Description");
-    projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
-
-    projDescription.addComponent(projDescriptionContent);
-    projDescription.setMargin(true);
-    projDescription.setWidth("100%");
-    projectview_content.addComponent(projDescription);
-
-    // members section
-
-    VerticalLayout members_section = new VerticalLayout();
-    Component membersContent = getMembersComponent(projectInformation.members);
-
-    membersContent.setIcon(FontAwesome.USERS);
-    membersContent.setCaption("Members");
-    members_section.addComponent(membersContent);
-    members_section.setMargin(true);
-
-    projectview_content.addComponent(members_section);
-
-
-
-    // statistics section
-    VerticalLayout statistics = new VerticalLayout();
-
-    HorizontalLayout statContent = new HorizontalLayout();
-    statContent.setCaption("Statistics");
-    statContent.setIcon(FontAwesome.BAR_CHART_O);
-    statContent.addComponent(new Label(String.format("%s experiment(s),",
-        projectInformation.numberOfExperiments)));
-
-    statContent.addComponent(new Label(String.format("%s sample(s),",
-        projectInformation.numberOfSamples)));
-
-    statContent.addComponent(new Label(String.format("%s dataset(s).",
-        projectInformation.numberOfDatasets)));
-
-    statContent.setMargin(true);
-    statContent.setSpacing(true);
-
-    if (projectInformation.numberOfDatasets > 0) {
-
-      String lastSample = "No samples available";
-      if (projectInformation.lastChangedSample != null) {
-        lastSample = projectInformation.lastChangedSample.split("/")[2];
-      }
-      statContent.addComponent(new Label(String.format("Last change %s", String.format(
-          "occurred in sample %s (%s)", lastSample,
-          projectInformation.lastChangedDataset.toString()))));
-    }
-
-
-    statistics.addComponent(statContent);
-    statistics.setMargin(true);
-    projectview_content.addComponent(statistics);
-
-
-    // status bar section
-
-    VerticalLayout status = new VerticalLayout();
-    HorizontalLayout statusContent = new HorizontalLayout();
-    statusContent.setCaption("Status");
-    statusContent.setIcon(FontAwesome.CLOCK_O);
-
-    statusContent.addComponent(projectInformation.progressBar);
-    statusContent.addComponent(new Label(projectInformation.statusMessage));
-    statusContent.setSpacing(true);
-    statusContent.setMargin(true);
-
-    status.addComponent(statusContent);
-    status.setMargin(true);
-
-    projectview_content.addComponent(status);
-
-
-
     // table section
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
 
-    tableSectionContent.setCaption("Registered Experiments");
+    tableSectionContent.setCaption("Select Experiments for Barcode Creation");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
 
@@ -539,17 +443,6 @@ public class BarcodeView extends VerticalLayout implements View {
     }
   }
 
-
-  private void updateCaption() {
-    this.setCaption(String.format("Viewing Project %s", id));
-  }
-
-  private void tableClickChangeTreeView() {
-    table.setSelectable(true);
-    table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table, "Experiment"));
-  }
-
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
     // filterTable.setSizeFull();
@@ -574,73 +467,6 @@ public class BarcodeView extends VerticalLayout implements View {
 
     return filterTable;
   }
-
-  private String getMembersString(Set<String> members) {
-    String concat = new String("");
-    if (members != null) {
-      Object[] tmp = members.toArray();
-      concat = (String) tmp[0];
-
-      if (tmp.length > 1) {
-        for (int i = 1; i < tmp.length; ++i) {
-          concat = concat + ", " + tmp[i];
-        }
-      }
-    }
-
-    return concat;
-  }
-
-
-  private Component getMembersComponent(Set<String> members) {
-    HorizontalLayout membersLayout = new HorizontalLayout();
-    if (members != null) {
-      // membersLayout.addComponent(new Label("Members:"));
-      for (String member : members) {
-
-        // Cool idea, but let's do this when we have more portrait pictures in Liferay
-
-        try {
-          // companyId. We have presumable just one portal id, which equals the companyId.
-          User user = UserLocalServiceUtil.getUserByScreenName(1, member);
-          String fullname = user.getFullName();
-          String email = user.getEmailAddress();
-
-
-          // VaadinSession.getCurrent().getService();
-          // ThemeDisplay themedisplay =
-          // (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
-          // String url = user.getPortraitURL(themedisplay);
-          // ExternalResource er = new ExternalResource(url);
-          // com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(), er);
-          // image.setHeight(80, Unit.PIXELS);
-          // image.setWidth(65, Unit.PIXELS);
-          // membersLayout.addComponent(image);
-          String labelString =
-              new String("<a href=\"mailto:" + email
-                  + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
-          Label userLabel = new Label(labelString, ContentMode.HTML);
-          membersLayout.addComponent(userLabel);
-
-        } catch (com.liferay.portal.NoSuchUserException e) {
-          membersLayout.addComponent(new Label(member));
-        } catch (PortalException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (SystemException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-
-
-        // membersLayout.addComponent(new Label(member));
-      }
-      membersLayout.setSpacing(true);
-      membersLayout.setMargin(true);
-    }
-    return membersLayout;
-  }
-
 
   @Override
   public void enter(ViewChangeEvent event) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
@@ -100,12 +102,13 @@ public class ProjectView extends VerticalLayout implements View {
     this.setStatistics(projectInformation);
 
     
-    buttonLayoutSection = new VerticalLayout();
-    buttonLayoutSection.setMargin(true);
+    //buttonLayoutSection = new VerticalLayout();
+    //buttonLayoutSection.setMargin(true);
+    buttonLayoutSection.removeAllComponents();
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
-    buttonLayout.setSpacing(true);
+    //buttonLayout.setSpacing(true);
     
     buttonLayoutSection.addComponent(buttonLayout);
 
@@ -172,7 +175,7 @@ public class ProjectView extends VerticalLayout implements View {
         }
        }
       portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
-      downloadProject.addItem("<a href=\""+(String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE)+"\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project.</a>", null);      
+      downloadProject.addItem("<a href=\""+(String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE)+"\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>", null);      
     }
 
 
@@ -180,10 +183,18 @@ public class ProjectView extends VerticalLayout implements View {
     manage.setIcon(new ThemeResource("barcode_test2.png"));
    
     // Another submenu item with a sub-submenu
-    MenuItem colds = manage.addItem("test2", null, null);
+    MenuItem colds = manage.addItem("Create Barcodes", null, new MenuBar.Command() {
+      
+      public void menuSelected(MenuItem selectedItem) {
+        State state = (State)UI.getCurrent().getSession().getAttribute("state");
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        message.add(id);
+        message.add("barcodeview");
+        state.notifyObservers(message);     
+      }
+  });
     
-    colds.addItem("Milk",      null, null);
-    colds.addItem("Weissbier", null, null);
     // Another top-level item
     MenuItem snacks = menubar.addItem("Run workflows", null, null);
     snacks.setIcon(new ThemeResource("dna_test2.png"));
@@ -320,11 +331,12 @@ public class ProjectView extends VerticalLayout implements View {
 
     // table section
     VerticalLayout tableSection = new VerticalLayout();
-    HorizontalLayout tableSectionContent = new HorizontalLayout();
+    VerticalLayout tableSectionContent = new VerticalLayout();
     
     tableSectionContent.setCaption("Registered Experiments");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
+    tableSectionContent.addComponent(buttonLayoutSection);
     
     tableSectionContent.setMargin(true);
     tableSection.setMargin(true);
@@ -334,7 +346,6 @@ public class ProjectView extends VerticalLayout implements View {
     
     tableSection.addComponent(tableSectionContent);
     projectview_content.addComponent(tableSection);
-    projectview_content.addComponent(buttonLayoutSection);
     
     // graph section
     VerticalLayout graphSection = new VerticalLayout();

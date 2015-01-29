@@ -215,6 +215,15 @@ public class HomeView extends VerticalLayout implements View {
       table_width = (int) Math.floor(0.7 * browser_window_width);
     }
     */
+    HorizontalLayout button_bar = new HorizontalLayout();
+
+    this.export = new Button("Export as TSV");
+    button_bar.addComponent(this.export);
+    //button_bar.setMargin(true);
+    //homeview_content.addComponent(button_bar);
+    
+    FileDownloader fileDownloader = new FileDownloader(sr);
+    fileDownloader.extend(this.export);
     
     //this.table.setWidth(table_width, Unit.PIXELS);    
     this.table.setColumnExpandRatio("Identifier", 1);
@@ -228,6 +237,7 @@ public class HomeView extends VerticalLayout implements View {
     tableSectionContent.setCaption("Registered Projects");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
+    tableSectionContent.addComponent(button_bar);
 
     tableSectionContent.setMargin(true);
     tableSection.setMargin(true);
@@ -238,17 +248,6 @@ public class HomeView extends VerticalLayout implements View {
 
     tableSection.addComponent(tableSectionContent);
     homeview_content.addComponent(tableSection);
-
-    HorizontalLayout button_bar = new HorizontalLayout();
-
-    this.export = new Button("Export as TSV");
-    button_bar.addComponent(this.export);
-    button_bar.setMargin(true);
-    homeview_content.addComponent(button_bar);
-
-
-    FileDownloader fileDownloader = new FileDownloader(sr);
-    fileDownloader.extend(this.export);
 
     //this.setContent(homeview_content);
     this.addComponent(homeview_content);
