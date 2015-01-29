@@ -1409,7 +1409,7 @@ public class DataHandler {
       }
     }
   }
-
+  
   /**
    * Creates a Map of project statuses fulfilled, keyed by their meaning. For this, different steps
    * in the project flow are checked by looking at experiment types and data registered
@@ -1417,9 +1417,13 @@ public class DataHandler {
    * @param project openBIS project
    * @return
    */
-  public Map<String, Integer> computeProjectStatuses(Project p) {
+  public Map<String, Integer> computeProjectStatuses(String projectId) {
+    
+    System.out.println(projectId);
+    Project p = this.openBisClient.getProjectByCode(projectId);
+    System.out.println(p);
     Map<String, Integer> res = new HashMap<String, Integer>();
-    IndexedContainer c = project_to_experiments.get(p);
+    IndexedContainer c = project_to_experiments.get(p.getIdentifier());
     // project was planned (otherwise it would hopefully not exist :) )
     res.put("Project Planned", 1);
     // design is pre-registered to the test sample level
@@ -1434,7 +1438,7 @@ public class DataHandler {
     }
     res.put("Experimental Design registered", prereg);
     // data is uploaded
-    if (project_to_datasets.get(p).size() > 0)
+    if (project_to_datasets.get(p.getIdentifier()) != null && project_to_datasets.get(p.getIdentifier()).size() > 0)
       res.put("Data Registered", 1);
     else
       res.put("Data Registered", 0);

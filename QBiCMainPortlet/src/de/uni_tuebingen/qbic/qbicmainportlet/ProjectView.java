@@ -6,6 +6,7 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +43,7 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -313,12 +315,12 @@ public class ProjectView extends VerticalLayout implements View {
     // status bar section
 
     VerticalLayout status = new VerticalLayout();
-    HorizontalLayout statusContent = new HorizontalLayout();
+    VerticalLayout statusContent = this.createProjectStatusComponent(datahandler.computeProjectStatuses(this.id));
     statusContent.setCaption("Status");
     statusContent.setIcon(FontAwesome.CLOCK_O);
     
-    statusContent.addComponent(projectInformation.progressBar);
-    statusContent.addComponent(new Label(projectInformation.statusMessage));
+    //statusContent.addComponent(projectInformation.progressBar);
+    //statusContent.addComponent(new Label(projectInformation.statusMessage));
     statusContent.setSpacing(true);
     statusContent.setMargin(true);
     
@@ -516,7 +518,37 @@ public class ProjectView extends VerticalLayout implements View {
     return membersLayout;
   }
 
-
+  
+  public VerticalLayout createProjectStatusComponent(Map<String, Integer> statusValues) {  
+    VerticalLayout projectStatusContent = new VerticalLayout();
+    
+    Iterator it = statusValues.entrySet().iterator();
+    int finishedExperiments = 0;
+    
+    while (it.hasNext()) {
+      Map.Entry pairs = (Map.Entry) it.next();
+      
+        if ((Integer) pairs.getValue() == 0) {
+          Label statusLabel = new Label(pairs.getKey() + ": " + FontAwesome.TIMES.getHtml() , ContentMode.HTML);
+          statusLabel.setStyleName("redicon");
+          projectStatusContent.addComponent(statusLabel);
+        }
+        
+        else { 
+        Label statusLabel = new Label(pairs.getKey() + ": " + FontAwesome.CHECK.getHtml() , ContentMode.HTML);
+        statusLabel.setStyleName("greenicon");
+        projectStatusContent.addComponent(statusLabel);
+        }
+        finishedExperiments += (Integer) pairs.getValue();
+    }
+    
+    ProgressBar progressBar = new ProgressBar();
+    progressBar.setValue((float) finishedExperiments/statusValues.keySet().size());
+    projectStatusContent.addComponent(progressBar);
+    
+    return projectStatusContent;
+  }
+  
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
