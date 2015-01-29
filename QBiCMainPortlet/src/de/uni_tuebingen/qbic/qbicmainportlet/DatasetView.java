@@ -61,7 +61,7 @@ public class DatasetView extends VerticalLayout implements View {
   VerticalLayout vert;
   private final String DOWNLOAD_BUTTON_CAPTION = "Download";
   private final String VISUALIZE_BUTTON_CAPTION = "Visualize";
-
+  static String navigateToLabel = "datasetview";
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
@@ -303,8 +303,8 @@ public class DatasetView extends VerticalLayout implements View {
           //state.notifyObservers(message);
         } else {
           message.add("null");
-        }
-        state.notifyObservers(message);
+        }//TODO
+        //state.notifyObservers(message);
 
       }
     });

@@ -1091,7 +1091,7 @@ public class DataHandler {
       String download_link = filelist[0].getPathInDataSet();
       String[] splitted_link = download_link.split("/");
       String file_name = download_link.split("/")[splitted_link.length - 1];
-      System.out.println(file_name);
+      //System.out.println(file_name);
 
       dataset_container.getContainerProperty(new_ds, "Select").setValue(new CheckBox());
 

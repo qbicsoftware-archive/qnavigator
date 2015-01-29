@@ -444,7 +444,7 @@ public class QbicmainportletUI extends UI {
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
     navigator.addView("space", spaceView);
     navigator.addView("addspaceView", addspaceView);
-    navigator.addView("datasetView", new DatasetView());
+    navigator.addView(DatasetView.navigateToLabel, new DatasetView());
     navigator.addView(SampleView.navigateToLabel, new SampleView());
     navigator.addView("", homeView);
 

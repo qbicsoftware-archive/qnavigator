@@ -177,7 +177,25 @@ public class ProjectView extends VerticalLayout implements View {
         }
        }
       portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
+      //add sub Item to download all projects
       downloadProject.addItem("<a href=\""+(String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE)+"\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>", null);      
+      downloadProject.addItem("Dataset Overview", new MenuBar.Command() {
+        
+        @Override
+        public void menuSelected(MenuItem selectedItem) {
+          State state = (State)UI.getCurrent().getSession().getAttribute("state");
+          ArrayList<String> message = new ArrayList<String>();
+          message.add("clicked");
+          StringBuilder sb = new StringBuilder("type=");
+          sb.append(navigateToLabel);
+          sb.append("&");
+          sb.append("id=");
+          sb.append(id);
+          message.add(sb.toString());
+          message.add(DatasetView.navigateToLabel);
+          state.notifyObservers(message);
+        }
+      });
     }
 
 

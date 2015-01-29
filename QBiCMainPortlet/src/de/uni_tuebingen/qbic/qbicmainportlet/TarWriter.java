@@ -78,6 +78,9 @@ public class TarWriter {
       }
     }
     this.tar = new TarOutputStream(out);
+    tar.setLongFileMode(TarOutputStream.LONGFILE_POSIX);
+    tar.setBigNumberMode(TarOutputStream.BIGNUMBER_STAR);
+    
   }
 
   /**
@@ -124,6 +127,7 @@ public class TarWriter {
     //System.out.println(entryName + entry + fileSize);
     TarEntry tar_entry = new TarEntry(entryName);
     tar_entry.setSize(fileSize);
+    tar_entry.getRealSize();
     try {
       tar.putNextEntry(tar_entry);
       long totalWritten = 0;
@@ -185,18 +189,21 @@ public class TarWriter {
     Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
     Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
     long [] tarLen = new long[entrySet.size()];
+    String [] fileNames = new String[entrySet.size()];
     int i = 0;
     while (it.hasNext()) {
       Entry<String, SimpleEntry<String, Long>> entry = it.next();
       tarLen[i] = entry.getValue().getValue();
+      fileNames[i] = entry.getKey();
       i++;
     }
-    return computeTarLength(tarLen, tar_record_size, tar_block_size);
+    return computeTarLength( tarLen, tar_record_size, tar_block_size);
   }
   
   /**
    * Computes the size of an uncompressed tarball with the given parameters. See this for more
    * information: http://en.wikipedia.org/wiki/Tar_%28computing%29#Format_details
+   * IMPORTANT: computed value might be slightly bigger than the real one. But it suffices for our purppose, where we want to show download progress. 
    * 
    * @param file_sizes in bytes
    * @param tar_record_size in bytes
@@ -205,7 +212,7 @@ public class TarWriter {
    */
   private long computeTarLength(long[] file_sizes, int tar_record_size, int tar_block_size) {
     // Every file has a header
-    long length_tar_headers = file_sizes.length * tar_record_size;
+    long length_tar_headers = file_sizes.length * tar_record_size*3;
     long total_length_file_sizes = 0;
     long append_zeros = 0;
     for (int i = 0; i < file_sizes.length; i++) {
@@ -229,6 +236,51 @@ public class TarWriter {
     return length_tar_headers + total_length_file_sizes + append_zeros + mod;
   }
 
+  /**
+   * Computes the size of an uncompressed tarball with the given parameters. See this for more
+   * information: http://en.wikipedia.org/wiki/Tar_%28computing%29#Format_details
+   * Important: handles different header sizes
+   * DOES NOT WORK DO NOT USE
+   * 
+   * @param file_sizes in bytes
+   * @param tar_record_size in bytes
+   * @param tar_block_size in bytes
+   * @return size of the whole tar ball
+   */
+  @Deprecated
+  private long computeTarLength(String [] fileName, long[] file_sizes, int tar_record_size, int tar_block_size) {
+    // Every file has a header
+    long total_length_file_sizes = 0;
+    long append_zeros = 0;
+    for (int i = 0; i < file_sizes.length; i++) {
+      // every file is saved uncomppressed, add just its file size
+      TarEntry entry = new TarEntry(fileName[i]);
+      entry.setSize(file_sizes[i]);
+      System.out.println(fileName[i]);
+      System.out.println(file_sizes[i]);
+      System.out.println(entry.getRealSize());
+      System.out.println(entry.getSize());
+      total_length_file_sizes += entry.getRealSize();
+      // Each entry must be a multiple of the record size. it is not. entry will be filled with
+      // zeros until it is.
+      long mod = file_sizes[i] % tar_record_size;
+      if (mod > 0) {
+
+        append_zeros += tar_record_size - mod;
+      }
+    }
+
+    // tar ball must be a multiple of block size. If it is not will be filled with zeros until it
+    // is.
+    long mod = (total_length_file_sizes + append_zeros) % tar_block_size;
+    if (mod > 0) {
+      mod = tar_block_size - mod;
+    }
+    return total_length_file_sizes + append_zeros + mod;
+  }
+  
+  
+  
 public static void test1(){
   System.out.println("main started!");
   int numberOfDataSets = 2;
