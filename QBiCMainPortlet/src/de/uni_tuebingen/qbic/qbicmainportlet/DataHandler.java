@@ -19,7 +19,7 @@ import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import model.ExperimentBarcodeSummaryBean;
+import model.ExperimentType;
 
 import parser.Parser;
 import parser.PersonParser;
@@ -37,7 +37,6 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRo
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.StreamResource;
@@ -67,6 +66,7 @@ class SpaceInformation {
 
   }
 }
+
 
 class ProjectInformation {
   public IndexedContainer experiments;
@@ -1410,6 +1410,37 @@ public class DataHandler {
     }
   }
 
+  /**
+   * Creates a Map of project statuses fulfilled, keyed by their meaning. For this, different steps
+   * in the project flow are checked by looking at experiment types and data registered
+   * 
+   * @param project openBIS project
+   * @return
+   */
+  public Map<String, Integer> computeProjectStatuses(Project p) {
+    Map<String, Integer> res = new HashMap<String, Integer>();
+    IndexedContainer c = project_to_experiments.get(p);
+    // project was planned (otherwise it would hopefully not exist :) )
+    res.put("Project Planned", 1);
+    // design is pre-registered to the test sample level
+    int prereg = 0;
+    for (Object itemId : c.getItemIds()) {
+      Item exp = c.getItem(itemId);
+      String type = (String) exp.getItemProperty("Experiment Type").getValue();
+      if (type.equals(ExperimentType.Q_SAMPLE_PREPARATION.toString())) {
+        prereg = 1;
+        break;
+      }
+    }
+    res.put("Experimental Design registered", prereg);
+    // data is uploaded
+    if (project_to_datasets.get(p).size() > 0)
+      res.put("Data Registered", 1);
+    else
+      res.put("Data Registered", 0);
+    return res;
+  }
+
   public ThemeResource setExperimentStatusColor(String status) {
     ThemeResource resource = null;
     if (status.equals("FINISHED")) {
@@ -1464,9 +1495,9 @@ public class DataHandler {
       header += o.toString() + "\t";
     }
 
-    //for (int x = 1; x <= i.size(); x++) {
-    for (Object id: i) {
-    System.out.println(container.toString());
+    // for (int x = 1; x <= i.size(); x++) {
+    for (Object id : i) {
+      System.out.println(container.toString());
       Item it = container.getItem(id);
 
       for (Object o : propertyIDs) {
