@@ -1409,7 +1409,7 @@ public class DataHandler {
       }
     }
   }
-  
+
   /**
    * Creates a Map of project statuses fulfilled, keyed by their meaning. For this, different steps
    * in the project flow are checked by looking at experiment types and data registered
@@ -1418,10 +1418,8 @@ public class DataHandler {
    * @return
    */
   public Map<String, Integer> computeProjectStatuses(String projectId) {
-    
-    System.out.println(projectId);
+
     Project p = this.openBisClient.getProjectByCode(projectId);
-    System.out.println(p);
     Map<String, Integer> res = new HashMap<String, Integer>();
     IndexedContainer c = project_to_experiments.get(p.getIdentifier());
     // project was planned (otherwise it would hopefully not exist :) )
@@ -1431,14 +1429,16 @@ public class DataHandler {
     for (Object itemId : c.getItemIds()) {
       Item exp = c.getItem(itemId);
       String type = (String) exp.getItemProperty("Experiment Type").getValue();
-      if (type.equals(ExperimentType.Q_SAMPLE_PREPARATION.toString())) {
+      if (type.equals(this.openBisClient.openBIScodeToString(ExperimentType.Q_SAMPLE_PREPARATION
+          .toString()))) {
         prereg = 1;
         break;
       }
     }
     res.put("Experimental Design registered", prereg);
     // data is uploaded
-    if (project_to_datasets.get(p.getIdentifier()) != null && project_to_datasets.get(p.getIdentifier()).size() > 0)
+    if (project_to_datasets.get(p.getIdentifier()) != null
+        && project_to_datasets.get(p.getIdentifier()).size() > 0)
       res.put("Data Registered", 1);
     else
       res.put("Data Registered", 0);
