@@ -17,6 +17,8 @@ import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceURL;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.connector.ClientAbortException;
+
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
@@ -130,7 +132,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     response.setContentType("application/x-tar");
     String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
     response.setProperty("Content-Disposition", contentDispositionValue);
-
+    try{
     if (entries != null) {
       long tarFileLength = tarWriter.computeTarLength2(entries);
       // response.setContentLength((int) tarFileLength);
@@ -157,7 +159,11 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 
       // tarWriter.writeEntry(entries);
     }
-
+    }catch(Exception e){
+      //
+      System.out.println("client aborted download.");
+    }
+    
     tarWriter.closeStream();
   }
 

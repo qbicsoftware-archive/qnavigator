@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.catalina.connector.ClientAbortException;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarOutputStream;
 
@@ -74,12 +75,12 @@ public class TarWriter {
       try {
         this.tar.close();
       } catch (IOException e) {
-        System.out.println("TarTest::setOutputStream, close throws Exception.");
+        System.out.println("TarWriter::setOutputStream, close throws Exception.");
       }
     }
     this.tar = new TarOutputStream(out);
     tar.setLongFileMode(TarOutputStream.LONGFILE_POSIX);
-    tar.setBigNumberMode(TarOutputStream.BIGNUMBER_STAR);
+    tar.setBigNumberMode(TarOutputStream.BIGNUMBER_POSIX);
     
   }
 
@@ -91,7 +92,7 @@ public class TarWriter {
       try {
         this.tar.close();
       } catch (IOException e) {
-        System.out.println("TarTest::closeStream, close throws Exception.");
+        System.out.println("TarWriter::closeStream, close throws Exception.");
       }
       tar = null;
     }
@@ -154,8 +155,8 @@ public class TarWriter {
         entry.close();
       }
     } catch (IOException e1) {
-      e1.printStackTrace();
-      //System.out.println("TarTest::writeEntry failed for some reason");
+      //e1.printStackTrace();
+      System.out.println("TarTest::writeEntry failed for some reason. Probably could not close entry.");
     }
   }
   /**
