@@ -156,7 +156,14 @@ public class TarWriter {
       }
     } catch (IOException e1) {
       //e1.printStackTrace();
-      System.out.println("TarTest::writeEntry failed for some reason. Probably could not close entry.");
+      if(e1 instanceof ClientAbortException){
+        System.out.println("TarWriter::writeEntry client aborted download.");
+        return;
+      }
+      else{
+        System.out.println("TarWriter::writeEntry failed: IOException.");
+      }
+      
     }
   }
   /**
