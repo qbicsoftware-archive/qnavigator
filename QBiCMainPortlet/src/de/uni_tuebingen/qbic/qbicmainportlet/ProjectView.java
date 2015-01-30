@@ -544,13 +544,13 @@ public class ProjectView extends VerticalLayout implements View {
       
         if ((Integer) pairs.getValue() == 0) {
           Label statusLabel = new Label(pairs.getKey() + ": " + FontAwesome.TIMES.getHtml() , ContentMode.HTML);
-          statusLabel.setStyleName("redicon");
+          statusLabel.addStyleName("redicon");
           projectStatusContent.addComponent(statusLabel);
         }
         
         else {
           Label statusLabel = new Label(pairs.getKey() + ": " + FontAwesome.CHECK.getHtml() , ContentMode.HTML);
-          statusLabel.setStyleName("greenicon");
+          statusLabel.addStyleName("greenicon");
 
         if (pairs.getKey().equals("Project Planned")) {
         projectStatusContent.addComponentAsFirst(statusLabel);

@@ -5187,3 +5187,10 @@ body .qbicmainportlet.v-app {
 .v-ff .qbicmainportlet .v-scrollable {
 	font-size: 13px;
 }
+
+.redicon .v-icon {
+    color: red;
+}
+.greenicon .v-icon {
+    color: green;
+}

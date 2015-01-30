@@ -125,7 +125,7 @@ public class DatasetView extends VerticalLayout implements View {
     menubar.setWidth(100.0f, Unit.PERCENTAGE);    
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
-    menubar.setEnabled(false);
+    downloadProject.setEnabled(false);
     
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_test2.png"));
