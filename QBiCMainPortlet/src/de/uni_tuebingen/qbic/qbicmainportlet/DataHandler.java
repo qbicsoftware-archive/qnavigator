@@ -1490,7 +1490,6 @@ public class DataHandler {
   public String containerToString(Container container) {
     String header = "";
     Collection<?> i = container.getItemIds();
-    System.out.println(i);
     String rowString = "";
 
     Collection<?> propertyIDs = container.getContainerPropertyIds();
@@ -1501,7 +1500,6 @@ public class DataHandler {
 
     // for (int x = 1; x <= i.size(); x++) {
     for (Object id : i) {
-      System.out.println(container.toString());
       Item it = container.getItem(id);
 
       for (Object o : propertyIDs) {

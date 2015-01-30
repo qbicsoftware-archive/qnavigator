@@ -413,7 +413,6 @@ public class ProjectView extends VerticalLayout implements View {
     fileName =
         Paths.get(fileName, (String) htc.getItem(itemId).getItemProperty("File Name").getValue()).toString();
     
-    System.out.println(fileName);
     if (htc.hasChildren(itemId)) {
       
       for (Object childId : htc.getChildren(itemId)) {
