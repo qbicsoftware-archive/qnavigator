@@ -12,12 +12,9 @@ import java.util.Set;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletSession;
-import javax.portlet.PortletURL;
 import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceURL;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.connector.ClientAbortException;
 
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
@@ -60,7 +57,6 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     }
   }
 
-  private boolean resUrlNotSet = true;
   public static final String RESOURCE_ID = "mainPortletResourceId";
   public static final String RESOURCE_ATTRIBUTE = "resURL";
 
@@ -75,7 +71,6 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       resURL.setResourceID(RESOURCE_ID);
       request.getPortletSession().setAttribute(RESOURCE_ATTRIBUTE, resURL.toString(),
           PortletSession.APPLICATION_SCOPE);
-      resUrlNotSet = false;   
     }
     super.doDispatch(request, response);
   }
@@ -132,38 +127,38 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     response.setContentType("application/x-tar");
     String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
     response.setProperty("Content-Disposition", contentDispositionValue);
-    try{
-    if (entries != null) {
-      long tarFileLength = tarWriter.computeTarLength2(entries);
-      // response.setContentLength((int) tarFileLength);
-      // For some reason setContentLength does not work
-      response.setProperty("Content-Length", String.valueOf(tarFileLength));
-      tarWriter.setOutputStream(response.getPortletOutputStream());
+    try {
+      if (entries != null) {
+        long tarFileLength = tarWriter.computeTarLength2(entries);
+        // response.setContentLength((int) tarFileLength);
+        // For some reason setContentLength does not work
+        response.setProperty("Content-Length", String.valueOf(tarFileLength));
+        tarWriter.setOutputStream(response.getPortletOutputStream());
 
-      Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
-      Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
-      while (it.hasNext()) {
-        Entry<String, SimpleEntry<String, Long>> entry = it.next();
+        Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+        Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+        while (it.hasNext()) {
+          Entry<String, SimpleEntry<String, Long>> entry = it.next();
 
-        String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
-        String[] splittedFilePath = entryKey.split("/");
+          String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+          String[] splittedFilePath = entryKey.split("/");
 
-        if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
-          tarWriter.writeEntry(entry.getKey(),
-              dataHandler.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
-        } else {
-          tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue()
-              .getKey(), entryKey), entry.getValue().getValue());
+          if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+            tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue()
+                .getKey()), entry.getValue().getValue());
+          } else {
+            tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue()
+                .getKey(), entryKey), entry.getValue().getValue());
+          }
         }
-      }
 
-      // tarWriter.writeEntry(entries);
-    }
-    }catch(Exception e){
+        // tarWriter.writeEntry(entries);
+      }
+    } catch (Exception e) {
       //
       System.out.println("client aborted download.");
     }
-    
+
     tarWriter.closeStream();
   }
 

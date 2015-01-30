@@ -426,7 +426,7 @@ public class BarcodeView extends VerticalLayout implements View {
         Paths.get(fileName, (String) htc.getItem(itemId).getItemProperty("File Name").getValue())
             .toString();
 
-    System.out.println(fileName);
+    //System.out.println(fileName);
     if (htc.hasChildren(itemId)) {
 
       for (Object childId : htc.getChildren(itemId)) {
@@ -471,8 +471,8 @@ public class BarcodeView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    System.out.println("currentValue: " + currentValue);
-    System.out.println("navigateToLabel: " + navigateToLabel);
+    //System.out.println("currentValue: " + currentValue);
+    //System.out.println("navigateToLabel: " + navigateToLabel);
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
       Project project = dh.openBisClient.getProjectByCode(currentValue);
@@ -481,8 +481,8 @@ public class BarcodeView extends VerticalLayout implements View {
       this.setContainerDataSource(dh.getProjectInformation(projectIdentifier),
           getSummaryBeans(dh.openBisClient, currentValue), currentValue);
     } catch (Exception e) {
-      System.out.println("Exception in ProjectView.enter");
-      e.printStackTrace();
+      System.out.println("Exception in BarcodeView.enter");
+      //e.printStackTrace();
     }
   }
 

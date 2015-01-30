@@ -14,13 +14,13 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import model.ExperimentType;
-
 import parser.Parser;
 import parser.PersonParser;
 import persons.Qperson;
@@ -184,7 +184,6 @@ public class DataHandler {
     String lastModifiedExperiment = "N/A";
     String lastModifiedSample = "N/A";
     Date lastModifiedDate = new Date(0, 0, 0);
-    long endTime = 0;
     for (SpaceWithProjectsAndRoleAssignments space : space_list) {
       if (!space.getUsers().contains(userScreenName)) {
         continue;
@@ -633,9 +632,9 @@ public class DataHandler {
         String propertiesHeader = "Properties \n <ul>";
         String propertiesBottom = "";
 
-        Iterator it = ret.properties.entrySet().iterator();
+        Iterator<Entry<String, String>> it = ret.properties.entrySet().iterator();
         while (it.hasNext()) {
-          Map.Entry pairs = (Map.Entry) it.next();
+          Entry<String, String> pairs = it.next();
           if (pairs.getValue().equals("")) {
             continue;
           } else if (pairs.getKey().equals("Q_PERSONS")) {
@@ -961,10 +960,7 @@ public class DataHandler {
     for (Experiment e : exps) {
       Object new_ds = experiment_container.addItem();
 
-      String experimentIdentifier = e.getIdentifier();
       String type = this.openBisClient.openBIScodeToString(e.getExperimentTypeCode());
-      String space = experimentIdentifier.split("/")[1];
-      String project = experimentIdentifier.split("/")[2];
 
       Map<String, String> properties = e.getProperties();
 
@@ -1086,7 +1082,6 @@ public class DataHandler {
       String folderPath = filelist[0].getPathInDataSet();
       FileInfoDssDTO[] subList = d.listFiles(folderPath, false);
 
-      long totalFileSize = 0L;
       dataset_container.setChildrenAllowed(new_ds, true);
       String download_link = filelist[0].getPathInDataSet();
       String[] splitted_link = download_link.split("/");
@@ -1466,6 +1461,11 @@ public class DataHandler {
 
   public StreamResource getTSVStream(final String content, String id) {
     StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 946357391804404061L;
+
       @Override
       public InputStream getStream() {
         try {

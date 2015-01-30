@@ -325,8 +325,8 @@ public class SampleView extends VerticalLayout implements View{
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    System.out.println("currentValue: " + currentValue);
-    System.out.println("navigateToLabel: " + navigateToLabel);
+    //System.out.println("currentValue: " + currentValue);
+    //System.out.println("navigateToLabel: " + navigateToLabel);
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
       this.setContainerDataSource(dh.getSampleInformation(currentValue), currentValue);

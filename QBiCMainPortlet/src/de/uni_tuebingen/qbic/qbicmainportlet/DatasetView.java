@@ -552,7 +552,7 @@ public class DatasetView extends VerticalLayout implements View {
       fileName =
           Paths.get(fileName, (String) table.getItem(itemId).getItemProperty("File Name").getValue()).toString();
       
-      System.out.println(fileName);
+      //System.out.println(fileName);
       if (table.hasChildren(itemId)) {
         for (Object childId : table.getChildren(itemId)) {
           valueChange(childId, itemSelected, entries, fileName);
