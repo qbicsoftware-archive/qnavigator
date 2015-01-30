@@ -216,18 +216,14 @@ public class ProjectView extends VerticalLayout implements View {
   });
     
     // Another top-level item
-    MenuItem snacks = menubar.addItem("Run workflows", null, null);
-    snacks.setIcon(new ThemeResource("dna_test2.png"));
-
-    snacks.addItem("Weisswurst", null, null);
-    snacks.addItem("Bratwurst",  null, null);
-    snacks.addItem("Currywurst", null, null);
+    MenuItem workflows = menubar.addItem("Run workflows", null, null);
+    workflows.setIcon(new ThemeResource("dna_test2.png"));
+    workflows.setEnabled(false);
             
     // Yet another top-level item
-    MenuItem servs = menubar.addItem("Analyze your data", null, null);
-    servs.setIcon(new ThemeResource("graph_test2.png"));
-    servs.addItem("Car Service", null, null);
-    
+    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
+    analyze.setIcon(new ThemeResource("graph_test2.png"));
+    analyze.setEnabled(false);
     
     int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
     int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
@@ -552,14 +548,20 @@ public class ProjectView extends VerticalLayout implements View {
           projectStatusContent.addComponent(statusLabel);
         }
         
-        else { 
-        Label statusLabel = new Label(pairs.getKey() + ": " + FontAwesome.CHECK.getHtml() , ContentMode.HTML);
-        statusLabel.setStyleName("greenicon");
-        projectStatusContent.addComponent(statusLabel);
+        else {
+          Label statusLabel = new Label(pairs.getKey() + ": " + FontAwesome.CHECK.getHtml() , ContentMode.HTML);
+          statusLabel.setStyleName("greenicon");
+
+        if (pairs.getKey().equals("Project Planned")) {
+        projectStatusContent.addComponentAsFirst(statusLabel);
+        }
+        else {
+          projectStatusContent.addComponent(statusLabel);
+
         }
         finishedExperiments += (Integer) pairs.getValue();
     }
-    
+    }
     ProgressBar progressBar = new ProgressBar();
     progressBar.setValue((float) finishedExperiments/statusValues.keySet().size());
     projectStatusContent.addComponent(progressBar);

@@ -138,28 +138,21 @@ public class SampleView extends VerticalLayout implements View{
     menubar.setWidth(100.0f, Unit.PERCENTAGE);    
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
+    downloadProject.setEnabled(false);
     
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_test2.png"));
-   
-    // Another submenu item with a sub-submenu
-    MenuItem colds = manage.addItem("test2", null, null);
-
-    colds.addItem("Milk",      null, null);
-    colds.addItem("Weissbier", null, null);
+    manage.setEnabled(false);
 
     // Another top-level item
-    MenuItem snacks = menubar.addItem("Run workflows", null, null);
-    snacks.setIcon(new ThemeResource("dna_test2.png"));
-
-    snacks.addItem("Weisswurst", null, null);
-    snacks.addItem("Bratwurst",  null, null);
-    snacks.addItem("Currywurst", null, null);
+    MenuItem workflows = menubar.addItem("Run workflows", null, null);
+    workflows.setIcon(new ThemeResource("dna_test2.png"));
+    workflows.setEnabled(false);
             
     // Yet another top-level item
-    MenuItem servs = menubar.addItem("Analyze your data", null, null);
-    servs.setIcon(new ThemeResource("graph_test2.png"));
-    servs.addItem("Car Service", null, null);
+    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
+    analyze.setIcon(new ThemeResource("graph_test2.png"));
+    analyze.setEnabled(false);
     
     // Description of sample   
     VerticalLayout sampleDescription = new VerticalLayout();

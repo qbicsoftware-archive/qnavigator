@@ -266,9 +266,9 @@ public class TarWriter {
       entry.setSize(file_sizes[i]);
       System.out.println(fileName[i]);
       System.out.println(file_sizes[i]);
-      System.out.println(entry.getRealSize());
       System.out.println(entry.getSize());
-      total_length_file_sizes += entry.getRealSize();
+      System.out.println(entry.getSize());
+      total_length_file_sizes += entry.getSize();
       // Each entry must be a multiple of the record size. it is not. entry will be filled with
       // zeros until it is.
       long mod = file_sizes[i] % tar_record_size;

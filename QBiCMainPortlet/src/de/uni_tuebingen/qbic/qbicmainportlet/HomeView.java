@@ -150,17 +150,10 @@ public class HomeView extends VerticalLayout implements View {
     // Another submenu item with a sub-submenu
     MenuItem colds = manage.addItem("test2", null, null);
 
-    colds.addItem("Milk",      null, null);
-    colds.addItem("Weissbier", null, null);
-
     // Another top-level item
     MenuItem snacks = menubar.addItem("Run workflows", null, null);
     snacks.setIcon(new ThemeResource("dna_test2.png"));
     snacks.setEnabled(false);
-    
-    snacks.addItem("Weisswurst", null, null);
-    snacks.addItem("Bratwurst",  null, null);
-    snacks.addItem("Currywurst", null, null);
             
     // Yet another top-level item
     MenuItem servs = menubar.addItem("Analyze your data", null, null);

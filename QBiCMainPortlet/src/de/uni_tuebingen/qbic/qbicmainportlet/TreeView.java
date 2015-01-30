@@ -30,7 +30,7 @@ import com.vaadin.ui.themes.Runo;
 public class TreeView extends Panel implements Observer, ViewChangeListener {
 
   public Tree tree = new Tree();
-  public Button backButton = new Button("Back");
+  public Button backButton = new Button("Show all projects");
 
   public TreeView() {
     super();

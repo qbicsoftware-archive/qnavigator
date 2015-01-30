@@ -1437,8 +1437,8 @@ public class DataHandler {
     }
     res.put("Experimental Design registered", prereg);
     // data is uploaded
-    if (project_to_datasets.get(p.getIdentifier()) != null
-        && project_to_datasets.get(p.getIdentifier()).size() > 0)
+    if (project_to_datasets.get(p.getCode()) != null
+        && project_to_datasets.get(p.getCode()).size() > 0)
       res.put("Data Registered", 1);
     else
       res.put("Data Registered", 0);
