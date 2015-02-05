@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.portlet.PortletSession;
+import javax.servlet.annotation.WebServlet;
 
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
@@ -19,7 +20,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRo
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.Widgetset;
+import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
@@ -50,7 +51,9 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
  */
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
-@Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
+//@Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
+@WebServlet(value = "/*", asyncSupported = true)
+@VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class, widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
 public class QbicmainportletUI extends UI {
 
   private OpenBisClient openBisConnection;

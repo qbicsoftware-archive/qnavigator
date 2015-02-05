@@ -333,7 +333,7 @@ public class BarcodeView extends VerticalLayout implements View {
     projectview_content.removeAllComponents();
 
     MenuBar menubar = new MenuBar();
-    menubar.addStyleName("qbicmainportlet");
+    //menubar.addStyleName("qbicmainportlet");
     menubar.setWidth(100.0f, Unit.PERCENTAGE);
 
     projectview_content.addComponent(menubar);

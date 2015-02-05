@@ -140,9 +140,9 @@ public class ProjectView extends VerticalLayout implements View {
     //projectview_content.addComponent(toolbar);
     
     MenuBar menubar = new MenuBar();
-    menubar.addStyleName("qbicmainportlet");
+    //menubar.addStyleName("qbicmainportlet");
     menubar.setWidth(100.0f, Unit.PERCENTAGE);
-    
+    menubar.addStyleName("user-menu");
     projectview_content.addComponent(menubar);
     
     // A top-level menu item that opens a submenu
@@ -153,7 +153,7 @@ public class ProjectView extends VerticalLayout implements View {
     
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
-    
+    downloadProject.addSeparator();
     PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
     DataHandler datahandler =
         (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");

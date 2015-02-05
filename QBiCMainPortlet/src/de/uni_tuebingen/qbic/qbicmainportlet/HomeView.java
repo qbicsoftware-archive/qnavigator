@@ -127,18 +127,20 @@ public class HomeView extends VerticalLayout implements View {
     int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
 
     homeview_content.setWidth("100%");
-    this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
-    
+    //this.setWidth(String.format("%spx", (browserWidth * 0.6)));
+    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    this.setWidth((browserWidth * 0.6f), Unit.PIXELS);
+    //this.setHeight((browserHeight * 0.8f), Unit.PIXELS);
     MenuBar menubar = new MenuBar();
+    menubar.addStyleName("user-menu");
     // A top-level menu item that opens a submenu
     
     //set to true for the hack below
     menubar.setHtmlContentAllowed(true);
     homeview_content.addComponent(menubar);
 
-    menubar.addStyleName("qbicmainportlet");
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);    
+    //menubar.addStyleName("qbicmainportlet");
+    //menubar.setWidth(100.0f, Unit.PERCENTAGE);
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
     downloadProject.setEnabled(false);
@@ -163,25 +165,21 @@ public class HomeView extends VerticalLayout implements View {
 
     // view overall statistics
     VerticalLayout statistics = new VerticalLayout();
+    VerticalLayout homeViewDescription = new VerticalLayout();
+    statistics.setCaption("Statistics");
+    statistics.setIcon(FontAwesome.FILE_TEXT_O);
 
-    HorizontalLayout statContent = new HorizontalLayout();
-    statContent.setCaption("Statistics");
-    statContent.setIcon(FontAwesome.BAR_CHART_O);
-
-    statContent.addComponent(new Label(String.format("You have %s project(s),",
-        generalOpenBISInformation.numberOfProjects)));
-    statContent.addComponent(new Label(String.format("%s experiment(s),",
-        generalOpenBISInformation.numberOfExperiments)));
-    statContent.addComponent(new Label(String.format("%s sample(s),",
-        generalOpenBISInformation.numberOfSamples)));
-    statContent.addComponent(new Label(String.format("and %s dataset(s).",
-        generalOpenBISInformation.numberOfDatasets)));
-    statContent.setMargin(true);
-    statContent.setSpacing(true);
-
+    Label statContent = new Label(String.format("You have %s project(s), %s experiment(s), %s sample(s), and %s dataset(s).",    
+    generalOpenBISInformation.numberOfProjects, generalOpenBISInformation.numberOfExperiments, generalOpenBISInformation.numberOfSamples,
+    generalOpenBISInformation.numberOfDatasets) );
     statistics.addComponent(statContent);
     statistics.setMargin(true);
-    homeview_content.addComponent(statistics);
+    statistics.setWidth(100.0f, Unit.PERCENTAGE);
+    homeViewDescription.addComponent(statistics);
+    homeViewDescription.setMargin(true);
+    homeViewDescription.setWidth("100%");
+    
+    homeview_content.addComponent(homeViewDescription);
 
 
     if (generalOpenBISInformation.numberOfDatasets > 0) {
@@ -189,7 +187,7 @@ public class HomeView extends VerticalLayout implements View {
       if (generalOpenBISInformation.lastChangedSample != null) {
         lastSample = generalOpenBISInformation.lastChangedSample.split("/")[2];
       }
-      statContent.addComponent(new Label(String.format("Last change %s", String.format(
+      statistics.addComponent(new Label(String.format("Last change %s", String.format(
           "occurred in sample %s (%s)", lastSample,
           generalOpenBISInformation.lastChangedDataset.toString()))));
     }
@@ -241,7 +239,6 @@ public class HomeView extends VerticalLayout implements View {
 
     tableSection.addComponent(tableSectionContent);
     homeview_content.addComponent(tableSection);
-
     //this.setContent(homeview_content);
     this.addComponent(homeview_content);
   }

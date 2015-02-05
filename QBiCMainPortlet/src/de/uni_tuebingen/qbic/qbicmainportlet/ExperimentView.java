@@ -111,7 +111,7 @@ public class ExperimentView extends VerticalLayout implements View{
     menubar.setHtmlContentAllowed(true);
     expview_content.addComponent(menubar);
 
-    menubar.addStyleName("qbicmainportlet");
+    //menubar.addStyleName("qbicmainportlet");
     menubar.setWidth(100.0f, Unit.PERCENTAGE);    
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));

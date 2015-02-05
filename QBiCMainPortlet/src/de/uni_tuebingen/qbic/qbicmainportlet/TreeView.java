@@ -25,7 +25,7 @@ import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Runo;
-
+import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class TreeView extends Panel implements Observer, ViewChangeListener {
 
@@ -52,6 +52,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     MenuItem pseudoItem = menubar.addItem("", null);
     pseudoItem.setIcon(new ThemeResource("qbic_logo.png"));
     menubar.setWidth("100%");
+    menubar.addStyleName("user-menu");
     vl.addComponent(menubar);
     
     tree.setImmediate(true);
@@ -85,7 +86,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     
     // this.setWidth("250px");
     // this.setHeight("800px");
-    this.addStyleName(Runo.PANEL_LIGHT);
+    this.addStyleName(ValoTheme.PANEL_BORDERLESS);
     this.setContent(vl);
     //this.addComponent(vl);
     //this.setMargin(false);
