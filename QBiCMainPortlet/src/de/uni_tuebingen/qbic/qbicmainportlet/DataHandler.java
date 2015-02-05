@@ -1438,7 +1438,6 @@ public class DataHandler {
     return resource;
   }
 
-
   // public String beanContainerToString(BeanItemContainer c) {
   // String header = "";
   // for (Object o : c.getContainerPropertyIds())

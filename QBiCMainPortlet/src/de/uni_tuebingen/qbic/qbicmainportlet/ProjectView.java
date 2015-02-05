@@ -232,7 +232,7 @@ public class ProjectView extends VerticalLayout implements View {
 
     projectview_content.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
 
     
     // Project description

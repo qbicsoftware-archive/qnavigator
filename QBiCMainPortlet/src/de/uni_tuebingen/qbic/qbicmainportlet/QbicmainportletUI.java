@@ -27,6 +27,7 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
@@ -67,23 +68,31 @@ public class QbicmainportletUI extends UI {
     if (LiferayAndVaadinUtils.getUser() == null) {
       buildNoUserLogin();
     } else {
+      //logging who is connecting, when.
       DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
       System.out.println("QbicNavigator\nUser logged in: "
           + LiferayAndVaadinUtils.getUser().getScreenName() + " at "
           + dateFormat.format(new Date()) + " UTC.");
+      //try to init connection to openbis and write some session attributes, that can be accessed globally
       try {
         initConnection();
         initSessionAttributes();
       } catch (Exception e) {
+        //probably the connection to openbis failed
         buildErrorLayout(request);
         System.out.println(e.getMessage());
         return;
       }
+      //show progress bar and initialize the view
       initProgressBarAndThreading(request);
       // buildMainLayout();
     }
   }
-
+  
+ /**
+ * standard error layout, if it occurs.
+ * @param request
+ */
   private void buildErrorLayout(final VaadinRequest request) {
     VerticalLayout vl = new VerticalLayout();
     this.setContent(vl);
@@ -100,30 +109,38 @@ public class QbicmainportletUI extends UI {
     });
     vl.addComponent(button);
   }
-
+  
+  /**
+   * builds page if user is not logged in
+   */
   private void buildNoUserLogin() {
+    //Mail to qbic
     ExternalResource resource = new ExternalResource("mailto:info@qbic.uni-tuebingen.de");
     Link mailToQbicLink = new Link("", resource);
     mailToQbicLink.setIcon(new ThemeResource("mail9.png"));
-    mainLayout = new VerticalLayout();
-    mainLayout.setMargin(false);
+    
+    
     ThemeDisplay themedisplay =
         (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
-    Link loginPortalLink = new Link("", new ExternalResource(themedisplay.getURLSignIn()));
+    
+    //redirect to liferay login page
+    Link loginPortalLink = new Link("", new ExternalResource(themedisplay.getURLSignIn()));    
     loginPortalLink.setIcon(new ThemeResource("lock12.png"));
-
+    
+    //left part of the page
     VerticalLayout signIn = new VerticalLayout();
-
     signIn.addComponent(new Label("<h3>Sign in to manage your projects and access your data:</h3>",
         ContentMode.HTML));
     signIn.addComponent(loginPortalLink);
     signIn.setStyleName("no-user-login");
+    //right part of the page
     VerticalLayout contact = new VerticalLayout();
     contact.addComponent(new Label(
         "<h3>If you are interested in doing projects get in contact:</h3>", ContentMode.HTML));
     contact.addComponent(mailToQbicLink);
     contact.setStyleName("no-user-login");
-
+    
+    //build final layout, with some gaps between
     HorizontalLayout notSignedInLayout = new HorizontalLayout();
     Label expandingGap1 = new Label();
     expandingGap1.setWidth("100%");
@@ -144,19 +161,27 @@ public class QbicmainportletUI extends UI {
   private ProgressBar progress;
   private Label status;
 
+  
+  /**
+   * starts the querying of openbis and initializing the view
+   * @param request
+   */
   protected void initProgressBarAndThreading(VaadinRequest request) {
-    HorizontalLayout barbar = new HorizontalLayout();
     final VerticalLayout layout = new VerticalLayout();
-    layout.addComponent(barbar);
+    
     this.setContent(layout);
 
+    status = new Label("not running");
+    status.addStyleName("h1");
+    layout.addComponent(status);
     // Create the indicator, disabled until progress is started
     progress = new ProgressBar(new Float(0.0));
     progress.setEnabled(false);
-    barbar.addComponent(progress);
+    progress.setWidth(Page.getCurrent().getBrowserWindowWidth()*0.6f, Unit.PIXELS);
+    layout.addComponent(progress);
 
-    status = new Label("not running");
-    barbar.addComponent(status);
+    
+    
     final HierarchicalContainer tc = new HierarchicalContainer();
     final SpaceInformation homeInformation = new SpaceInformation();
     status.setValue("Connecting to database.");
@@ -391,7 +416,7 @@ public class QbicmainportletUI extends UI {
     public void run() {
       progress.setValue(new Float(current));
       if (current < 1.0)
-        status.setValue(String.valueOf(((int) (current * 100))) + "%");
+        status.setValue(String.valueOf(((int) (current * 100))) + "% loaded.");
       else
         status.setValue("all done");
     }

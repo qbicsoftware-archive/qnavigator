@@ -15,6 +15,7 @@ import java.util.Set;
 import org.apache.commons.lang.WordUtils;
 
 import com.google.gwt.user.server.rpc.UnexpectedException;
+import com.vaadin.server.StreamResource;
 
 import ch.systemsx.cisd.common.api.client.ServiceFinder;
 import ch.systemsx.cisd.common.exceptions.InvalidAuthenticationException;
