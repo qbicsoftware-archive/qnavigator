@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.Utils;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
@@ -123,7 +125,7 @@ public class ProjectView extends VerticalLayout implements View {
     
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     StreamResource sr =
-        dh.getTSVStream(dh.containerToString(projectInformation.experiments), this.id);
+        Utils.getTSVStream(Utils.containerToString(projectInformation.experiments), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
 

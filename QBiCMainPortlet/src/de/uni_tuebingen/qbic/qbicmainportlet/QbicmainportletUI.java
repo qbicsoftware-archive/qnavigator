@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.OpenBisFunctions;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
@@ -205,7 +207,7 @@ public class QbicmainportletUI extends UI {
       DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
 
       status.setValue("Connecting to database.");
-      List<SpaceWithProjectsAndRoleAssignments> space_list = dh.getSpace_list();
+      List<SpaceWithProjectsAndRoleAssignments> space_list = dh.getSpacesWithProjectInformation();
 
       // Initialization of Tree Container
       tc.addContainerProperty("identifier", String.class, "N/A");
@@ -269,7 +271,7 @@ public class QbicmainportletUI extends UI {
 
             List<Project> tmp_list = new ArrayList<Project>();
             tmp_list.add(project);
-            List<Experiment> experiments = dh.listExperimentsOfProjects(tmp_list);
+            List<Experiment> experiments = dh.openBisClient.listExperimentsOfProjects(tmp_list);
 
             // Add number of experiments for every project
             number_of_experiments += experiments.size();
@@ -290,12 +292,12 @@ public class QbicmainportletUI extends UI {
               tc.getContainerProperty(experiment_name, "project").setValue(project_name);
               tc.getContainerProperty(experiment_name, "caption").setValue(
                   String.format("%s (%s)",
-                      dh.openBIScodeToString(experiment.getExperimentTypeCode()), experiment_name));
+                      dh.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()), experiment_name));
 
               tc.setChildrenAllowed(experiment_name, false);
             }
             if (experiment_identifiers.size() > 0
-                && dh.listDataSetsForExperiments(experiment_identifiers).size() > 0) {
+                && dh.openBisClient.listDataSetsForExperiments(experiment_identifiers).size() > 0) {
               space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
             } else {
               space_container.getContainerProperty(new_s, "Contains datasets").setValue("no");
@@ -304,9 +306,9 @@ public class QbicmainportletUI extends UI {
           }
           List<Sample> samplesOfSpace = new ArrayList<Sample>();
           if (project_identifiers_tmp.size() > 0) {
-            samplesOfSpace = dh.listSamplesForProjects(project_identifiers_tmp);
+            samplesOfSpace = dh.openBisClient.listSamplesForProjects(project_identifiers_tmp);
           } else {
-            samplesOfSpace = dh.getSamplesofSpace(space_name); // TODO code or identifier
+            samplesOfSpace = dh.openBisClient.getSamplesofSpace(space_name); // TODO code or identifier
                                                                // needed?
           }
           number_of_samples += samplesOfSpace.size();
@@ -316,7 +318,7 @@ public class QbicmainportletUI extends UI {
           }
           List<DataSet> datasets = new ArrayList<DataSet>();
           if (sample_identifiers_tmp.size() > 0) {
-            datasets = dh.listDataSetsForSamples(sample_identifiers_tmp);
+            datasets = dh.openBisClient.listDataSetsForSamples(sample_identifiers_tmp);
           }
           number_of_datasets += datasets.size();
           StringBuilder lce = new StringBuilder();

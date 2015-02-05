@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.OpenBisFunctions;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -163,7 +165,7 @@ public class MpPortletListener implements PortletListener,
           int bytesRead = 0;
 
           fis =
-              dataHandler.getDatasetStream((String) this.table.getItem(next)
+              dataHandler.openBisClient.getDatasetStream((String) this.table.getItem(next)
                   .getItemProperty("CODE").getValue());
           System.out.println((String) this.table.getItem(next)
                   .getItemProperty("CODE").getValue());
@@ -286,7 +288,7 @@ public class MpPortletListener implements PortletListener,
             int bytesRead = 0;
 
             fis =
-                dataHandler.getDatasetStream((String) this.table.getItem(next)
+                dataHandler.openBisClient.getDatasetStream((String) this.table.getItem(next)
                     .getItemProperty("CODE").getValue());
             System.out.println((String) this.table.getItem(next)
                     .getItemProperty("CODE").getValue());
@@ -409,7 +411,7 @@ public class MpPortletListener implements PortletListener,
         String datasetCode = (String) table.getItem(next).getItemProperty("CODE").getValue();
         String datasetType = (String) table.getItem(next).getItemProperty("File Name").getValue();
         try {
-          this.open.setResource(new ExternalResource(dataHanlder.getUrlForDataset(datasetCode,
+          this.open.setResource(new ExternalResource(dataHandler.openBisClient.getUrlForDataset(datasetCode,
               datasetType)));
           this.open.setEnabled(true);
         } catch (MalformedURLException e) {

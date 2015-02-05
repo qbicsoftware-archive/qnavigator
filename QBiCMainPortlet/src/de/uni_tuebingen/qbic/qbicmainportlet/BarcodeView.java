@@ -1,7 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.BarcodesReadyRunnable;
-import helpers.Functions;
+import helpers.BarcodeFunctions;
+import helpers.Utils;
 
 import java.nio.file.Paths;
 import java.util.AbstractMap;
@@ -178,6 +179,7 @@ public class BarcodeView extends VerticalLayout implements View {
     comparators = new OptionGroup("Sort Sheet by");
     comparators.addItems(SortBy.values());
     comparators.setValue(SortBy.DESCRIPTION);
+    
     buttonLayoutSection.addComponent(comparators);
     buttonLayout.addComponent(sheetDownloadButton);
     buttonLayout.addComponent(pdfDownloadButton);
@@ -196,7 +198,7 @@ public class BarcodeView extends VerticalLayout implements View {
     table.setMultiSelect(true);
 
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr = dh.getTSVStream(dh.containerToString(beanContainer), this.id);
+    StreamResource sr = Utils.getTSVStream(Utils.containerToString(beanContainer), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
 
@@ -383,14 +385,17 @@ public class BarcodeView extends VerticalLayout implements View {
 
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_test2.png"));
+    manage.setEnabled(false);
 
     // Another top-level item
-    MenuItem snacks = menubar.addItem("Run workflows", null, null);
-    snacks.setIcon(new ThemeResource("dna_test2.png"));
+    MenuItem workflows = menubar.addItem("Run workflows", null, null);
+    workflows.setIcon(new ThemeResource("dna_test2.png"));
+    workflows.setEnabled(false);
 
     // Yet another top-level item
-    MenuItem servs = menubar.addItem("Analyze your data", null, null);
-    servs.setIcon(new ThemeResource("graph_test2.png"));
+    MenuItem analysis = menubar.addItem("Analyze your data", null, null);
+    analysis.setIcon(new ThemeResource("graph_test2.png"));
+    analysis.setEnabled(false);
 
 
     int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
@@ -507,7 +512,7 @@ public class BarcodeView extends VerticalLayout implements View {
         if (type.equals(barcodeExperiments.get(1))) {
           bioType = samples.get(0).getProperties().get("Q_SAMPLE_TYPE");
         }
-        beans.add(new ExperimentBarcodeSummaryBean(Functions.getBarcodeRange(ids), bioType, Integer
+        beans.add(new ExperimentBarcodeSummaryBean(BarcodeFunctions.getBarcodeRange(ids), bioType, Integer
             .toString(numOfSamples), expCode));
       }
     }

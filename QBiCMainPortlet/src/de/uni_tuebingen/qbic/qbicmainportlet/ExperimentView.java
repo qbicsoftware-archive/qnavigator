@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.Utils;
+
 import org.tepi.filtertable.FilterTable;
 
 import com.vaadin.data.util.IndexedContainer;
@@ -87,7 +89,7 @@ public class ExperimentView extends VerticalLayout implements View{
     this.id = id;
 
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr = dh.getTSVStream(dh.containerToString(expInformation.samples), this.id);
+    StreamResource sr = Utils.getTSVStream(Utils.containerToString(expInformation.samples), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
 

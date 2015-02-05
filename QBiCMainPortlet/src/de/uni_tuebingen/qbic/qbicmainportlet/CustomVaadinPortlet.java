@@ -1,6 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
+import helpers.OpenBisFunctions;
+
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
@@ -144,10 +146,10 @@ public class CustomVaadinPortlet extends VaadinPortlet {
           String[] splittedFilePath = entryKey.split("/");
 
           if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
-            tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue()
+            tarWriter.writeEntry(entry.getKey(), dataHandler.openBisClient.getDatasetStream(entry.getValue()
                 .getKey()), entry.getValue().getValue());
           } else {
-            tarWriter.writeEntry(entry.getKey(), dataHandler.getDatasetStream(entry.getValue()
+            tarWriter.writeEntry(entry.getKey(), dataHandler.openBisClient.getDatasetStream(entry.getValue()
                 .getKey(), entryKey), entry.getValue().getValue());
           }
         }

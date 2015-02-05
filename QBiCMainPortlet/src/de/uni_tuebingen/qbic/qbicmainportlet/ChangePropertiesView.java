@@ -1,6 +1,8 @@
   package de.uni_tuebingen.qbic.qbicmainportlet;
 
-  import java.net.MalformedURLException;
+  import helpers.OpenBisFunctions;
+
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
@@ -97,7 +99,7 @@ import com.vaadin.ui.Image;
             parameters.put("identifier", expInformation.identifier);
             parameters.put("properties", properties);
      
-            dh.callIngestionService("notify-user", parameters);
+            dh.openBisClient.triggerIngestionService("notify-user", parameters);
             Notification.show("Changes committed!", Type.TRAY_NOTIFICATION);
           }
         });

@@ -145,7 +145,7 @@ public class DataHandler {
   // Map<String, IndexedContainer> connectedPersons = new HashMap<String, IndexedContainer>();
   IndexedContainer connectedPersons = new IndexedContainer();
 
-  public List<SpaceWithProjectsAndRoleAssignments> getSpace_list() {
+  public List<SpaceWithProjectsAndRoleAssignments> getSpacesWithProjectInformation() {
     if (space_list == null) {
       space_list = this.openBisClient.getFacade().getSpacesWithProjects();
     }
@@ -169,7 +169,7 @@ public class DataHandler {
    */
   public SpaceInformation getHomeInformation(String userScreenName) {
 
-    List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpace_list();
+    List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpacesWithProjectInformation();
     SpaceInformation homeInformation = new SpaceInformation();
     IndexedContainer space_container = new IndexedContainer();
     space_container.addContainerProperty("Project", String.class, "");
@@ -339,7 +339,7 @@ public class DataHandler {
     }
 
     else if (this.spaces.get(identifier) == null) {
-      space_list = this.getSpace_list();
+      space_list = this.getSpacesWithProjectInformation();
       spaces = this.createSpaceContainer(space_list, identifier);
 
       this.spaces.put(identifier, spaces);
@@ -568,7 +568,7 @@ public class DataHandler {
    * @return set of user names as string
    */
   private Set<String> getSpaceMembers(String spaceCode) {
-    List<SpaceWithProjectsAndRoleAssignments> spaces = this.getSpace_list();
+    List<SpaceWithProjectsAndRoleAssignments> spaces = this.getSpacesWithProjectInformation();
     for (SpaceWithProjectsAndRoleAssignments space : spaces) {
       if (space.getCode().equals(spaceCode)) {
         return space.getUsers();
@@ -1151,27 +1151,6 @@ public class DataHandler {
     }
   }
 
-  public URL getUrlForDataset(String datasetCode, String datasetName) throws MalformedURLException {
-
-    return this.openBisClient.getDataStoreDownloadURL(datasetCode, datasetName);
-  }
-
-  public InputStream getDatasetStream(String datasetCode) {
-
-    IOpenbisServiceFacade facade = openBisClient.getFacade();
-    DataSet dataSet = facade.getDataSet(datasetCode);
-    FileInfoDssDTO[] filelist = dataSet.listFiles("original", false);
-    return dataSet.getFile(filelist[0].getPathInDataSet());
-  }
-
-  public InputStream getDatasetStream(String datasetCode, String folder) {
-
-    IOpenbisServiceFacade facade = openBisClient.getFacade();
-    DataSet dataSet = facade.getDataSet(datasetCode);
-    FileInfoDssDTO[] filelist = dataSet.listFiles("original/" + folder, false);
-    return dataSet.getFile(filelist[0].getPathInDataSet());
-  }
-
   /**
    * Function to fill tree container and collect statistical information of spaces. Should replace
    * the two functions and be somewhat faster. Still not pretty. Needs work
@@ -1182,7 +1161,7 @@ public class DataHandler {
    */
   public SpaceInformation initTreeAndHomeInfo(HierarchicalContainer tc, String userName) {
 
-    List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpace_list();
+    List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpacesWithProjectInformation();
 
     // Initialization of Tree Container
     tc.addContainerProperty("identifier", String.class, "N/A");
@@ -1247,7 +1226,7 @@ public class DataHandler {
           List<Project> tmp_list = new ArrayList<Project>();
           tmp_list.add(project);
           List<Experiment> experiments =
-              this.openBisClient.openbisInfoService.listExperiments(
+              this.openBisClient.getOpenbisInfoService().listExperiments(
                   this.openBisClient.getSessionToken(), tmp_list, null);
 
           // Add number of experiments for every project
@@ -1337,7 +1316,7 @@ public class DataHandler {
     tc.addContainerProperty("type", String.class, "N/A");
     tc.addContainerProperty("project", String.class, "N/A");
 
-    List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpace_list();
+    List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpacesWithProjectInformation();
 
     for (SpaceWithProjectsAndRoleAssignments s : space_list) {
       if (s.getUsers().contains(screenName)) {
@@ -1367,7 +1346,7 @@ public class DataHandler {
           List<Project> tmp_list = new ArrayList<Project>();
           tmp_list.add(project);
           List<Experiment> experiments =
-              this.openBisClient.openbisInfoService.listExperiments(
+              this.openBisClient.getOpenbisInfoService().listExperiments(
                   this.openBisClient.getSessionToken(), tmp_list, null);
 
           for (Experiment experiment : experiments) {
@@ -1459,26 +1438,6 @@ public class DataHandler {
     return resource;
   }
 
-  public StreamResource getTSVStream(final String content, String id) {
-    StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
-      /**
-       * 
-       */
-      private static final long serialVersionUID = 946357391804404061L;
-
-      @Override
-      public InputStream getStream() {
-        try {
-          InputStream is = new ByteArrayInputStream(content.getBytes());
-          return is;
-        } catch (Exception e) {
-          e.printStackTrace();
-          return null;
-        }
-      }
-    }, String.format("%s_table_contents.tsv", id));
-    return resource;
-  }
 
   // public String beanContainerToString(BeanItemContainer c) {
   // String header = "";
@@ -1487,43 +1446,6 @@ public class DataHandler {
   // for (c.get)
   // }
 
-  public String containerToString(Container container) {
-    String header = "";
-    Collection<?> i = container.getItemIds();
-    String rowString = "";
-
-    Collection<?> propertyIDs = container.getContainerPropertyIds();
-
-    for (Object o : propertyIDs) {
-      header += o.toString() + "\t";
-    }
-
-    // for (int x = 1; x <= i.size(); x++) {
-    for (Object id : i) {
-      Item it = container.getItem(id);
-
-      for (Object o : propertyIDs) {
-        // Could be extended to an exclusion list if we don't want to show further columns
-        if (o.toString() == "dl_link") {
-          continue;
-        } else if (o.toString() == "Status") {
-          Image image = (Image) it.getItemProperty(o).getValue();
-          rowString += image.getCaption() + "\t";
-        } else {
-          Property prop = it.getItemProperty(o);
-          rowString += prop.toString() + "\t";
-        }
-      }
-      rowString += "\n";
-    }
-    return header + "\n" + rowString;
-  }
-
-  public void callIngestionService(String serviceName, Map<String, Object> parameters) {
-    System.out.println(serviceName);
-    System.out.println(parameters);
-    this.openBisClient.triggerIngestionService("notify-user", parameters);
-  }
 
   public List<Qperson> parseConnectedPeopleInformation(String xmlString) {
     PersonParser xmlParser = new PersonParser();
@@ -1570,32 +1492,6 @@ public class DataHandler {
 
       }
     }
-  }
-
-  public List<Experiment> listExperimentsOfProjects(List<Project> tmp_list) {
-    return this.openBisClient.openbisInfoService.listExperiments(
-        this.openBisClient.getSessionToken(), tmp_list, null);
-
-  }
-
-  public String openBIScodeToString(String experimentTypeCode) {
-    return this.openBisClient.openBIScodeToString(experimentTypeCode);
-  }
-
-  public List<DataSet> listDataSetsForExperiments(List<String> experimentIdentifiers) {
-    return this.openBisClient.getFacade().listDataSetsForExperiments(experimentIdentifiers);
-  }
-
-  public List<Sample> listSamplesForProjects(List<String> projectIdentifiers) {
-    return this.openBisClient.getFacade().listSamplesForProjects(projectIdentifiers);
-  }
-
-  public List<Sample> getSamplesofSpace(String spaceName) {
-    return this.openBisClient.getSamplesofSpace(spaceName);
-  }
-
-  public List<DataSet> listDataSetsForSamples(List<String> sampleIdentifier) {
-    return this.openBisClient.getFacade().listDataSetsForSamples(sampleIdentifier);
   }
 
 }

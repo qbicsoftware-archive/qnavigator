@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.OpenBisFunctions;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -223,7 +225,7 @@ public class GraphGenerator
 			                             String testSampleType = "";
 			                                for(PropertyType pType: testSampleProperties) {
 			                                  if(pType.getCode().equals("Q_SAMPLE_TYPE")){
-			                                    testSampleType = dh.openBIScodeToString(dh.openBisClient.getCVLabelForProperty(pType, dh.openBisClient.getSampleByIdentifier(gc.getIdentifier()).getProperties().get("Q_SAMPLE_TYPE")));
+			                                    testSampleType = dh.openBisClient.openBIScodeToString(dh.openBisClient.getCVLabelForProperty(pType, dh.openBisClient.getSampleByIdentifier(gc.getIdentifier()).getProperties().get("Q_SAMPLE_TYPE")));
 			                                  }
 			                                }
 									  
@@ -238,7 +240,7 @@ public class GraphGenerator
 										for (Sample ggc : grandgrandchildren) {
 										  
 										  
-											Object grandgranddaughter_node = graph.insertVertex(parent, ggc.getPermId(), String.format("%s\n%s", ggc.getCode(), dh.openBIScodeToString(ggc.getSampleTypeCode())), 20, 20, width + 20.0, height,"ROUNDED;strokeColor=#ffffff;fillColor=#F39019");
+											Object grandgranddaughter_node = graph.insertVertex(parent, ggc.getPermId(), String.format("%s\n%s", ggc.getCode(), dh.openBisClient.openBIScodeToString(ggc.getSampleTypeCode())), 20, 20, width + 20.0, height,"ROUNDED;strokeColor=#ffffff;fillColor=#F39019");
 											graph.insertEdge(parent, null, "", granddaughter_node, grandgranddaughter_node);
 
 										}

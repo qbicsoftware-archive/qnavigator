@@ -1,6 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
+import helpers.Utils;
+
 import org.tepi.filtertable.FilterTable;
 
 import com.liferay.portal.kernel.exception.PortalException;
@@ -54,7 +56,7 @@ public class HomeView extends VerticalLayout implements View {
 
     this.setContainerDataSource(datasource, caption);
     dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    sr = dh.getTSVStream(dh.containerToString(datasource.projects), this.caption);
+    sr = Utils.getTSVStream(Utils.containerToString(datasource.projects), this.caption);
     this.tableClickChangeTreeView();
 
     this.buildLayout(datasource);
@@ -66,7 +68,7 @@ public class HomeView extends VerticalLayout implements View {
 
     this.setContainerDataSource(datasource, caption);
     dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    sr = dh.getTSVStream(dh.containerToString(datasource.projects), this.caption);
+    sr = Utils.getTSVStream(Utils.containerToString(datasource.projects), this.caption);
     this.tableClickChangeTreeView();
 
     this.buildLayout(datasource);

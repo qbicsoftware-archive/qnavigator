@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.OpenBisFunctions;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -323,7 +325,7 @@ public class DatasetView extends VerticalLayout implements View {
         DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
         URL url;
         try {
-          url = dh.getUrlForDataset(datasetCode, datasetFileName);
+          url = dh.openBisClient.getUrlForDataset(datasetCode, datasetFileName);
           Window subWindow =
               new Window("QC of Sample: "
                   + (String) table.getItem(next).getItemProperty("Sample").getValue());

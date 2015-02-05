@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.Utils;
+
 import org.tepi.filtertable.FilterTable;
 import org.tepi.filtertable.FilterTreeTable;
 
@@ -110,7 +112,7 @@ public class SampleView extends VerticalLayout implements View{
     this.id = id;
     
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr = dh.getTSVStream(dh.containerToString(sampInformation.datasets), this.id);
+    StreamResource sr = Utils.getTSVStream(Utils.containerToString(sampInformation.datasets), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
     
