@@ -1,7 +1,5 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.OpenBisFunctions;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
@@ -34,6 +32,7 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.WrappedPortletSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -41,7 +40,6 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickEvent;
 
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
@@ -54,9 +52,10 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
  */
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
-//@Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
+// @Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
 @WebServlet(value = "/*", asyncSupported = true)
-@VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class, widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
+@VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class,
+    widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
 public class QbicmainportletUI extends UI {
 
   private OpenBisClient openBisConnection;
@@ -66,34 +65,36 @@ public class QbicmainportletUI extends UI {
   @Override
   protected void init(VaadinRequest request) {
     if (LiferayAndVaadinUtils.getUser() == null) {
-      buildNoUserLogin();
+      buildNotLoggedinLayout();
     } else {
-      //logging who is connecting, when.
+      // logging who is connecting, when.
       DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
       System.out.println("QbicNavigator\nUser logged in: "
           + LiferayAndVaadinUtils.getUser().getScreenName() + " at "
           + dateFormat.format(new Date()) + " UTC.");
-      //try to init connection to openbis and write some session attributes, that can be accessed globally
+      // try to init connection to openbis and write some session attributes, that can be accessed
+      // globally
       try {
         initConnection();
         initSessionAttributes();
       } catch (Exception e) {
-        //probably the connection to openbis failed
-        buildErrorLayout(request);
+        // probably the connection to openbis failed
+        buildOpenbisConnectionErrorLayout(request);
         System.out.println(e.getMessage());
         return;
       }
-      //show progress bar and initialize the view
+      // show progress bar and initialize the view
       initProgressBarAndThreading(request);
       // buildMainLayout();
     }
   }
-  
- /**
- * standard error layout, if it occurs.
- * @param request
- */
-  private void buildErrorLayout(final VaadinRequest request) {
+
+  /**
+   * standard error layout, if connection to database failed.
+   * 
+   * @param request
+   */
+  private void buildOpenbisConnectionErrorLayout(final VaadinRequest request) {
     VerticalLayout vl = new VerticalLayout();
     this.setContent(vl);
     vl.addComponent(new Label(
@@ -109,38 +110,38 @@ public class QbicmainportletUI extends UI {
     });
     vl.addComponent(button);
   }
-  
+
   /**
    * builds page if user is not logged in
    */
-  private void buildNoUserLogin() {
-    //Mail to qbic
+  private void buildNotLoggedinLayout() {
+    // Mail to qbic
     ExternalResource resource = new ExternalResource("mailto:info@qbic.uni-tuebingen.de");
     Link mailToQbicLink = new Link("", resource);
     mailToQbicLink.setIcon(new ThemeResource("mail9.png"));
-    
-    
+
+
     ThemeDisplay themedisplay =
         (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
-    
-    //redirect to liferay login page
-    Link loginPortalLink = new Link("", new ExternalResource(themedisplay.getURLSignIn()));    
+
+    // redirect to liferay login page
+    Link loginPortalLink = new Link("", new ExternalResource(themedisplay.getURLSignIn()));
     loginPortalLink.setIcon(new ThemeResource("lock12.png"));
-    
-    //left part of the page
+
+    // left part of the page
     VerticalLayout signIn = new VerticalLayout();
     signIn.addComponent(new Label("<h3>Sign in to manage your projects and access your data:</h3>",
         ContentMode.HTML));
     signIn.addComponent(loginPortalLink);
     signIn.setStyleName("no-user-login");
-    //right part of the page
+    // right part of the page
     VerticalLayout contact = new VerticalLayout();
     contact.addComponent(new Label(
         "<h3>If you are interested in doing projects get in contact:</h3>", ContentMode.HTML));
     contact.addComponent(mailToQbicLink);
     contact.setStyleName("no-user-login");
-    
-    //build final layout, with some gaps between
+
+    // build final layout, with some gaps between
     HorizontalLayout notSignedInLayout = new HorizontalLayout();
     Label expandingGap1 = new Label();
     expandingGap1.setWidth("100%");
@@ -161,14 +162,15 @@ public class QbicmainportletUI extends UI {
   private ProgressBar progress;
   private Label status;
 
-  
+
   /**
    * starts the querying of openbis and initializing the view
+   * 
    * @param request
    */
   protected void initProgressBarAndThreading(VaadinRequest request) {
     final VerticalLayout layout = new VerticalLayout();
-    
+
     this.setContent(layout);
 
     status = new Label("not running");
@@ -177,11 +179,11 @@ public class QbicmainportletUI extends UI {
     // Create the indicator, disabled until progress is started
     progress = new ProgressBar(new Float(0.0));
     progress.setEnabled(false);
-    progress.setWidth(Page.getCurrent().getBrowserWindowWidth()*0.6f, Unit.PIXELS);
+    progress.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.6f, Unit.PIXELS);
     layout.addComponent(progress);
 
-    
-    
+
+
     final HierarchicalContainer tc = new HierarchicalContainer();
     final SpaceInformation homeInformation = new SpaceInformation();
     status.setValue("Connecting to database.");
@@ -317,7 +319,8 @@ public class QbicmainportletUI extends UI {
               tc.getContainerProperty(experiment_name, "project").setValue(project_name);
               tc.getContainerProperty(experiment_name, "caption").setValue(
                   String.format("%s (%s)",
-                      dh.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()), experiment_name));
+                      dh.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),
+                      experiment_name));
 
               tc.setChildrenAllowed(experiment_name, false);
             }
@@ -333,8 +336,9 @@ public class QbicmainportletUI extends UI {
           if (project_identifiers_tmp.size() > 0) {
             samplesOfSpace = dh.openBisClient.listSamplesForProjects(project_identifiers_tmp);
           } else {
-            samplesOfSpace = dh.openBisClient.getSamplesofSpace(space_name); // TODO code or identifier
-                                                               // needed?
+            samplesOfSpace = dh.openBisClient.getSamplesofSpace(space_name); // TODO code or
+                                                                             // identifier
+            // needed?
           }
           number_of_samples += samplesOfSpace.size();
           List<String> sample_identifiers_tmp = new ArrayList<String>();
