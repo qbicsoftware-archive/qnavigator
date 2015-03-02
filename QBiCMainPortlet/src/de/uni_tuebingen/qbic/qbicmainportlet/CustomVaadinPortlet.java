@@ -18,6 +18,9 @@ import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceURL;
 import javax.servlet.http.HttpServletResponse;
 
+import logging.Log4j2Logger;
+import logging.Logger;
+
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
@@ -42,11 +45,14 @@ public class CustomVaadinPortlet extends VaadinPortlet {
      */
     private static final long serialVersionUID = -6282242585931296999L;
 
+    
+    
     public CustomVaadinPortletService(final VaadinPortlet portlet,
         final DeploymentConfiguration config) throws ServiceException {
       super(portlet, config);
     }
-
+    
+    
     /**
      * This method is used to determine the uri for Vaadin resources like theme or widgetset. It's
      * overriden to point to this web application context, instead of ROOT context
@@ -58,7 +64,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       // return request.getContextPath();
     }
   }
-
+  private static Logger LOGGER = new Log4j2Logger(CustomVaadinPortletService.class);
   public static final String RESOURCE_ID = "mainPortletResourceId";
   public static final String RESOURCE_ATTRIBUTE = "resURL";
 
@@ -158,7 +164,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       }
     } catch (Exception e) {
       //
-      System.out.println("client aborted download.");
+      LOGGER.info("client aborted download.");
     }
 
     tarWriter.closeStream();

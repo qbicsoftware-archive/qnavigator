@@ -55,8 +55,8 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
 //@Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
-@WebServlet(value = "/*", asyncSupported = true)
-@VaadinServletConfiguration(productionMode = false, ui = QbicmainservletUI.class, widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
+//@WebServlet(value = "/*", asyncSupported = true)
+//@VaadinServletConfiguration(productionMode = false, ui = QbicmainservletUI.class, widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
 public class QbicmainservletUI extends UI {
 
   private OpenBisClient openBisConnection;

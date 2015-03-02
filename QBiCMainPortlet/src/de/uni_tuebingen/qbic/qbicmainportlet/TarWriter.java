@@ -1,32 +1,26 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import logging.Log4j2Logger;
+import logging.Logger;
+
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarOutputStream;
 
-import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
-import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
-
 
 public class TarWriter {
-  //some default value
+  private static Logger LOGGER = new Log4j2Logger(TarWriter.class);
+  // some default value
   private String rootFolderName = "qbic";
   // TODO Take Vaadin defaults!
   private final int DEFAULT_BUFFER_SIZE = 32768;
@@ -41,11 +35,13 @@ public class TarWriter {
 
   /**
    * Sets the root Folder Name. If the archive is extracted everything is extracted to this folder
+   * 
    * @param rootFolderName
    */
-  public void setRootFolderName(String rootFolderName){
+  public void setRootFolderName(String rootFolderName) {
     this.rootFolderName = rootFolderName;
   }
+
   /**
    * Sets the buffer size to new value only if 0 < bufferSize <= MAX_BUFFER_SIZE.
    * 
@@ -75,13 +71,13 @@ public class TarWriter {
       try {
         this.tar.close();
       } catch (IOException e) {
-        System.out.println("TarWriter::setOutputStream, close throws Exception.");
+        LOGGER.error("closing previous stream failed.", e.getCause());
       }
     }
     this.tar = new TarOutputStream(out);
     tar.setLongFileMode(TarOutputStream.LONGFILE_POSIX);
     tar.setBigNumberMode(TarOutputStream.BIGNUMBER_POSIX);
-    
+
   }
 
   /**
@@ -92,7 +88,7 @@ public class TarWriter {
       try {
         this.tar.close();
       } catch (IOException e) {
-        System.out.println("TarWriter::closeStream, close throws Exception.");
+        LOGGER.error("closing previous stream failed.", e.getCause());
       }
       tar = null;
     }
@@ -125,7 +121,7 @@ public class TarWriter {
    * @param fileSize
    */
   public void writeEntry(String entryName, InputStream entry, long fileSize) {
-    //System.out.println(entryName + entry + fileSize);
+    // System.out.println(entryName + entry + fileSize);
     TarEntry tar_entry = new TarEntry(entryName);
     tar_entry.setSize(fileSize);
     tar_entry.getRealSize();
@@ -134,20 +130,21 @@ public class TarWriter {
       long totalWritten = 0;
       int bytesRead = 0;
       final byte[] buffer = new byte[BUFFER_SIZE];
-      //System.out.println("File: " + entryName + ", Size: " + Long.toString(fileSize));
-      
+      // System.out.println("File: " + entryName + ", Size: " + Long.toString(fileSize));
+
 
       while ((bytesRead = entry.read(buffer)) > 0) {
-        //System.out.println("bytes read: " + Integer.toString(bytesRead) + " buffer.length: " + Integer.toString(buffer.length));
+        // System.out.println("bytes read: " + Integer.toString(bytesRead) + " buffer.length: " +
+        // Integer.toString(buffer.length));
         tar.write(buffer, 0, bytesRead);
         totalWritten += bytesRead;
-        //System.out.println("totalWritten: " + totalWritten);
+        // System.out.println("totalWritten: " + totalWritten);
         if (totalWritten >= buffer.length) {
           // Avoid chunked encoding for small resources
           tar.flush();
         }
       }
-      //System.out.println("bytesRead");
+      // System.out.println("bytesRead");
       tar.closeEntry();
 
       // try to close input stream
@@ -155,35 +152,37 @@ public class TarWriter {
         entry.close();
       }
     } catch (IOException e1) {
-      //e1.printStackTrace();
-      if(e1 instanceof ClientAbortException){
-        System.out.println("TarWriter::writeEntry client aborted download.");
+      // e1.printStackTrace();
+      if (e1 instanceof ClientAbortException) {
+        LOGGER.info("client aborted download.");
         return;
+      } else {
+        LOGGER.error("writing entry to client failed", e1.getCause());
       }
-      else{
-        System.out.println("TarWriter::writeEntry failed: IOException.");
-      }
-      
+
     }
   }
+
   /**
    * creates a String path out of the given parameters
+   * 
    * @param paths
    * @return
    */
-  public String getPath(String... paths){
+  public String getPath(String... paths) {
     StringBuilder sb = new StringBuilder(rootFolderName);
-    for(String s : paths){
-      if(!s.startsWith(java.io.File.separator))sb.append(java.io.File.separator);
+    for (String s : paths) {
+      if (!s.startsWith(java.io.File.separator))
+        sb.append(java.io.File.separator);
       sb.append(s);
     }
     return sb.toString();
   }
-  
-  public long computeTarLength(Map<String, AbstractMap.SimpleEntry<InputStream, Long>> entries){
+
+  public long computeTarLength(Map<String, AbstractMap.SimpleEntry<InputStream, Long>> entries) {
     Set<Entry<String, SimpleEntry<InputStream, Long>>> entrySet = entries.entrySet();
     Iterator<Entry<String, SimpleEntry<InputStream, Long>>> it = entrySet.iterator();
-    long [] tarLen = new long[entrySet.size()];
+    long[] tarLen = new long[entrySet.size()];
     int i = 0;
     while (it.hasNext()) {
       Entry<String, SimpleEntry<InputStream, Long>> entry = it.next();
@@ -192,12 +191,12 @@ public class TarWriter {
     }
     return computeTarLength(tarLen, tar_record_size, tar_block_size);
   }
-  
-  public long computeTarLength2(Map<String, AbstractMap.SimpleEntry<String, Long>> entries){
+
+  public long computeTarLength2(Map<String, AbstractMap.SimpleEntry<String, Long>> entries) {
     Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
     Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
-    long [] tarLen = new long[entrySet.size()];
-    String [] fileNames = new String[entrySet.size()];
+    long[] tarLen = new long[entrySet.size()];
+    String[] fileNames = new String[entrySet.size()];
     int i = 0;
     while (it.hasNext()) {
       Entry<String, SimpleEntry<String, Long>> entry = it.next();
@@ -205,13 +204,14 @@ public class TarWriter {
       fileNames[i] = entry.getKey();
       i++;
     }
-    return computeTarLength( tarLen, tar_record_size, tar_block_size);
+    return computeTarLength(tarLen, tar_record_size, tar_block_size);
   }
-  
+
   /**
    * Computes the size of an uncompressed tarball with the given parameters. See this for more
-   * information: http://en.wikipedia.org/wiki/Tar_%28computing%29#Format_details
-   * IMPORTANT: computed value might be slightly bigger than the real one. But it suffices for our purppose, where we want to show download progress. 
+   * information: http://en.wikipedia.org/wiki/Tar_%28computing%29#Format_details IMPORTANT:
+   * computed value might be slightly bigger than the real one. But it suffices for our purppose,
+   * where we want to show download progress.
    * 
    * @param file_sizes in bytes
    * @param tar_record_size in bytes
@@ -220,7 +220,7 @@ public class TarWriter {
    */
   private long computeTarLength(long[] file_sizes, int tar_record_size, int tar_block_size) {
     // Every file has a header
-    long length_tar_headers = file_sizes.length * tar_record_size*3;
+    long length_tar_headers = file_sizes.length * tar_record_size * 3;
     long total_length_file_sizes = 0;
     long append_zeros = 0;
     for (int i = 0; i < file_sizes.length; i++) {
@@ -246,9 +246,8 @@ public class TarWriter {
 
   /**
    * Computes the size of an uncompressed tarball with the given parameters. See this for more
-   * information: http://en.wikipedia.org/wiki/Tar_%28computing%29#Format_details
-   * Important: handles different header sizes
-   * DOES NOT WORK DO NOT USE
+   * information: http://en.wikipedia.org/wiki/Tar_%28computing%29#Format_details Important: handles
+   * different header sizes DOES NOT WORK DO NOT USE
    * 
    * @param file_sizes in bytes
    * @param tar_record_size in bytes
@@ -256,7 +255,8 @@ public class TarWriter {
    * @return size of the whole tar ball
    */
   @Deprecated
-  private long computeTarLength(String [] fileName, long[] file_sizes, int tar_record_size, int tar_block_size) {
+  private long computeTarLength(String[] fileName, long[] file_sizes, int tar_record_size,
+      int tar_block_size) {
     // Every file has a header
     long total_length_file_sizes = 0;
     long append_zeros = 0;

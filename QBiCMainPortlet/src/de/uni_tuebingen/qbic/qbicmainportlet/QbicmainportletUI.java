@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
@@ -7,10 +8,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.portlet.PortletSession;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletResponse;
 
+import logging.Log4j2Logger;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
@@ -61,17 +65,16 @@ public class QbicmainportletUI extends UI {
   private OpenBisClient openBisConnection;
   private VerticalLayout mainLayout;
   private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
-
+  private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
+  
   @Override
   protected void init(VaadinRequest request) {
     if (LiferayAndVaadinUtils.getUser() == null) {
       buildNotLoggedinLayout();
     } else {
       // logging who is connecting, when.
-      DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-      System.out.println("QbicNavigator\nUser logged in: "
-          + LiferayAndVaadinUtils.getUser().getScreenName() + " at "
-          + dateFormat.format(new Date()) + " UTC.");
+      LOGGER.debug("debug");
+      LOGGER.info("QbicNavigator used by: " + LiferayAndVaadinUtils.getUser().getScreenName());
       // try to init connection to openbis and write some session attributes, that can be accessed
       // globally
       try {
@@ -80,13 +83,23 @@ public class QbicmainportletUI extends UI {
       } catch (Exception e) {
         // probably the connection to openbis failed
         buildOpenbisConnectionErrorLayout(request);
-        System.out.println(e.getMessage());
+        if(isInProductionMode())
+          try {
+            VaadinService.getCurrentResponse().sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT, "openbis could not be accessed.");
+          } catch (IOException | IllegalArgumentException e1) {
+            // TODO Auto-generated catch block
+            VaadinService.getCurrentResponse().setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
+          }
         return;
       }
       // show progress bar and initialize the view
       initProgressBarAndThreading(request);
       // buildMainLayout();
     }
+  }
+
+  private boolean isInProductionMode() {
+    return VaadinService.getCurrent().getDeploymentConfiguration().isProductionMode();
   }
 
   /**
@@ -196,7 +209,7 @@ public class QbicmainportletUI extends UI {
     final Thread thread = new Thread(th);
     Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
       public void uncaughtException(Thread th, Throwable ex) {
-        System.out.println("Uncaught exception: " + ex);
+        LOGGER.error("exception thrown during initialization.", ex);
         status
             .setValue("An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
       }
@@ -374,10 +387,9 @@ public class QbicmainportletUI extends UI {
       homeViewInformation.lastChangedExperiment = lastModifiedExperiment;
       homeViewInformation.projects = space_container;
       long endTime = System.nanoTime();
-      System.out.println("Took " + ((endTime - startTime) / 1000000000.0) + " s");
+      LOGGER.info(String.format("Took %d s",((endTime - startTime) / 1000000000.0)));
 
-      System.out.println("User " + userName + " has " + homeViewInformation.numberOfProjects
-          + " projects.");
+      LOGGER.info(String.format("User %s has %i projects",userName, homeViewInformation.numberOfProjects));
       try {
         Thread.currentThread().sleep(100); // Sleep for 100 milliseconds
       } catch (InterruptedException e) {

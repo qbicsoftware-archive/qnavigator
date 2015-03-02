@@ -1,7 +1,5 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.OpenBisFunctions;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -14,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.portlet.PortletSession;
+
+import logging.Log4j2Logger;
+import logging.Logger;
 
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
@@ -32,19 +33,17 @@ import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -57,7 +56,7 @@ public class DatasetView extends VerticalLayout implements View {
    */
   private static final long serialVersionUID = 8672873911284888801L;
 
-  // private final FilterTable table;
+  private static Logger LOGGER = new Log4j2Logger(DatasetView.class);
   private final FilterTreeTable table;
   private HierarchicalContainer datasets;
   VerticalLayout vert;
@@ -74,7 +73,7 @@ public class DatasetView extends VerticalLayout implements View {
   public DatasetView() {
     this.vert = new VerticalLayout();
     this.table = buildFilterTable();
-    //this.setContent(vert);
+    // this.setContent(vert);
     this.addComponent(vert);
   }
 
@@ -84,7 +83,7 @@ public class DatasetView extends VerticalLayout implements View {
     this.table = buildFilterTable();
     this.buildLayout();
     this.setContainerDataSource(this.datasets);
-    //this.setContent(vert);
+    // this.setContent(vert);
     this.addComponent(vert);
   }
 
@@ -108,27 +107,27 @@ public class DatasetView extends VerticalLayout implements View {
    */
   private void buildLayout() {
     this.vert.removeAllComponents();
-    
+
     int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
     int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
 
     this.vert.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
     this.setHeight(String.format("%spx", (browserHeight * 0.8)));
-    
+
     MenuBar menubar = new MenuBar();
     // A top-level menu item that opens a submenu
-    
-    //set to true for the hack below
+
+    // set to true for the hack below
     menubar.setHtmlContentAllowed(true);
     this.vert.addComponent(menubar);
 
     menubar.addStyleName("qbicmainportlet");
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);    
+    menubar.setWidth(100.0f, Unit.PERCENTAGE);
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
     downloadProject.setEnabled(false);
-    
+
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_test2.png"));
     manage.setEnabled(false);
@@ -137,7 +136,7 @@ public class DatasetView extends VerticalLayout implements View {
     MenuItem workflows = menubar.addItem("Run workflows", null, null);
     workflows.setIcon(new ThemeResource("dna_test2.png"));
     workflows.setEnabled(false);
-            
+
     // Yet another top-level item
     MenuItem analyze = menubar.addItem("Analyze your data", null, null);
     analyze.setIcon(new ThemeResource("graph_test2.png"));
@@ -172,8 +171,8 @@ public class DatasetView extends VerticalLayout implements View {
     table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
-    
-    //this.table.setSizeFull();
+
+    // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
@@ -188,18 +187,17 @@ public class DatasetView extends VerticalLayout implements View {
 
     Button checkAll = new Button("Select all datasets");
     checkAll.addClickListener(new ClickListener() {
-      
+
       @Override
       public void buttonClick(ClickEvent event) {
-        for(Object itemId: table.getItemIds()){
-          ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
-          .setValue(true);
+        for (Object itemId : table.getItemIds()) {
+          ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue()).setValue(true);
         }
       }
     });
-    
+
     buttonLayout.addComponent(checkAll);
-    
+
     /**
      * prepare download.
      */
@@ -215,9 +213,9 @@ public class DatasetView extends VerticalLayout implements View {
     download.setResource(new ExternalResource("javascript:"));
     download.setEnabled(false);
 
-    
+
     for (final Object itemId : this.table.getItemIds()) {
-      setCheckedBox(itemId, (String)this.table.getItem(itemId).getItemProperty("CODE").getValue());
+      setCheckedBox(itemId, (String) this.table.getItem(itemId).getItemProperty("CODE").getValue());
     }
 
 
@@ -295,11 +293,11 @@ public class DatasetView extends VerticalLayout implements View {
           message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
           message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
           message.add(space);
-          //state.notifyObservers(message);
+          // state.notifyObservers(message);
         } else {
           message.add("null");
-        }//TODO
-        //state.notifyObservers(message);
+        }// TODO
+         // state.notifyObservers(message);
 
       }
     });
@@ -363,9 +361,9 @@ public class DatasetView extends VerticalLayout implements View {
             // String hostTmp = themedisplay.getURLPortal() +
             // UI.getCurrent().getPage().getLocation().getPath() + "?qbicsession=" +
             // UI.getCurrent().getSession().getAttribute("gv-restapi-session") + "&someblabla=" ;
-            System.out.println(hostTmp);
+            LOGGER.debug(hostTmp);
             String host = Base64.encode(hostTmp.getBytes());
-            System.out.println(host);
+            LOGGER.debug(host);
             String title = (String) table.getItem(next).getItemProperty("Sample").getValue();
             res =
                 new ExternalResource(
@@ -374,7 +372,7 @@ public class DatasetView extends VerticalLayout implements View {
                             "http://localhost:7778/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
                             host, title, fileId, filePath));
           }
-          System.out.println(res.toString());
+          LOGGER.debug(res.toString());
           BrowserFrame frame = new BrowserFrame("", res);
           if (rhAttached) {
             frame.addDetachListener(new DetachListener() {
@@ -404,7 +402,8 @@ public class DatasetView extends VerticalLayout implements View {
           // Open it in the UI
           ui.addWindow(subWindow);
         } catch (MalformedURLException e) {
-          System.out.println("MalformedURLException");
+          LOGGER.error(String.format(
+              "Visualization failed because of malformedURL for dataset: %s", datasetCode));
           Notification
               .show(
                   "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
@@ -480,10 +479,7 @@ public class DatasetView extends VerticalLayout implements View {
     try {
       this.setContainerDataSource(dh.getDatasets(map.get("id"), map.get("type")));
     } catch (Exception e) {
-      System.out
-          .println("Exception in DataSetView.enter, due to datahandler.getDatasets with parameters"
-              + map.toString());
-      // e.printStackTrace();
+      LOGGER.error(String.format("getting dataset failed for dataset %s", map.toString()));
     }
   }
 
@@ -511,16 +507,12 @@ public class DatasetView extends VerticalLayout implements View {
 
       boolean itemSelected = (Boolean) event.getProperty().getValue();
       /*
-      String fileName = "";
-      Object parentId = table.getParent(itemId);
-      //In order to prevent infinity loop
-      int folderDepth = 0;
-      while(parentId != null && folderDepth < 100){
-        fileName = Paths.get((String) table.getItem(parentId).getItemProperty("File Name").getValue(), fileName).toString();
-        parentId = table.getParent(parentId);
-        folderDepth++;
-      }*/
-      
+       * String fileName = ""; Object parentId = table.getParent(itemId); //In order to prevent
+       * infinity loop int folderDepth = 0; while(parentId != null && folderDepth < 100){ fileName =
+       * Paths.get((String) table.getItem(parentId).getItemProperty("File Name").getValue(),
+       * fileName).toString(); parentId = table.getParent(parentId); folderDepth++; }
+       */
+
       valueChange(itemId, itemSelected, entries, itemFolderName);
       portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
 
@@ -552,9 +544,10 @@ public class DatasetView extends VerticalLayout implements View {
       ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
           .setValue(itemSelected);
       fileName =
-          Paths.get(fileName, (String) table.getItem(itemId).getItemProperty("File Name").getValue()).toString();
-      
-      //System.out.println(fileName);
+          Paths.get(fileName,
+              (String) table.getItem(itemId).getItemProperty("File Name").getValue()).toString();
+
+      // System.out.println(fileName);
       if (table.hasChildren(itemId)) {
         for (Object childId : table.getChildren(itemId)) {
           valueChange(childId, itemSelected, entries, fileName);
@@ -570,7 +563,4 @@ public class DatasetView extends VerticalLayout implements View {
       }
     }
   }
-
-
-
 }
