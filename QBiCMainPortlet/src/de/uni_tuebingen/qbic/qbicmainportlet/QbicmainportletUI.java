@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import javax.portlet.PortletSession;
@@ -66,6 +67,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
+  private String version = "0.2.0";
+  private String revision = "346";
   
   @Override
   protected void init(VaadinRequest request) {
@@ -73,8 +76,7 @@ public class QbicmainportletUI extends UI {
       buildNotLoggedinLayout();
     } else {
       // logging who is connecting, when.
-      LOGGER.debug("debug");
-      LOGGER.info("QbicNavigator used by: " + LiferayAndVaadinUtils.getUser().getScreenName());
+      LOGGER.info(String.format("QbicNavigator (%s.%s) used by: %s",version,revision, LiferayAndVaadinUtils.getUser().getScreenName()));
       // try to init connection to openbis and write some session attributes, that can be accessed
       // globally
       try {
@@ -387,9 +389,9 @@ public class QbicmainportletUI extends UI {
       homeViewInformation.lastChangedExperiment = lastModifiedExperiment;
       homeViewInformation.projects = space_container;
       long endTime = System.nanoTime();
-      LOGGER.info(String.format("Took %d s",((endTime - startTime) / 1000000000.0)));
+      LOGGER.info(String.format("Took %f s",((endTime - startTime) / 1000000000.0)));
 
-      LOGGER.info(String.format("User %s has %i projects",userName, homeViewInformation.numberOfProjects));
+      LOGGER.info(String.format("User %s has %d projects",userName, homeViewInformation.numberOfProjects));
       try {
         Thread.currentThread().sleep(100); // Sleep for 100 milliseconds
       } catch (InterruptedException e) {
@@ -516,7 +518,10 @@ public class QbicmainportletUI extends UI {
 
     treeViewAndLevelView.addComponent(navigatorContent);
     mainLayout.addComponent(treeViewAndLevelView);
-
+    mainLayout.addComponent(new Label(String.format("version: %s", version)));
+    if(!isInProductionMode()){
+      mainLayout.addComponent(new Label(String.format("revision: %s", revision)));
+    }
     setContent(mainLayout);
 
     navigator.navigateTo("");
