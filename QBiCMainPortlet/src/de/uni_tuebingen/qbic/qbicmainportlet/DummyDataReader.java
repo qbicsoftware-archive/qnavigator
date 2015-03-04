@@ -70,7 +70,7 @@ public class DummyDataReader {
 	private void parseSamp(String project,String line) {
 		String[] cats = line.split("\t");
 		String id = cats[0];
-		SampleBean b = new SampleBean(id,cats[1], cats[3], cats[2], cats[5], cats[4], "unknown");
+		SampleBean b = null;//new SampleBean(id,cats[1], cats[3], cats[2], cats[5], cats[4], "unknown");
 //		System.out.println("adding sample "+b);
 		if(sampData.containsKey(id)) sampData.get(id).add(b);
 		else sampData.put(id, new ArrayList<SampleBean>(Arrays.asList(b)));
