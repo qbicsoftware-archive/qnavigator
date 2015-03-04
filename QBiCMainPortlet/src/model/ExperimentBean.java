@@ -2,102 +2,180 @@ package model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.Image;
 
-public class ExperimentBean implements Serializable{
-  
+public class ExperimentBean implements Serializable {
+
   private String id;
   private String code;
   private String type;
-  private String description;
-  private String parents;
-  private String species;
   private Image status;
   private String registrator;
   private Timestamp registrationDate;
-  private List<String> samples;
-  
-  public ExperimentBean(String id, String code, String type, String description, String parents,
-      String species, Image status, String registrator, Timestamp registrationDate,
-      List<String> samples) {
+  private BeanItemContainer<SampleBean> samples;
+  private String lastChangedSample;
+  private Date lastChangedDataset;
+  private Map<String, String> properties;
+  private Map<String, List<String>> controlledVocabularies;
+
+  public ExperimentBean(String id, String code, String type, Image status, String registrator,
+      Timestamp registrationDate, BeanItemContainer<SampleBean> samples, String lastChangedSample,
+      Date lastChangedDataset, Map<String, String> properties,
+      Map<String, List<String>> controlledVocabularies) {
     super();
     this.id = id;
     this.code = code;
     this.type = type;
-    this.description = description;
-    this.parents = parents;
-    this.species = species;
     this.status = status;
     this.registrator = registrator;
     this.registrationDate = registrationDate;
     this.samples = samples;
+    this.lastChangedSample = lastChangedSample;
+    this.lastChangedDataset = lastChangedDataset;
+    this.properties = properties;
+    this.controlledVocabularies = controlledVocabularies;
   }
-  
+
+
+
   public String getId() {
     return id;
   }
+
+
+
   public void setId(String id) {
     this.id = id;
   }
+
+
+
   public String getCode() {
     return code;
   }
+
+
+
   public void setCode(String code) {
     this.code = code;
   }
+
+
+
   public String getType() {
     return type;
   }
+
+
+
   public void setType(String type) {
     this.type = type;
   }
-  public String getDescription() {
-    return description;
-  }
-  public void setDescription(String description) {
-    this.description = description;
-  }
-  public String getParents() {
-    return parents;
-  }
-  public void setParents(String parents) {
-    this.parents = parents;
-  }
-  public String getSpecies() {
-    return species;
-  }
-  public void setSpecies(String species) {
-    this.species = species;
-  }
+
+
+
   public Image getStatus() {
     return status;
   }
+
+
+
   public void setStatus(Image status) {
     this.status = status;
   }
+
+
+
   public String getRegistrator() {
     return registrator;
   }
+
+
+
   public void setRegistrator(String registrator) {
     this.registrator = registrator;
   }
+
+
+
   public Timestamp getRegistrationDate() {
     return registrationDate;
   }
+
+
+
   public void setRegistrationDate(Timestamp registrationDate) {
     this.registrationDate = registrationDate;
   }
-  public List<String> getSamples() {
+
+
+
+  public BeanItemContainer<SampleBean> getSamples() {
     return samples;
   }
-  public void setSamples(List<String> samples) {
+
+
+
+  public void setSamples(BeanItemContainer<SampleBean> samples) {
     this.samples = samples;
   }
-  
-  
-  
+
+
+
+  public String getLastChangedSample() {
+    return lastChangedSample;
+  }
+
+
+
+  public void setLastChangedSample(String lastChangedSample) {
+    this.lastChangedSample = lastChangedSample;
+  }
+
+
+
+  public Date getLastChangedDataset() {
+    return lastChangedDataset;
+  }
+
+
+
+  public void setLastChangedDataset(Date lastChangedDataset) {
+    this.lastChangedDataset = lastChangedDataset;
+  }
+
+
+
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
+
+
+  public void setProperties(Map<String, String> properties) {
+    this.properties = properties;
+  }
+
+
+
+  public Map<String, List<String>> getControlledVocabularies() {
+    return controlledVocabularies;
+  }
+
+
+
+  public void setControlledVocabularies(Map<String, List<String>> controlledVocabularies) {
+    this.controlledVocabularies = controlledVocabularies;
+  }
+
+
+
   @Override
   public String toString() {
     return "ExperimentBean [id=" + id + "]";
