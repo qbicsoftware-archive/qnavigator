@@ -207,8 +207,16 @@ public class BarcodeView extends VerticalLayout implements View {
     // this.updateCaption();
   }
 
+  public Button getButtonTube() {
+    return pdfDownloadButton;
+  }
+
+  public Button getButtonSheet() {
+    return sheetDownloadButton;
+  }
+
   private void initControl() {
-    final BarcodeView instance = this; //needed for concurrency
+    final BarcodeView instance = this; // needed for concurrency
     // TODO Auto-generated method stub
     /**
      * Button listeners
@@ -233,7 +241,7 @@ public class BarcodeView extends VerticalLayout implements View {
               getSamplesFromExperimentSummaries((Collection<ExperimentBarcodeSummaryBean>) table
                   .getValue());
           creator.findOrCreateBarcodesWithProgress(barcodeBeans, bar, info,
-              new BarcodesReadyRunnable(instance));
+              new BarcodesReadyRunnable(instance, creator, barcodeBeans));
         }
       }
     };
@@ -517,5 +525,9 @@ public class BarcodeView extends VerticalLayout implements View {
       }
     }
     return beans;
+  }
+
+  public SortBy getSorter() {
+    return (SortBy) comparators.getValue();
   }
 }
