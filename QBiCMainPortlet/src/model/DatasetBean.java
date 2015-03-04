@@ -2,6 +2,9 @@ package model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
+
+import com.vaadin.ui.CheckBox;
 
 public class DatasetBean implements Serializable {
 
@@ -12,7 +15,7 @@ public class DatasetBean implements Serializable {
   private static final long serialVersionUID = 4275310001607043674L;
 
   // is the bean selected in the table?
-  private boolean isSelected;
+  private CheckBox isSelected;
 
   // all information in its linked parents.
   private ProjectBean project;
@@ -43,13 +46,17 @@ public class DatasetBean implements Serializable {
   // If it is a directory, the file structure has to taken with care.
   private boolean isDirectory;
 
+  private DatasetBean parent;
+  
+  private DatasetBean root;
+  private List<DatasetBean> children;
+  
 
 
-  public DatasetBean(boolean isSelected, ProjectBean project, SampleBean sample,
+  public DatasetBean(CheckBox isSelected, ProjectBean project, SampleBean sample,
       ExperimentBean experiment, String code, String name, String type, long fileSize,
       String humanReadableFileSize, String dssPath, Timestamp registrationDate, String registrator,
-      boolean isDirectory) {
-    super();
+      boolean isDirectory, DatasetBean parent, DatasetBean root, List<DatasetBean> children) {
     this.isSelected = isSelected;
     this.project = project;
     this.sample = sample;
@@ -63,6 +70,46 @@ public class DatasetBean implements Serializable {
     this.registrationDate = registrationDate;
     this.registrator = registrator;
     this.isDirectory = isDirectory;
+    this.parent = parent;
+    this.root = root;
+    this.children = children;
+  }
+
+  public boolean hasParent(){
+    return parent != null;
+  }
+  
+  public boolean hasChildren(){
+    return children != null && children.size() > 0;
+  }
+  
+  public boolean isRoot(){
+    return root == null;
+  }
+  
+  
+  public DatasetBean getParent() {
+    return parent;
+  }
+
+  public void setParent(DatasetBean parent) {
+    this.parent = parent;
+  }
+
+  public DatasetBean getRoot() {
+    return root;
+  }
+
+  public void setRoot(DatasetBean root) {
+    this.root = root;
+  }
+
+  public List<DatasetBean> getChildren() {
+    return children;
+  }
+
+  public void setChildren(List<DatasetBean> children) {
+    this.children = children;
   }
 
   public String getName() {
@@ -219,12 +266,12 @@ public class DatasetBean implements Serializable {
     return true;
   }
 
-  public boolean isSelected() {
+  public CheckBox isSelected() {
     return isSelected;
   }
 
   public void setSelected(boolean isSelected) {
-    this.isSelected = isSelected;
+    this.isSelected.setValue(isSelected);
   }
 
 }
