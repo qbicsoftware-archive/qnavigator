@@ -7,82 +7,158 @@ import com.vaadin.ui.CheckBox;
 
 public class DatasetBean implements Serializable{
   
-  //TODO beans?
+  
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 4275310001607043674L;
+
+  //is the bean selected in the table?
+  private boolean isSelected;
+  
+  //all information in its linked parents.
+  private ProjectBean project;
+  private SampleBean sample;
+  private ExperimentBean experiment;
+  
+  //openbis code
   private String code;
-  private String project;
-  private String experiment;
-  private String sample;
-  private String fileName;
-  private String fileType;
+  //file or directory name on dss 
+  private String name;
+  //type of this dataset
+  private String type;
+  
   //TODO to bytes method
-  private String fileSize;
-  private String fileDownloadLink;
+  //size of this dataset on dss.
+  private long fileSize;
+  //same as {@link fileSize} but human readable format
+  private String humanReadableFileSize;
+  
+  
+  //path to the actual file or directory of this dataset on the dss.
+  private String dssPath;
+  //date of the registration of this dataset (not necessary when data arrives)
   private Timestamp registrationDate;
+  //name of the registrator
+  //TODO class user or liferay user?
   private String registrator;
   
-  public DatasetBean(String code, String project, String experiment, String sample,
-      String fileName, String fileType, String fileSize, String fileDownloadLink,
-      Timestamp registrationDate, String registrator) {
+  //If it is a directory, the file structure has to taken with care.
+  private boolean isDirectory;
+  
+  
+  
+  public DatasetBean(boolean isSelected, ProjectBean project, SampleBean sample,
+      ExperimentBean experiment, String code, String name, String type, long fileSize,
+      String humanReadableFileSize, String dssPath, Timestamp registrationDate, String registrator,
+      boolean isDirectory) {
     super();
-    this.code = code;
+    this.isSelected = isSelected;
     this.project = project;
-    this.experiment = experiment;
     this.sample = sample;
-    this.fileName = fileName;
-    this.fileType = fileType;
+    this.experiment = experiment;
+    this.code = code;
+    this.name = name;
+    this.type = type;
     this.fileSize = fileSize;
-    this.fileDownloadLink = fileDownloadLink;
+    this.humanReadableFileSize = humanReadableFileSize;
+    this.dssPath = dssPath;
     this.registrationDate = registrationDate;
     this.registrator = registrator;
+    this.isDirectory = isDirectory;
   }
-  
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public String getHumanReadableFileSize() {
+    return humanReadableFileSize;
+  }
+
+  public void setHumanReadableFileSize(String humanReadableFileSize) {
+    this.humanReadableFileSize = humanReadableFileSize;
+  }
+
+  public String getDssPath() {
+    return dssPath;
+  }
+
+  public void setDssPath(String dssPath) {
+    this.dssPath = dssPath;
+  }
+
+  public boolean isDirectory() {
+    return isDirectory;
+  }
+
+  public void setDirectory(boolean isDirectory) {
+    this.isDirectory = isDirectory;
+  }
+
+  public static long getSerialversionuid() {
+    return serialVersionUID;
+  }
+
   public String getCode() {
     return code;
   }
   public void setCode(String code) {
     this.code = code;
   }
-  public String getProject() {
+  public ProjectBean getProject() {
     return project;
   }
-  public void setProject(String project) {
+  public void setProject(ProjectBean project) {
     this.project = project;
   }
-  public String getExperiment() {
+  public ExperimentBean getExperiment() {
     return experiment;
   }
-  public void setExperiment(String experiment) {
+  public void setExperiment(ExperimentBean experiment) {
     this.experiment = experiment;
   }
-  public String getSample() {
+  public SampleBean getSample() {
     return sample;
   }
-  public void setSample(String sample) {
+  public void setSample(SampleBean sample) {
     this.sample = sample;
   }
   public String getFileName() {
-    return fileName;
+    return name;
   }
   public void setFileName(String fileName) {
-    this.fileName = fileName;
+    this.name = fileName;
   }
   public String getFileType() {
-    return fileType;
+    return type;
   }
   public void setFileType(String fileType) {
-    this.fileType = fileType;
+    this.type = fileType;
   }
-  public String getFileSize() {
+  public long getFileSize() {
     return fileSize;
   }
-  public void setFileSize(String fileSize) {
+  public void setFileSize(long fileSize) {
     this.fileSize = fileSize;
   }
   public String getFileDownloadLink() {
-    return fileDownloadLink;
+    return dssPath;
   }
   public void setFileDownloadLink(String fileDownloadLink) {
-    this.fileDownloadLink = fileDownloadLink;
+    this.dssPath = fileDownloadLink;
   }
   public Timestamp getRegistrationDate() {
     return registrationDate;
@@ -125,6 +201,14 @@ public class DatasetBean implements Serializable{
     } else if (!code.equals(other.code))
       return false;
     return true;
+  }
+
+  public boolean isSelected() {
+    return isSelected;
+  }
+
+  public void setSelected(boolean isSelected) {
+    this.isSelected = isSelected;
   }
   
 }
