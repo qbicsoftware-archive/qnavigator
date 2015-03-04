@@ -2,9 +2,9 @@ package model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.Set;
+import java.util.List;
 
-import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.ProgressBar;
 
 public class ProjectBean implements Serializable{
@@ -12,20 +12,18 @@ public class ProjectBean implements Serializable{
   private String id;
   private String code;
   private String description;
-  //TODO spaceBean ?
-  private String space;
-  //TODO experimentBeans?
-  private IndexedContainer experiments;
+  private SpaceBean space;
+  private BeanItemContainer<ExperimentBean> experiments;
   private ProgressBar progress;
   private Timestamp registrationDate;
   private String registrator;
   private String contact;
   //TODO userBean ?
-  private Set<String> members;
+  private List<String> members;
   
-  public ProjectBean(String id, String code, String description, String space,
-      IndexedContainer experiments, ProgressBar progress, Timestamp registrationDate,
-      String registrator, String contact, Set<String> members) {
+  public ProjectBean(String id, String code, String description, SpaceBean space,
+      BeanItemContainer<ExperimentBean> experiments, ProgressBar progress, Timestamp registrationDate,
+      String registrator, String contact, List<String> members) {
     super();
     this.id = id;
     this.code = code;
@@ -63,19 +61,19 @@ public class ProjectBean implements Serializable{
     this.description = description;
   }
 
-  public String getSpace() {
+  public SpaceBean getSpace() {
     return space;
   }
 
-  public void setSpace(String space) {
+  public void setSpace(SpaceBean space) {
     this.space = space;
   }
 
-  public IndexedContainer getExperiments() {
+  public BeanItemContainer<ExperimentBean> getExperiments() {
     return experiments;
   }
 
-  public void setExperiments(IndexedContainer experiments) {
+  public void setExperiments(BeanItemContainer<ExperimentBean> experiments) {
     this.experiments = experiments;
   }
 
@@ -111,11 +109,11 @@ public class ProjectBean implements Serializable{
     this.contact = contact;
   }
 
-  public Set<String> getMembers() {
+  public List<String> getMembers() {
     return members;
   }
 
-  public void setMembers(Set<String> members) {
+  public void setMembers(List<String> members) {
     this.members = members;
   }
 

@@ -1,22 +1,28 @@
 package model;
 
 import java.io.Serializable;
+import java.util.List;
 
-import com.vaadin.data.Container;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.ui.ProgressBar;
+
 
 public class SpaceBean implements Serializable{
 
   private String id;
   private String description;
-  private String containsData;
-  //TODO beans
-  private Container projects;
-  private Container experiments;
-  private Container samples;
-  private Container datasets;
+  private Boolean containsData;
+  private BeanItemContainer<ProjectBean> projects;
+  private BeanItemContainer<ExperimentBean> experiments;
+  private BeanItemContainer<SampleBean> samples;
+  private BeanItemContainer<DatasetBean> datasets;
+  // TODO bean ?
+  private List<String> members;
+  private ProgressBar progress;
+  // TODO statistics ? LastChanged?
   
-  public SpaceBean(String id, String description, String containsData, Container projects,
-      Container experiments, Container samples, Container datasets) {
+  public SpaceBean(String id, String description, Boolean containsData, BeanItemContainer<ProjectBean> projects,
+      BeanItemContainer<ExperimentBean> experiments, BeanItemContainer<SampleBean> samples, BeanItemContainer<DatasetBean> datasets, List<String> members, ProgressBar progress) {
     super();
     this.id = id;
     this.description = description;
@@ -25,6 +31,8 @@ public class SpaceBean implements Serializable{
     this.experiments = experiments;
     this.samples = samples;
     this.datasets = datasets;
+    this.setMembers(members);
+    this.setProgress(progress);
   }
 
   public String getId() {
@@ -43,43 +51,43 @@ public class SpaceBean implements Serializable{
     this.description = description;
   }
 
-  public String getContainsData() {
+  public Boolean getContainsData() {
     return containsData;
   }
 
-  public void setContainsData(String containsData) {
+  public void setContainsData(Boolean containsData) {
     this.containsData = containsData;
   }
 
-  public Container getProjects() {
+  public BeanItemContainer<ProjectBean> getProjects() {
     return projects;
   }
 
-  public void setProjects(Container projects) {
+  public void setProjects(BeanItemContainer<ProjectBean> projects) {
     this.projects = projects;
   }
 
-  public Container getExperiments() {
+  public BeanItemContainer<ExperimentBean> getExperiments() {
     return experiments;
   }
 
-  public void setExperiments(Container experiments) {
+  public void setExperiments(BeanItemContainer<ExperimentBean> experiments) {
     this.experiments = experiments;
   }
 
-  public Container getSamples() {
+  public BeanItemContainer<SampleBean> getSamples() {
     return samples;
   }
 
-  public void setSamples(Container samples) {
+  public void setSamples(BeanItemContainer<SampleBean> samples) {
     this.samples = samples;
   }
 
-  public Container getDatasets() {
+  public BeanItemContainer<DatasetBean> getDatasets() {
     return datasets;
   }
 
-  public void setDatasets(Container datasets) {
+  public void setDatasets(BeanItemContainer<DatasetBean> datasets) {
     this.datasets = datasets;
   }
 
@@ -111,6 +119,22 @@ public class SpaceBean implements Serializable{
     } else if (!id.equals(other.id))
       return false;
     return true;
+  }
+
+  public List<String> getMembers() {
+    return members;
+  }
+
+  public void setMembers(List<String> members) {
+    this.members = members;
+  }
+
+  public ProgressBar getProgress() {
+    return progress;
+  }
+
+  public void setProgress(ProgressBar progress) {
+    this.progress = progress;
   }
  
 }
