@@ -17,6 +17,7 @@ public class ExperimentBean implements Serializable {
   private String type;
   private Image status;
   private String registrator;
+  private ProjectBean project;
   private Timestamp registrationDate;
   private BeanItemContainer<SampleBean> samples;
   private String lastChangedSample;
@@ -25,8 +26,8 @@ public class ExperimentBean implements Serializable {
   private Map<String, List<String>> controlledVocabularies;
 
   public ExperimentBean(String id, String code, String type, Image status, String registrator,
-      Timestamp registrationDate, BeanItemContainer<SampleBean> samples, String lastChangedSample,
-      Date lastChangedDataset, Map<String, String> properties,
+      ProjectBean project, Timestamp registrationDate, BeanItemContainer<SampleBean> samples,
+      String lastChangedSample, Date lastChangedDataset, Map<String, String> properties,
       Map<String, List<String>> controlledVocabularies) {
     super();
     this.id = id;
@@ -34,6 +35,7 @@ public class ExperimentBean implements Serializable {
     this.type = type;
     this.status = status;
     this.registrator = registrator;
+    this.project = project;
     this.registrationDate = registrationDate;
     this.samples = samples;
     this.lastChangedSample = lastChangedSample;
@@ -94,6 +96,17 @@ public class ExperimentBean implements Serializable {
 
   public String getRegistrator() {
     return registrator;
+  }
+
+
+  public void setProject(ProjectBean project) {
+    this.project = project;
+  }
+
+
+
+  public ProjectBean getProject() {
+    return project;
   }
 
 
