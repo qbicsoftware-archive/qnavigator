@@ -20,7 +20,12 @@ import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import model.DatasetBean;
+import model.ExperimentBean;
 import model.ExperimentType;
+import model.ProjectBean;
+import model.SampleBean;
+import model.SpaceBean;
 import parser.Parser;
 import parser.PersonParser;
 import persons.Qperson;
@@ -37,6 +42,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRo
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.StreamResource;
@@ -123,10 +129,14 @@ public class DataHandler {
   // Map<String, ExperimentInformation> experimentInformations =
   // new HashMap<String, ExperimentInformation>();
   // Map<String, SampleInformation> sampleInformations = new HashMap<String, SampleInformation>();
-  Map<String, Container> projectMap = new HashMap<String, Container>();
-  Map<String, Container> experimentMap = new HashMap<String, Container>();
-  Map<String, Container> sampleMap = new HashMap<String, Container>();
-  Map<String, Container> datasetMap = new HashMap<String, Container>();
+  Map<String, BeanItemContainer<ProjectBean>> projectMap =
+      new HashMap<String, BeanItemContainer<ProjectBean>>();
+  Map<String, BeanItemContainer<ExperimentBean>> experimentMap =
+      new HashMap<String, BeanItemContainer<ExperimentBean>>();
+  Map<String, BeanItemContainer<SampleBean>> sampleMap =
+      new HashMap<String, BeanItemContainer<SampleBean>>();
+  Map<String, BeanItemContainer<DatasetBean>> datasetMap =
+      new HashMap<String, BeanItemContainer<DatasetBean>>();
 
   // Map<String, IndexedContainer> space_to_projects = new HashMap<String, IndexedContainer>();
   //
@@ -192,7 +202,7 @@ public class DataHandler {
   // }
 
 
-  public Container getDatasets(String id, String type) throws Exception {
+  public BeanItemContainer<DatasetBean> getDatasets(String id, String type) throws Exception {
 
     List<DataSet> dataset_list = null;
 
@@ -217,13 +227,13 @@ public class DataHandler {
         default:
           throw new Exception("Unknown datatype: " + type);
       }
-      Container datasets = this.createDatasetContainer(dataset_list, id);
+      BeanItemContainer<DatasetBean> datasets = this.createDatasetContainer(dataset_list, id);
       this.datasetMap.put(id, datasets);
       return datasets;
     }
   }
 
-  public Container getSamples(String id, String type) throws Exception {
+  public BeanItemContainer<SampleBean> getSamples(String id, String type) throws Exception {
 
     List<Sample> sample_list = null;
 
@@ -243,13 +253,13 @@ public class DataHandler {
         default:
           throw new Exception("Unknown datatype: " + type);
       }
-      Container samples = this.createSampleContainer(sample_list, id);
+      BeanItemContainer<SampleBean> samples = this.createSampleContainer(sample_list, id);
       this.sampleMap.put(id, samples);
       return samples;
     }
   }
 
-  public Container getExperiments(String id, String type) throws Exception {
+  public BeanItemContainer<ExperimentBean> getExperiments(String id, String type) throws Exception {
 
     List<Experiment> experiment_list = null;
 
@@ -266,19 +276,20 @@ public class DataHandler {
         default:
           throw new Exception("Unknown datatype: " + type);
       }
-      Container experiments = this.createExperimentContainer(experiment_list, id);
+      BeanItemContainer<ExperimentBean> experiments =
+          this.createExperimentContainer(experiment_list, id);
       this.experimentMap.put(id, experiments);
       return experiments;
     }
 
   }
 
-  public Container getProjects(String id, String type) throws Exception {
+  public BeanItemContainer<ProjectBean> getProjects(String id, String type) throws Exception {
 
     List<Project> project_list = null;
 
-    if (this.experimentMap.get(id) != null) {
-      return this.experimentMap.get(id);
+    if (this.projectMap.get(id) != null) {
+      return this.projectMap.get(id);
     } else {
       switch (type) {
         case "space":
@@ -287,8 +298,8 @@ public class DataHandler {
         default:
           throw new Exception("Unknown datatype: " + type);
       }
-      Container projects = this.createProjectContainer(project_list, id);
-      this.experimentMap.put(id, projects);
+      BeanItemContainer<ProjectBean> projects = this.createProjectContainer(project_list, id);
+      this.projectMap.put(id, projects);
       return projects;
     }
 
@@ -555,73 +566,76 @@ public class DataHandler {
    * @param identifier
    * @return
    */
-  private SpaceInformation createSpaceContainer(List<SpaceWithProjectsAndRoleAssignments> spaces,
-      String identifier) {
-    SpaceWithProjectsAndRoleAssignments tmp_space = null;
-    for (SpaceWithProjectsAndRoleAssignments space : spaces) {
-      if (space.getCode().equals(identifier)) {
-        tmp_space = space;
-        break;
-      }
-    }
-    if (tmp_space == null) {
-      System.out.println(String.format(
-          "space %s does not seem to exist! In DataHandler::createSpaceContainer", identifier));
-      return null;
-    }
-    SpaceInformation spaceInformation = new SpaceInformation();
-    IndexedContainer space_container = new IndexedContainer();
-
-    space_container.addContainerProperty("Project", String.class, "");
-    space_container.addContainerProperty("Description", String.class, "");
-    space_container.addContainerProperty("Progress", ProgressBar.class, "");
-
-
-    // List<Project> projects = this.openBisClient.getProjectsofSpace(id);
-    int number_of_samples = 0;
-    List<Project> projects = tmp_space.getProjects();
-    int number_of_projects = projects.size();// projects.size();
-    int number_of_experiments = 0;
-    int number_of_datasets = 0;
-    String lastModifiedExperiment = "N/A";
-    String lastModifiedSample = "N/A";
-    Date lastModifiedDate = new Date(0, 0, 0);
-
-    number_of_experiments = this.openBisClient.getExperimentsOfSpace(identifier).size();// this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
-                                                                                        // projects,
-                                                                                        // null);
-    List<Sample> samplesOfSpace = this.openBisClient.getSamplesofSpace(identifier);// this.openBisClient.facade.listSamplesForProjects(tmp_list_str);
-    number_of_samples += samplesOfSpace.size();
-    List<DataSet> datasets = this.openBisClient.getDataSetsOfSpaceByIdentifier(identifier); // this.openBisClient.facade.listDataSetsForExperiments(tmp_experiment_identifier_lis);
-    number_of_datasets = datasets.size();
-
-    StringBuilder lce = new StringBuilder();
-    StringBuilder lcs = new StringBuilder();
-    this.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
-    lastModifiedExperiment = lce.toString();
-    lastModifiedSample = lcs.toString();
-
-    spaceInformation.numberOfProjects = number_of_projects;
-    spaceInformation.numberOfExperiments = number_of_experiments;
-    spaceInformation.numberOfSamples = number_of_samples;
-    spaceInformation.numberOfDatasets = number_of_datasets;
-    spaceInformation.lastChangedDataset = lastModifiedDate;
-    spaceInformation.lastChangedSample = lastModifiedSample;
-    spaceInformation.lastChangedExperiment = lastModifiedExperiment;
-
-    spaceInformation.members = removeQBiCStaffFromMemberSet(tmp_space.getUsers());
-
-    for (Project p : projects) {
-      Object new_s = space_container.addItem();
-      space_container.getContainerProperty(new_s, "Project").setValue(p.getCode());
-      space_container.getContainerProperty(new_s, "Description").setValue(p.getDescription());
-      space_container.getContainerProperty(new_s, "Progress").setValue(
-          new ProgressBar(this.openBisClient.computeProjectStatus(p)));
-    }
-    spaceInformation.projects = space_container;
-
-    return spaceInformation;
-  }
+  // private SpaceInformation createSpaceContainer(List<SpaceWithProjectsAndRoleAssignments> spaces,
+  // String identifier) {
+  // SpaceWithProjectsAndRoleAssignments tmp_space = null;
+  // for (SpaceWithProjectsAndRoleAssignments space : spaces) {
+  // if (space.getCode().equals(identifier)) {
+  // tmp_space = space;
+  // break;
+  // }
+  // }
+  // if (tmp_space == null) {
+  // System.out.println(String.format(
+  // "space %s does not seem to exist! In DataHandler::createSpaceContainer", identifier));
+  // return null;
+  // }
+  // SpaceInformation spaceInformation = new SpaceInformation();
+  // IndexedContainer space_container = new IndexedContainer();
+  //
+  // space_container.addContainerProperty("Project", String.class, "");
+  // space_container.addContainerProperty("Description", String.class, "");
+  // space_container.addContainerProperty("Progress", ProgressBar.class, "");
+  //
+  //
+  // // List<Project> projects = this.openBisClient.getProjectsofSpace(id);
+  // int number_of_samples = 0;
+  // List<Project> projects = tmp_space.getProjects();
+  // int number_of_projects = projects.size();// projects.size();
+  // int number_of_experiments = 0;
+  // int number_of_datasets = 0;
+  // String lastModifiedExperiment = "N/A";
+  // String lastModifiedSample = "N/A";
+  // Date lastModifiedDate = new Date(0, 0, 0);
+  //
+  // number_of_experiments = this.openBisClient.getExperimentsOfSpace(identifier).size();//
+  // this.openBisClient.openbisInfoService.listExperiments(this.openBisClient.getSessionToken(),
+  // // projects,
+  // // null);
+  // List<Sample> samplesOfSpace = this.openBisClient.getSamplesofSpace(identifier);//
+  // this.openBisClient.facade.listSamplesForProjects(tmp_list_str);
+  // number_of_samples += samplesOfSpace.size();
+  // List<DataSet> datasets = this.openBisClient.getDataSetsOfSpaceByIdentifier(identifier); //
+  // this.openBisClient.facade.listDataSetsForExperiments(tmp_experiment_identifier_lis);
+  // number_of_datasets = datasets.size();
+  //
+  // StringBuilder lce = new StringBuilder();
+  // StringBuilder lcs = new StringBuilder();
+  // this.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
+  // lastModifiedExperiment = lce.toString();
+  // lastModifiedSample = lcs.toString();
+  //
+  // spaceInformation.numberOfProjects = number_of_projects;
+  // spaceInformation.numberOfExperiments = number_of_experiments;
+  // spaceInformation.numberOfSamples = number_of_samples;
+  // spaceInformation.numberOfDatasets = number_of_datasets;
+  // spaceInformation.lastChangedDataset = lastModifiedDate;
+  // spaceInformation.lastChangedSample = lastModifiedSample;
+  // spaceInformation.lastChangedExperiment = lastModifiedExperiment;
+  //
+  // spaceInformation.members = removeQBiCStaffFromMemberSet(tmp_space.getUsers());
+  //
+  // for (Project p : projects) {
+  // Object new_s = space_container.addItem();
+  // space_container.getContainerProperty(new_s, "Project").setValue(p.getCode());
+  // space_container.getContainerProperty(new_s, "Description").setValue(p.getDescription());
+  // space_container.getContainerProperty(new_s, "Progress").setValue(
+  // new ProgressBar(this.openBisClient.computeProjectStatus(p)));
+  // }
+  // spaceInformation.projects = space_container;
+  //
+  // return spaceInformation;
+  // }
 
   /**
    * This method filters out qbic staff and other unnecessary space members TODO: this method might
@@ -631,6 +645,7 @@ public class DataHandler {
    * @return a new set which exculdes qbic staff and functional members
    */
   private Set<String> removeQBiCStaffFromMemberSet(Set<String> users) {
+    // TODO there is probably a method to get users of the QBIC group out of openBIS
     Set<String> ret = new LinkedHashSet<String>(users);
     ret.remove("iiswo01"); // QBiC Staff
     ret.remove("iisfr01"); // QBiC Staff
@@ -646,47 +661,70 @@ public class DataHandler {
   }
 
   @SuppressWarnings("unchecked")
-  private IndexedContainer createProjectContainer(List<Project> projs, String id) {
+  private BeanItemContainer<ProjectBean> createProjectContainer(List<Project> projs, String spaceID)
+      throws Exception {
 
-    IndexedContainer project_container = new IndexedContainer();
+    BeanItemContainer<ProjectBean> res = new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
-    project_container.addContainerProperty("Description", String.class, null);
-    project_container.addContainerProperty("Space", String.class, null);
-    project_container.addContainerProperty("Registration Date", Timestamp.class, null);
-    project_container.addContainerProperty("Registrator", String.class, null);
-    project_container.addContainerProperty("Progress", ProgressBar.class, null);
-    project_container.addContainerProperty("Progress", ProgressBar.class, null);
-
+    // project_container.addContainerProperty("Description", String.class, null);
+    // project_container.addContainerProperty("Space", String.class, null);
+    // project_container.addContainerProperty("Registration Date", Timestamp.class, null);
+    // project_container.addContainerProperty("Registrator", String.class, null);
+    // project_container.addContainerProperty("Progress", ProgressBar.class, null);
+    SpaceBean space = new SpaceBean();
+    space.setId(spaceID); // TODO do we need more space information at this point?
     for (Project p : projs) {
-      Object new_p = project_container.addItem();
-
-      String code = p.getCode();
-      String desc = p.getDescription();
-
-      String space = code.split("/")[1];
-
+      ProgressBar progressBar = new ProgressBar();
+      progressBar.setValue(this.openBisClient.computeProjectStatus(p));
       Date date = p.getRegistrationDetails().getRegistrationDate();
-      String registrator = p.getRegistrationDetails().getUserId();
-
       SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
       String dateString = sd.format(date);
       Timestamp ts = Timestamp.valueOf(dateString);
+      ProjectBean b =
+          new ProjectBean(p.getIdentifier(), p.getCode(), p.getDescription(), space,
+              getExperiments(p.getIdentifier(), "project"), progressBar, ts, p
+                  .getRegistrationDetails().getUserId(), p.getRegistrationDetails().getUserEmail(),
+              (List<String>) getSpaceMembers(spaceID), datasetMap.get(p.getIdentifier()) != null);
+      res.addBean(b);
+      // Object new_p = project_container.addItem();
+      //
+      // String code = p.getCode();
+      // String desc = p.getDescription();
+      //
+      // String space = code.split("/")[1];
+      //
+      // String registrator = p.getRegistrationDetails().getUserId();
+      //
 
-      ProgressBar progressBar = new ProgressBar();
-      progressBar.setValue(this.openBisClient.computeProjectStatus(p));
+      //
 
-      project_container.getContainerProperty(new_p, "Space").setValue(space);
-      project_container.getContainerProperty(new_p, "Description").setValue(desc);
-      project_container.getContainerProperty(new_p, "Registration Date").setValue(ts);
-      project_container.getContainerProperty(new_p, "Registerator").setValue(registrator);
-      project_container.getContainerProperty(new_p, "Progress").setValue(progressBar);
+      //
+      // project_container.getContainerProperty(new_p, "Space").setValue(space);
+      // project_container.getContainerProperty(new_p, "Description").setValue(desc);
+      // project_container.getContainerProperty(new_p, "Registration Date").setValue(ts);
+      // project_container.getContainerProperty(new_p, "Registerator").setValue(registrator);
+      // project_container.getContainerProperty(new_p, "Progress").setValue(progressBar);
     }
 
-    return project_container;
+    return res;
   }
 
   @SuppressWarnings("unchecked")
-  private IndexedContainer createExperimentContainer(List<Experiment> exps, String id) {
+  private BeanItemContainer<ExperimentBean> createExperimentContainer(List<Experiment> exps,
+      String projID) {
+    
+    BeanItemContainer<ExperimentBean> res = new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
+
+    // project_container.addContainerProperty("Description", String.class, null);
+    // project_container.addContainerProperty("Space", String.class, null);
+    // project_container.addContainerProperty("Registration Date", Timestamp.class, null);
+    // project_container.addContainerProperty("Registrator", String.class, null);
+    // project_container.addContainerProperty("Progress", ProgressBar.class, null);
+    
+    
+    
+    
+    
 
     IndexedContainer experiment_container = new IndexedContainer();
 
@@ -696,6 +734,24 @@ public class DataHandler {
     experiment_container.addContainerProperty("Registrator", String.class, null);
     experiment_container.addContainerProperty("Status", Image.class, null);
     // experiment_container.addContainerProperty("Properties", Map.class, null);
+    ProjectBean space = new ProjectBean();
+    space.setId(spaceID); // TODO do we need more space information at this point?
+    for (Experiment e : exps) {
+      ProgressBar progressBar = new ProgressBar();
+      progressBar.setValue(this.openBisClient.computeProjectStatus(p));
+      Date date = p.getRegistrationDetails().getRegistrationDate();
+      SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+      String dateString = sd.format(date);
+      Timestamp ts = Timestamp.valueOf(dateString);
+      ExperimentBean e = new ExperimentBean(id, code, type, status, registrator, project, registrationDate, samples,
+          lastChangedSample, lastChangedDataset, properties, controlledVocabularies)
+      ProjectBean b =
+          new ProjectBean(p.getIdentifier(), p.getCode(), p.getDescription(), space,
+              getExperiments(p.getIdentifier(), "project"), progressBar, ts, p
+                  .getRegistrationDetails().getUserId(), p.getRegistrationDetails().getUserEmail(),
+              (List<String>) getSpaceMembers(spaceID), datasetMap.get(p.getIdentifier()) != null);
+      res.addBean(b);
+
 
 
 
@@ -735,7 +791,7 @@ public class DataHandler {
   }
 
   @SuppressWarnings("unchecked")
-  private IndexedContainer createSampleContainer(List<Sample> samples, String id) {
+  private BeanItemContainer<SampleBean> createSampleContainer(List<Sample> samples, String id) {
 
     IndexedContainer sample_container = new IndexedContainer();
     sample_container.addContainerProperty("Sample", String.class, null);
@@ -768,7 +824,7 @@ public class DataHandler {
     return sample_container;
   }
 
-  private HierarchicalContainer createDatasetContainer(List<DataSet> datasets, String id) {
+  private BeanItemContainer<DatasetBean> createDatasetContainer(List<DataSet> datasets, String id) {
 
     HierarchicalContainer dataset_container = new HierarchicalContainer();
 
@@ -901,149 +957,149 @@ public class DataHandler {
    * @param userName Screenname of the Liferay User
    * @return SpaceInformation object
    */
-  public SpaceInformation initTreeAndHomeInfo(HierarchicalContainer tc, String userName) {
-
-    List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpacesWithProjectInformation();
-
-    // Initialization of Tree Container
-    tc.addContainerProperty("identifier", String.class, "N/A");
-    tc.addContainerProperty("type", String.class, "N/A");
-    tc.addContainerProperty("project", String.class, "N/A");
-    tc.addContainerProperty("caption", String.class, "N/A");
-
-
-    // Initialization of Home Information
-    SpaceInformation homeInformation = new SpaceInformation();
-    IndexedContainer space_container = new IndexedContainer();
-    space_container.addContainerProperty("Project", String.class, "");
-    space_container.addContainerProperty("Description", String.class, "");
-    space_container.addContainerProperty("Contains datasets", String.class, "");
-    int number_of_projects = 0;
-    int number_of_experiments = 0;
-    int number_of_samples = 0;
-    int number_of_datasets = 0;
-    String lastModifiedExperiment = "N/A";
-    String lastModifiedSample = "N/A";
-    Date lastModifiedDate = new Date(0, 0, 0);
-    for (SpaceWithProjectsAndRoleAssignments s : space_list) {
-      if (s.getUsers().contains(userName)) {
-        String space_name = s.getCode();
-
-        // TODO does this work for everyone? should it? empty container would be the aim, probably
-        if (space_name.equals("QBIC_USER_SPACE")) {
-          fillPersonsContainer(space_name);
-        }
-
-        List<Project> projects = s.getProjects();
-        number_of_projects += projects.size();
-        List<String> project_identifiers_tmp = new ArrayList<String>();
-        for (Project project : projects) {
-
-          String project_name = project.getCode();
-          if (tc.containsId(project_name)) {
-            project_name = project.getIdentifier();
-          }
-          Object new_s = space_container.addItem();
-          space_container.getContainerProperty(new_s, "Project").setValue(project_name);
-
-          // Project descriptions can be long; truncate the string to provide a brief preview
-          String desc = project.getDescription();
-
-          if (desc != null && desc.length() > 0) {
-            desc = desc.substring(0, Math.min(desc.length(), 100));
-            if (desc.length() == 100) {
-              desc += "...";
-            }
-          }
-          space_container.getContainerProperty(new_s, "Description").setValue(desc);
-
-          // System.out.println("|--Project: " + project_name);
-          tc.addItem(project_name);
-
-          tc.getContainerProperty(project_name, "type").setValue("project");
-          tc.getContainerProperty(project_name, "identifier").setValue(project_name);
-          tc.getContainerProperty(project_name, "project").setValue(project_name);
-          tc.getContainerProperty(project_name, "caption").setValue(project_name);
-
-          List<Project> tmp_list = new ArrayList<Project>();
-          tmp_list.add(project);
-          List<Experiment> experiments =
-              this.openBisClient.getOpenbisInfoService().listExperiments(
-                  this.openBisClient.getSessionToken(), tmp_list, null);
-
-          // Add number of experiments for every project
-          number_of_experiments += experiments.size();
-
-          List<String> experiment_identifiers = new ArrayList<String>();
-
-          for (Experiment experiment : experiments) {
-            experiment_identifiers.add(experiment.getIdentifier());
-            String experiment_name = experiment.getCode();
-            if (tc.containsId(experiment_name)) {
-              experiment_name = experiment.getIdentifier();
-            }
-            // System.out.println(" |--Experiment: " + experiment_name);
-            tc.addItem(experiment_name);
-            tc.setParent(experiment_name, project_name);
-            tc.getContainerProperty(experiment_name, "type").setValue("experiment");
-            tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
-            tc.getContainerProperty(experiment_name, "project").setValue(project_name);
-            tc.getContainerProperty(experiment_name, "caption").setValue(
-                String.format("%s (%s)",
-                    this.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),
-                    experiment_name));
-
-            tc.setChildrenAllowed(experiment_name, false);
-          }
-          if (experiment_identifiers.size() > 0
-              && this.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers)
-                  .size() > 0) {
-            space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
-          } else {
-            space_container.getContainerProperty(new_s, "Contains datasets").setValue("no");
-          }
-        }
-        List<Sample> samplesOfSpace = new ArrayList<Sample>();
-        if (project_identifiers_tmp.size() > 0) {
-          samplesOfSpace =
-              this.openBisClient.getFacade().listSamplesForProjects(project_identifiers_tmp);
-        } else {
-          samplesOfSpace = this.openBisClient.getSamplesofSpace(space_name); // TODO code or
-                                                                             // identifier
-          // needed?
-        }
-        number_of_samples += samplesOfSpace.size();
-        List<String> sample_identifiers_tmp = new ArrayList<String>();
-        for (Sample sa : samplesOfSpace) {
-          sample_identifiers_tmp.add(sa.getIdentifier());
-        }
-        List<DataSet> datasets = new ArrayList<DataSet>();
-        if (sample_identifiers_tmp.size() > 0) {
-          datasets = this.openBisClient.getFacade().listDataSetsForSamples(sample_identifiers_tmp);
-        }
-        number_of_datasets += datasets.size();
-        StringBuilder lce = new StringBuilder();
-        StringBuilder lcs = new StringBuilder();
-        this.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
-        String tmplastModifiedExperiment = lce.toString();
-        String tmplastModifiedSample = lcs.toString();
-        if (!tmplastModifiedSample.equals("N/A")) {
-          lastModifiedExperiment = tmplastModifiedExperiment;
-          lastModifiedSample = tmplastModifiedSample;
-        }
-      }
-    }
-    homeInformation.numberOfProjects = number_of_projects;
-    homeInformation.numberOfExperiments = number_of_experiments;
-    homeInformation.numberOfSamples = number_of_samples;
-    homeInformation.numberOfDatasets = number_of_datasets;
-    homeInformation.lastChangedDataset = lastModifiedDate;
-    homeInformation.lastChangedSample = lastModifiedSample;
-    homeInformation.lastChangedExperiment = lastModifiedExperiment;
-    homeInformation.projects = space_container;
-
-    return homeInformation;
-  }
+  // public SpaceInformation initTreeAndHomeInfo(HierarchicalContainer tc, String userName) {
+  //
+  // List<SpaceWithProjectsAndRoleAssignments> space_list = this.getSpacesWithProjectInformation();
+  //
+  // // Initialization of Tree Container
+  // tc.addContainerProperty("identifier", String.class, "N/A");
+  // tc.addContainerProperty("type", String.class, "N/A");
+  // tc.addContainerProperty("project", String.class, "N/A");
+  // tc.addContainerProperty("caption", String.class, "N/A");
+  //
+  //
+  // // Initialization of Home Information
+  // SpaceInformation homeInformation = new SpaceInformation();
+  // IndexedContainer space_container = new IndexedContainer();
+  // space_container.addContainerProperty("Project", String.class, "");
+  // space_container.addContainerProperty("Description", String.class, "");
+  // space_container.addContainerProperty("Contains datasets", String.class, "");
+  // int number_of_projects = 0;
+  // int number_of_experiments = 0;
+  // int number_of_samples = 0;
+  // int number_of_datasets = 0;
+  // String lastModifiedExperiment = "N/A";
+  // String lastModifiedSample = "N/A";
+  // Date lastModifiedDate = new Date(0, 0, 0);
+  // for (SpaceWithProjectsAndRoleAssignments s : space_list) {
+  // if (s.getUsers().contains(userName)) {
+  // String space_name = s.getCode();
+  //
+  // // TODO does this work for everyone? should it? empty container would be the aim, probably
+  // if (space_name.equals("QBIC_USER_SPACE")) {
+  // fillPersonsContainer(space_name);
+  // }
+  //
+  // List<Project> projects = s.getProjects();
+  // number_of_projects += projects.size();
+  // List<String> project_identifiers_tmp = new ArrayList<String>();
+  // for (Project project : projects) {
+  //
+  // String project_name = project.getCode();
+  // if (tc.containsId(project_name)) {
+  // project_name = project.getIdentifier();
+  // }
+  // Object new_s = space_container.addItem();
+  // space_container.getContainerProperty(new_s, "Project").setValue(project_name);
+  //
+  // // Project descriptions can be long; truncate the string to provide a brief preview
+  // String desc = project.getDescription();
+  //
+  // if (desc != null && desc.length() > 0) {
+  // desc = desc.substring(0, Math.min(desc.length(), 100));
+  // if (desc.length() == 100) {
+  // desc += "...";
+  // }
+  // }
+  // space_container.getContainerProperty(new_s, "Description").setValue(desc);
+  //
+  // // System.out.println("|--Project: " + project_name);
+  // tc.addItem(project_name);
+  //
+  // tc.getContainerProperty(project_name, "type").setValue("project");
+  // tc.getContainerProperty(project_name, "identifier").setValue(project_name);
+  // tc.getContainerProperty(project_name, "project").setValue(project_name);
+  // tc.getContainerProperty(project_name, "caption").setValue(project_name);
+  //
+  // List<Project> tmp_list = new ArrayList<Project>();
+  // tmp_list.add(project);
+  // List<Experiment> experiments =
+  // this.openBisClient.getOpenbisInfoService().listExperiments(
+  // this.openBisClient.getSessionToken(), tmp_list, null);
+  //
+  // // Add number of experiments for every project
+  // number_of_experiments += experiments.size();
+  //
+  // List<String> experiment_identifiers = new ArrayList<String>();
+  //
+  // for (Experiment experiment : experiments) {
+  // experiment_identifiers.add(experiment.getIdentifier());
+  // String experiment_name = experiment.getCode();
+  // if (tc.containsId(experiment_name)) {
+  // experiment_name = experiment.getIdentifier();
+  // }
+  // // System.out.println(" |--Experiment: " + experiment_name);
+  // tc.addItem(experiment_name);
+  // tc.setParent(experiment_name, project_name);
+  // tc.getContainerProperty(experiment_name, "type").setValue("experiment");
+  // tc.getContainerProperty(experiment_name, "identifier").setValue(experiment_name);
+  // tc.getContainerProperty(experiment_name, "project").setValue(project_name);
+  // tc.getContainerProperty(experiment_name, "caption").setValue(
+  // String.format("%s (%s)",
+  // this.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),
+  // experiment_name));
+  //
+  // tc.setChildrenAllowed(experiment_name, false);
+  // }
+  // if (experiment_identifiers.size() > 0
+  // && this.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers)
+  // .size() > 0) {
+  // space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
+  // } else {
+  // space_container.getContainerProperty(new_s, "Contains datasets").setValue("no");
+  // }
+  // }
+  // List<Sample> samplesOfSpace = new ArrayList<Sample>();
+  // if (project_identifiers_tmp.size() > 0) {
+  // samplesOfSpace =
+  // this.openBisClient.getFacade().listSamplesForProjects(project_identifiers_tmp);
+  // } else {
+  // samplesOfSpace = this.openBisClient.getSamplesofSpace(space_name); // TODO code or
+  // // identifier
+  // // needed?
+  // }
+  // number_of_samples += samplesOfSpace.size();
+  // List<String> sample_identifiers_tmp = new ArrayList<String>();
+  // for (Sample sa : samplesOfSpace) {
+  // sample_identifiers_tmp.add(sa.getIdentifier());
+  // }
+  // List<DataSet> datasets = new ArrayList<DataSet>();
+  // if (sample_identifiers_tmp.size() > 0) {
+  // datasets = this.openBisClient.getFacade().listDataSetsForSamples(sample_identifiers_tmp);
+  // }
+  // number_of_datasets += datasets.size();
+  // StringBuilder lce = new StringBuilder();
+  // StringBuilder lcs = new StringBuilder();
+  // this.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
+  // String tmplastModifiedExperiment = lce.toString();
+  // String tmplastModifiedSample = lcs.toString();
+  // if (!tmplastModifiedSample.equals("N/A")) {
+  // lastModifiedExperiment = tmplastModifiedExperiment;
+  // lastModifiedSample = tmplastModifiedSample;
+  // }
+  // }
+  // }
+  // homeInformation.numberOfProjects = number_of_projects;
+  // homeInformation.numberOfExperiments = number_of_experiments;
+  // homeInformation.numberOfSamples = number_of_samples;
+  // homeInformation.numberOfDatasets = number_of_datasets;
+  // homeInformation.lastChangedDataset = lastModifiedDate;
+  // homeInformation.lastChangedSample = lastModifiedSample;
+  // homeInformation.lastChangedExperiment = lastModifiedExperiment;
+  // homeInformation.projects = space_container;
+  //
+  // return homeInformation;
+  // }
 
   /**
    * Creates a Map of project statuses fulfilled, keyed by their meaning. For this, different steps
@@ -1056,14 +1112,14 @@ public class DataHandler {
 
     Project p = this.openBisClient.getProjectByCode(projectId);
     Map<String, Integer> res = new HashMap<String, Integer>();
-    IndexedContainer c = project_to_experiments.get(p.getIdentifier());
+    BeanItemContainer<ExperimentBean> cont =
+        (BeanItemContainer<ExperimentBean>) experimentMap.get(p.getIdentifier());
     // project was planned (otherwise it would hopefully not exist :) )
     res.put("Project Planned", 1);
     // design is pre-registered to the test sample level
     int prereg = 0;
-    for (Object itemId : c.getItemIds()) {
-      Item exp = c.getItem(itemId);
-      String type = (String) exp.getItemProperty("Experiment Type").getValue();
+    for (ExperimentBean bean : cont.getItemIds()) {
+      String type = bean.getType();
       if (type.equals(this.openBisClient.openBIScodeToString(ExperimentType.Q_SAMPLE_PREPARATION
           .toString()))) {
         prereg = 1;
@@ -1072,8 +1128,7 @@ public class DataHandler {
     }
     res.put("Experimental Design registered", prereg);
     // data is uploaded
-    if (project_to_datasets.get(p.getCode()) != null
-        && project_to_datasets.get(p.getCode()).size() > 0)
+    if (datasetMap.get(p.getIdentifier()) != null)
       res.put("Data Registered", 1);
     else
       res.put("Data Registered", 0);
