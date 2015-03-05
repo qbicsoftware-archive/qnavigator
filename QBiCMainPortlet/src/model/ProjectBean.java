@@ -2,6 +2,7 @@ package model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import com.vaadin.data.util.BeanItemContainer;
@@ -15,15 +16,16 @@ public class ProjectBean implements Serializable{
   private SpaceBean space;
   private BeanItemContainer<ExperimentBean> experiments;
   private ProgressBar progress;
-  private Timestamp registrationDate;
+  private Date registrationDate;
   private String registrator;
   private String contact;
   //TODO userBean ?
   private List<String> members;
+  private Boolean containsData;
   
   public ProjectBean(String id, String code, String description, SpaceBean space,
-      BeanItemContainer<ExperimentBean> experiments, ProgressBar progress, Timestamp registrationDate,
-      String registrator, String contact, List<String> members) {
+      BeanItemContainer<ExperimentBean> experiments, ProgressBar progress, Date registrationDate,
+      String registrator, String contact, List<String> members, Boolean containsData) {
     super();
     this.id = id;
     this.code = code;
@@ -35,6 +37,7 @@ public class ProjectBean implements Serializable{
     this.registrator = registrator;
     this.contact = contact;
     this.members = members;
+    this.setContainsData(containsData);
   }
 
   public String getId() {
@@ -85,11 +88,11 @@ public class ProjectBean implements Serializable{
     this.progress = progress;
   }
 
-  public Timestamp getRegistrationDate() {
+  public Date getRegistrationDate() {
     return registrationDate;
   }
 
-  public void setRegistrationDate(Timestamp registrationDate) {
+  public void setRegistrationDate(Date registrationDate) {
     this.registrationDate = registrationDate;
   }
 
@@ -145,5 +148,13 @@ public class ProjectBean implements Serializable{
     } else if (!id.equals(other.id))
       return false;
     return true;
+  }
+
+  public Boolean getContainsData() {
+    return containsData;
+  }
+
+  public void setContainsData(Boolean containsData) {
+    this.containsData = containsData;
   }  
 }

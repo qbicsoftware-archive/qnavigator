@@ -6,6 +6,7 @@ import org.tepi.filtertable.FilterTable;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.UI;
 
 /**
@@ -76,11 +77,13 @@ public class ViewTablesClickListener implements Property.ValueChangeListener {
 		if(property == null){
 			return;
 		}
-		String experiment = (String) this.viewTable.getItem(property).getItemProperty(this.type).getValue();
+		//String experiment = (String) this.viewTable.getItem(property).getItemProperty(this.type).getValue();
+		String entity =(String) this.viewTable.getItem(property).getItemProperty("id").getValue();
+
 		State state = (State)UI.getCurrent().getSession().getAttribute("state");
 		ArrayList<String> message = new ArrayList<String>();
 		message.add("clicked");
-		message.add(experiment);
+		message.add(entity);
 		message.add(this.type);
 		state.notifyObservers(message);		
 	}

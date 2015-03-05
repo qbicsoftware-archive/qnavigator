@@ -63,9 +63,9 @@ public class GraphGenerator
 
 	    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
 	    
-	    Project p = dh.openBisClient.getProjectByCode(project);
+	    //Project p = dh.openBisClient.getProjectByCode(project);
 	    
-		//Project p = this.open_client.getProjectByIdentifier(project);
+		Project p = dh.openBisClient.getProjectByIdentifier(project);
 		//System.out.println(p);
 
 		mxGraph graph = new mxGraph();

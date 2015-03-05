@@ -34,6 +34,10 @@ public class SpaceBean implements Serializable{
     this.setMembers(members);
     this.setProgress(progress);
   }
+  
+  public SpaceBean()
+  {
+    }
 
   public String getId() {
     return id;

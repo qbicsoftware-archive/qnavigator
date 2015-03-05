@@ -1,6 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
@@ -16,6 +17,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
 import logging.Log4j2Logger;
+import logging.SysOutLogger;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
@@ -26,6 +28,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
@@ -40,6 +43,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.ProgressBar;
@@ -49,6 +53,11 @@ import com.vaadin.ui.VerticalLayout;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import model.DatasetBean;
+import model.ExperimentBean;
+import model.ProjectBean;
+import model.SampleBean;
+import model.SpaceBean;
 
 /*
  * in portal-ext.properties the following settings must be set, in order to work
@@ -200,14 +209,16 @@ public class QbicmainportletUI extends UI {
 
 
     final HierarchicalContainer tc = new HierarchicalContainer();
-    final SpaceInformation homeInformation = new SpaceInformation();
+    //final SpaceInformation homeInformation = new SpaceInformation();
+    final SpaceBean homeSpaceBean = null;
     status.setValue("Connecting to database.");
 
 
 
     final RunnableFillsContainer th =
-        new RunnableFillsContainer(tc, homeInformation, LiferayAndVaadinUtils.getUser()
-            .getScreenName());
+        //new RunnableFillsContainer(tc, homeInformation, LiferayAndVaadinUtils.getUser()
+        //    .getScreenName());
+        new RunnableFillsContainer(tc, homeSpaceBean, LiferayAndVaadinUtils.getUser().getScreenName());
     final Thread thread = new Thread(th);
     Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
       public void uncaughtException(Thread th, Throwable ex) {
@@ -232,16 +243,17 @@ public class QbicmainportletUI extends UI {
     // Volatile because read in another thread in access()
     volatile double current = 0.0;
     private HierarchicalContainer tc;
-    private SpaceInformation homeViewInformation;
+    //private SpaceInformation homeViewInformation;
     private String userName;
+    private SpaceBean homeSpaceBean;
 
-    public RunnableFillsContainer(HierarchicalContainer tc, SpaceInformation homeInformation,
+    public RunnableFillsContainer(HierarchicalContainer tc, SpaceBean homeSpaceBean,
         String user) {
       this.tc = tc;
-      this.homeViewInformation = homeInformation;
+      this.homeSpaceBean = homeSpaceBean;
       this.userName = user;
     }
-
+    
     @Override
     public void run() {
       long startTime = System.nanoTime();
@@ -249,49 +261,53 @@ public class QbicmainportletUI extends UI {
       DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
 
       status.setValue("Connecting to database.");
-      List<SpaceWithProjectsAndRoleAssignments> space_list = dh.getSpacesWithProjectInformation();
+      List<SpaceWithProjectsAndRoleAssignments> spaceList = dh.getSpacesWithProjectInformation();
 
       // Initialization of Tree Container
-      tc.addContainerProperty("identifier", String.class, "N/A");
+       tc.addContainerProperty("identifier", String.class, "N/A");
       tc.addContainerProperty("type", String.class, "N/A");
       tc.addContainerProperty("project", String.class, "N/A");
       tc.addContainerProperty("caption", String.class, "N/A");
 
       // Initialization of Home Information
-      IndexedContainer space_container = new IndexedContainer();
-      space_container.addContainerProperty("Project", String.class, "");
-      space_container.addContainerProperty("Description", String.class, "");
-      space_container.addContainerProperty("Contains datasets", String.class, "");
+      final BeanItemContainer<SpaceBean> spaceContainer = new BeanItemContainer<SpaceBean>(SpaceBean.class);
+    
       int number_of_projects = 0;
       int i = 0;
-      int all = space_list.size();
+      int all = spaceList.size();
       int number_of_experiments = 0;
       int number_of_samples = 0;
       int number_of_datasets = 0;
       String lastModifiedExperiment = "N/A";
       String lastModifiedSample = "N/A";
       Date lastModifiedDate = new Date(0, 0, 0);
-      for (SpaceWithProjectsAndRoleAssignments s : space_list) {
+      
+      final SpaceBean homeSpaceBean = new SpaceBean("homeSpace", "", false, new BeanItemContainer<ProjectBean>(ProjectBean.class),
+          new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new BeanItemContainer<SampleBean>(SampleBean.class), new BeanItemContainer<DatasetBean>(DatasetBean.class), new ArrayList<String>(), new ProgressBar());
+
+      BeanItemContainer<ProjectBean> projectContainer = new BeanItemContainer<ProjectBean>(ProjectBean.class);
+      
+      for (SpaceWithProjectsAndRoleAssignments s : spaceList) {
         if (s.getUsers().contains(userName)) {
-          String space_name = s.getCode();
+          String spaceName = s.getCode();
 
           // TODO does this work for everyone? should it? empty container would be the aim, probably
-          if (space_name.equals("QBIC_USER_SPACE")) {
-            dh.fillPersonsContainer(space_name);
+          if (spaceName.equals("QBIC_USER_SPACE")) {
+            dh.fillPersonsContainer(spaceName);
           }
-
+                  
           List<Project> projects = s.getProjects();
           number_of_projects += projects.size();
           List<String> project_identifiers_tmp = new ArrayList<String>();
+          
+          
           for (Project project : projects) {
 
             String project_name = project.getCode();
             if (tc.containsId(project_name)) {
               project_name = project.getIdentifier();
             }
-            Object new_s = space_container.addItem();
-            space_container.getContainerProperty(new_s, "Project").setValue(project_name);
-
+            
             // Project descriptions can be long; truncate the string to provide a brief preview
             String desc = project.getDescription();
 
@@ -301,11 +317,8 @@ public class QbicmainportletUI extends UI {
                 desc += "...";
               }
             }
-            space_container.getContainerProperty(new_s, "Description").setValue(desc);
-
-            // System.out.println("|--Project: " + project_name);
+            
             tc.addItem(project_name);
-
             tc.getContainerProperty(project_name, "type").setValue("project");
             tc.getContainerProperty(project_name, "identifier").setValue(project_name);
             tc.getContainerProperty(project_name, "project").setValue(project_name);
@@ -319,10 +332,21 @@ public class QbicmainportletUI extends UI {
             number_of_experiments += experiments.size();
 
             List<String> experiment_identifiers = new ArrayList<String>();
-
+            
+            ProjectBean newProjectBean =
+                new ProjectBean(project.getIdentifier(), project.getCode(), desc, homeSpaceBean,
+                    new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new ProgressBar(),
+                    new Date(), "", "", new ArrayList<String>(), false);
+            
+            projectContainer.addBean(newProjectBean);
+            
+            BeanItemContainer<ExperimentBean> experimentContainer = new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
+            
             for (Experiment experiment : experiments) {
+              
               experiment_identifiers.add(experiment.getIdentifier());
               String experiment_name = experiment.getCode();
+              
               if (tc.containsId(experiment_name)) {
                 experiment_name = experiment.getIdentifier();
               }
@@ -336,35 +360,35 @@ public class QbicmainportletUI extends UI {
                   String.format("%s (%s)",
                       dh.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),
                       experiment_name));
-
+ 
               tc.setChildrenAllowed(experiment_name, false);
+              
+              ExperimentBean newExperimentBean = new ExperimentBean(experiment.getIdentifier(), experiment.getCode(), experiment.getExperimentTypeCode(), new Image(), 
+                  experiment.getRegistrationDetails().getUserId(), newProjectBean, new Timestamp(experiment.getRegistrationDetails().getRegistrationDate().getTime()), null, null, null, null, null);
+              
             }
-            if (experiment_identifiers.size() > 0
-                && dh.openBisClient.listDataSetsForExperiments(experiment_identifiers).size() > 0) {
-              space_container.getContainerProperty(new_s, "Contains datasets").setValue("yes");
-            } else {
-              space_container.getContainerProperty(new_s, "Contains datasets").setValue("no");
-            }
-
-          }
+            
           List<Sample> samplesOfSpace = new ArrayList<Sample>();
           if (project_identifiers_tmp.size() > 0) {
             samplesOfSpace = dh.openBisClient.listSamplesForProjects(project_identifiers_tmp);
           } else {
-            samplesOfSpace = dh.openBisClient.getSamplesofSpace(space_name); // TODO code or
-                                                                             // identifier
-            // needed?
+            samplesOfSpace = dh.openBisClient.getSamplesofSpace(spaceName); 
           }
           number_of_samples += samplesOfSpace.size();
           List<String> sample_identifiers_tmp = new ArrayList<String>();
           for (Sample sa : samplesOfSpace) {
             sample_identifiers_tmp.add(sa.getIdentifier());
+         
           }
+          
+          
           List<DataSet> datasets = new ArrayList<DataSet>();
           if (sample_identifiers_tmp.size() > 0) {
             datasets = dh.openBisClient.listDataSetsForSamples(sample_identifiers_tmp);
           }
           number_of_datasets += datasets.size();
+          newProjectBean.setContainsData(datasets.size() != 0);
+
           StringBuilder lce = new StringBuilder();
           StringBuilder lcs = new StringBuilder();
           dh.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
@@ -373,25 +397,22 @@ public class QbicmainportletUI extends UI {
           if (!tmplastModifiedSample.equals("N/A")) {
             lastModifiedExperiment = tmplastModifiedExperiment;
             lastModifiedSample = tmplastModifiedSample;
-          }
+          }         
+        }
+          
+        homeSpaceBean.setProjects(projectContainer);
         }
         UI.getCurrent().access(
             new UpdateProgressbar(QbicmainportletUI.getCurrent().getProgressBar(),
                 QbicmainportletUI.getCurrent().getStatusLabel(), (double) (i + 1) / (double) all));
         ++i;
       }
-      homeViewInformation.numberOfProjects = number_of_projects;
-      homeViewInformation.numberOfExperiments = number_of_experiments;
-      homeViewInformation.numberOfSamples = number_of_samples;
-      homeViewInformation.numberOfDatasets = number_of_datasets;
-      homeViewInformation.lastChangedDataset = lastModifiedDate;
-      homeViewInformation.lastChangedSample = lastModifiedSample;
-      homeViewInformation.lastChangedExperiment = lastModifiedExperiment;
-      homeViewInformation.projects = space_container;
+     
       long endTime = System.nanoTime();
       LOGGER.info(String.format("Took %f s",((endTime - startTime) / 1000000000.0)));
 
-      LOGGER.info(String.format("User %s has %d projects",userName, homeViewInformation.numberOfProjects));
+      //LOGGER.info(String.format("User %s has %d projects",userName, homeViewInformation.numberOfProjects));
+      LOGGER.info(String.format("User %s has %d projects",userName, homeSpaceBean.getProjects().size()));
       try {
         Thread.currentThread().sleep(100); // Sleep for 100 milliseconds
       } catch (InterruptedException e) {
@@ -407,7 +428,9 @@ public class QbicmainportletUI extends UI {
           // Stop polling
           UI.getCurrent().setPollInterval(-1);
 
-          QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
+          //QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
+          System.out.println(spaceContainer.size());
+          QbicmainportletUI.getCurrent().buildMainLayout(tc, homeSpaceBean);
         }
       });
     }
@@ -447,7 +470,8 @@ public class QbicmainportletUI extends UI {
   }
 
 
-  public void buildMainLayout(HierarchicalContainer tc, SpaceInformation homeViewInformation) {
+  //public void buildMainLayout(HierarchicalContainer tc, SpaceInformation homeViewInformation) {
+  public void buildMainLayout(HierarchicalContainer tc, SpaceBean homeSpaceBean) {
     // HierarchicalContainer tc = new HierarchicalContainer();
     // System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
     // long startTime = System.nanoTime();
@@ -476,8 +500,10 @@ public class QbicmainportletUI extends UI {
 
     HomeView homeView;
 
-    if (homeViewInformation.numberOfProjects > 0) {
-      homeView = new HomeView(homeViewInformation, "Your Projects");
+    //if (homeViewInformation.numberOfProjects > 0) {
+    if (homeSpaceBean.getProjects().size() > 0) {
+      //homeView = new HomeView(homeViewInformation, "Your Projects");
+      homeView = new HomeView(homeSpaceBean, "Your Projects");
     } else {
       homeView = new HomeView();
     }

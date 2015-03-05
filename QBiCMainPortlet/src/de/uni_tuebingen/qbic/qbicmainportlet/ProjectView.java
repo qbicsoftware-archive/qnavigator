@@ -112,7 +112,6 @@ public class ProjectView extends VerticalLayout implements View {
     this.id = id;
     this.setStatistics(expContainer);
 
-
     // buttonLayoutSection = new VerticalLayout();
     // buttonLayoutSection.setMargin(true);
     buttonLayoutSection.removeAllComponents();
@@ -127,7 +126,6 @@ public class ProjectView extends VerticalLayout implements View {
     buttonLayout.addComponent(this.export);
 
     // this.projectview_content.addComponent(buttonLayoutSection);
-
     this.table.setContainerDataSource(expContainer);
 
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
@@ -349,22 +347,22 @@ public class ProjectView extends VerticalLayout implements View {
 
 
     // status bar section
-
-    VerticalLayout status = new VerticalLayout();
-    VerticalLayout statusContent =
-        this.createProjectStatusComponent(datahandler.computeProjectStatuses(this.id));
-    statusContent.setCaption("Status");
-    statusContent.setIcon(FontAwesome.CLOCK_O);
+    //TODO STATUS NEEDS CODE ??
+    //VerticalLayout status = new VerticalLayout();
+    //VerticalLayout statusContent =
+    //    this.createProjectStatusComponent(datahandler.computeProjectStatuses(this.id));
+    //statusContent.setCaption("Status");
+    //statusContent.setIcon(FontAwesome.CLOCK_O);
 
     // statusContent.addComponent(projectInformation.progressBar);
     // statusContent.addComponent(new Label(projectInformation.statusMessage));
-    statusContent.setSpacing(true);
-    statusContent.setMargin(true);
+    //statusContent.setSpacing(true);
+    //statusContent.setMargin(true);
 
-    status.addComponent(statusContent);
-    status.setMargin(true);
+    //status.addComponent(statusContent);
+    //status.setMargin(true);
 
-    projectview_content.addComponent(status);
+    //projectview_content.addComponent(status);
 
 
 
@@ -483,7 +481,7 @@ public class ProjectView extends VerticalLayout implements View {
     filterTable.setColumnReorderingAllowed(true);
 
     // filterTable.setCaption("Registered Experiments");
-    filterTable.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
+    //filterTable.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
 
     return filterTable;
   }
@@ -597,12 +595,14 @@ public class ProjectView extends VerticalLayout implements View {
     // System.out.println("currentValue: " + currentValue);
     // System.out.println("navigateToLabel: " + navigateToLabel);
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    Project project = dh.openBisClient.getProjectByCode(currentValue);
-    String projectIdentifier = project.getIdentifier();
+    //Project project = dh.openBisClient.getProjectByCode(currentValue);
+    //String projectIdentifier = project.getIdentifier();
+
+    // currentValue = project identifier
 
     try {
       this.setContainerDataSource(
-          (BeanItemContainer<ExperimentBean>) dh.getProjectInformation(projectIdentifier),
+          (BeanItemContainer<ExperimentBean>) dh.getProjectInformation(currentValue),
           currentValue);
     } catch (Exception e) {
       // TODO Auto-generated catch block

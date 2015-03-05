@@ -1,38 +1,28 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
-import helpers.Utils;
+import java.util.Iterator;
+
+import model.ProjectBean;
+import model.SpaceBean;
 
 import org.tepi.filtertable.FilterTable;
 
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.theme.ThemeDisplay;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CustomTable.Align;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.CustomTable.Align;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.MenuBar.MenuItem;
 
 public class HomeView extends VerticalLayout implements View {
 
@@ -50,6 +40,7 @@ public class HomeView extends VerticalLayout implements View {
 
   private Button export;
 
+  /*
   public HomeView(SpaceInformation datasource, String caption) {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
@@ -74,14 +65,43 @@ public class HomeView extends VerticalLayout implements View {
     this.buildLayout(datasource);
 
   }
+*/
+  
+  public HomeView(SpaceBean datasource, String caption) {
+    homeview_content = new VerticalLayout();
+    this.table = buildFilterTable();
 
+    this.setContainerDataSource(datasource, caption);
+    dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    
+    //TODO ?
+    //sr = Utils.getTSVStream(Utils.containerToString(datasource.projects), this.caption);
+    this.tableClickChangeTreeView();
+
+    this.buildLayout(datasource);
+  }
+
+  public HomeView(FilterTable table, SpaceBean datasource, String caption) {
+    homeview_content = new VerticalLayout();
+    this.table = table;
+
+    this.setContainerDataSource(datasource, caption);
+    dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    
+    //TODO ?
+    //sr = Utils.getTSVStream(Utils.containerToString(datasource.projects), this.caption);
+    this.tableClickChangeTreeView();
+
+    this.buildLayout(datasource);
+
+  }
 
   /**
    * execute the above constructor with default settings, in order to have the same settings
    */
   public HomeView() {
-    this(new FilterTable(), new SpaceInformation(),
-        "You seem to have no registered projects. Please contact QBiC.");
+    //this(new FilterTable(), new SpaceInformation(),
+    this(new FilterTable(), new SpaceBean(),"You seem to have no registered projects. Please contact QBiC.");
   }
 
   public void setSizeFull() {
@@ -99,21 +119,27 @@ public class HomeView extends VerticalLayout implements View {
    * @param homeViewInformation
    * @param caption
    */
-  public void setContainerDataSource(SpaceInformation homeViewInformation, String caption) {
-
+  //public void setContainerDataSource(SpaceInformation homeViewInformation, String caption) {
+  public void setContainerDataSource(SpaceBean spaceBeans, String caption) {
+  
     this.caption = caption;
     //this.updateCaption();
     // this.setStatistics(homeViewInformation);
 
-    this.table.setContainerDataSource(homeViewInformation.projects);
-
-
-
+    //this.table.setContainerDataSource(homeViewInformation.projects);
+    //TODO iterate over spaceBeanContainer and get projects ?
+      
+    this.table.setContainerDataSource(spaceBeans.getProjects());
+    this.table.setVisibleColumns(new Object[]{"id", "description", "containsData"});
+    this.table.setColumnHeader("id", "Name");
+    this.table.setColumnHeader("description", "Description");
+    this.table.setColumnHeader("containsData", "Contains Datasets");
   }
 
 
-  private void buildLayout(SpaceInformation generalOpenBISInformation) {
-    // clean up first
+  //private void buildLayout(SpaceInformation generalOpenBISInformation) {
+  private void buildLayout(SpaceBean datasource) {
+  // clean up first
     homeview_content.removeAllComponents();
     this.setMargin(false);
     
@@ -171,9 +197,11 @@ public class HomeView extends VerticalLayout implements View {
     statistics.setCaption("Statistics");
     statistics.setIcon(FontAwesome.FILE_TEXT_O);
 
-    Label statContent = new Label(String.format("You have %s project(s), %s experiment(s), %s sample(s), and %s dataset(s).",    
-    generalOpenBISInformation.numberOfProjects, generalOpenBISInformation.numberOfExperiments, generalOpenBISInformation.numberOfSamples,
-    generalOpenBISInformation.numberOfDatasets) );
+    Label statContent = new Label("Who needs statistics?");
+    //Label statContent = new Label(String.format("You have %s project(s), %s experiment(s), %s sample(s), and %s dataset(s).",    
+    //TODO ?
+        //generalOpenBISInformation.numberOfProjects, generalOpenBISInformation.numberOfExperiments, generalOpenBISInformation.numberOfSamples,
+    //generalOpenBISInformation.numberOfDatasets) );
     statistics.addComponent(statContent);
     statistics.setMargin(true);
     statistics.setWidth(100.0f, Unit.PERCENTAGE);
@@ -183,7 +211,8 @@ public class HomeView extends VerticalLayout implements View {
     
     homeview_content.addComponent(homeViewDescription);
 
-
+    //TODO ?
+    /*
     if (generalOpenBISInformation.numberOfDatasets > 0) {
       String lastSample = "No samples available";
       if (generalOpenBISInformation.lastChangedSample != null) {
@@ -193,7 +222,7 @@ public class HomeView extends VerticalLayout implements View {
           "occurred in sample %s (%s)", lastSample,
           generalOpenBISInformation.lastChangedDataset.toString()))));
     }
-
+    */
 
     // table section
     this.table.setSelectable(true);
@@ -215,11 +244,12 @@ public class HomeView extends VerticalLayout implements View {
     //button_bar.setMargin(true);
     //homeview_content.addComponent(button_bar);
     
-    FileDownloader fileDownloader = new FileDownloader(sr);
-    fileDownloader.extend(this.export);
+    //TODO FIX ITTTTT
+    //FileDownloader fileDownloader = new FileDownloader(sr);
+    //fileDownloader.extend(this.export);
     
     //this.table.setWidth(table_width, Unit.PIXELS);    
-    this.table.setColumnExpandRatio("Identifier", 1);
+    this.table.setColumnExpandRatio("Name", 1);
     this.table.setColumnExpandRatio("Description", 3);
     this.table.setColumnExpandRatio("Contains datasets", 1);
     this.table.setColumnAlignment("Contains datasets", Align.CENTER);
@@ -275,8 +305,6 @@ public class HomeView extends VerticalLayout implements View {
     filterTable.setColumnCollapsingAllowed(true);
 
     filterTable.setColumnReorderingAllowed(true);
-    
-    
     
     // filterTable.setCaption("Registered Projects");
 

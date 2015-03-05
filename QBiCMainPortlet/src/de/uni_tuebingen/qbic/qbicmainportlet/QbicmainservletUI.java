@@ -454,7 +454,8 @@ public class QbicmainservletUI extends UI {
     HomeView homeView;
 
     if (homeViewInformation.numberOfProjects > 0) {
-      homeView = new HomeView(homeViewInformation, "Your Projects");
+      homeView = new HomeView();//new HomeView(homeViewInformation, "Your Projects");
+          
     } else {
       homeView = new HomeView();
     }
