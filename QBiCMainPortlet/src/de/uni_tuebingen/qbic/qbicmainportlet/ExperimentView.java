@@ -1,9 +1,12 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.Utils;
+import model.ExperimentBean;
+import model.SampleBean;
 
 import org.tepi.filtertable.FilterTable;
 
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -71,8 +74,8 @@ public class ExperimentView extends VerticalLayout implements View{
    * @param projectInformation
    * @param id
    */
-  public void setContainerDataSource(ExperimentInformation expInformation, String id) {
-    this.setStatistics(expInformation);
+  public void setContainerDataSource(ExperimentBean experimentBean, String id) {
+    this.setStatistics(experimentBean);
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
@@ -85,18 +88,21 @@ public class ExperimentView extends VerticalLayout implements View{
     this.expview_content.addComponent(buttonLayout);
 
 
-    this.table.setContainerDataSource(expInformation.samples);
+    this.table.setContainerDataSource(experimentBean.getSamples());
     this.id = id;
 
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr = Utils.getTSVStream(Utils.containerToString(expInformation.samples), this.id);
-    FileDownloader fileDownloader = new FileDownloader(sr);
-    fileDownloader.extend(this.export);
+    //TODO fix that 
+    //DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    //StreamResource sr = Utils.getTSVStream(Utils.containerToString(sampleContainer), this.id);
+    //FileDownloader fileDownloader = new FileDownloader(sr);
+    //fileDownloader.extend(this.export);
 
    // this.updateCaption();
   }
 
-  private void setStatistics(ExperimentInformation expInformation) {
+  private void setStatistics(ExperimentBean experimentBean) {
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+
     this.expview_content.removeAllComponents();
     
     int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
@@ -140,7 +146,7 @@ public class ExperimentView extends VerticalLayout implements View{
     VerticalLayout generalInfoContent = new VerticalLayout();
     generalInfoContent.setCaption("General Information");
     generalInfoContent.setIcon(FontAwesome.INFO);
-    generalInfoContent.addComponent(new Label(String.format("Kind:\t %s", expInformation.experimentType)));
+    generalInfoContent.addComponent(new Label(String.format("Kind:\t %s", experimentBean.getType())));
     generalInfoContent.setMargin(true);
     generalInfo.setMargin(true);
     
@@ -154,24 +160,24 @@ public class ExperimentView extends VerticalLayout implements View{
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
 
+    int numberOfDatasets = dh.datasetMap.get(experimentBean.getId()).size();
     
     statContent.addComponent(new Label(String.format("%s sample(s),",
-        expInformation.numberOfSamples)));
-    statContent.addComponent(new Label(String.format("%s dataset(s).",
-        expInformation.numberOfDatasets)));
+        experimentBean.getSamples().size())));
+    statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
     statContent.setMargin(true);
     statContent.setSpacing(true);
 
-    if (expInformation.numberOfDatasets > 0) {
+    if (numberOfDatasets > 0) {
 
       String lastSample = "No samples available";
-      if (expInformation.lastChangedSample != null) {
-        lastSample = expInformation.lastChangedSample.split("/")[2];
+      if (experimentBean.getLastChangedSample() != null) {
+        lastSample = experimentBean.getLastChangedSample();// .split("/")[2];
       }
       statContent.addComponent(new Label(String.format(
           "Last change %s",
           String.format("occurred in sample %s (%s)", lastSample,
-              expInformation.lastChangedDataset.toString()))));
+              experimentBean.getLastChangedDataset().toString()))));
     }
     
 
@@ -243,6 +249,7 @@ public class ExperimentView extends VerticalLayout implements View{
     try {
       // String type =
       // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
+      //this.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
       this.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
     } catch (Exception e) {
       System.out.println("Exception in ExperimentView.enter");

@@ -311,14 +311,9 @@ public class ProjectView extends VerticalLayout implements View {
     HorizontalLayout statContent = new HorizontalLayout();
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
-    statContent.addComponent(new Label(String.format("%s experiment(s),", expContainer.getItemIds()
-        .size())));
+    statContent.addComponent(new Label(String.format("%s experiment(s),", expContainer.size())));
 
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    dh.sampleMap.get(expContainer.getIdByIndex(0));// TODO use project
-
-    statContent.addComponent(new Label(String.format("%s sample(s),", project.getExperiments()
-        .size())));
+    statContent.addComponent(new Label(String.format("%s sample(s),", datahandler.sampleMap.get(project.getId()).size())));
 
     int numOfDatasets = datahandler.datasetMap.get(project.getId()).size();
 

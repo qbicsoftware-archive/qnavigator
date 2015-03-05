@@ -1,6 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.Utils;
+import model.SampleBean;
 
 import org.tepi.filtertable.FilterTable;
 import org.tepi.filtertable.FilterTreeTable;
@@ -91,8 +92,8 @@ public class SampleView extends VerticalLayout implements View{
    * @param sampleInformation
    * @param id
    */
-  public void setContainerDataSource(SampleInformation sampInformation, String id) {
-    this.setStatistics(sampInformation);
+  public void setContainerDataSource(SampleBean sampleBean, String id) {
+    this.setStatistics(sampleBean);
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
@@ -107,19 +108,20 @@ public class SampleView extends VerticalLayout implements View{
 
     this.vert.addComponent(buttonLayout);
 
-    this.table.setContainerDataSource(sampInformation.datasets);
+    this.table.setContainerDataSource(sampleBean.getDatasets());
     this.table.setVisibleColumns((Object[]) SAMPLEVIEW_TABLE_COLUMNS);
     this.id = id;
     
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr = Utils.getTSVStream(Utils.containerToString(sampInformation.datasets), this.id);
-    FileDownloader fileDownloader = new FileDownloader(sr);
-    fileDownloader.extend(this.export);
+    //TODO FIX THAT
+    //DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    //StreamResource sr = Utils.getTSVStream(Utils.containerToString(sampInformation.datasets), this.id);
+    //FileDownloader fileDownloader = new FileDownloader(sr);
+    //fileDownloader.extend(this.export);
     
    // this.updateCaption();
   }
 
-  private void setStatistics(SampleInformation sampInformation) {
+  private void setStatistics(SampleBean sampleBean) {
     this.vert.removeAllComponents();
     
     int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
@@ -162,27 +164,30 @@ public class SampleView extends VerticalLayout implements View{
     sampleDescriptionContent.setMargin(true);
     sampleDescriptionContent.setCaption("Description");
     sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
-    sampleDescriptionContent.addComponent(new Label(String.format("%s.", sampInformation.sampleType)));
-    sampleDescriptionContent.addComponent(new Label(sampInformation.parentsFormattedString, ContentMode.HTML));
+    sampleDescriptionContent.addComponent(new Label(String.format("%s.", sampleBean.getType())));
+    
+    //TODO 
+    //sampleDescriptionContent.addComponent(new Label(sampleBean.generateParentsFormattedString(), ContentMode.HTML));
     sampleDescription.addComponent(sampleDescriptionContent);
     sampleDescription.setMargin(true);
     this.vert.addComponent(sampleDescription);
     
     
     // Statistics of sample
+    int numberOfDatasets = sampleBean.getDatasets().size();
     VerticalLayout statistics = new VerticalLayout();
     HorizontalLayout statContent = new HorizontalLayout();
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
     statContent.addComponent(new Label(String.format("%s dataset(s).",
-        sampInformation.numberOfDatasets)));
+        numberOfDatasets)));
     statContent.setMargin(true);
     statContent.setSpacing(true);   
-    if (sampInformation.numberOfDatasets > 0) {
+    if (numberOfDatasets > 0) {
 
       String lastDataset = "No Datasets available!";
-      if (sampInformation.lastChangedDataset != null) {
-        lastDataset = sampInformation.lastChangedDataset.toString();
+      if (sampleBean.getLastChangedDataset() != null) {
+        lastDataset = sampleBean.getLastChangedDataset().toString();
         statContent.addComponent(new Label(String.format(
             "Last Change: %s",
             String.format("Dataset added on %s",
@@ -201,7 +206,9 @@ public class SampleView extends VerticalLayout implements View{
     VerticalLayout propertiesContent = new VerticalLayout();
     propertiesContent.setCaption("Properties");
     propertiesContent.setIcon(FontAwesome.LIST_UL);
-    propertiesContent.addComponent(new Label(sampInformation.propertiesFormattedString, ContentMode.HTML));  
+    
+    //TODO 
+    //propertiesContent.addComponent(new Label(sampleBean.generatePropertiesFormattedString(), ContentMode.HTML));  
     properties.addComponent(propertiesContent);
     properties.setMargin(true);
     this.vert.addComponent(properties);
@@ -211,7 +218,9 @@ public class SampleView extends VerticalLayout implements View{
     VerticalLayout experimentalFactorsContent = new VerticalLayout();
     experimentalFactorsContent.setCaption("Experimental Factors");
     experimentalFactorsContent.setIcon(FontAwesome.TH);
-    experimentalFactorsContent.addComponent(new Label(sampInformation.xmlPropertiesFormattedString, ContentMode.HTML));  
+    
+    //TODO 
+    //experimentalFactorsContent.addComponent(new Label(sampInformation.xmlPropertiesFormattedString, ContentMode.HTML));  
     experimentalFactors.addComponent(experimentalFactorsContent);
     experimentalFactors.setMargin(true);
     this.vert.addComponent(experimentalFactors);
