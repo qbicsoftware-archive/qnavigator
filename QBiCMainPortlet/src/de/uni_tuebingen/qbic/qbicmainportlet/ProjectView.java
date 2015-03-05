@@ -9,6 +9,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,6 +17,8 @@ import javax.portlet.PortletSession;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import model.ExperimentBean;
+import model.ProjectBean;
 
 import org.tepi.filtertable.FilterTable;
 
@@ -25,6 +28,8 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.vaadin.data.Container;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.View;
@@ -103,9 +108,9 @@ public class ProjectView extends VerticalLayout implements View {
    * @param projectInformation
    * @param id
    */
-  public void setContainerDataSource(ProjectInformation projectInformation, String id) {
+  public void setContainerDataSource(BeanItemContainer<ExperimentBean> expContainer, String id) {
     this.id = id;
-    this.setStatistics(projectInformation);
+    this.setStatistics(expContainer);
 
 
     // buttonLayoutSection = new VerticalLayout();
@@ -123,11 +128,10 @@ public class ProjectView extends VerticalLayout implements View {
 
     // this.projectview_content.addComponent(buttonLayoutSection);
 
-    this.table.setContainerDataSource(projectInformation.experiments);
+    this.table.setContainerDataSource(expContainer);
 
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    StreamResource sr =
-        Utils.getTSVStream(Utils.containerToString(projectInformation.experiments), this.id);
+    StreamResource sr = Utils.getTSVStream(Utils.containerToString(expContainer), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
 
@@ -135,7 +139,8 @@ public class ProjectView extends VerticalLayout implements View {
   }
 
 
-  private void setStatistics(ProjectInformation projectInformation) {
+  private void setStatistics(BeanItemContainer<ExperimentBean> expContainer) {
+    ProjectBean project = expContainer.getItemIds().get(0).getProject();
     // this.setWidth("100%");
     projectview_content.removeAllComponents();
 
@@ -163,7 +168,7 @@ public class ProjectView extends VerticalLayout implements View {
         (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     HierarchicalContainer datasetContainer = null;
     try {
-      datasetContainer = datahandler.getDatasets(this.id, "project");
+      datasetContainer = (HierarchicalContainer) datahandler.getDatasets(this.id, "project");
     } catch (Exception e) {
       LOGGER.error("failed to set dataset container for project: " + this.id);
       datasetContainer = null;
@@ -249,8 +254,9 @@ public class ProjectView extends VerticalLayout implements View {
     VerticalLayout projDescriptionContent = new VerticalLayout();
 
     Label descContent = new Label("none");
-    if (!("".equals(projectInformation.description))) {
-      descContent = new Label(projectInformation.description);
+    String desc = project.getDescription();
+    if (!desc.isEmpty()) {
+      descContent = new Label(desc);
     }
 
     Label contact =
@@ -290,7 +296,7 @@ public class ProjectView extends VerticalLayout implements View {
     // members section
 
     VerticalLayout members_section = new VerticalLayout();
-    Component membersContent = getMembersComponent(projectInformation.members);
+    Component membersContent = getMembersComponent(project.getMembers());
 
     membersContent.setIcon(FontAwesome.USERS);
     membersContent.setCaption("Members");
@@ -307,27 +313,33 @@ public class ProjectView extends VerticalLayout implements View {
     HorizontalLayout statContent = new HorizontalLayout();
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
-    statContent.addComponent(new Label(String.format("%s experiment(s),",
-        projectInformation.numberOfExperiments)));
+    statContent.addComponent(new Label(String.format("%s experiment(s),", expContainer.getItemIds()
+        .size())));
 
-    statContent.addComponent(new Label(String.format("%s sample(s),",
-        projectInformation.numberOfSamples)));
+    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    dh.sampleMap.get(expContainer.getIdByIndex(0));// TODO use project
 
-    statContent.addComponent(new Label(String.format("%s dataset(s).",
-        projectInformation.numberOfDatasets)));
+    statContent.addComponent(new Label(String.format("%s sample(s),", project.getExperiments()
+        .size())));
+
+    int numOfDatasets = datahandler.datasetMap.get(project.getId()).size();
+
+    statContent.addComponent(new Label(String.format("%s dataset(s).", numOfDatasets)));
 
     statContent.setMargin(true);
     statContent.setSpacing(true);
 
-    if (projectInformation.numberOfDatasets > 0) {
+    if (numOfDatasets > 0) {
 
       String lastSample = "No samples available";
-      if (projectInformation.lastChangedSample != null) {
-        lastSample = projectInformation.lastChangedSample.split("/")[2];
-      }
-      statContent.addComponent(new Label(String.format("Last change %s", String.format(
-          "occurred in sample %s (%s)", lastSample,
-          projectInformation.lastChangedDataset.toString()))));
+      // if (project.projectInformation.lastChangedSample != null) {
+      // lastSample = projectInformation.lastChangedSample.split("/")[2];
+      lastSample = "not implemented"; // TODO
+      // }
+      statContent.addComponent(new Label(String.format("Last change %s",
+          String.format("occurred in sample %s (%s)", lastSample,
+          // projectInformation.lastChangedDataset.toString()))));
+              "never"))));
     }
 
 
@@ -493,11 +505,11 @@ public class ProjectView extends VerticalLayout implements View {
   }
 
 
-  private Component getMembersComponent(Set<String> members) {
+  private Component getMembersComponent(List<String> list) {
     HorizontalLayout membersLayout = new HorizontalLayout();
-    if (members != null) {
+    if (list != null) {
       // membersLayout.addComponent(new Label("Members:"));
-      for (String member : members) {
+      for (String member : list) {
 
         // Cool idea, but let's do this when we have more portrait pictures in Liferay
 
@@ -588,6 +600,13 @@ public class ProjectView extends VerticalLayout implements View {
     Project project = dh.openBisClient.getProjectByCode(currentValue);
     String projectIdentifier = project.getIdentifier();
 
-    this.setContainerDataSource(dh.getProjectInformation(projectIdentifier), currentValue);
+    try {
+      this.setContainerDataSource(
+          (BeanItemContainer<ExperimentBean>) dh.getProjectInformation(projectIdentifier),
+          currentValue);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 }
