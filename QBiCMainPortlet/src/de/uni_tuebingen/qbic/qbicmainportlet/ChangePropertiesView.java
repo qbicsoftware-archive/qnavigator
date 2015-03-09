@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import model.ExperimentBean;
+
   import org.tepi.filtertable.FilterTable;
 
 import com.vaadin.data.Item;
@@ -78,10 +80,10 @@ import com.vaadin.ui.Image;
         this(new IndexedContainer(), "No Experiment selected");
       }
       
-      public void setContainerDataSource(final ExperimentInformation expInformation, final String id){
+      public void setContainerDataSource(final ExperimentBean experimentBean, final String id){
         this.buildLayout();
         this.id = id;
-        this.buildFormLayout(expInformation);
+        this.buildFormLayout(experimentBean);
         
         final Button saveButton = new Button("Commit Changes", new ClickListener() {
           @Override
@@ -96,7 +98,7 @@ import com.vaadin.ui.Image;
             }
             
             HashMap<String, Object> parameters = new HashMap<String, Object>();
-            parameters.put("identifier", expInformation.identifier);
+            parameters.put("identifier", experimentBean.getId());
             parameters.put("properties", properties);
      
             dh.openBisClient.triggerIngestionService("notify-user", parameters);
@@ -108,7 +110,7 @@ import com.vaadin.ui.Image;
         statistics.addComponent(new Label(String.format("Experiment ID: %s",
             id)));
         statistics.addComponent(new Label(String.format("Experiment Type: %s",
-            expInformation.experimentType)));
+            experimentBean.getId())));
         
         HorizontalLayout buttonLayout = new HorizontalLayout();
         
@@ -140,24 +142,24 @@ import com.vaadin.ui.Image;
           this.vert.setSizeFull();
           }
       
-  private void buildFormLayout(ExperimentInformation expInfo) {
+  private void buildFormLayout(ExperimentBean experimentBean) {
     final FieldGroup fieldGroup = new FieldGroup();
     final FormLayout form2 = new FormLayout();
     
-    for(String key: expInfo.properties.keySet()){
-      if(expInfo.controlledVocabularies.keySet().contains(key)) {
+    for(String key: experimentBean.getProperties().keySet()){
+      if(experimentBean.getControlledVocabularies().keySet().contains(key)) {
         ComboBox select = new ComboBox(key);
         fieldGroup.bind(select,key);
         form2.addComponent(select);
         
         // Add items with given item IDs
-        for(String item: expInfo.controlledVocabularies.get(key)) {
+        for(String item: experimentBean.getControlledVocabularies().get(key)) {
           select.addItem(item);
         }
-        select.setValue(expInfo.properties.get(key));
+        select.setValue(experimentBean.getProperties().get(key));
       } else {
       TextField tf = new TextField(key);
-      tf.setValue(expInfo.properties.get(key));
+      tf.setValue(experimentBean.getProperties().get(key));
       fieldGroup.bind(tf,key);
       form2.addComponent(tf);
       }
@@ -174,9 +176,8 @@ import com.vaadin.ui.Image;
     System.out.println("navigateToLabel: " + navigateToLabel);
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
-      // String type =
-      // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-      this.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
+      //TODO fix datahandler method ?
+      this.setContainerDataSource(dh.getExperiment(currentValue), currentValue);
     } catch (Exception e) {
       System.out.println("Exception in SampleView.enter");
       //e.printStackTrace();

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.ProgressBar;
@@ -20,12 +21,12 @@ public class ProjectBean implements Serializable{
   private String registrator;
   private String contact;
   //TODO userBean ?
-  private List<String> members;
+  private Set<String> members;
   private Boolean containsData;
   
   public ProjectBean(String id, String code, String description, SpaceBean space,
       BeanItemContainer<ExperimentBean> experiments, ProgressBar progress, Date registrationDate,
-      String registrator, String contact, List<String> members, Boolean containsData) {
+      String registrator, String contact, Set<String> members, Boolean containsData) {
     super();
     this.id = id;
     this.code = code;
@@ -38,6 +39,10 @@ public class ProjectBean implements Serializable{
     this.contact = contact;
     this.members = members;
     this.setContainsData(containsData);
+  }
+
+  public ProjectBean() {
+    // TODO Auto-generated constructor stub
   }
 
   public String getId() {
@@ -112,11 +117,11 @@ public class ProjectBean implements Serializable{
     this.contact = contact;
   }
 
-  public List<String> getMembers() {
+  public Set<String> getMembers() {
     return members;
   }
 
-  public void setMembers(List<String> members) {
+  public void setMembers(Set<String> members) {
     this.members = members;
   }
 

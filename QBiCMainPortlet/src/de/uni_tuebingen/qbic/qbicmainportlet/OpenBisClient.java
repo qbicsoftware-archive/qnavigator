@@ -508,6 +508,25 @@ public class OpenBisClient {// implements Serializable {
     }
     return experiment;
   }
+  
+  /**
+   * Function to retrieve a experiment from openBIS by the code of the experiment.
+   * 
+   * @param experimentCode id of the openBIS experiment
+   * @return experiment with the given code
+   */
+  public Experiment getExperimentById(String experimentId) {
+    List<Experiment> experiments = this.listExperiments();
+    Experiment experiment = null;
+    for (Experiment e : experiments) {
+      if (e.getIdentifier().equals(experimentId)) {
+        experiment = e;
+        break;
+      }
+    }
+    return experiment;
+  }
+
 
   /**
    * Function to retrieve the project of an experiment from openBIS

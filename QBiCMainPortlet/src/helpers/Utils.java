@@ -9,6 +9,7 @@ import java.util.List;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Image;
 
@@ -122,6 +123,39 @@ public class Utils {
   }
   
   public static String containerToString(Container container) {
+    String header = "";
+    Collection<?> i = container.getItemIds();
+    String rowString = "";
+
+    Collection<?> propertyIDs = container.getContainerPropertyIds();
+
+    for (Object o : propertyIDs) {
+      header += o.toString() + "\t";
+    }
+
+    // for (int x = 1; x <= i.size(); x++) {
+    for (Object id : i) {
+      Item it = container.getItem(id);
+
+      for (Object o : propertyIDs) {
+        // Could be extended to an exclusion list if we don't want to show further columns
+        if (o.toString() == "dl_link") {
+          continue;
+        } else if (o.toString() == "Status") {
+          Image image = (Image) it.getItemProperty(o).getValue();
+          rowString += image.getCaption() + "\t";
+        } else {
+          Property prop = it.getItemProperty(o);
+          rowString += prop.toString() + "\t";
+        }
+      }
+      rowString += "\n";
+    }
+    return header + "\n" + rowString;
+  }
+  
+  //TODO fix and test
+  public static String containerToString(BeanItemContainer container) {
     String header = "";
     Collection<?> i = container.getItemIds();
     String rowString = "";

@@ -3,7 +3,17 @@ package model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+
+import parser.Parser;
+import properties.Qproperties;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
@@ -14,15 +24,17 @@ public class SampleBean implements Comparable<Object> {
   private String code;
   private String type;
   // Map containing parents of the sample and the corresponding sample types
-  private Map<String, String> parents;
+  //private Map<String, String> parents;
+  private List<Sample> parents;
   private BeanItemContainer<DatasetBean> datasets;
   private Date lastChangedDataset;
   private Map<String, String> properties;
+  private Map<String, String> typeLabels;
   private String xmlPropertiesFormattedString;
 
-  public SampleBean(String id, String code, String type, Map<String, String> parents,
+  public SampleBean(String id, String code, String type, List<Sample> parents,
       BeanItemContainer<DatasetBean> datasets, Date lastChangedDataset,
-      Map<String, String> properties, String xmlPropertiesFormattedString) {
+      Map<String, String> properties, Map<String, String> typeLabels, String xmlPropertiesFormattedString) {
     super();
     this.id = id;
     this.code = code;
@@ -31,7 +43,12 @@ public class SampleBean implements Comparable<Object> {
     this.datasets = datasets;
     this.lastChangedDataset = lastChangedDataset;
     this.properties = properties;
+    this.typeLabels = typeLabels;
     this.xmlPropertiesFormattedString = xmlPropertiesFormattedString;
+  }
+  
+  public SampleBean() {
+    
   }
 
 
@@ -72,13 +89,13 @@ public class SampleBean implements Comparable<Object> {
 
 
 
-  public Map<String, String> getParents() {
+  public List<Sample> getParents() {
     return parents;
   }
 
 
 
-  public void setParents(Map<String, String> parents) {
+  public void setParents(List<Sample> parents) {
     this.parents = parents;
   }
 
@@ -129,6 +146,14 @@ public class SampleBean implements Comparable<Object> {
   public void setXmlPropertiesFormattedString(String xmlPropertiesFormattedString) {
     this.xmlPropertiesFormattedString = xmlPropertiesFormattedString;
   }
+  
+  public Map<String, String> getTypeLabels() {
+    return typeLabels;
+  }
+
+  public void setTypeLabels(Map<String, String> typeLabels) {
+    this.typeLabels = typeLabels;
+  }
 
 
 
@@ -150,4 +175,53 @@ public class SampleBean implements Comparable<Object> {
   public int hashCode() {
     return id.hashCode();
   }
+  
+  public String getParentsFormattedString() {
+    String parentsHeader = "This sample has been derived from the following samples: ";
+    String parentsBottom = "<ul>";
+
+    if (this.getParents().isEmpty()) {
+      return  parentsHeader += "None";
+
+    } else {
+        for(Sample sample: this.getParents()) {
+        parentsBottom += "<li><b>" + sample.getCode() + "</b> (" + sample.getSampleTypeCode() + ") </li>";
+      }
+      parentsBottom += "</ul>";
+      
+      return parentsHeader + parentsBottom;
+    }
+  }
+  
+  public String getPropertiesFormattedString() throws JAXBException {
+    String propertiesBottom = "<ul> ";
+    String xmlPropertiesBottom = "<ul> ";
+
+    Iterator<Entry<String, String>> it = this.getProperties().entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry pairs = (Map.Entry) it.next();
+      if (pairs.getKey().equals("Q_PROPERTIES")) {
+        Parser xmlParser = new Parser();
+        JAXBElement<Qproperties> xmlProperties =
+            xmlParser.parseXMLString(pairs.getValue().toString());
+        Map<String, String> xmlPropertiesMap = xmlParser.getMap(xmlProperties);
+
+        Iterator itProperties = xmlPropertiesMap.entrySet().iterator();
+        while (itProperties.hasNext()) {
+          Map.Entry pairsProperties = (Map.Entry) itProperties.next();
+
+          xmlPropertiesBottom +=
+              "<li><b>"
+                  + (pairsProperties.getKey() + ":</b> " + pairsProperties.getValue() + "</li>");
+        }
+      } else {
+        propertiesBottom +=
+            "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
+      }
+    }
+    propertiesBottom += "</ul>";
+
+    return propertiesBottom + xmlPropertiesBottom;
+  }
+  
 }

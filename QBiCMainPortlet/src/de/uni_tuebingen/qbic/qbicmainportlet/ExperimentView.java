@@ -1,28 +1,22 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.Utils;
 import model.ExperimentBean;
-import model.SampleBean;
 
 import org.tepi.filtertable.FilterTable;
 
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Panel;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -77,6 +71,7 @@ public class ExperimentView extends VerticalLayout implements View{
   public void setContainerDataSource(ExperimentBean experimentBean, String id) {
     this.setStatistics(experimentBean);
 
+    /*
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
@@ -87,13 +82,18 @@ public class ExperimentView extends VerticalLayout implements View{
 
     this.expview_content.addComponent(buttonLayout);
 
-
+  */
     this.table.setContainerDataSource(experimentBean.getSamples());
+    this.table.setVisibleColumns(new Object[]{"code", "type"});
+    this.table.setColumnHeader("code", "Name");
+    this.table.setColumnHeader("type", "Type");
+    
+    
     this.id = id;
 
     //TODO fix that 
     //DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    //StreamResource sr = Utils.getTSVStream(Utils.containerToString(sampleContainer), this.id);
+    //StreamResource sr = Utils.getTSVStream(Utils.containerToString(experimentBean.getSamples()), this.id);
     //FileDownloader fileDownloader = new FileDownloader(sr);
     //fileDownloader.extend(this.export);
 
@@ -110,7 +110,7 @@ public class ExperimentView extends VerticalLayout implements View{
 
     expview_content.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
     
     MenuBar menubar = new MenuBar();
     // A top-level menu item that opens a submenu
@@ -120,6 +120,7 @@ public class ExperimentView extends VerticalLayout implements View{
     expview_content.addComponent(menubar);
 
     //menubar.addStyleName("qbicmainportlet");
+    menubar.addStyleName("user-menu");
     menubar.setWidth(100.0f, Unit.PERCENTAGE);    
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
@@ -160,14 +161,16 @@ public class ExperimentView extends VerticalLayout implements View{
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
 
-    int numberOfDatasets = dh.datasetMap.get(experimentBean.getId()).size();
+    
+    //int numberOfDatasets = dh.datasetMap.get(experimentBean.getId()).size();
     
     statContent.addComponent(new Label(String.format("%s sample(s),",
         experimentBean.getSamples().size())));
-    statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
+    //statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
     statContent.setMargin(true);
     statContent.setSpacing(true);
 
+    /*
     if (numberOfDatasets > 0) {
 
       String lastSample = "No samples available";
@@ -179,14 +182,24 @@ public class ExperimentView extends VerticalLayout implements View{
           String.format("occurred in sample %s (%s)", lastSample,
               experimentBean.getLastChangedDataset().toString()))));
     }
+    */
     
 
     statistics.addComponent(statContent);
     statistics.setMargin(true);
     expview_content.addComponent(statistics);
+    
+    // Properties of experiment
+    VerticalLayout properties = new VerticalLayout();
+    VerticalLayout propertiesContent = new VerticalLayout();
+    propertiesContent.setCaption("Properties");
+    propertiesContent.setIcon(FontAwesome.LIST_UL);
 
-    // statistics.addComponent(new Label(expInformation.propertiesFormattedString,
-    // ContentMode.HTML));
+    propertiesContent.addComponent(new Label(experimentBean.generatePropertiesFormattedString(), ContentMode.HTML));
+    properties.addComponent(propertiesContent);
+    properties.setMargin(true);
+    expview_content.addComponent(properties);
+
 
     // table section
     VerticalLayout tableSection = new VerticalLayout();
@@ -250,7 +263,7 @@ public class ExperimentView extends VerticalLayout implements View{
       // String type =
       // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
       //this.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
-      this.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
+      this.setContainerDataSource(dh.getExperiment(currentValue), currentValue);
     } catch (Exception e) {
       System.out.println("Exception in ExperimentView.enter");
       //e.printStackTrace();

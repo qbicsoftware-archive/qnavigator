@@ -3,8 +3,10 @@ package model;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.IndexedContainer;
@@ -17,31 +19,49 @@ public class ExperimentBean implements Serializable {
   private String type;
   private Image status;
   private String registrator;
-  private ProjectBean project;
-  private Timestamp registrationDate;
+  private Date registrationDate;
   private BeanItemContainer<SampleBean> samples;
   private String lastChangedSample;
   private Date lastChangedDataset;
   private Map<String, String> properties;
   private Map<String, List<String>> controlledVocabularies;
+  private Map<String, String> typeLabels;
 
-  public ExperimentBean(String id, String code, String type, Image status, String registrator,
-      ProjectBean project, Timestamp registrationDate, BeanItemContainer<SampleBean> samples,
+  public Map<String, String> getTypeLabels() {
+    return typeLabels;
+  }
+
+
+
+  public void setTypeLabels(Map<String, String> typeLabels) {
+    this.typeLabels = typeLabels;
+  }
+
+
+
+  public ExperimentBean(String id, String code, String type, Image status, String registrator, 
+      Date registrationDate, BeanItemContainer<SampleBean> samples,
       String lastChangedSample, Date lastChangedDataset, Map<String, String> properties,
-      Map<String, List<String>> controlledVocabularies) {
+      Map<String, List<String>> controlledVocabularies, Map<String, String> typeLabels) {
     super();
     this.id = id;
     this.code = code;
     this.type = type;
     this.status = status;
     this.registrator = registrator;
-    this.project = project;
     this.registrationDate = registrationDate;
     this.samples = samples;
     this.lastChangedSample = lastChangedSample;
     this.lastChangedDataset = lastChangedDataset;
     this.properties = properties;
     this.controlledVocabularies = controlledVocabularies;
+    this.typeLabels = typeLabels;
+  }
+
+
+
+  public ExperimentBean() {
+    // TODO Auto-generated constructor stub
   }
 
 
@@ -98,32 +118,20 @@ public class ExperimentBean implements Serializable {
     return registrator;
   }
 
-
-  public void setProject(ProjectBean project) {
-    this.project = project;
-  }
-
-
-
-  public ProjectBean getProject() {
-    return project;
-  }
-
-
-
+  
   public void setRegistrator(String registrator) {
     this.registrator = registrator;
   }
 
 
 
-  public Timestamp getRegistrationDate() {
+  public Date getRegistrationDate() {
     return registrationDate;
   }
 
 
 
-  public void setRegistrationDate(Timestamp registrationDate) {
+  public void setRegistrationDate(Date registrationDate) {
     this.registrationDate = registrationDate;
   }
 
@@ -217,5 +225,30 @@ public class ExperimentBean implements Serializable {
     } else if (!id.equals(other.id))
       return false;
     return true;
+  }
+  
+  public String generatePropertiesFormattedString() {
+    String propertiesHeader = "<ul>";
+    String propertiesBottom = "";
+
+    Iterator<Entry<String, String>> it = this.getProperties().entrySet().iterator();
+    while (it.hasNext()) {
+      Entry<String, String> pairs = it.next();
+      if (pairs.getValue().equals("")) {
+        continue;
+      } else if (pairs.getKey().equals("Q_PERSONS")) {
+        continue;
+      } else {
+        propertiesBottom +=
+            "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
+        propertiesBottom +=
+            "<li><b>"
+                + (pairs.getKey().toString() + ":</b> "
+                    + pairs.getValue() + "</li>");
+      }
+    }
+    propertiesBottom += "</ul>";
+
+    return propertiesHeader + propertiesBottom;
   }
 }

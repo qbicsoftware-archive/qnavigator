@@ -477,7 +477,9 @@ public class DatasetView extends VerticalLayout implements View {
     }
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
+      //TODO fix
       this.setContainerDataSource(dh.getDatasets(map.get("id"), map.get("type")));
+
     } catch (Exception e) {
       LOGGER.error(String.format("getting dataset failed for dataset %s", map.toString()));
     }

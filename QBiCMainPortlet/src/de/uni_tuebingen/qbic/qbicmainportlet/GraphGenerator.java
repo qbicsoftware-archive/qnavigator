@@ -11,12 +11,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingConstants;
 
+import model.ExperimentBean;
+import model.ProjectBean;
+import model.SampleBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
@@ -57,7 +61,7 @@ public class GraphGenerator
 		this.url = url;
 	}
 
-	public GraphGenerator(String project) throws IOException
+	public GraphGenerator(ProjectBean projectBean) throws IOException
 	{
 		//super("openBIS graph");
 
@@ -65,7 +69,7 @@ public class GraphGenerator
 	    
 	    //Project p = dh.openBisClient.getProjectByCode(project);
 	    
-		Project p = dh.openBisClient.getProjectByIdentifier(project);
+		//Project p = dh.openBisClient.getProjectByIdentifier(projectBean);
 		//System.out.println(p);
 
 		mxGraph graph = new mxGraph();
@@ -93,8 +97,19 @@ public class GraphGenerator
 
 			// could be done more efficiently with SearchCriteria (at least I hope so)
 			Map<String, Integer> sample_count = new HashMap<String, Integer>();
-			List<Sample> all_project_samples = dh.openBisClient.getSamplesOfProject(p.getCode());
+			
+			
+			//List<Sample> all_project_samples = dh.openBisClient.getSamplesOfProject(p.getCode());
 			//List<Sample> all_project_samples = dh.project_to_samples.get(p.getId());
+			List<SampleBean> all_project_samples;
+			
+			for (Iterator i = projectBean.getExperiments().getItemIds().iterator(); i.hasNext();) {
+			    // Get the current item identifier, which is an integer.
+			    ExperimentBean exp = (ExperimentBean) i.next();
+			    for (Iterator j = exp.getSamples().getItemIds().iterator(); i.hasNext();) {
+			      all_project_samples.add((SampleBean) j.next());
+			    }
+			}
 			
             List<PropertyType> bioSampleProperties = dh.openBisClient.listPropertiesForType(dh.openBisClient.getSampleTypeByString("Q_BIOLOGICAL_SAMPLE"));
             List<PropertyType> testSampleProperties = dh.openBisClient.listPropertiesForType(dh.openBisClient.getSampleTypeByString("Q_TEST_SAMPLE"));
@@ -104,14 +119,15 @@ public class GraphGenerator
 			// count the different sample types
 			Integer num_measurement_samples = new Integer(0);
 
-	         List<Sample> samps = new ArrayList<Sample>();
+	        List<SampleBean> samps = new ArrayList<SampleBean>();
 
-			for (Sample s : all_project_samples) {
-				String key = s.getSampleTypeCode();
-
+			for (SampleBean s : all_project_samples) {
+				//String key = s.getSampleTypeCode();
+			    String key = s.getType();
+			  
 				if (sample_count.containsKey(key)) {
 
-					sample_count.put(key, sample_count.get(s.getSampleTypeCode()) + 1);
+					sample_count.put(key, sample_count.get(s.getType()) + 1);
 				}
 				else {
 					sample_count.put(key, 1);
@@ -119,7 +135,8 @@ public class GraphGenerator
 
 				if (key.equals("Q_TEST_SAMPLE")) {
 					//List<Sample> tmp = this.open_client.getFacade().listSamplesOfSample(s.getPermId());
-				  List<Sample> tmp = dh.openBisClient.getFacade().listSamplesOfSample(s.getPermId());
+				  //List<Sample> tmp = dh.openBisClient.getFacade().listSamplesOfSample(s.getPermId());
+				  List<Sample> tmp = s.getParents();
 				  num_measurement_samples += tmp.size();
 				}
 				
@@ -175,11 +192,11 @@ public class GraphGenerator
 			      //samps.addAll(this.open_client.getSamplesofExperiment(e.getIdentifier()));
 				    //samps.addAll(dh.openBisClient.getSamplesofExperiment(e.getIdentifier()));
 				    
-					for (Sample s : samps) {
+					for (SampleBean s : samps) {
 						//List <Object> subtree_vertices = new ArrayList<Object>();
 						//s.getProperties().get(key)
                       //TODO get Labels of properties.... for organism                        
-                        List<PropertyType> completeProperties = dh.openBisClient.listPropertiesForType(dh.openBisClient.getSampleTypeByString(s.getSampleTypeCode()));
+                        List<PropertyType> completeProperties = dh.openBisClient.listPropertiesForType(dh.openBisClient.getSampleTypeByString(s.getType()));
                         
                         String species = "";
                         for(PropertyType pType: completeProperties) {
@@ -189,13 +206,13 @@ public class GraphGenerator
                         }
                         
 					  
-					    Object mother_node = graph.insertVertex(parent, s.getPermId(), String.format("%s\n%s", s.getCode(), species), 20, 20, width, height, "ROUNDED;strokeColor=#ffffff;fillColor=#0365C0");
+					    Object mother_node = graph.insertVertex(parent, s.getId(), String.format("%s\n%s", s.getCode(), species), 20, 20, width, height, "ROUNDED;strokeColor=#ffffff;fillColor=#0365C0");
 						//subtree_vertices.add(mother_node);
 						List<Sample>  children = new ArrayList<Sample>();
 						
 						//children.addAll(this.open_client.getFacade().listSamplesOfSample(s.getPermId()));
-                        children.addAll(dh.openBisClient.getFacade().listSamplesOfSample(s.getPermId()));
-
+                        //children.addAll(dh.openBisClient.getFacade().listSamplesOfSample(s.getPermId()));
+					    
 						
 						//Object group_node = graph.insertVertex(parent, null, "Entities", 20, 20, width, height);
 
@@ -362,7 +379,7 @@ public class GraphGenerator
 			
 			if(image != null) { 
 			  ImageIO.write(image, "PNG", bas);
-			  this.res = showFile(project, "PNG", bas);
+			  this.res = showFile(projectBean, "PNG", bas);
 			}
 			else {
 			  this.res = null;

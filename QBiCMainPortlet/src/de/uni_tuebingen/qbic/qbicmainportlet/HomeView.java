@@ -1,6 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
+import helpers.Utils;
+
 import java.util.Iterator;
 
 import model.ProjectBean;
@@ -11,6 +13,7 @@ import org.tepi.filtertable.FilterTable;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
@@ -34,38 +37,12 @@ public class HomeView extends VerticalLayout implements View {
   private String caption;
   FilterTable table;
   VerticalLayout homeview_content;
+  VerticalLayout buttonLayoutSection = new VerticalLayout();
+
 
   DataHandler dh;
-  StreamResource sr;
 
   private Button export;
-
-  /*
-  public HomeView(SpaceInformation datasource, String caption) {
-    homeview_content = new VerticalLayout();
-    this.table = buildFilterTable();
-
-    this.setContainerDataSource(datasource, caption);
-    dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    sr = Utils.getTSVStream(Utils.containerToString(datasource.projects), this.caption);
-    this.tableClickChangeTreeView();
-
-    this.buildLayout(datasource);
-  }
-
-  public HomeView(FilterTable table, SpaceInformation datasource, String caption) {
-    homeview_content = new VerticalLayout();
-    this.table = table;
-
-    this.setContainerDataSource(datasource, caption);
-    dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    sr = Utils.getTSVStream(Utils.containerToString(datasource.projects), this.caption);
-    this.tableClickChangeTreeView();
-
-    this.buildLayout(datasource);
-
-  }
-*/
   
   public HomeView(SpaceBean datasource, String caption) {
     homeview_content = new VerticalLayout();
@@ -74,8 +51,6 @@ public class HomeView extends VerticalLayout implements View {
     this.setContainerDataSource(datasource, caption);
     dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     
-    //TODO ?
-    //sr = Utils.getTSVStream(Utils.containerToString(datasource.projects), this.caption);
     this.tableClickChangeTreeView();
 
     this.buildLayout(datasource);
@@ -88,8 +63,6 @@ public class HomeView extends VerticalLayout implements View {
     this.setContainerDataSource(datasource, caption);
     dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     
-    //TODO ?
-    //sr = Utils.getTSVStream(Utils.containerToString(datasource.projects), this.caption);
     this.tableClickChangeTreeView();
 
     this.buildLayout(datasource);
@@ -120,7 +93,7 @@ public class HomeView extends VerticalLayout implements View {
    * @param caption
    */
   //public void setContainerDataSource(SpaceInformation homeViewInformation, String caption) {
-  public void setContainerDataSource(SpaceBean spaceBeans, String caption) {
+  public void setContainerDataSource(SpaceBean spaceBean, String caption) {
   
     this.caption = caption;
     //this.updateCaption();
@@ -128,17 +101,30 @@ public class HomeView extends VerticalLayout implements View {
 
     //this.table.setContainerDataSource(homeViewInformation.projects);
     //TODO iterate over spaceBeanContainer and get projects ?
+    
+    buttonLayoutSection.removeAllComponents();
+    HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setHeight(null);
+    buttonLayout.setWidth("100%");
+    buttonLayoutSection.addComponent(buttonLayout);
+
+    this.export = new Button("Export as TSV");
+    buttonLayout.addComponent(this.export);
+    
+    StreamResource sr = Utils.getTSVStream(Utils.containerToString(spaceBean.getProjects()), this.caption);
+    FileDownloader fileDownloader = new FileDownloader(sr);
+    fileDownloader.extend(this.export);
       
-    this.table.setContainerDataSource(spaceBeans.getProjects());
-    this.table.setVisibleColumns(new Object[]{"id", "description", "containsData"});
-    this.table.setColumnHeader("id", "Name");
+    this.table.setContainerDataSource(spaceBean.getProjects());
+    this.table.setVisibleColumns(new Object[]{"code", "description", "containsData"});
+    this.table.setColumnHeader("code", "Name");
     this.table.setColumnHeader("description", "Description");
     this.table.setColumnHeader("containsData", "Contains Datasets");
   }
 
 
   //private void buildLayout(SpaceInformation generalOpenBISInformation) {
-  private void buildLayout(SpaceBean datasource) {
+  private void buildLayout(SpaceBean spaceBean) {
   // clean up first
     homeview_content.removeAllComponents();
     this.setMargin(false);
@@ -197,9 +183,8 @@ public class HomeView extends VerticalLayout implements View {
     statistics.setCaption("Statistics");
     statistics.setIcon(FontAwesome.FILE_TEXT_O);
 
-    Label statContent = new Label("Who needs statistics?");
-    //Label statContent = new Label(String.format("You have %s project(s), %s experiment(s), %s sample(s), and %s dataset(s).",    
-    //TODO ?
+    Label statContent = new Label(String.format("You have %s project(s), %s experiment(s), %s sample(s), and %s dataset(s).", 
+        spaceBean.getProjects().size(), spaceBean.getExperiments().size(), spaceBean.getSamples().size(), spaceBean.getDatasets().size()));
         //generalOpenBISInformation.numberOfProjects, generalOpenBISInformation.numberOfExperiments, generalOpenBISInformation.numberOfSamples,
     //generalOpenBISInformation.numberOfDatasets) );
     statistics.addComponent(statContent);
@@ -237,10 +222,10 @@ public class HomeView extends VerticalLayout implements View {
       table_width = (int) Math.floor(0.7 * browser_window_width);
     }
     */
-    HorizontalLayout button_bar = new HorizontalLayout();
+    //HorizontalLayout button_bar = new HorizontalLayout();
 
-    this.export = new Button("Export as TSV");
-    button_bar.addComponent(this.export);
+    //this.export = new Button("Export as TSV");
+    //button_bar.addComponent(this.export);
     //button_bar.setMargin(true);
     //homeview_content.addComponent(button_bar);
     
@@ -260,7 +245,7 @@ public class HomeView extends VerticalLayout implements View {
     tableSectionContent.setCaption("Registered Projects");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
-    tableSectionContent.addComponent(button_bar);
+    //tableSectionContent.addComponent(button_bar);
 
     tableSectionContent.setMargin(true);
     tableSection.setMargin(true);

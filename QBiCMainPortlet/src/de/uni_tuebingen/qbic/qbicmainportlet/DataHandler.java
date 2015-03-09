@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,6 +34,7 @@ import properties.Qproperties;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
@@ -129,14 +131,14 @@ public class DataHandler {
   // Map<String, ExperimentInformation> experimentInformations =
   // new HashMap<String, ExperimentInformation>();
   // Map<String, SampleInformation> sampleInformations = new HashMap<String, SampleInformation>();
-  Map<String, BeanItemContainer<ProjectBean>> projectMap =
-      new HashMap<String, BeanItemContainer<ProjectBean>>();
-  Map<String, BeanItemContainer<ExperimentBean>> experimentMap =
-      new HashMap<String, BeanItemContainer<ExperimentBean>>();
-  Map<String, BeanItemContainer<SampleBean>> sampleMap =
-      new HashMap<String, BeanItemContainer<SampleBean>>();
-  Map<String, BeanItemContainer<DatasetBean>> datasetMap =
-      new HashMap<String, BeanItemContainer<DatasetBean>>();
+  Map<String, ProjectBean> projectMap =
+      new HashMap<String, ProjectBean>();
+  Map<String, ExperimentBean> experimentMap =
+      new HashMap<String, ExperimentBean>();
+  Map<String, SampleBean> sampleMap =
+      new HashMap<String, SampleBean>();
+  Map<String, DatasetBean> datasetMap =
+      new HashMap<String, DatasetBean>();
 
   // Map<String, IndexedContainer> space_to_projects = new HashMap<String, IndexedContainer>();
   //
@@ -201,7 +203,7 @@ public class DataHandler {
   //
   // }
 
-
+/*
   public BeanItemContainer<DatasetBean> getDatasets(String id, String type) throws Exception {
 
     List<DataSet> dataset_list = null;
@@ -283,28 +285,124 @@ public class DataHandler {
     }
 
   }
+*/
+  
+  /**
+   * Method to get Bean from either openbis identifier or openbis object.
+   * Checks if corresponding bean is already stored in datahandler map.
+   * 
+   * @param 
+   * @return 
+   */
+  public ProjectBean getProject(Object proj) {
+    Project project;
+    ProjectBean newProjectBean;
+    System.out.println(proj);
+    System.out.println(this.projectMap);
 
-  public BeanItemContainer<ProjectBean> getProjects(String id, String type) throws Exception {
-
-    List<Project> project_list = null;
-
-    if (this.projectMap.get(id) != null) {
-      return this.projectMap.get(id);
-    } else {
-      switch (type) {
-        case "space":
-          project_list = this.openBisClient.getProjectsOfSpace(id);
-          break;
-        default:
-          throw new Exception("Unknown datatype: " + type);
+    if (proj instanceof Project) {
+      project = (Project) proj;
+      newProjectBean = this.createProjectBean(project);
+    }
+    else {
+      if (this.projectMap.get((String) proj) != null) {
+        System.out.println("taking it from the map");
+        newProjectBean = this.projectMap.get(proj);
+      } else {      
+        project = this.openBisClient.getProjectByIdentifier((String) proj);
+        newProjectBean = this.createProjectBean(project);
       }
-      BeanItemContainer<ProjectBean> projects = this.createProjectContainer(project_list, id);
-      this.projectMap.put(id, projects);
-      return projects;
+    }
+    this.projectMap.put(newProjectBean.getId(), newProjectBean);
+    return newProjectBean;
+  }
+  
+  /**
+   * Method to get Bean from either openbis identifier or openbis object.
+   * Checks if corresponding bean is already stored in datahandler map.
+   * 
+   * @param 
+   * @return 
+   */
+  public ExperimentBean getExperiment(Object exp) {
+    Experiment experiment;
+    ExperimentBean newExperimentBean;
+
+    if (exp instanceof Experiment) {
+      experiment = (Experiment) exp;
+      newExperimentBean = this.createExperimentBean(experiment);
+      }
+    
+    else {
+      if (this.experimentMap.get((String) exp) != null) {
+        newExperimentBean = this.experimentMap.get(exp);
+      } else {
+        experiment = this.openBisClient.getExperimentById((String) exp);
+        newExperimentBean = this.createExperimentBean(experiment);
+      }
+    }
+    
+    this.experimentMap.put(newExperimentBean.getId(), newExperimentBean);
+    return newExperimentBean;
+  }
+  
+  /**
+   * Method to get Bean from either openbis identifier or openbis object.
+   * Checks if corresponding bean is already stored in datahandler map.
+   * 
+   * @param 
+   * @return 
+   */
+  public SampleBean getSample(Object samp) {
+    Sample sample;
+    SampleBean newSampleBean;
+
+    if (samp instanceof Sample) {
+      sample = (Sample) samp;
+      newSampleBean = this.createSampleBean(sample);
     }
 
+    else {
+      if (this.sampleMap.get((String) samp) != null) {
+        newSampleBean = this.sampleMap.get(samp);
+      } else {
+        sample = this.openBisClient.getSampleByIdentifier((String) samp);
+        newSampleBean = this.createSampleBean(sample);
+      }
+    }
+    this.sampleMap.put(newSampleBean.getId(), newSampleBean);
+    return newSampleBean;
   }
+  
+  /**
+   * Method to get Bean from either openbis identifier or openbis object.
+   * Checks if corresponding bean is already stored in datahandler map.
+   * 
+   * @param 
+   * @return 
+   */
+  public DatasetBean getDataset(Object ds) {
+    DataSet dataset;
+    DatasetBean newDatasetBean;
 
+    if (ds instanceof DataSet) {
+      dataset = (DataSet) ds;
+      newDatasetBean = this.createDatasetBean(dataset);
+    }
+
+    else {
+      if (this.datasetMap.get((String) ds) != null) {
+        newDatasetBean = this.datasetMap.get(ds);
+      } else {
+        dataset = this.openBisClient.facade.getDataSet((String) ds);
+        newDatasetBean = this.createDatasetBean(dataset);
+      }
+    }
+    this.datasetMap.put(newDatasetBean.getCode(), newDatasetBean);
+    return newDatasetBean;
+  }
+  
+  
   /**
    * Returns all users of a Space.
    * 
@@ -321,6 +419,7 @@ public class DataHandler {
     return null;
   }
 
+  /*
   public Container getProjectInformation(String id) throws Exception {
     if (experimentMap.get(id) != null)
       return experimentMap.get(id);
@@ -335,6 +434,7 @@ public class DataHandler {
     } else {
       return getSamples(id, "experiment");
     }
+    */
     // ExperimentInformation ret = new ExperimentInformation();
     // try {
     // // TODO check for source of nullpointer exception !
@@ -414,13 +514,13 @@ public class DataHandler {
     // }
     // return ret;
     // }
-  }
+  //}
 
-  public Container getSampleInformation(String id) throws Exception {
-    if (datasetMap.containsKey(id)) {
-      return datasetMap.get(id);
-    } else {
-      return getDatasets(id, "sample");
+ // public Container getSampleInformation(String id) throws Exception {
+   // if (datasetMap.containsKey(id)) {
+    //  return datasetMap.get(id);
+    //} else {
+    //  return getDatasets(id, "sample");
       // SampleInformation ret = new SampleInformation();
       // Sample samp = this.openBisClient.getSampleByIdentifier(id);
       //
@@ -512,8 +612,8 @@ public class DataHandler {
       // ret = null;
       // }
       // return ret;
-    }
-  }
+ //   }
+//  }
 
   /**
    * checks which of the datasets in the given list is the oldest and writes that into the last tree
@@ -659,7 +759,208 @@ public class DataHandler {
     // ret.remove("babysauron");
     return ret;
   }
+  
+  
+  /**
+   * Method create ProjectBean for project object
+   * 
+   * @param Project project
+   * @return ProjectBean for corresponding project
+   */
+  private ProjectBean createProjectBean(Project project) {
+    
+    ProjectBean newProjectBean = new ProjectBean();
+    
+    List<Experiment> experiments = this.openBisClient.getExperimentsOfProjectByIdentifier(project.getIdentifier());
+    
+    ProgressBar progressBar = new ProgressBar();
+    progressBar.setValue(this.openBisClient.computeProjectStatus(project));
 
+    Date registrationDate = project.getRegistrationDetails().getRegistrationDate();
+    
+    newProjectBean.setId(project.getIdentifier());
+    newProjectBean.setCode(project.getCode());
+    newProjectBean.setDescription(project.getDescription());
+    newProjectBean.setRegistrationDate(registrationDate);
+    newProjectBean.setProgress(progressBar);
+    newProjectBean.setRegistrator(project.getRegistrationDetails().getUserId());
+    newProjectBean.setContact(project.getRegistrationDetails().getUserEmail());
+
+    BeanItemContainer<ExperimentBean> experimentBeans = new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
+    
+    for (Experiment experiment: experiments) {
+      experimentBeans.addBean(this.getExperiment(experiment));
+    }
+
+    newProjectBean.setExperiments(experimentBeans);
+    newProjectBean.setMembers(this.openBisClient.getSpaceMembers(project.getSpaceCode()));
+
+    return newProjectBean;
+  }
+  
+  
+  /**
+   * Method to create ExperimentBean for experiment object
+   * 
+   * @param Experiment experiment
+   * @return ExperimentBean for corresponding experiment
+   */
+  private ExperimentBean createExperimentBean(Experiment experiment){
+    
+    ExperimentBean newExperimentBean = new ExperimentBean();
+    List<Sample> samples = this.openBisClient.getSamplesofExperiment(experiment.getIdentifier());    
+
+    String status = "";
+    
+    // Get all properties for metadata changing
+    List<PropertyType> completeProperties =
+        this.openBisClient.listPropertiesForType(this.openBisClient.getExperimentTypeByString(experiment
+            .getExperimentTypeCode()));
+
+    Map<String, String> assignedProperties = experiment.getProperties();
+    Map<String, List<String>> controlledVocabularies = new HashMap<String, List<String>>();
+    Map<String, String> properties = new HashMap<String, String>();
+
+    if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
+      status = assignedProperties.get("Q_CURRENT_STATUS");
+    }
+    
+    System.out.println("hjere");
+    
+    for (PropertyType p : completeProperties) {
+      
+      //TODO no hardcoding
+
+      if (p instanceof ControlledVocabularyPropertyType) {
+        controlledVocabularies.put(p.getCode(), openBisClient.listVocabularyTermsForProperty(p));
+      }
+
+      if (assignedProperties.keySet().contains(p.getCode())) {
+        properties.put(p.getCode(), assignedProperties.get(p.getCode()));
+      } else {
+        properties.put(p.getCode(), "");
+      }
+    }
+
+    Map<String, String> typeLabels =
+        this.openBisClient.getLabelsofProperties(this.openBisClient
+            .getExperimentTypeByString(experiment.getExperimentTypeCode()));
+
+    Image statusColor = new Image(status, this.setExperimentStatusColor(status));
+    statusColor.setWidth("15px");
+    statusColor.setHeight("15px");
+    
+    newExperimentBean.setId(experiment.getIdentifier());
+    newExperimentBean.setCode(experiment.getCode());
+    newExperimentBean.setType(experiment.getExperimentTypeCode());
+    newExperimentBean.setStatus(statusColor);
+    newExperimentBean.setRegistrator(experiment.getRegistrationDetails().getUserId());
+    newExperimentBean.setRegistrationDate(experiment.getRegistrationDetails().getRegistrationDate());
+    newExperimentBean.setProperties(properties);
+    newExperimentBean.setControlledVocabularies(controlledVocabularies);
+    newExperimentBean.setTypeLabels(typeLabels);
+    
+    //TODO do we want to have that ? (last Changed)
+    newExperimentBean.setLastChangedSample(null);
+    newExperimentBean.setLastChangedSample(null);
+    
+    System.out.println("Creating sample Beans");
+    // Create sample Beans (or fetch them) for samples of experiment
+    BeanItemContainer<SampleBean> sampleBeans = new BeanItemContainer<SampleBean>(SampleBean.class);
+    int test = 0;
+    for (Sample sample: samples) {
+      test += 1;
+      sampleBeans.addBean(this.getSample(sample));
+      System.out.println(test);
+
+    }
+    newExperimentBean.setSamples(sampleBeans);
+   
+    return newExperimentBean;  
+  }
+  
+  
+  /**
+   * Method to create SampleBean for sample object
+   * 
+   * @param Sample sample
+   * @return SampleBean for corresponding object
+   */
+  private SampleBean createSampleBean(Sample sample){
+    
+    SampleBean newSampleBean = new SampleBean();
+        
+    Map<String, String> properties = sample.getProperties();
+    
+    newSampleBean.setId(sample.getIdentifier());
+    newSampleBean.setCode(sample.getCode());
+    newSampleBean.setType(sample.getSampleTypeCode());
+    newSampleBean.setProperties(properties);
+    newSampleBean.setParents(this.openBisClient.getParents(sample.getCode()));
+    
+    BeanItemContainer<DatasetBean> datasetBeans = new BeanItemContainer<DatasetBean>(DatasetBean.class);
+    List<DataSet> datasets = this.openBisClient.getDataSetsOfSampleByIdentifier(sample.getIdentifier());
+    
+    Date lastModifiedDate = new Date();
+    
+    for (DataSet dataset: datasets) {
+      datasetBeans.addBean(this.getDataset(dataset));      
+      Date date = dataset.getRegistrationDate();
+      if (date.after(lastModifiedDate)) {
+        lastModifiedDate.setTime(date.getTime());
+        break;
+      }
+    }
+    
+    newSampleBean.setDatasets(datasetBeans);
+    newSampleBean.setLastChangedDataset(lastModifiedDate);
+    
+    Map<String, String> typeLabels = this.openBisClient.getLabelsofProperties(this.openBisClient.getSampleTypeByString(sample.getSampleTypeCode()));
+    newSampleBean.setTypeLabels(typeLabels);
+    
+    return newSampleBean; 
+  }
+  
+  
+  /**
+   * Method to create DatasetBean for dataset object
+   * 
+   * @param Dataset dataset
+   * @return DatasetBean for corresponding object
+   */
+  private DatasetBean createDatasetBean(DataSet dataset){
+    
+    DatasetBean newDatasetBean = new DatasetBean();
+        
+    
+    newDatasetBean.setCode(dataset.getCode());
+    // Whats the Name ?
+    newDatasetBean.setName(dataset.tryGetInternalPathInDataStore());
+    newDatasetBean.setType(dataset.getDataSetTypeCode());
+    //TODO 
+    //newDatasetBean.setProject(dataset.);
+   // newDatasetBean.setExperiment(this.getExperiment(dataset.getExperimentIdentifier()));
+    //newDatasetBean.setSample(this.getSample(dataset.getSampleIdentifierOrNull()));
+    
+    //TODO 
+    //newDatasetBean.setRegistrator(registrator);
+    newDatasetBean.setRegistrationDate(dataset.getRegistrationDate());
+    //TODO 
+    //newDatasetBean.setDirectory(dataset.);
+    newDatasetBean.setParent(null);
+    newDatasetBean.setRoot(null);
+    newDatasetBean.setRoot(null);
+    newDatasetBean.setSelected(false);
+    
+    //TODO
+    //this.fileSize = fileSize;
+    //this.humanReadableFileSize = humanReadableFileSize;
+    //this.dssPath = dssPath;
+
+    return newDatasetBean;  
+  }
+
+  /*
   @SuppressWarnings("unchecked")
   private BeanItemContainer<ProjectBean> createProjectContainer(List<Project> projs, String spaceID)
       throws Exception {
@@ -709,6 +1010,8 @@ public class DataHandler {
     return res;
   }
 
+*/
+  /*
   @SuppressWarnings("unchecked")
   private BeanItemContainer<ExperimentBean> createExperimentContainer(List<Experiment> exps,
       String projID) {
@@ -789,7 +1092,9 @@ public class DataHandler {
 
     return experiment_container;
   }
-
+*/
+  
+  /*
   @SuppressWarnings("unchecked")
   private BeanItemContainer<SampleBean> createSampleContainer(List<Sample> samples, String id) {
 
@@ -823,7 +1128,8 @@ public class DataHandler {
 
     return sample_container;
   }
-
+*/
+  /*
   private BeanItemContainer<DatasetBean> createDatasetContainer(List<DataSet> datasets, String id) {
 
     HierarchicalContainer dataset_container = new HierarchicalContainer();
@@ -869,7 +1175,8 @@ public class DataHandler {
 
     return dataset_container;
   }
-
+*/
+  
   public void registerDatasetInTable(DataSet d, FileInfoDssDTO[] filelist,
       HierarchicalContainer dataset_container, String project, String sample, Timestamp ts,
       String sampleType, Object parent) {
@@ -1108,12 +1415,12 @@ public class DataHandler {
    * @param project openBIS project
    * @return
    */
-  public Map<String, Integer> computeProjectStatuses(String projectId) {
+  public Map<String, Integer> computeProjectStatuses(ProjectBean projectBean) {
 
-    Project p = this.openBisClient.getProjectByCode(projectId);
+    //Project p = this.openBisClient.getProjectByCode(projectId);
     Map<String, Integer> res = new HashMap<String, Integer>();
-    BeanItemContainer<ExperimentBean> cont =
-        (BeanItemContainer<ExperimentBean>) experimentMap.get(p.getIdentifier());
+    BeanItemContainer<ExperimentBean> cont = projectBean.getExperiments();
+        
     // project was planned (otherwise it would hopefully not exist :) )
     res.put("Project Planned", 1);
     // design is pre-registered to the test sample level
@@ -1128,9 +1435,10 @@ public class DataHandler {
     }
     res.put("Experimental Design registered", prereg);
     // data is uploaded
-    if (datasetMap.get(p.getIdentifier()) != null)
-      res.put("Data Registered", 1);
-    else
+    //TODO fix that
+    //if (datasetMap.get(p.getIdentifier()) != null)
+    //  res.put("Data Registered", 1);
+   // else
       res.put("Data Registered", 0);
     return res;
   }

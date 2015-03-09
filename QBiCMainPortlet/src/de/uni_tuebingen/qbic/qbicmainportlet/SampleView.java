@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import javax.xml.bind.JAXBException;
+
 import helpers.Utils;
 import model.SampleBean;
 
@@ -109,7 +111,14 @@ public class SampleView extends VerticalLayout implements View{
     this.vert.addComponent(buttonLayout);
 
     this.table.setContainerDataSource(sampleBean.getDatasets());
-    this.table.setVisibleColumns((Object[]) SAMPLEVIEW_TABLE_COLUMNS);
+    //this.table.setVisibleColumns((Object[]) SAMPLEVIEW_TABLE_COLUMNS);
+    
+    this.table.setVisibleColumns(new Object[]{"name", "type", "registrationDate", "fileSize"});
+    this.table.setColumnHeader("name", "Name");
+    this.table.setColumnHeader("type", "Type");
+    this.table.setColumnHeader("registrationDate", "Registration Date");
+    this.table.setColumnHeader("fileSize", "Size");
+
     this.id = id;
     
     //TODO FIX THAT
@@ -129,7 +138,7 @@ public class SampleView extends VerticalLayout implements View{
 
     vert.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
     
     MenuBar menubar = new MenuBar();
     // A top-level menu item that opens a submenu
@@ -138,7 +147,8 @@ public class SampleView extends VerticalLayout implements View{
     menubar.setHtmlContentAllowed(true);
     this.vert.addComponent(menubar);
 
-    menubar.addStyleName("qbicmainportlet");
+    //menubar.addStyleName("qbicmainportlet");
+    menubar.addStyleName("user-menu");
     menubar.setWidth(100.0f, Unit.PERCENTAGE);    
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
@@ -166,8 +176,7 @@ public class SampleView extends VerticalLayout implements View{
     sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
     sampleDescriptionContent.addComponent(new Label(String.format("%s.", sampleBean.getType())));
     
-    //TODO 
-    //sampleDescriptionContent.addComponent(new Label(sampleBean.generateParentsFormattedString(), ContentMode.HTML));
+    sampleDescriptionContent.addComponent(new Label(sampleBean.getParentsFormattedString(), ContentMode.HTML));
     sampleDescription.addComponent(sampleDescriptionContent);
     sampleDescription.setMargin(true);
     this.vert.addComponent(sampleDescription);
@@ -207,8 +216,12 @@ public class SampleView extends VerticalLayout implements View{
     propertiesContent.setCaption("Properties");
     propertiesContent.setIcon(FontAwesome.LIST_UL);
     
-    //TODO 
-    //propertiesContent.addComponent(new Label(sampleBean.generatePropertiesFormattedString(), ContentMode.HTML));  
+    try {
+      propertiesContent.addComponent(new Label(sampleBean.getPropertiesFormattedString(), ContentMode.HTML));
+    } catch (JAXBException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }  
     properties.addComponent(propertiesContent);
     properties.setMargin(true);
     this.vert.addComponent(properties);
@@ -219,43 +232,11 @@ public class SampleView extends VerticalLayout implements View{
     experimentalFactorsContent.setCaption("Experimental Factors");
     experimentalFactorsContent.setIcon(FontAwesome.TH);
     
-    //TODO 
-    //experimentalFactorsContent.addComponent(new Label(sampInformation.xmlPropertiesFormattedString, ContentMode.HTML));  
+    experimentalFactorsContent.addComponent(new Label(sampleBean.getXmlPropertiesFormattedString(), ContentMode.HTML));  
     experimentalFactors.addComponent(experimentalFactorsContent);
     experimentalFactors.setMargin(true);
     this.vert.addComponent(experimentalFactors);
-    
-    /*VerticalLayout statistics = new VerticalLayout();
-
-    statistics
-        .addComponent(new Label(String.format("Kind: %s", sampInformation.sampleType)));
-    statistics.addComponent(new Label(String.format("# Datasets: %s",
-        sampInformation.numberOfDatasets)));
-
-    statistics.addComponent(new Label(sampInformation.propertiesFormattedString, ContentMode.HTML));
-
-    this.vert.setSpacing(true);
-    this.vert.setMargin(true);
-    this.vert.addComponent(statistics);
-
-    Label parents = new Label(sampInformation.parentsFormattedString, ContentMode.HTML);
-
-    statistics.addComponent(parents);
-
-    if (sampInformation.numberOfDatasets > 0) {
-
-      String lastDataset = "No Datasets available!";
-      if (sampInformation.lastChangedDataset != null) {
-        lastDataset = sampInformation.lastChangedDataset.toString();
-        statistics.addComponent(new Label(String.format(
-            "Last Change: %s",
-            String.format("Dataset added on %s",
-                lastDataset))));
-      } else {
-        statistics.addComponent(new Label(lastDataset));
-      }
-    }
-    */
+   
     // Table (containing datasets) section
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
@@ -340,7 +321,8 @@ public class SampleView extends VerticalLayout implements View{
     //System.out.println("navigateToLabel: " + navigateToLabel);
     DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
-      this.setContainerDataSource(dh.getSampleInformation(currentValue), currentValue);
+      //TODO fix data handler method
+      this.setContainerDataSource(dh.getSample(currentValue), currentValue);
     } catch (Exception e) {
       System.out.println("Exception in SampleView.enter");
       // e.printStackTrace();

@@ -2,6 +2,7 @@ package model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import com.vaadin.ui.CheckBox;
@@ -38,7 +39,7 @@ public class DatasetBean implements Serializable {
   // path to the actual file or directory of this dataset on the dss.
   private String dssPath;
   // date of the registration of this dataset (not necessary when data arrives)
-  private Timestamp registrationDate;
+  private Date registrationDate;
   // name of the registrator
   // TODO class user or liferay user?
   private String registrator;
@@ -55,7 +56,7 @@ public class DatasetBean implements Serializable {
 
   public DatasetBean(CheckBox isSelected, ProjectBean project, SampleBean sample,
       ExperimentBean experiment, String code, String name, String type, long fileSize,
-      String humanReadableFileSize, String dssPath, Timestamp registrationDate, String registrator,
+      String humanReadableFileSize, String dssPath, Date registrationDate, String registrator,
       boolean isDirectory, DatasetBean parent, DatasetBean root, List<DatasetBean> children) {
     this.isSelected = isSelected;
     this.project = project;
@@ -73,6 +74,10 @@ public class DatasetBean implements Serializable {
     this.parent = parent;
     this.root = root;
     this.children = children;
+  }
+
+  public DatasetBean() {
+    // TODO Auto-generated constructor stub
   }
 
   public boolean hasParent(){
@@ -220,11 +225,11 @@ public class DatasetBean implements Serializable {
     this.dssPath = fileDownloadLink;
   }
 
-  public Timestamp getRegistrationDate() {
+  public Date getRegistrationDate() {
     return registrationDate;
   }
 
-  public void setRegistrationDate(Timestamp registrationDate) {
+  public void setRegistrationDate(Date registrationDate) {
     this.registrationDate = registrationDate;
   }
 
@@ -266,11 +271,12 @@ public class DatasetBean implements Serializable {
     return true;
   }
 
-  public CheckBox isSelected() {
+  public CheckBox getIsSelected() {
     return isSelected;
   }
 
   public void setSelected(boolean isSelected) {
+    this.isSelected = new CheckBox();
     this.isSelected.setValue(isSelected);
   }
 
