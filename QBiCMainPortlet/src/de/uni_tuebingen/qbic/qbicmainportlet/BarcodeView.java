@@ -353,7 +353,7 @@ public class BarcodeView extends VerticalLayout implements View {
 
     projectview_content.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
 
 
     // table section
@@ -442,7 +442,7 @@ public class BarcodeView extends VerticalLayout implements View {
     List<String> barcodeExperiments =
         new ArrayList<String>(Arrays.asList("Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION"));
     List<ExperimentBarcodeSummaryBean> beans = new ArrayList<ExperimentBarcodeSummaryBean>();
-    for (Experiment e : openbis.getExperimentsOfProjectByCode(project)) {
+    for (Experiment e : openbis.getExperimentsOfProjectByIdentifier(project)) {
       String type = e.getExperimentTypeCode();
       if (barcodeExperiments.contains(type)) {
         String expCode = e.getCode();
