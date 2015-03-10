@@ -2,6 +2,7 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.Utils;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
@@ -29,6 +30,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -37,6 +39,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -343,13 +346,13 @@ public class ProjectView extends VerticalLayout implements View {
     // status bar section
 
     VerticalLayout status = new VerticalLayout();
+    
+    // use getProgress of projectBean ?
     VerticalLayout statusContent =
     this.createProjectStatusComponent(datahandler.computeProjectStatuses(projectBean));
     statusContent.setCaption("Status");
     statusContent.setIcon(FontAwesome.CLOCK_O);
-    
-    //statusContent.addComponent(projectBean.getProgress());
-    
+        
     //TODO
     //statusContent.addComponent(new Label(projectInformation.statusMessage));
     statusContent.setSpacing(true);
@@ -392,10 +395,11 @@ public class ProjectView extends VerticalLayout implements View {
     graphSection.setWidth("100%");
     graphSectionContent.setWidth("100%");
 
-    /*
+    
     try {
       GraphGenerator graphFrame = new GraphGenerator(projectBean);
       Resource resource = graphFrame.getRes();
+      System.out.println(resource);
       if (resource != null) {
         Image graphImage = new Image("", graphFrame.getRes());
         graphSectionContent.addComponent(graphImage);
@@ -403,9 +407,10 @@ public class ProjectView extends VerticalLayout implements View {
         projectview_content.addComponent(graphSection);
       }
     } catch (IOException e) {
+      System.out.println(e);
       LOGGER.error("graph creation failed", e.getCause());
     }
-    */
+    
 
     // HorizontalLayout head = new HorizontalLayout();
     // head.addComponent(statistics);

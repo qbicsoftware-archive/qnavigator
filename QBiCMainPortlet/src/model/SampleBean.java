@@ -26,15 +26,15 @@ public class SampleBean implements Comparable<Object> {
   // Map containing parents of the sample and the corresponding sample types
   //private Map<String, String> parents;
   private List<Sample> parents;
+  private List<Sample> children;
   private BeanItemContainer<DatasetBean> datasets;
   private Date lastChangedDataset;
   private Map<String, String> properties;
   private Map<String, String> typeLabels;
-  private String xmlPropertiesFormattedString;
 
   public SampleBean(String id, String code, String type, List<Sample> parents,
       BeanItemContainer<DatasetBean> datasets, Date lastChangedDataset,
-      Map<String, String> properties, Map<String, String> typeLabels, String xmlPropertiesFormattedString) {
+      Map<String, String> properties, Map<String, String> typeLabels, List<Sample> children) {
     super();
     this.id = id;
     this.code = code;
@@ -44,7 +44,7 @@ public class SampleBean implements Comparable<Object> {
     this.lastChangedDataset = lastChangedDataset;
     this.properties = properties;
     this.typeLabels = typeLabels;
-    this.xmlPropertiesFormattedString = xmlPropertiesFormattedString;
+    this.children = children;
   }
   
   public SampleBean() {
@@ -134,18 +134,6 @@ public class SampleBean implements Comparable<Object> {
   public void setProperties(Map<String, String> properties) {
     this.properties = properties;
   }
-
-
-
-  public String getXmlPropertiesFormattedString() {
-    return xmlPropertiesFormattedString;
-  }
-
-
-
-  public void setXmlPropertiesFormattedString(String xmlPropertiesFormattedString) {
-    this.xmlPropertiesFormattedString = xmlPropertiesFormattedString;
-  }
   
   public Map<String, String> getTypeLabels() {
     return typeLabels;
@@ -193,8 +181,26 @@ public class SampleBean implements Comparable<Object> {
     }
   }
   
-  public String getPropertiesFormattedString() throws JAXBException {
+  public String generatePropertiesFormattedString() throws JAXBException {
     String propertiesBottom = "<ul> ";
+
+    Iterator<Entry<String, String>> it = this.getProperties().entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry pairs = (Map.Entry) it.next();
+      if (pairs.getKey().equals("Q_PROPERTIES")) {
+        continue;
+        }
+      else {
+       propertiesBottom += "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
+      }
+    }
+    propertiesBottom += "</ul>";
+
+    return propertiesBottom;
+  }
+  
+  public String generateXMLPropertiesFormattedString() throws JAXBException {
+
     String xmlPropertiesBottom = "<ul> ";
 
     Iterator<Entry<String, String>> it = this.getProperties().entrySet().iterator();
@@ -212,16 +218,20 @@ public class SampleBean implements Comparable<Object> {
 
           xmlPropertiesBottom +=
               "<li><b>"
-                  + (pairsProperties.getKey() + ":</b> " + pairsProperties.getValue() + "</li>");
+                  + (typeLabels.get(pairsProperties.getKey()) + ":</b> " + pairsProperties.getValue() + "</li>");
         }
-      } else {
-        propertiesBottom +=
-            "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
+        break;
       }
     }
-    propertiesBottom += "</ul>";
+    return xmlPropertiesBottom;
+}
 
-    return propertiesBottom + xmlPropertiesBottom;
+  public List<Sample> getChildren() {
+    return children;
+  }
+
+  public void setChildren(List<Sample> children) {
+    this.children = children;
   }
   
 }

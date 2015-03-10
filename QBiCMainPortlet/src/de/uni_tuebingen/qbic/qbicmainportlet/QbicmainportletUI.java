@@ -366,11 +366,14 @@ public class QbicmainportletUI extends UI {
                   experiment.getRegistrationDetails().getUserId(), new Timestamp(experiment.getRegistrationDetails().getRegistrationDate().getTime()), null, null, null, null, null,null);
               allExperimentsContainer.addBean(newExperimentBean);
             }
+            
+            if(experiment_identifiers.size() > 0) {
+              List<DataSet> datasets = dh.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers);
+              newProjectBean.setContainsData(datasets.size() != 0);
+            } 
           }
         }
            
-          //newProjectBean.setContainsData(datasets.size() != 0);
-
           //StringBuilder lce = new StringBuilder();
           //StringBuilder lcs = new StringBuilder();
           //dh.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);

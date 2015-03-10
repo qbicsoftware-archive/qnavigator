@@ -897,6 +897,7 @@ public class DataHandler {
     newSampleBean.setType(sample.getSampleTypeCode());
     newSampleBean.setProperties(properties);
     newSampleBean.setParents(this.openBisClient.getParents(sample.getCode()));
+    newSampleBean.setChildren(this.openBisClient.getFacade().listSamplesOfSample(sample.getPermId()));
     
     BeanItemContainer<DatasetBean> datasetBeans = new BeanItemContainer<DatasetBean>(DatasetBean.class);
     List<DataSet> datasets = this.openBisClient.getDataSetsOfSampleByIdentifier(sample.getIdentifier());

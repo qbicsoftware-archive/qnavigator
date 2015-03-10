@@ -638,6 +638,7 @@ public class OpenBisClient {// implements Serializable {
     List<Sample> samps = getSamplesOfProject(projectIdentifier);
     List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> res =
         new ArrayList<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
+    
     for (Iterator<Sample> iterator = samps.iterator(); iterator.hasNext();) {
       Sample sample = (Sample) iterator.next();
       res.addAll(getDataSetsOfSampleByIdentifier(sample.getIdentifier()));

@@ -217,7 +217,7 @@ public class SampleView extends VerticalLayout implements View{
     propertiesContent.setIcon(FontAwesome.LIST_UL);
     
     try {
-      propertiesContent.addComponent(new Label(sampleBean.getPropertiesFormattedString(), ContentMode.HTML));
+      propertiesContent.addComponent(new Label(sampleBean.generatePropertiesFormattedString(), ContentMode.HTML));
     } catch (JAXBException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -232,7 +232,12 @@ public class SampleView extends VerticalLayout implements View{
     experimentalFactorsContent.setCaption("Experimental Factors");
     experimentalFactorsContent.setIcon(FontAwesome.TH);
     
-    experimentalFactorsContent.addComponent(new Label(sampleBean.getXmlPropertiesFormattedString(), ContentMode.HTML));  
+    try {
+      experimentalFactorsContent.addComponent(new Label(sampleBean.generateXMLPropertiesFormattedString(), ContentMode.HTML));
+    } catch (JAXBException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }  
     experimentalFactors.addComponent(experimentalFactorsContent);
     experimentalFactors.setMargin(true);
     this.vert.addComponent(experimentalFactors);

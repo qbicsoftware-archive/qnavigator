@@ -241,10 +241,10 @@ public class ExperimentBean implements Serializable {
       } else {
         propertiesBottom +=
             "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
-        propertiesBottom +=
-            "<li><b>"
-                + (pairs.getKey().toString() + ":</b> "
-                    + pairs.getValue() + "</li>");
+        //propertiesBottom +=
+        //    "<li><b>"
+        //       + (pairs.getKey().toString() + ":</b> "
+        //            + pairs.getValue() + "</li>");
       }
     }
     propertiesBottom += "</ul>";
