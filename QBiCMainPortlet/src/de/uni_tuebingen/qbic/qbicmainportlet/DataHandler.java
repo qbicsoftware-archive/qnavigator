@@ -904,7 +904,9 @@ public class DataHandler {
     Date lastModifiedDate = new Date();
     
     for (DataSet dataset: datasets) {
-      datasetBeans.addBean(this.getDataset(dataset));      
+      DatasetBean datasetBean = this.getDataset(dataset);
+      datasetBean.setSample(newSampleBean);
+      datasetBeans.addBean(datasetBean);      
       Date date = dataset.getRegistrationDate();
       if (date.after(lastModifiedDate)) {
         lastModifiedDate.setTime(date.getTime());
@@ -931,26 +933,36 @@ public class DataHandler {
   private DatasetBean createDatasetBean(DataSet dataset){
     
     DatasetBean newDatasetBean = new DatasetBean();
-        
-    
+    FileInfoDssDTO[] filelist = dataset.listFiles("original", true);
+    String download_link = filelist[0].getPathInDataSet();
+    String[] splitted_link = download_link.split("/");
+    String fileName = splitted_link[splitted_link.length - 1];
     newDatasetBean.setCode(dataset.getCode());
-    // Whats the Name ?
-    newDatasetBean.setName(dataset.tryGetInternalPathInDataStore());
+    newDatasetBean.setName(fileName);
+    StringBuilder dssPath =  new StringBuilder(dataset.getDataSetDss().tryGetInternalPathInDataStore());
+    dssPath.append("/");
+    dssPath.append(filelist[0].getPathInDataSet());
+    newDatasetBean.setDssPath(dssPath.toString());
     newDatasetBean.setType(dataset.getDataSetTypeCode());
-    //TODO 
-    //newDatasetBean.setProject(dataset.);
-   // newDatasetBean.setExperiment(this.getExperiment(dataset.getExperimentIdentifier()));
-    //newDatasetBean.setSample(this.getSample(dataset.getSampleIdentifierOrNull()));
-    
+    newDatasetBean.setFileSize(filelist[0].getFileSize());
     //TODO 
     //newDatasetBean.setRegistrator(registrator);
     newDatasetBean.setRegistrationDate(dataset.getRegistrationDate());
-    //TODO 
-    //newDatasetBean.setDirectory(dataset.);
+    
     newDatasetBean.setParent(null);
-    newDatasetBean.setRoot(null);
-    newDatasetBean.setRoot(null);
+    newDatasetBean.setRoot(newDatasetBean);
+    
     newDatasetBean.setSelected(false);
+    
+    
+    if(filelist[0].isDirectory()){
+      newDatasetBean.setDirectory(filelist[0].isDirectory());
+      String folderPath = filelist[0].getPathInDataSet();
+      FileInfoDssDTO[] subList = dataset.listFiles(folderPath, false);      
+      datasetBeanChildren(newDatasetBean, subList, dataset);
+    }
+
+
     
     //TODO
     //this.fileSize = fileSize;
@@ -959,7 +971,40 @@ public class DataHandler {
 
     return newDatasetBean;  
   }
-
+  public void datasetBeanChildren(DatasetBean datasetBean, FileInfoDssDTO[] fileList, DataSet d){
+    ArrayList<DatasetBean> beans = new ArrayList<DatasetBean>();
+    for(FileInfoDssDTO dto: fileList){
+      DatasetBean newBean = new DatasetBean();
+      newBean.setCode(datasetBean.getCode());
+      StringBuilder dssPath =  new StringBuilder(datasetBean.getDssPath());
+      dssPath.append("/");
+      dssPath.append(dto.getPathInDataSet());      
+      newBean.setDssPath(dssPath.toString());
+      newBean.setExperiment(datasetBean.getExperiment());
+      String download_link = dto.getPathInDataSet();
+      String[] splitted_link = download_link.split("/");
+      newBean.setFileName(splitted_link[splitted_link.length - 1]);
+      newBean.setFileSize(dto.getFileSize());
+      newBean.setFileType(d.getDataSetTypeCode());
+      newBean.setHumanReadableFileSize(DashboardUtil.humanReadableByteCount(dto.getFileSize(), true));
+      newBean.setParent(datasetBean);
+      newBean.setProject(datasetBean.getProject());
+      newBean.setRegistrationDate(datasetBean.getRegistrationDate());
+      newBean.setRegistrator(datasetBean.getRegistrator());
+      newBean.setRoot(datasetBean.getRoot());
+      newBean.setSample(datasetBean.getSample());
+      newBean.setSelected(datasetBean.getIsSelected().getValue());
+      if(dto.isDirectory()){       
+        newBean.setDirectory(true);
+        String folderPath = dto.getPathInDataSet();
+        FileInfoDssDTO[] subList = d.listFiles(folderPath, false); 
+        datasetBeanChildren(newBean, subList,d);
+      }
+      beans.add(newBean);
+      
+    }
+    datasetBean.setChildren(beans);
+  }
   /*
   @SuppressWarnings("unchecked")
   private BeanItemContainer<ProjectBean> createProjectContainer(List<Project> projs, String spaceID)
@@ -1094,7 +1139,7 @@ public class DataHandler {
   }
 */
   
-  /*
+  /*      beans.add(newBean);
   @SuppressWarnings("unchecked")
   private BeanItemContainer<SampleBean> createSampleContainer(List<Sample> samples, String id) {
 

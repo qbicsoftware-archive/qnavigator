@@ -156,9 +156,9 @@ public class ProjectView extends VerticalLayout implements View {
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
     downloadProject.addSeparator();
-    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
     DataHandler datahandler =
         (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    /*PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
     HierarchicalContainer datasetContainer = null;
     try {
       //TODO fix that !
@@ -166,7 +166,8 @@ public class ProjectView extends VerticalLayout implements View {
     } catch (Exception e) {
       LOGGER.error("failed to set dataset container for project: " + this.id);
       datasetContainer = null;
-    }
+    }*/
+    /*
     if (datasetContainer == null || datasetContainer.getItemIds().isEmpty()) {
       downloadProject.setEnabled(false);
     } else {
@@ -181,14 +182,16 @@ public class ProjectView extends VerticalLayout implements View {
         }
       }
       portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
+      
       // add sub Item to download all projects
-      downloadProject
+      /*downloadProject
           .addItem(
               "<a href=\""
                   + (String) portletSession
                       .getAttribute("resURL", PortletSession.APPLICATION_SCOPE)
                   + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
-              null);
+              null);*/
+      //Open DatasetView
       downloadProject.addItem("Dataset Overview", new MenuBar.Command() {
 
         @Override
@@ -206,7 +209,7 @@ public class ProjectView extends VerticalLayout implements View {
           state.notifyObservers(message);
         }
       });
-    }
+    /*}*/
 
 
     MenuItem manage = menubar.addItem("Manage your data", null, null);

@@ -192,11 +192,17 @@ public class DatasetBean implements Serializable {
   public void setSample(SampleBean sample) {
     this.sample = sample;
   }
-
+  /**
+   * same as {@link getName}
+   * @return
+   */
   public String getFileName() {
     return name;
   }
-
+  /**
+   * same as {@link setName}
+   * @return
+   */
   public void setFileName(String fileName) {
     this.name = fileName;
   }
@@ -215,14 +221,6 @@ public class DatasetBean implements Serializable {
 
   public void setFileSize(long fileSize) {
     this.fileSize = fileSize;
-  }
-
-  public String getFileDownloadLink() {
-    return dssPath;
-  }
-
-  public void setFileDownloadLink(String fileDownloadLink) {
-    this.dssPath = fileDownloadLink;
   }
 
   public Date getRegistrationDate() {
