@@ -161,39 +161,21 @@ public class ProjectView extends VerticalLayout implements View {
     downloadProject.addSeparator();
     DataHandler datahandler =
         (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    /*PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-    HierarchicalContainer datasetContainer = null;
-    try {
-      //TODO fix that !
-      //datasetContainer = (HierarchicalContainer) datahandler.getDatasets(this.id, "project");
-    } catch (Exception e) {
-      LOGGER.error("failed to set dataset container for project: " + this.id);
-      datasetContainer = null;
-    }*/
-    /*
-    if (datasetContainer == null || datasetContainer.getItemIds().isEmpty()) {
-      downloadProject.setEnabled(false);
-    } else {
-      Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
-          new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-      for (Object itemId : datasetContainer.getItemIds()) {
-        // if((datasetContainer.getChildren(itemId) != null) &&
-        // !datasetContainer.getChildren(itemId).isEmpty()) {
-        if (datasetContainer.getParent(itemId) == null) {
-          addentry((Integer) itemId, datasetContainer, entries,
-              (String) datasetContainer.getItem(itemId).getItemProperty("CODE").getValue());
-        }
-      }
-      portletSession.setAttribute("qbic_download", entries, PortletSession.APPLICATION_SCOPE);
+    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+    //TODO getContainsData is always false!! Should be set correctly
+    //if(projectBean.getContainsData()){
+    //  downloadProject.setEnabled(false);
+    //}
+     portletSession.setAttribute("qbic_download", projectBean, PortletSession.APPLICATION_SCOPE);
       
       // add sub Item to download all projects
-      /*downloadProject
+      downloadProject
           .addItem(
               "<a href=\""
                   + (String) portletSession
                       .getAttribute("resURL", PortletSession.APPLICATION_SCOPE)
                   + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
-              null);*/
+              null);
       //Open DatasetView
       downloadProject.addItem("Dataset Overview", new MenuBar.Command() {
 
@@ -212,7 +194,6 @@ public class ProjectView extends VerticalLayout implements View {
           state.notifyObservers(message);
         }
       });
-    /*}*/
 
 
     MenuItem manage = menubar.addItem("Manage your data", null, null);
@@ -399,7 +380,7 @@ public class ProjectView extends VerticalLayout implements View {
     try {
       GraphGenerator graphFrame = new GraphGenerator(projectBean);
       Resource resource = graphFrame.getRes();
-      System.out.println(resource);
+      //System.out.println(resource);
       if (resource != null) {
         Image graphImage = new Image("", graphFrame.getRes());
         graphSectionContent.addComponent(graphImage);

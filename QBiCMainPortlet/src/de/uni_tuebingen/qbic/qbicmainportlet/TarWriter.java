@@ -286,4 +286,12 @@ public class TarWriter {
     }
     return total_length_file_sizes + append_zeros + mod;
   }
+
+  /**
+   * returns the content type of this particular writer
+   * @return
+   */
+  public String getContentType() {
+    return "application/x-tar";
+  }
 }

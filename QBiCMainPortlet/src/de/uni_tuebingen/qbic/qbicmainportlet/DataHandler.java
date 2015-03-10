@@ -297,8 +297,8 @@ public class DataHandler {
   public ProjectBean getProject(Object proj) {
     Project project;
     ProjectBean newProjectBean;
-    System.out.println(proj);
-    System.out.println(this.projectMap);
+    //System.out.println(proj);
+   //System.out.println(this.projectMap);
 
     if (proj instanceof Project) {
       project = (Project) proj;
@@ -995,6 +995,7 @@ public class DataHandler {
       newBean.setRoot(datasetBean.getRoot());
       newBean.setSample(datasetBean.getSample());
       newBean.setSelected(datasetBean.getIsSelected().getValue());
+      newBean.setDirectory(false);
       if(dto.isDirectory()){       
         newBean.setDirectory(true);
         String folderPath = dto.getPathInDataSet();

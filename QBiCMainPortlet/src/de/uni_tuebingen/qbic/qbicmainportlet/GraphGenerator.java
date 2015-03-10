@@ -125,7 +125,7 @@ public class GraphGenerator
 	        List<SampleBean> samps = new ArrayList<SampleBean>();
 
 			for (SampleBean s : all_project_samples) {
-			  System.out.println(s);
+			  //System.out.println(s);
 				//String key = s.getSampleTypeCode();
 			    String key = s.getType();
 			  
@@ -150,7 +150,7 @@ public class GraphGenerator
 			}
 
 
-			System.out.println(sample_count);
+			//System.out.println(sample_count);
 			if (sample_count.containsKey("Q_BIOLOGICAL_ENTITY")) {
 				Object dummy_node_level1 = graph.insertVertex(parent, null, sample_count.get("Q_BIOLOGICAL_ENTITY") + "\n" + "biological entities", 20,  20,  width, height, "NONE;strokeWidth=0;strokeColor=#FFFFFF;fillColor=#FFFFFF");
 

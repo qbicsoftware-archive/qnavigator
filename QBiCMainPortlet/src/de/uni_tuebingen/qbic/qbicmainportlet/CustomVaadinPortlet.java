@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,6 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import model.DatasetBean;
+import model.ExperimentBean;
+import model.ProjectBean;
+import model.SampleBean;
 
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
@@ -107,69 +112,113 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     DataHandler dataHandler =
         (DataHandler) request.getPortletSession().getAttribute("datahandler",
             PortletSession.APPLICATION_SCOPE);
-    Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
-        (Map<String, AbstractMap.SimpleEntry<String, Long>>) request.getPortletSession()
+    Object bean =
+        (Object) request.getPortletSession()
             .getAttribute("qbic_download", PortletSession.APPLICATION_SCOPE);
-    if (entries == null || entries.isEmpty()) {
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
+    if(bean instanceof ProjectBean){
+      serveProject((ProjectBean)bean, new TarWriter(), response, dataHandler.openBisClient );
+    }
+    else{
       response.setContentType("text/javascript");
       response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
           String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
       response.getWriter().append("Please select at least one dataset for download");
-      // super.serveResource(request, response);
       return;
     }
-
-    // request.getPortletSession().setAttribute("qbic_download_entries",null,PortletSession.APPLICATION_SCOPE);
-    // System.out.println(entries);
-    /*
-     * if(dataHandler == null || entries == null || !(dataHandler instanceof DataHandler) ||
-     * !(entries instanceof Map<?,?>)){ response.setContentType("text/plain");
-     * response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
-     * String.valueOf(HttpServletResponse.SC_NOT_FOUND)); response.getWriter().append(
-     * "Oh Dear. Something went wrong.\nRetry later or contact your project manager.\n"+ "Time: " +
-     * (new Date()).toString()); return; }
-     */
-    TarWriter tarWriter = new TarWriter();
-    String filename = "all.tar";
-    // Sets content type
-    response.setContentType("application/x-tar");
-    String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
-    response.setProperty("Content-Disposition", contentDispositionValue);
+  }
+  /**
+   * 
+   * Note: the provided stream will be closed.
+   * @param bean bean containing datasets.
+   * @param writer writes
+   * @param response writer writes to its outputstream
+   * @param openbisClient
+   */
+  private void serveProject(ProjectBean bean, TarWriter writer, ResourceResponse response, OpenBisClient openbisClient) {
+    String filename = bean.getCode() + ".tar";
+    
+    response.setContentType(writer.getContentType());
+    StringBuilder sb = new StringBuilder("attachement; filename=\"");
+    sb.append(filename);
+    sb.append("\"");
+    response.setProperty("Content-Disposition", sb.toString());
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
+    
+    long tarFileLength = writer.computeTarLength2(entries);
+    // response.setContentLength((int) tarFileLength);
+    // For some reason setContentLength does not work
+    response.setProperty("Content-Length", String.valueOf(tarFileLength));
     try {
-      if (entries != null) {
-        long tarFileLength = tarWriter.computeTarLength2(entries);
-        // response.setContentLength((int) tarFileLength);
-        // For some reason setContentLength does not work
-        response.setProperty("Content-Length", String.valueOf(tarFileLength));
-        tarWriter.setOutputStream(response.getPortletOutputStream());
-
-        Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
-        Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
-        while (it.hasNext()) {
-          Entry<String, SimpleEntry<String, Long>> entry = it.next();
-
-          String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
-          String[] splittedFilePath = entryKey.split("/");
-
-          if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
-            tarWriter.writeEntry(entry.getKey(), dataHandler.openBisClient.getDatasetStream(entry.getValue()
-                .getKey()), entry.getValue().getValue());
-          } else {
-            tarWriter.writeEntry(entry.getKey(), dataHandler.openBisClient.getDatasetStream(entry.getValue()
-                .getKey(), entryKey), entry.getValue().getValue());
-          }
-        }
-
-        // tarWriter.writeEntry(entries);
-      }
-    } catch (Exception e) {
-      //
-      LOGGER.info("client aborted download.");
+      writer.setOutputStream(response.getPortletOutputStream());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
-    tarWriter.closeStream();
+    Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+    Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+    while (it.hasNext()) {
+      Entry<String, SimpleEntry<String, Long>> entry = it.next();
+      String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+      String[] splittedFilePath = entryKey.split("/");
+
+      if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
+            .getKey()), entry.getValue().getValue());
+      } else {
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
+            .getKey(), entryKey), entry.getValue().getValue());
+      }
+    }
+    writer.closeStream();
   }
 
+  Map<String, SimpleEntry<String, Long>> convertBeanToEntries(Object bean) {
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+    if(bean instanceof ProjectBean){
+      ProjectBean projectBean = (ProjectBean) bean;
+      for(ExperimentBean eb : projectBean.getExperiments().getItemIds()){
+        for(SampleBean sb : eb.getSamples().getItemIds()){
+          for(DatasetBean db : sb.getDatasets().getItemIds()){
+            addEntry(db, entries);          
+          }
+        }
+      }      
+    }
+    return entries;
+  }
+
+  Map<String, AbstractMap.SimpleEntry<String, Long>> addEntry(DatasetBean db, Map<String, AbstractMap.SimpleEntry<String, Long>> entries){
+    StringBuilder sb = new StringBuilder(db.getCode());
+    sb.append("/");
+    sb.append(db.getName());
+    if(db.isDirectory()){
+      for(DatasetBean child : db.getChildren()){
+        addChildrensEntry(child, entries, sb.toString());
+      }
+    }else{
+      entries.put(sb.toString(), new AbstractMap.SimpleEntry<String, Long>(db.getCode(), db.getFileSize()));
+    }
+    return entries;
+  }
+  
+
+  private Map<String, AbstractMap.SimpleEntry<String, Long>> addChildrensEntry(DatasetBean db, Map<String, SimpleEntry<String, Long>> entries,
+      String name) {
+    StringBuilder sb = new StringBuilder(name);
+    sb.append("/");
+    sb.append(db.getName());    
+    if(db.isDirectory()){
+      for(DatasetBean child : db.getChildren()){
+        addChildrensEntry(child, entries, sb.toString());
+      }
+    }else{
+      entries.put(sb.toString(), new AbstractMap.SimpleEntry<String, Long>(db.getCode(), db.getFileSize()));
+    }
+    return entries;
+    
+  }
 
   @Override
   protected VaadinPortletService createPortletService(
