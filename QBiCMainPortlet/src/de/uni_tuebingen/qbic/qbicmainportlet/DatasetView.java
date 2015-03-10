@@ -556,7 +556,7 @@ public class DatasetView extends VerticalLayout implements View {
 
     } catch (Exception e) {
       e.printStackTrace();
-      LOGGER.error(String.format("getting dataset failed for dataset %s", map.toString()), e.getCause());
+      LOGGER.error(String.format("getting dataset failed for dataset %s", map.toString()), e.getStackTrace());
     }
   }
   

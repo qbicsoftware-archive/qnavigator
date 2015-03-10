@@ -37,10 +37,28 @@ public class Log4j2Logger implements Logger {
 
   @Override
   public void error(String message, Throwable t) {
-    if(t != null && t.getStackTrace() != null && t.getStackTrace().length > 10){
+    if(t == null || t.getStackTrace() == null){
+      logger.error(message);
+      return;
+    }
+    else if(t.getStackTrace().length > 10){
       t.setStackTrace(Arrays.copyOfRange(t.getStackTrace(), 0, 10));
     }
     logger.error(message, t);
 
+  }
+
+  @Override
+  public void error(String message, StackTraceElement[] stackTraceElement) {
+    if(stackTraceElement == null){
+      logger.error(message);
+      return;
+    }
+    else if(stackTraceElement.length > 10){
+        stackTraceElement = Arrays.copyOfRange(stackTraceElement, 0, 10);
+      } 
+      Throwable t = new Throwable();
+      t.setStackTrace(stackTraceElement);
+      logger.error(message, t); 
   }
 }

@@ -388,8 +388,7 @@ public class ProjectView extends VerticalLayout implements View {
         projectview_content.addComponent(graphSection);
       }
     } catch (IOException e) {
-      System.out.println(e);
-      LOGGER.error("graph creation failed", e.getCause());
+      LOGGER.error("graph creation failed", e.getStackTrace());
     }
     
 
@@ -522,7 +521,7 @@ public class ProjectView extends VerticalLayout implements View {
         } catch (PortalException | SystemException e) {
           LOGGER.error(
               "reading out openbis members and matching their names to liferay users failed",
-              e.getCause());
+              e.getStackTrace());
         }
 
 

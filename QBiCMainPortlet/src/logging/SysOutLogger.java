@@ -55,10 +55,27 @@ public class SysOutLogger implements Logger {
   @Override
   public void error(String message, Throwable t) {
     log(getDateTime(), "ERROR", message);
-    t.setStackTrace(Arrays.copyOfRange(t.getStackTrace(), 0, 10));
+    if(t == null || t.getStackTrace() == null){
+      return;
+    }
+    else if(t.getStackTrace().length > 10){
+      t.setStackTrace(Arrays.copyOfRange(t.getStackTrace(), 0, 10));
+    }
+    
     System.out.println(t.getMessage());
   }
-
+  @Override
+  public void error(String message, StackTraceElement[] stackTraceElement) {
+    log(getDateTime(), "ERROR", message);
+    if(stackTraceElement == null){
+      return;
+    }
+    else if(stackTraceElement.length > 10){
+      stackTraceElement = Arrays.copyOfRange(stackTraceElement, 0, 10);
+    } 
+    System.out.println(stackTraceElement);
+    
+  }
   
   public void setLogLevel(LogLevel loglevel) {
     this.loglevel = loglevel;
@@ -87,5 +104,4 @@ public class SysOutLogger implements Logger {
     Date date = new Date();
     return dateFormat.format(date);
   }
-
 }

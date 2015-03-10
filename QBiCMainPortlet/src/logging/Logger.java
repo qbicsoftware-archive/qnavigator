@@ -51,4 +51,13 @@ public interface Logger {
    */
   public void error(String message, Throwable t);
 
+  /**
+   * Logs error message (severe fault) and adds the top 10 lines of the stack trace (to not overload
+   * the console)
+   * 
+   * @param message string to log
+   * @param stackTraceElement StackTraceElement to expand log
+   */
+  public void error(String message, StackTraceElement[] stackTraceElement);
+  
 }
