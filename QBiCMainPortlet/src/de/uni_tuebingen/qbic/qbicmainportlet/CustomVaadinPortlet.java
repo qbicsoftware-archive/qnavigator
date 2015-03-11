@@ -32,6 +32,8 @@ import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
 
+import main.OpenBisClient;
+
 /**
  * 
  * copied from:

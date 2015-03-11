@@ -60,6 +60,8 @@ import model.ProjectBean;
 import model.SampleBean;
 import model.SpaceBean;
 
+import main.OpenBisClient;
+
 /*
  * in portal-ext.properties the following settings must be set, in order to work
  * com.liferay.portal.servlet.filters.etag.ETagFilter=false
@@ -602,7 +604,7 @@ public class QbicmainportletUI extends UI {
   private void initConnection() {
     this.openBisConnection =
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
-            manager.getDataSourceUrl(), true);
+            manager.getDataSourceUrl());
     addDetachListener(new DetachListener() {
 
       @Override

@@ -48,6 +48,8 @@ import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+import main.OpenBisClient;
+
 public class BarcodeView extends VerticalLayout implements View {
 
   /**
@@ -75,6 +77,8 @@ public class BarcodeView extends VerticalLayout implements View {
   ArrayList<IBarcodeBean> barcodeBeans;
 
   private OpenBisClient openbis;
+  
+
 
   public BarcodeView(OpenBisClient openbisClient, FilterTable table, IndexedContainer datasource, String id, String scripts,
       String paths) {
@@ -102,9 +106,9 @@ public class BarcodeView extends VerticalLayout implements View {
 
   }
 
-  public BarcodeView(OpenBisClient openbisClient, String scripts, String path) {
+  public BarcodeView(OpenBisClient openBisClient, String scripts, String path) {
     // execute the above constructor with default settings, in order to have the same settings
-    this(openbisClient, new FilterTable(), new IndexedContainer(), "No project selected", scripts, path);
+    this(openBisClient, new FilterTable(), new IndexedContainer(), "No project selected", scripts, path);
   }
 
   public void setSizeFull() {

@@ -1,24 +1,15 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import model.DatasetBean;
@@ -26,13 +17,9 @@ import model.ExperimentBean;
 import model.ExperimentType;
 import model.ProjectBean;
 import model.SampleBean;
-import model.SpaceBean;
-import parser.Parser;
 import parser.PersonParser;
 import persons.Qperson;
-import properties.Qproperties;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
@@ -41,19 +28,17 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
-import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
+import main.OpenBisClient;
+
 //
 // class SpaceInformation {
 // public int numberOfProjects;
@@ -394,7 +379,7 @@ public class DataHandler {
       if (this.datasetMap.get((String) ds) != null) {
         newDatasetBean = this.datasetMap.get(ds);
       } else {
-        dataset = this.openBisClient.facade.getDataSet((String) ds);
+        dataset = this.openBisClient.getFacade().getDataSet((String) ds);
         newDatasetBean = this.createDatasetBean(dataset);
       }
     }
