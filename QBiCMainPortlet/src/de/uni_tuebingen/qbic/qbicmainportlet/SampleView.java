@@ -2,7 +2,6 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import javax.xml.bind.JAXBException;
 
-import helpers.Utils;
 import model.SampleBean;
 
 import org.tepi.filtertable.FilterTable;
@@ -12,26 +11,19 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinPortletSession;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Panel;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-@SuppressWarnings("deprecation")
 public class SampleView extends VerticalLayout implements View{
 
   /**
@@ -49,8 +41,10 @@ public class SampleView extends VerticalLayout implements View{
       "Dataset Type", "Registration Date", "Validated", "File Size"};
 
   private String id;
+  private DataHandler datahandler;
 
-  public SampleView(FilterTable table, HierarchicalContainer datasource, String id) {
+  public SampleView(DataHandler datahandler, FilterTable table, HierarchicalContainer datasource, String id) {
+    this.datahandler = datahandler;
     this.vert = new VerticalLayout();
     this.id = id;
 
@@ -69,24 +63,14 @@ public class SampleView extends VerticalLayout implements View{
 
     this.download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
     this.download.setEnabled(false);
-    //MpPortletListener mppl = new MpPortletListener(this.download, this.table);
-    //this.table.addValueChangeListener(mppl);
-    if (VaadinSession.getCurrent() instanceof VaadinPortletSession) {
-      VaadinPortletSession portletsession = (VaadinPortletSession) VaadinSession.getCurrent();
 
-      // Add a custom listener to handle action and
-      // render requests.
-     // portletsession.addPortletListener(mppl);
-
-    }
-    // this.tableClickChangeTreeView();
   }
 
-  public SampleView() {
+  public SampleView(DataHandler datahandler) {
     // execute the above constructor with default settings, in order to have the same settings
-    this(new FilterTable(), new HierarchicalContainer(), "No Sample has been selected!");
+    this(datahandler,new FilterTable(), new HierarchicalContainer(), "No Sample has been selected!");
   }
-
+  
   /**
    * sets the ContainerDataSource for showing it in a table and the id of the current Openbis
    * Sample. The id is shown in the caption.
@@ -324,10 +308,9 @@ public class SampleView extends VerticalLayout implements View{
     String currentValue = event.getParameters();
     //System.out.println("currentValue: " + currentValue);
     //System.out.println("navigateToLabel: " + navigateToLabel);
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
       //TODO fix data handler method
-      this.setContainerDataSource(dh.getSample(currentValue), currentValue);
+      this.setContainerDataSource(datahandler.getSample(currentValue), currentValue);
     } catch (Exception e) {
       System.out.println("Exception in SampleView.enter");
       // e.printStackTrace();

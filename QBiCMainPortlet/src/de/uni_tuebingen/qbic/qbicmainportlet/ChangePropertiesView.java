@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import logging.Log4j2Logger;
+import logging.Logger;
 import model.ExperimentBean;
 
   import org.tepi.filtertable.FilterTable;
@@ -59,14 +61,17 @@ import com.vaadin.ui.Image;
        * 
        */
       private static final long serialVersionUID = 8672873911284888801L;
+      static Logger LOGGER = new Log4j2Logger(ChangePropertiesView.class);
       static String navigateToLabel =  "changePropertiesView";
       private IndexedContainer datasets;
       private FormLayout form;
       private FieldGroup fieldGroup;
       VerticalLayout vert;
       String id;
+      private DataHandler datahandler;
         
-      public ChangePropertiesView(IndexedContainer datasource, String id) {
+      public ChangePropertiesView(DataHandler datahandler, IndexedContainer datasource, String id) {
+        this.datahandler = datahandler;
         vert = new VerticalLayout();
         this.id = id;
         this.datasets = datasource;
@@ -75,9 +80,9 @@ import com.vaadin.ui.Image;
       }
 
 
-      public ChangePropertiesView() {
+      public ChangePropertiesView(DataHandler datahandler) {
         // execute the above constructor with default settings, in order to have the same settings
-        this(new IndexedContainer(), "No Experiment selected");
+        this(datahandler, new IndexedContainer(), "No Experiment selected");
       }
       
       public void setContainerDataSource(final ExperimentBean experimentBean, final String id){
@@ -174,13 +179,11 @@ import com.vaadin.ui.Image;
     String currentValue = event.getParameters();
     System.out.println("currentValue: " + currentValue);
     System.out.println("navigateToLabel: " + navigateToLabel);
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
       //TODO fix datahandler method ?
-      this.setContainerDataSource(dh.getExperiment(currentValue), currentValue);
+      this.setContainerDataSource(datahandler.getExperiment(currentValue), currentValue);
     } catch (Exception e) {
-      System.out.println("Exception in SampleView.enter");
-      //e.printStackTrace();
+      LOGGER.error("failed to load view with paramters: "+ currentValue, e.getStackTrace());
     }
     
   }

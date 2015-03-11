@@ -27,9 +27,6 @@ import model.SampleBean;
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
 
-import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
-import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
-
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -82,29 +79,19 @@ public class DatasetView extends VerticalLayout implements View {
       ""));
 
   private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Project", "Sample",
-      "Sample Type", "File Name", "Dataset Type", "Registration Date",
-      "File Size"};
-  
-  
-  
-  public DatasetView() {
+      "Sample Type", "File Name", "Dataset Type", "Registration Date", "File Size"};
+
+  public DatasetView(DataHandler dh) {
+
+    this.datahandler = dh;
+
     this.vert = new VerticalLayout();
     this.table = buildFilterTable();
     // this.setContent(vert);
     this.addComponent(vert);
   }
 
-  public DatasetView(DataHandler dh) {
-    
-    this.datahandler = dh;
-    
-    this.vert = new VerticalLayout();
-    this.table = buildFilterTable();
-    // this.setContent(vert);
-    this.addComponent(vert);
-  }
-  
-  
+
   public DatasetView(HierarchicalContainer dataset) {
     this.vert = new VerticalLayout();
     this.datasets = dataset;
@@ -120,16 +107,16 @@ public class DatasetView extends VerticalLayout implements View {
     this.datasets = (HierarchicalContainer) newDataSource;
     this.table.setContainerDataSource(this.datasets);
 
-    //TODO does this affect the datasetview?
-    //this.table.setColumnCollapsed("state", true);
+    // TODO does this affect the datasetview?
+    // this.table.setColumnCollapsed("state", true);
 
     this.table.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
 
     this.table.setSizeFull();
     this.buildLayout();
   }
-  
-  public HierarchicalContainer getContainerDataSource(){
+
+  public HierarchicalContainer getContainerDataSource() {
     return this.datasets;
   }
 
@@ -317,9 +304,8 @@ public class DatasetView extends VerticalLayout implements View {
               (String) table.getItem(next).getItemProperty("Dataset Type").getValue();
           message.add(datasetType);
           String project = (String) table.getItem(next).getItemProperty("Project").getValue();
-          DataHandler dh =
-              datahandler!= null?datahandler :(DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-          String space = dh.openBisClient.getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
+
+          String space = datahandler.openBisClient.getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
           message.add(project);
           message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
           message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
@@ -353,10 +339,9 @@ public class DatasetView extends VerticalLayout implements View {
         String datasetCode = (String) table.getItem(next).getItemProperty("CODE").getValue();
         String datasetFileName =
             (String) table.getItem(next).getItemProperty("File Name").getValue();
-        DataHandler dh = datahandler!= null?datahandler :(DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
         URL url;
         try {
-          url = dh.openBisClient.getUrlForDataset(datasetCode, datasetFileName);
+          url = datahandler.openBisClient.getUrlForDataset(datasetCode, datasetFileName);
           Window subWindow =
               new Window("QC of Sample: "
                   + (String) table.getItem(next).getItemProperty("Sample").getValue());
@@ -508,10 +493,9 @@ public class DatasetView extends VerticalLayout implements View {
         return;
       map.put(kv[0], kv[1]);
     }
-    DataHandler dh = datahandler!= null?datahandler :(DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
       HierarchicalContainer datasetContainer = null;
-      switch(map.get("type")){
+      switch (map.get("type")) {
         case "project":
           datasetContainer = new HierarchicalContainer();
           datasetContainer.addContainerProperty("Select", CheckBox.class, null);
@@ -521,56 +505,55 @@ public class DatasetView extends VerticalLayout implements View {
           datasetContainer.addContainerProperty("File Name", String.class, null);
           datasetContainer.addContainerProperty("File Type", String.class, null);
           datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-          datasetContainer.addContainerProperty("Registration Date", Timestamp.class,null);
+          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
           datasetContainer.addContainerProperty("Validated", Boolean.class, null);
           datasetContainer.addContainerProperty("File Size", String.class, null);
           datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
           datasetContainer.addContainerProperty("dl_link", String.class, null);
           datasetContainer.addContainerProperty("CODE", String.class, null);
-          ProjectBean projectBean = dh.getProject(map.get("id"));
+          ProjectBean projectBean = datahandler.getProject(map.get("id"));
           BeanItemContainer<ExperimentBean> bic = projectBean.getExperiments();
-          for(ExperimentBean eb: bic.getItemIds()){
+          for (ExperimentBean eb : bic.getItemIds()) {
             BeanItemContainer<SampleBean> bsb = eb.getSamples();
-            for(SampleBean sb: bsb.getItemIds()){
+            for (SampleBean sb : bsb.getItemIds()) {
               BeanItemContainer<DatasetBean> datasetbeans = sb.getDatasets();
-              for(DatasetBean d : datasetbeans.getItemIds()){
-                  String sample = sb.getCode();
-                  String sampleType = sb.getType();//this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
-                  String project = projectBean.getCode();
-                  Date date = d.getRegistrationDate();
-                  SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                  String dateString = sd.format(date);
-                  Timestamp ts = Timestamp.valueOf(dateString);
-                  // recursive test
-                  registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);            
+              for (DatasetBean d : datasetbeans.getItemIds()) {
+                String sample = sb.getCode();
+                String sampleType = sb.getType();// this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
+                String project = projectBean.getCode();
+                Date date = d.getRegistrationDate();
+                SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                String dateString = sd.format(date);
+                Timestamp ts = Timestamp.valueOf(dateString);
+                // recursive test
+                registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);
               }
             }
-            
+
           }
           break;
         default:
           datasetContainer = new HierarchicalContainer();
       }
-      
+
       this.setContainerDataSource(datasetContainer);
 
     } catch (Exception e) {
       e.printStackTrace();
-      LOGGER.error(String.format("getting dataset failed for dataset %s", map.toString()), e.getStackTrace());
+      LOGGER.error(String.format("getting dataset failed for dataset %s", map.toString()),
+          e.getStackTrace());
     }
   }
-  
-  
-  
-  
-  public void registerDatasetInTable(DatasetBean d,
-      HierarchicalContainer dataset_container, String project, String sample, Timestamp ts,
-      String sampleType, Object parent) {
+
+
+
+  public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
+      String project, String sample, Timestamp ts, String sampleType, Object parent) {
     if (d.hasChildren()) {
 
       Object new_ds = dataset_container.addItem();
 
-      List<DatasetBean> subList= d.getChildren();
+      List<DatasetBean> subList = d.getChildren();
 
 
       dataset_container.setChildrenAllowed(new_ds, true);
@@ -579,7 +562,8 @@ public class DatasetView extends VerticalLayout implements View {
 
       dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
-      dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(d.getSample().getType());
+      dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
+          d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
       dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue("-");
@@ -587,16 +571,14 @@ public class DatasetView extends VerticalLayout implements View {
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_ds, "CODE").setValue(d.getCode());
-      dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(
-          d.getFileSize());
+      dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(d.getFileSize());
 
       if (parent != null) {
         dataset_container.setParent(new_ds, parent);
       }
 
       for (DatasetBean file : subList) {
-        registerDatasetInTable(file, dataset_container, project, sample, ts, sampleType,
-            new_ds);
+        registerDatasetInTable(file, dataset_container, project, sample, ts, sampleType, new_ds);
       }
 
     } else {
@@ -610,15 +592,13 @@ public class DatasetView extends VerticalLayout implements View {
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
       dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
-      dataset_container.getContainerProperty(new_file, "File Type")
-          .setValue(d.getFileType());
-      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(
-          d.getType());
+      dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
+      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
-      dataset_container.getContainerProperty(new_file, "File Size").setValue(DashboardUtil.humanReadableByteCount(d.getFileSize(),true));
-      dataset_container.getContainerProperty(new_file, "dl_link").setValue(
-          d.getDssPath());
+      dataset_container.getContainerProperty(new_file, "File Size").setValue(
+          DashboardUtil.humanReadableByteCount(d.getFileSize(), true));
+      dataset_container.getContainerProperty(new_file, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(d.getFileSize());
       if (parent != null) {
@@ -626,21 +606,8 @@ public class DatasetView extends VerticalLayout implements View {
       }
     }
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
 
   private class TableCheckBoxValueChangeListener implements ValueChangeListener {
 

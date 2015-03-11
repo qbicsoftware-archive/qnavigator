@@ -59,9 +59,15 @@ public class ProjectView extends VerticalLayout implements View {
   private String id;
   private Button export;
 
+  private DataHandler datahandler;
+
+  private State state;
+
   private static Logger LOGGER = new Log4j2Logger(ProjectView.class);
 
-  public ProjectView(FilterTable table, IndexedContainer datasource, String id) {
+  public ProjectView(DataHandler datahandler,State state, String id) {
+    this.datahandler = datahandler;
+    this.state = state;
     projectview_content = new VerticalLayout();
 
     this.id = id;
@@ -74,15 +80,14 @@ public class ProjectView extends VerticalLayout implements View {
     // this.setContent(projectview_content);
     this.addComponent(projectview_content);
 
-    this.table.setContainerDataSource(datasource);
     this.tableClickChangeTreeView();
 
   }
 
 
-  public ProjectView() {
+  public ProjectView(DataHandler datahandler, State state) {
     // execute the above constructor with default settings, in order to have the same settings
-    this(new FilterTable(), new IndexedContainer(), "No project selected");
+    this(datahandler,state, "No project selected");
   }
 
   public void setSizeFull() {
@@ -159,8 +164,6 @@ public class ProjectView extends VerticalLayout implements View {
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
     downloadProject.addSeparator();
-    DataHandler datahandler =
-        (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
     //TODO getContainsData is always false!! Should be set correctly
     //if(projectBean.getContainsData()){
@@ -203,7 +206,6 @@ public class ProjectView extends VerticalLayout implements View {
     MenuItem colds = manage.addItem("Create Barcodes", null, new MenuBar.Command() {
 
       public void menuSelected(MenuItem selectedItem) {
-        State state = (State) UI.getCurrent().getSession().getAttribute("state");
         ArrayList<String> message = new ArrayList<String>();
         message.add("clicked");
         message.add(id);
@@ -574,20 +576,7 @@ public class ProjectView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    // System.out.println("currentValue: " + currentValue);
-    // System.out.println("navigateToLabel: " + navigateToLabel);
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    //Project project = dh.openBisClient.getProjectByCode(currentValue);
-    //String projectIdentifier = project.getIdentifier();
 
-    // currentValue = project identifier
-    this.setContainerDataSource(dh.getProject(currentValue), currentValue);
-
- //   try {
- //     this.setContainerDataSource(dh.getProject(currentValue), currentValue);
- //   } catch (Exception e) {
- //     // TODO Auto-generated catch block
- //     e.printStackTrace();
- //   }
+    this.setContainerDataSource(datahandler.getProject(currentValue), currentValue);
   }
 }

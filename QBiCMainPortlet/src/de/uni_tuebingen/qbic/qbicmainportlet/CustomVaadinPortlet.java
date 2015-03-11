@@ -173,7 +173,12 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     }
     writer.closeStream();
   }
-
+  /**
+   * if it is one of the openbis beans, then it will be converted into an entry.
+   * Used to prepare a bean for download via a writer, e.g. a {@link TarWriter}
+   * @param bean
+   * @return
+   */
   Map<String, SimpleEntry<String, Long>> convertBeanToEntries(Object bean) {
     Map<String, AbstractMap.SimpleEntry<String, Long>> entries = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
     if(bean instanceof ProjectBean){
@@ -188,7 +193,13 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     }
     return entries;
   }
-
+  
+  /**
+   * Given datasetbean (and its children) is included into the entry, which can be used for download 
+   * @param db
+   * @param entries
+   * @return
+   */
   Map<String, AbstractMap.SimpleEntry<String, Long>> addEntry(DatasetBean db, Map<String, AbstractMap.SimpleEntry<String, Long>> entries){
     StringBuilder sb = new StringBuilder(db.getCode());
     sb.append("/");
@@ -203,7 +214,13 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     return entries;
   }
   
-
+  /**
+   * Helper function of addEntry. Adds name of parent db to children.
+   * @param db
+   * @param entries
+   * @param name
+   * @return
+   */
   private Map<String, AbstractMap.SimpleEntry<String, Long>> addChildrensEntry(DatasetBean db, Map<String, SimpleEntry<String, Long>> entries,
       String name) {
     StringBuilder sb = new StringBuilder(name);

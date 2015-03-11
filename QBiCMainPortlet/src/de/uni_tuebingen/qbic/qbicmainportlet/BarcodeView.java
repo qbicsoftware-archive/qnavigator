@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import logging.Log4j2Logger;
+import logging.Logger;
 import main.BarcodeCreator;
 import model.ExperimentBarcodeSummaryBean;
 import model.IBarcodeBean;
@@ -54,7 +56,7 @@ public class BarcodeView extends VerticalLayout implements View {
   private static final long serialVersionUID = 8921847321758727061L;
 
   static String navigateToLabel = "barcodeview";
-
+  static Logger LOGGER = new Log4j2Logger(BarcodeView.class);
   FilterTable table;
   VerticalLayout projectview_content;
 
@@ -71,15 +73,15 @@ public class BarcodeView extends VerticalLayout implements View {
 
   BarcodeCreator creator;
   ArrayList<IBarcodeBean> barcodeBeans;
-  OpenBisClient openbis;
 
-  public BarcodeView(FilterTable table, IndexedContainer datasource, String id, String scripts,
+  private OpenBisClient openbis;
+
+  public BarcodeView(OpenBisClient openbisClient, FilterTable table, IndexedContainer datasource, String id, String scripts,
       String paths) {
+    this.openbis = openbisClient;
     projectview_content = new VerticalLayout();
 
     this.creator = new BarcodeCreator(scripts, paths);
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    openbis = dh.openBisClient;
 
     this.id = id;
 
@@ -100,9 +102,9 @@ public class BarcodeView extends VerticalLayout implements View {
 
   }
 
-  public BarcodeView(String scripts, String path) {
+  public BarcodeView(OpenBisClient openbisClient, String scripts, String path) {
     // execute the above constructor with default settings, in order to have the same settings
-    this(new FilterTable(), new IndexedContainer(), "No project selected", scripts, path);
+    this(openbisClient, new FilterTable(), new IndexedContainer(), "No project selected", scripts, path);
   }
 
   public void setSizeFull() {
@@ -173,7 +175,6 @@ public class BarcodeView extends VerticalLayout implements View {
     table.setSelectable(true);
     table.setMultiSelect(true);
 
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     StreamResource sr = Utils.getTSVStream(Utils.containerToString(beanContainer), this.id);
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
@@ -429,12 +430,10 @@ public class BarcodeView extends VerticalLayout implements View {
     String currentValue = event.getParameters();
     // System.out.println("currentValue: " + currentValue);
     // System.out.println("navigateToLabel: " + navigateToLabel);
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
-      this.setContainerDataSource(getSummaryBeans(dh.openBisClient, currentValue), currentValue);
+      this.setContainerDataSource(getSummaryBeans(openbis, currentValue), currentValue);
     } catch (Exception e) {
-      System.out.println("Exception in BarcodeView.enter");
-      // e.printStackTrace();
+      LOGGER.error("setting container datasource from bean failed", e.getStackTrace());
     }
   }
 

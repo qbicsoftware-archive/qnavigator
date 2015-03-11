@@ -42,17 +42,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="5" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.SpaceInformation" project="QBiCMainPortlet" 
-    file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DataHandler.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="6734" y="1142"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="6" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.State" project="QBiCMainPortlet" 
+  <class id="5" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.State" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/State.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="5236" y="450"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -61,7 +51,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="7" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DatasetView" project="QBiCMainPortlet" 
+  <class id="6" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DatasetView" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DatasetView.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="5270" y="1909"/>    
@@ -71,7 +61,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="8" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ToolBar" project="QBiCMainPortlet" 
+  <class id="7" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ToolBar" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ToolBar.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="223" width="221" x="6479" y="-37"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -80,7 +70,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="9" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.MpPortletListener" project="QBiCMainPortlet" 
+  <class id="8" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.MpPortletListener" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/MpPortletListener.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="3210" y="2331"/>    
@@ -90,7 +80,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="10" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.SampleView" project="QBiCMainPortlet" 
+  <class id="9" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.SampleView" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/SampleView.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="5613" y="1962"/>    
@@ -100,17 +90,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="11" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ExperimentInformation" 
-    project="QBiCMainPortlet" file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DataHandler.java" 
-    binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="6469" y="1138"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="12" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ButtonLink" project="QBiCMainPortlet" 
+  <class id="10" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ButtonLink" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ButtonLink.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="4931" y="2271"/>    
@@ -120,7 +100,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="13" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.TreeView" project="QBiCMainPortlet" 
+  <class id="11" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.TreeView" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/TreeView.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="4387" y="1659"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -129,7 +109,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="14" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.LevelView" project="QBiCMainPortlet" 
+  <class id="12" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.LevelView" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/LevelView.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="4202" y="2011"/>    
@@ -139,7 +119,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <enumeration id="15" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ToolBar.View" 
+  <enumeration id="13" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ToolBar.View" 
     project="QBiCMainPortlet" file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ToolBar.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="6217" y="67"/>    
@@ -149,7 +129,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <class id="16" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ViewTablesClickListener" 
+  <class id="14" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ViewTablesClickListener" 
     project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ViewTablesClickListener.java" binary="false" 
     corner="BOTTOM_RIGHT">    
@@ -160,7 +140,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="17" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ProjectView" project="QBiCMainPortlet" 
+  <class id="15" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ProjectView" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ProjectView.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="5265" y="1373"/>    
@@ -170,7 +150,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="18" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletUI" 
+  <class id="16" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletUI" 
     project="QBiCMainPortlet" file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/QbicmainportletUI.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="3715" y="99"/>    
@@ -180,7 +160,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="19" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.QcMlOpenbisSource" 
+  <class id="17" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.QcMlOpenbisSource" 
     project="QBiCMainPortlet" file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/QcMlOpenbisSource.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="5013" y="1992"/>    
@@ -190,7 +170,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="20" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.HomeView" project="QBiCMainPortlet" 
+  <class id="18" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.HomeView" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/HomeView.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="5255" y="2319"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -199,7 +179,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="21" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.SpaceView" project="QBiCMainPortlet" 
+  <class id="19" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.SpaceView" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/SpaceView.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="5934" y="2105"/>    
@@ -209,7 +189,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="22" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ToolBar.DropDown" project="QBiCMainPortlet" 
+  <class id="20" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ToolBar.DropDown" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ToolBar.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="6490" y="342"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -218,7 +198,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="23" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ProxyForGenomeViewerRestApi" 
+  <class id="21" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ProxyForGenomeViewerRestApi" 
     project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ProxyForGenomeViewerRestApi.java" binary="false" 
     corner="BOTTOM_RIGHT">    
@@ -229,7 +209,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="24" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DataHandler" project="QBiCMainPortlet" 
+  <class id="22" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DataHandler" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DataHandler.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="2666" y="408"/>    
@@ -239,17 +219,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="25" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ProjectInformation" 
-    project="QBiCMainPortlet" file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DataHandler.java" 
-    binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="6377" y="852"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="26" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ChangePropertiesView" 
+  <class id="23" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ChangePropertiesView" 
     project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ChangePropertiesView.java" binary="false" 
     corner="BOTTOM_RIGHT">    
@@ -260,7 +230,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="27" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.OpenBisClient" project="QBiCMainPortlet" 
+  <class id="24" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.OpenBisClient" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/OpenBisClient.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="2585" y="1558"/>    
@@ -270,7 +240,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="28" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DatasetViewFilterGenerator" 
+  <class id="25" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DatasetViewFilterGenerator" 
     project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DatasetViewFilterGenerator.java" binary="false" 
     corner="BOTTOM_RIGHT">    
@@ -281,7 +251,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="29" language="java" 
+  <class id="26" language="java" 
     name="de.uni_tuebingen.qbic.qbicmainportlet.CustomVaadinPortlet.CustomVaadinPortletService" 
     project="QBiCMainPortlet" file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/CustomVaadinPortlet.java" 
     binary="false" corner="BOTTOM_RIGHT">    
@@ -292,7 +262,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="30" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DummyDataReader" project="QBiCMainPortlet" 
+  <class id="27" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DummyDataReader" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DummyDataReader.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="2018" y="141"/>    
@@ -302,7 +272,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="31" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DatasetViewFilterDecorator" 
+  <class id="28" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.DatasetViewFilterDecorator" 
     project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DatasetViewFilterDecorator.java" binary="false" 
     corner="BOTTOM_RIGHT">    
@@ -313,7 +283,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="32" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ToolBar.DropDownStateObserver" 
+  <class id="29" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.ToolBar.DropDownStateObserver" 
     project="QBiCMainPortlet" file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/ToolBar.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="6731" y="335"/>    
@@ -323,7 +293,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="33" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.TarWriter" project="QBiCMainPortlet" 
+  <class id="30" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.TarWriter" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/TarWriter.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1658" y="294"/>    
@@ -333,7 +303,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="34" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.QcMlWorkflowView" project="QBiCMainPortlet" 
+  <class id="31" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.QcMlWorkflowView" project="QBiCMainPortlet" 
     file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/QcMlWorkflowView.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="6208" y="2045"/>    
@@ -343,391 +313,297 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="35" language="java" name="de.uni_tuebingen.qbic.qbicmainportlet.SampleInformation" 
-    project="QBiCMainPortlet" file="/QBiCMainPortlet/src/de/uni_tuebingen/qbic/qbicmainportlet/DataHandler.java" 
-    binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="6718" y="832"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <dependency id="36">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="31"/>  
-  </dependency>  
-  <dependency id="37">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="17"/>  
-  </dependency>  
-  <dependency id="38">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="31"/>  
-  </dependency>  
-  <dependency id="39">    
-    <end type="SOURCE" refId="26"/>    
-    <end type="TARGET" refId="24"/>  
-  </dependency>  
-  <nesting id="40">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="29"/>  
-  </nesting>  
-  <dependency id="41">    
-    <end type="SOURCE" refId="20"/>    
-    <end type="TARGET" refId="16"/>  
-  </dependency>  
-  <dependency id="42">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="34"/>  
-  </dependency>  
-  <association id="43">    
-    <end type="SOURCE" refId="7" navigable="false">      
-      <attribute id="44" name="download">        
+  <association id="32">    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="33" name="openBisClient">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="45" minimum="0" maximum="1">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="12" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="46">    
-    <end type="SOURCE" refId="20"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
-  <dependency id="47">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="11"/>  
-  </dependency>  
-  <dependency id="48">    
-    <end type="SOURCE" refId="20"/>    
-    <end type="TARGET" refId="31"/>  
-  </dependency>  
-  <association id="49">    
-    <end type="SOURCE" refId="10" navigable="false">      
-      <attribute id="50" name="download">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="51" minimum="0" maximum="1">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="12" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="52">    
-    <end type="SOURCE" refId="20" navigable="false">      
-      <attribute id="53" name="dh">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="54" minimum="0" maximum="1">        
+      <multiplicity id="34" minimum="0" maximum="1">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="24" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="55">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="3"/>  
+  <dependency id="35">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="25"/>  
   </dependency>  
-  <association id="56">    
-    <end type="SOURCE" refId="24" navigable="false">      
-      <attribute id="57" name="experimentInformations">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="58" minimum="0" maximum="2147483647">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="11" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="59">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="10"/>  
-  </dependency>  
-  <dependency id="60">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="24"/>  
-  </dependency>  
-  <dependency id="61">    
+  <nesting id="36">    
     <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="18"/>  
-  </dependency>  
-  <nesting id="62">    
-    <end type="SOURCE" refId="8"/>    
-    <end type="TARGET" refId="22"/>  
+    <end type="TARGET" refId="29"/>  
   </nesting>  
-  <nesting id="63">    
-    <end type="SOURCE" refId="8"/>    
-    <end type="TARGET" refId="32"/>  
-  </nesting>  
-  <association id="64">    
-    <end type="SOURCE" refId="24" navigable="false">      
-      <attribute id="65" name="sampleInformations">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="66" minimum="0" maximum="2147483647">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="35" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="67">    
-    <end type="SOURCE" refId="34"/>    
-    <end type="TARGET" refId="24"/>  
+  <dependency id="37">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="5"/>  
   </dependency>  
-  <dependency id="68">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="6"/>  
-  </dependency>  
-  <association id="69">    
-    <end type="SOURCE" refId="24" navigable="false">      
-      <attribute id="70" name="spaces">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="71" minimum="0" maximum="2147483647">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="72">    
-    <end type="SOURCE" refId="3"/>    
-    <end type="TARGET" refId="31"/>  
-  </dependency>  
-  <dependency id="73">    
-    <end type="SOURCE" refId="8"/>    
-    <end type="TARGET" refId="6"/>  
-  </dependency>  
-  <dependency id="74">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="19"/>  
-  </dependency>  
-  <dependency id="75">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="28"/>  
-  </dependency>  
-  <association id="76">    
-    <end type="SOURCE" refId="18" navigable="false">      
-      <attribute id="77" name="openBisConnection">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="78" minimum="0" maximum="1">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="27" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="79">    
-    <end type="SOURCE" refId="21"/>    
+  <dependency id="38">    
+    <end type="SOURCE" refId="6"/>    
     <end type="TARGET" refId="16"/>  
   </dependency>  
-  <dependency id="80">    
+  <dependency id="39">    
+    <end type="SOURCE" refId="31"/>    
+    <end type="TARGET" refId="22"/>  
+  </dependency>  
+  <dependency id="40">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="22"/>  
+  </dependency>  
+  <dependency id="41">    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="42">    
     <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="23"/>  
+    <end type="TARGET" refId="5"/>  
   </dependency>  
-  <dependency id="81">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="24"/>  
-  </dependency>  
-  <dependency id="82">    
-    <end type="SOURCE" refId="20"/>    
+  <dependency id="43">    
+    <end type="SOURCE" refId="3"/>    
     <end type="TARGET" refId="28"/>  
   </dependency>  
-  <dependency id="83">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="7"/>  
+  <association id="44">    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="45" name="download">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="46" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="47">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="31"/>  
   </dependency>  
-  <dependency id="84">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="28"/>  
+  <dependency id="48">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="25"/>  
   </dependency>  
-  <dependency id="85">    
+  <dependency id="49">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="50">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="51">    
     <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="24"/>  
+    <end type="TARGET" refId="30"/>  
   </dependency>  
-  <dependency id="86">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="27"/>  
+  <dependency id="52">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="21"/>  
   </dependency>  
-  <dependency id="87">    
-    <end type="SOURCE" refId="18"/>    
+  <association id="53">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="54" name="open">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="55" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="56">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="22"/>  
+  </dependency>  
+  <association id="57">    
+    <end type="SOURCE" refId="6" navigable="false">      
+      <attribute id="58" name="download">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="59" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="60">    
+    <end type="SOURCE" refId="16"/>    
     <end type="TARGET" refId="1"/>  
   </dependency>  
-  <dependency id="88">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="24"/>  
+  <dependency id="61">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="17"/>  
   </dependency>  
-  <dependency id="89">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="20"/>  
+  <dependency id="62">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="22"/>  
   </dependency>  
-  <dependency id="90">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="13"/>  
-  </dependency>  
-  <dependency id="91">    
-    <end type="SOURCE" refId="13"/>    
-    <end type="TARGET" refId="6"/>  
-  </dependency>  
-  <dependency id="92">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="31"/>  
-  </dependency>  
-  <dependency id="93">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="31"/>  
-  </dependency>  
-  <dependency id="94">    
+  <dependency id="63">    
     <end type="SOURCE" refId="18"/>    
     <end type="TARGET" refId="14"/>  
   </dependency>  
-  <dependency id="95">    
-    <end type="SOURCE" refId="21"/>    
-    <end type="TARGET" refId="31"/>  
+  <nesting id="64">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="20"/>  
+  </nesting>  
+  <dependency id="65">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="28"/>  
   </dependency>  
-  <dependency id="96">    
-    <end type="SOURCE" refId="3"/>    
-    <end type="TARGET" refId="24"/>  
-  </dependency>  
-  <dependency id="97">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="24"/>  
-  </dependency>  
-  <association id="98">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="99" name="open">        
+  <association id="66">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="67" name="dataHandler">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="100" minimum="0" maximum="1">        
+      <multiplicity id="68" minimum="0" maximum="1">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="12" navigable="true"/>    
+    <end type="TARGET" refId="22" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="101">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="6"/>  
+  <nesting id="69">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="26"/>  
+  </nesting>  
+  <dependency id="70">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="18"/>  
   </dependency>  
-  <dependency id="102">    
+  <dependency id="71">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <dependency id="72">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="15"/>  
+  </dependency>  
+  <dependency id="73">    
     <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="5"/>  
+    <end type="TARGET" refId="25"/>  
   </dependency>  
-  <dependency id="103">    
-    <end type="SOURCE" refId="21"/>    
-    <end type="TARGET" refId="5"/>  
+  <dependency id="74">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="22"/>  
   </dependency>  
-  <dependency id="104">    
-    <end type="SOURCE" refId="3"/>    
+  <dependency id="75">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="12"/>  
+  </dependency>  
+  <dependency id="76">    
+    <end type="SOURCE" refId="15"/>    
     <end type="TARGET" refId="28"/>  
   </dependency>  
-  <dependency id="105">    
-    <end type="SOURCE" refId="26"/>    
-    <end type="TARGET" refId="11"/>  
-  </dependency>  
-  <association id="106">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="107" name="dataHandler">        
+  <association id="77">    
+    <end type="SOURCE" refId="16" navigable="false">      
+      <attribute id="78" name="openBisConnection">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="108" minimum="0" maximum="1">        
+      <multiplicity id="79" minimum="0" maximum="1">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="24" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="109">    
+  <dependency id="80">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="81">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="82">    
+    <end type="SOURCE" refId="23"/>    
+    <end type="TARGET" refId="22"/>  
+  </dependency>  
+  <dependency id="83">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="84">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <dependency id="85">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="86">    
     <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="16"/>  
+    <end type="TARGET" refId="14"/>  
   </dependency>  
-  <dependency id="110">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="16"/>  
+  <dependency id="87">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="25"/>  
   </dependency>  
-  <dependency id="111">    
+  <dependency id="88">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="22"/>  
+  </dependency>  
+  <dependency id="89">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="90">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="9"/>  
+  </dependency>  
+  <dependency id="91">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="23"/>  
+  </dependency>  
+  <dependency id="92">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <association id="93">    
+    <end type="SOURCE" refId="18" navigable="false">      
+      <attribute id="94" name="datahandler">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="95" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="22" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="96">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <nesting id="97">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="13"/>  
+  </nesting>  
+  <dependency id="98">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="99">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="22"/>  
+  </dependency>  
+  <dependency id="100">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="22"/>  
+  </dependency>  
+  <dependency id="101">    
     <end type="SOURCE" refId="16"/>    
     <end type="TARGET" refId="6"/>  
   </dependency>  
-  <dependency id="112">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="21"/>  
-  </dependency>  
-  <dependency id="113">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="35"/>  
-  </dependency>  
-  <dependency id="114">    
-    <end type="SOURCE" refId="18"/>    
-    <end type="TARGET" refId="26"/>  
-  </dependency>  
-  <dependency id="115">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="25"/>  
-  </dependency>  
-  <dependency id="116">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="28"/>  
-  </dependency>  
-  <dependency id="117">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="28"/>  
-  </dependency>  
-  <association id="118">    
-    <end type="SOURCE" refId="24" navigable="false">      
-      <attribute id="119" name="projectInformations">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="120" minimum="0" maximum="2147483647">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="25" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <generalization id="121">    
-    <end type="SOURCE" refId="32"/>    
-    <end type="TARGET" refId="22"/>  
-  </generalization>  
-  <nesting id="122">    
-    <end type="SOURCE" refId="8"/>    
-    <end type="TARGET" refId="15"/>  
-  </nesting>  
-  <dependency id="123">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="33"/>  
-  </dependency>  
-  <dependency id="124">    
-    <end type="SOURCE" refId="7"/>    
+  <dependency id="102">    
+    <end type="SOURCE" refId="6"/>    
     <end type="TARGET" refId="24"/>  
   </dependency>  
-  <dependency id="125">    
-    <end type="SOURCE" refId="21"/>    
-    <end type="TARGET" refId="28"/>  
-  </dependency>  
-  <association id="126">    
-    <end type="SOURCE" refId="24" navigable="false">      
-      <attribute id="127" name="openBisClient">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="128" minimum="0" maximum="1">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="27" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="129">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="27"/>  
+  <generalization id="103">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="20"/>  
+  </generalization>  
+  <dependency id="104">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="14"/>  
   </dependency>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     sort-features="false" accessors="true" visibility="true">    

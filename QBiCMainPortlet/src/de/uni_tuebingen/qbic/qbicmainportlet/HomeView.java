@@ -40,28 +40,28 @@ public class HomeView extends VerticalLayout implements View {
   VerticalLayout buttonLayoutSection = new VerticalLayout();
 
 
-  DataHandler dh;
+  DataHandler datahandler;
 
   private Button export;
   
-  public HomeView(SpaceBean datasource, String caption) {
+  public HomeView(DataHandler datahandler, SpaceBean datasource, String caption) {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
 
     this.setContainerDataSource(datasource, caption);
-    dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    this.datahandler = datahandler;
     
     this.tableClickChangeTreeView();
 
     this.buildLayout(datasource);
   }
 
-  public HomeView(FilterTable table, SpaceBean datasource, String caption) {
+  public HomeView(DataHandler datahandler, FilterTable table, SpaceBean datasource, String caption) {
     homeview_content = new VerticalLayout();
     this.table = table;
 
     this.setContainerDataSource(datasource, caption);
-    dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+    this.datahandler = datahandler;
     
     this.tableClickChangeTreeView();
 
@@ -72,9 +72,9 @@ public class HomeView extends VerticalLayout implements View {
   /**
    * execute the above constructor with default settings, in order to have the same settings
    */
-  public HomeView() {
+  public HomeView(DataHandler datahandler) {
     //this(new FilterTable(), new SpaceInformation(),
-    this(new FilterTable(), new SpaceBean(),"You seem to have no registered projects. Please contact QBiC.");
+    this(datahandler, new FilterTable(), new SpaceBean(),"You seem to have no registered projects. Please contact QBiC.");
   }
 
   public void setSizeFull() {

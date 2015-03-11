@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import logging.Log4j2Logger;
+import logging.Logger;
 import model.ExperimentBean;
 
 import org.tepi.filtertable.FilterTable;
@@ -26,14 +28,17 @@ public class ExperimentView extends VerticalLayout implements View{
    * 
    */
   private static final long serialVersionUID = -9156593640161721690L;
+  static Logger LOGGER = new Log4j2Logger(ExperimentView.class);
   static String navigateToLabel = "experiment";
   FilterTable table;
   VerticalLayout expview_content;
 
   private String id;
   private Button export;
+  private DataHandler datahandler;
 
-  public ExperimentView(FilterTable table, IndexedContainer datasource, String id) {
+  public ExperimentView(DataHandler datahandler, String id) {
+    this.datahandler = datahandler;
     expview_content = new VerticalLayout();
     this.id = id;
 
@@ -45,14 +50,13 @@ public class ExperimentView extends VerticalLayout implements View{
     //this.setContent(expview_content);
     this.addComponent(expview_content);
     
-    this.table.setContainerDataSource(datasource);
     this.tableClickChangeTreeView();
   }
 
 
-  public ExperimentView() {
+  public ExperimentView(DataHandler datahandler) {
     // execute the above constructor with default settings, in order to have the same settings
-    this(new FilterTable(), new IndexedContainer(), "No project selected");
+    this(datahandler, "No project selected");
   }
 
   public void setSizeFull() {
@@ -101,7 +105,6 @@ public class ExperimentView extends VerticalLayout implements View{
   }
 
   private void setStatistics(ExperimentBean experimentBean) {
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
 
     this.expview_content.removeAllComponents();
     
@@ -256,17 +259,13 @@ public class ExperimentView extends VerticalLayout implements View{
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    //System.out.println("currentValue: " + currentValue);
-   // System.out.println("navigateToLabel: " + navigateToLabel);
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
     try {
       // String type =
       // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
       //this.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
-      this.setContainerDataSource(dh.getExperiment(currentValue), currentValue);
+      this.setContainerDataSource(datahandler.getExperiment(currentValue), currentValue);
     } catch (Exception e) {
-      System.out.println("Exception in ExperimentView.enter");
-      //e.printStackTrace();
+      LOGGER.error("setting experiment view failed with parameter: " + currentValue, e.getStackTrace());
     }
     
   }

@@ -78,7 +78,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "346";
+  private String revision = "370";
   
   @Override
   protected void init(VaadinRequest request) {
@@ -512,15 +512,16 @@ public class QbicmainportletUI extends UI {
     // AddSpaceView(new
     // Table(),
     // spaces));
-
+    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+    DataHandler datahandler = (DataHandler)portletSession.getAttribute("datahandler");
     HomeView homeView;
 
     //if (homeViewInformation.numberOfProjects > 0) {
     if (homeSpaceBean.getProjects().size() > 0) {
       //homeView = new HomeView(homeViewInformation, "Your Projects");
-      homeView = new HomeView(homeSpaceBean, "Your Projects");
+      homeView = new HomeView(datahandler, homeSpaceBean, "Your Projects");
     } else {
-      homeView = new HomeView();
+      homeView = new HomeView(datahandler);
     }
     LevelView maxQuantWorkflowView = new LevelView(new Button("maxQuantWorkflowView"));
     QcMlWorkflowView qcmlView = new QcMlWorkflowView();
@@ -533,15 +534,15 @@ public class QbicmainportletUI extends UI {
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
     //navigator.addView("space", spaceView);
     //navigator.addView("addspaceView", addspaceView);
-    navigator.addView(DatasetView.navigateToLabel, new DatasetView());
-    navigator.addView(SampleView.navigateToLabel, new SampleView());
+    navigator.addView(DatasetView.navigateToLabel, new DatasetView(datahandler));
+    navigator.addView(SampleView.navigateToLabel, new SampleView(datahandler));
     navigator.addView("", homeView);
 
-    navigator.addView(ProjectView.navigateToLabel, new ProjectView());
-    navigator.addView(BarcodeView.navigateToLabel, new BarcodeView(manager.getScriptsFolder(),
+    navigator.addView(ProjectView.navigateToLabel, new ProjectView(datahandler,state));
+    navigator.addView(BarcodeView.navigateToLabel, new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
         manager.getPathVariable()));
-    navigator.addView(ExperimentView.navigateToLabel, new ExperimentView());
-    navigator.addView(ChangePropertiesView.navigateToLabel, new ChangePropertiesView());
+    navigator.addView(ExperimentView.navigateToLabel, new ExperimentView(datahandler));
+    navigator.addView(ChangePropertiesView.navigateToLabel, new ChangePropertiesView(datahandler));
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
     navigator.addView("qcMlWorkflow", qcMlWorkflowView);
     navigator.addView("testRunWorkflow", testRunWorkflowView);
@@ -589,10 +590,6 @@ public class QbicmainportletUI extends UI {
     }
     UI.getCurrent().getSession().setAttribute("state", new State());
     DataHandler dataHandler = new DataHandler(this.openBisConnection);
-    UI.getCurrent().getSession().setAttribute("datahandler", dataHandler);
-    UI.getCurrent()
-        .getSession()
-        .setAttribute("qbic_download", new HashMap<String, AbstractMap.SimpleEntry<String, Long>>());
 
     PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
     portletSession.setAttribute("datahandler", dataHandler, PortletSession.APPLICATION_SCOPE);
