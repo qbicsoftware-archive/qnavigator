@@ -80,7 +80,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "370";
+  private String revision = "375";
   
   @Override
   protected void init(VaadinRequest request) {
@@ -212,9 +212,10 @@ public class QbicmainportletUI extends UI {
     final HierarchicalContainer tc = new HierarchicalContainer();
     final SpaceBean homeSpaceBean = null;
     status.setValue("Connecting to database.");
-
+    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+    DataHandler datahandler = (DataHandler)portletSession.getAttribute("datahandler",PortletSession.APPLICATION_SCOPE);
     final RunnableFillsContainer th =
-        new RunnableFillsContainer(tc, homeSpaceBean, LiferayAndVaadinUtils.getUser().getScreenName());
+        new RunnableFillsContainer(datahandler, tc, homeSpaceBean, LiferayAndVaadinUtils.getUser().getScreenName());
     final Thread thread = new Thread(th);
     Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
       public void uncaughtException(Thread th, Throwable ex) {
@@ -242,22 +243,22 @@ public class QbicmainportletUI extends UI {
     //private SpaceInformation homeViewInformation;
     private String userName;
     private SpaceBean homeSpaceBean;
+    private DataHandler datahandler;
 
-    public RunnableFillsContainer(HierarchicalContainer tc, SpaceBean homeSpaceBean,
+    public RunnableFillsContainer(DataHandler dh, HierarchicalContainer tc, SpaceBean homeSpaceBean,
         String user) {
       this.tc = tc;
       this.homeSpaceBean = homeSpaceBean;
       this.userName = user;
+      this.datahandler = dh;
     }
     
     @Override
     public void run() {
       long startTime = System.nanoTime();
 
-      DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-
       status.setValue("Connecting to database.");
-      List<SpaceWithProjectsAndRoleAssignments> spaceList = dh.getSpacesWithProjectInformation();
+      List<SpaceWithProjectsAndRoleAssignments> spaceList = datahandler.getSpacesWithProjectInformation();
 
       // Initialization of Tree Container
        tc.addContainerProperty("identifier", String.class, "N/A");
@@ -294,7 +295,7 @@ public class QbicmainportletUI extends UI {
 
           // TODO does this work for everyone? should it? empty container would be the aim, probably
           if (spaceName.equals("QBIC_USER_SPACE")) {
-            dh.fillPersonsContainer(spaceName);
+            datahandler.fillPersonsContainer(spaceName);
           }
                   
           List<Project> projects = s.getProjects();
@@ -328,7 +329,7 @@ public class QbicmainportletUI extends UI {
 
             List<Project> tmp_list = new ArrayList<Project>();
             tmp_list.add(project);
-            List<Experiment> experiments = dh.openBisClient.listExperimentsOfProjects(tmp_list);
+            List<Experiment> experiments = datahandler.openBisClient.listExperimentsOfProjects(tmp_list);
 
             // Add number of experiments for every project
             number_of_experiments += experiments.size();
@@ -358,7 +359,7 @@ public class QbicmainportletUI extends UI {
               tc.getContainerProperty(experimentIdentifier, "project").setValue(projectIdentifier);
               tc.getContainerProperty(experimentIdentifier, "caption").setValue(
                   String.format("%s (%s)",
-                      dh.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),
+                      datahandler.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),
                       experimentCode));
  
               tc.setChildrenAllowed(experimentCode, false);
@@ -370,7 +371,7 @@ public class QbicmainportletUI extends UI {
             }
             
             if(experiment_identifiers.size() > 0) {
-              List<DataSet> datasets = dh.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers);
+              List<DataSet> datasets = datahandler.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers);
               newProjectBean.setContainsData(datasets.size() != 0);
             } 
           }
@@ -396,7 +397,7 @@ public class QbicmainportletUI extends UI {
       //TODO 3 samples are missing in comparison to openBIS ???!
       List<Sample> samplesOfSpace = new ArrayList<Sample>();
       if (project_identifiers_tmp.size() > 0) {
-        samplesOfSpace = dh.openBisClient.listSamplesForProjects(project_identifiers_tmp);
+        samplesOfSpace = datahandler.openBisClient.listSamplesForProjects(project_identifiers_tmp);
       } else {
         //samplesOfSpace = dh.openBisClient.getSamplesofSpace(spaceName); 
       }
@@ -414,7 +415,7 @@ public class QbicmainportletUI extends UI {
 
       List<DataSet> datasets = new ArrayList<DataSet>();
       if (sample_identifiers_tmp.size() > 0) {
-        datasets = dh.openBisClient.listDataSetsForSamples(sample_identifiers_tmp);
+        datasets = datahandler.openBisClient.listDataSetsForSamples(sample_identifiers_tmp);
       }
       
       for (DataSet ds: datasets) {
@@ -447,7 +448,7 @@ public class QbicmainportletUI extends UI {
 
           //QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
           System.out.println(spaceContainer.size());
-          QbicmainportletUI.getCurrent().buildMainLayout(tc, homeSpaceBean);
+          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean);
         }
       });
     }
@@ -488,7 +489,7 @@ public class QbicmainportletUI extends UI {
 
 
   //public void buildMainLayout(HierarchicalContainer tc, SpaceInformation homeViewInformation) {
-  public void buildMainLayout(HierarchicalContainer tc, SpaceBean homeSpaceBean) {
+  public void buildMainLayout(DataHandler datahandler, HierarchicalContainer tc, SpaceBean homeSpaceBean) {
     // HierarchicalContainer tc = new HierarchicalContainer();
     // System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
     // long startTime = System.nanoTime();
@@ -514,8 +515,6 @@ public class QbicmainportletUI extends UI {
     // AddSpaceView(new
     // Table(),
     // spaces));
-    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-    DataHandler datahandler = (DataHandler)portletSession.getAttribute("datahandler");
     HomeView homeView;
 
     //if (homeViewInformation.numberOfProjects > 0) {
@@ -605,6 +604,7 @@ public class QbicmainportletUI extends UI {
     this.openBisConnection =
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
             manager.getDataSourceUrl());
+      this.openBisConnection.login();
     addDetachListener(new DetachListener() {
 
       @Override
