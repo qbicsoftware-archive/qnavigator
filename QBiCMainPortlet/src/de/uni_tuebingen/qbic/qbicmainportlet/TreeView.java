@@ -9,8 +9,11 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.WebBrowser;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -24,25 +27,30 @@ import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.Runo;
 import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class TreeView extends Panel implements Observer, ViewChangeListener {
 
-  public Tree tree = new Tree();
-  public Button backButton = new Button("Show all projects");
+  private Tree tree = new Tree();
+  private Button backButton = new Button("Show all projects");
+  private State state;
+  private Navigator navigator;
 
-  public TreeView() {
+  public TreeView(State state, Navigator navigator) {
     super();
+    this.state = state;
+    this.navigator = navigator;
     this.init();
   }
 
-  public TreeView(Container c) {
-    super();
-    this.init();
+  public TreeView(Container c,State state, Navigator navigator) {
+    this(state, navigator);
     tree.setContainerDataSource(c);
   }
-
+  public void setContainerDatasource(Container c){
+    tree.setContainerDataSource(c);
+  }
+  
   private void init() {
     VerticalLayout vl = new VerticalLayout();
     vl.setMargin(false);
@@ -73,16 +81,12 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
         removeFilter();
         tree.collapseItem(tree.getValue());
         tree.unselect(tree.getValue());
-        UI.getCurrent().getNavigator().navigateTo("");
+        navigator.navigateTo("");
       }
       
     });
     //this.setCaption("Project Browser");
-    
-    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
-    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
-    this.setWidth(String.format("%spx", (browserWidth * 0.12)));
-    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+
     
     // this.setWidth("250px");
     // this.setHeight("800px");
@@ -95,6 +99,10 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
   }
 
+  public void rebuildLayout(int height, int width, WebBrowser browser){
+    this.setWidth((width * 0.12f), Unit.PIXELS);
+    this.setHeight((height * 0.8f), Unit.PIXELS);
+  }
 
 
   public Tree getTree() {
@@ -111,7 +119,6 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
       @Override
       public void itemClick(ItemClickEvent event) {
-        State state = (State) UI.getCurrent().getSession().getAttribute("state");
         ArrayList<String> message = new ArrayList<String>();
         message.add("clicked");
         message.add(event.getItemId().toString());

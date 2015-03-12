@@ -35,10 +35,13 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
+import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.WebBrowser;
 import com.vaadin.server.WrappedPortletSession;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -59,7 +62,6 @@ import model.ExperimentBean;
 import model.ProjectBean;
 import model.SampleBean;
 import model.SpaceBean;
-
 import main.OpenBisClient;
 
 /*
@@ -80,7 +82,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "375";
+  private String revision = "377";
   
   @Override
   protected void init(VaadinRequest request) {
@@ -515,7 +517,7 @@ public class QbicmainportletUI extends UI {
     // AddSpaceView(new
     // Table(),
     // spaces));
-    HomeView homeView;
+    final HomeView homeView;
 
     //if (homeViewInformation.numberOfProjects > 0) {
     if (homeSpaceBean.getProjects().size() > 0) {
@@ -530,20 +532,28 @@ public class QbicmainportletUI extends UI {
     LevelView qcMlWorkflowView = new LevelView(qcmlView);
     LevelView testRunWorkflowView = new LevelView(new Button("testRunWorkflowView"));
     LevelView searchView = new LevelView(new SearchForUsers());
-
+    DatasetView datasetView = new DatasetView(datahandler);
+    SampleView sampleView = new SampleView(datahandler);
+    ProjectView projectView = new ProjectView(datahandler,state);
+    BarcodeView barcodeView = new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
+        manager.getPathVariable());
+    ExperimentView experimentView = new ExperimentView(datahandler);
+    ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
+    
+    
     VerticalLayout navigatorContent = new VerticalLayout();
+    
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
     //navigator.addView("space", spaceView);
     //navigator.addView("addspaceView", addspaceView);
-    navigator.addView(DatasetView.navigateToLabel, new DatasetView(datahandler));
-    navigator.addView(SampleView.navigateToLabel, new SampleView(datahandler));
+    navigator.addView(DatasetView.navigateToLabel, datasetView);
+    navigator.addView(SampleView.navigateToLabel, sampleView);
     navigator.addView("", homeView);
 
-    navigator.addView(ProjectView.navigateToLabel, new ProjectView(datahandler,state));
-    navigator.addView(BarcodeView.navigateToLabel, new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
-        manager.getPathVariable()));
-    navigator.addView(ExperimentView.navigateToLabel, new ExperimentView(datahandler));
-    navigator.addView(ChangePropertiesView.navigateToLabel, new ChangePropertiesView(datahandler));
+    navigator.addView(ProjectView.navigateToLabel, projectView);
+    navigator.addView(BarcodeView.navigateToLabel, barcodeView);
+    navigator.addView(ExperimentView.navigateToLabel,experimentView );
+    navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
     navigator.addView("qcMlWorkflow", qcMlWorkflowView);
     navigator.addView("testRunWorkflow", testRunWorkflowView);
@@ -554,7 +564,8 @@ public class QbicmainportletUI extends UI {
     mainLayout = new VerticalLayout();
     mainLayout.setMargin(true);
 
-    TreeView tv = createTreeView(tc, state);
+    final TreeView tv = new TreeView(tc, state, navigator);
+    state.addObserver(tv);
     navigator.addViewChangeListener(tv);
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
     treeViewAndLevelView.addComponent(tv);
@@ -566,15 +577,25 @@ public class QbicmainportletUI extends UI {
       mainLayout.addComponent(new Label(String.format("revision: %s", revision)));
     }
     setContent(mainLayout);
-
+    
+    //"Responsive design"
+    getPage().addBrowserWindowResizeListener(new BrowserWindowResizeListener() {
+      @Override
+      public void browserWindowResized(BrowserWindowResizeEvent event) {
+        int height = event.getHeight();
+        int width = event.getWidth();
+        WebBrowser browser = event.getSource().getWebBrowser();
+        homeView.rebuildLayout(height, width, browser);
+        tv.rebuildLayout(height, width, browser);
+      }
+    });
+    int height = getPage().getBrowserWindowHeight();
+    int width = getPage().getBrowserWindowWidth();
+    WebBrowser browser = getPage().getWebBrowser();    
+    homeView.rebuildLayout(height, width, browser);
+    tv.rebuildLayout(height, width, browser);
+    
     navigator.navigateTo("");
-  }
-
-  private TreeView createTreeView(HierarchicalContainer tc, State st) {
-    TreeView t = new TreeView();
-    t.tree.setContainerDataSource(tc);
-    st.addObserver(t);
-    return t;
   }
 
   public PortletSession getPortletSession() {

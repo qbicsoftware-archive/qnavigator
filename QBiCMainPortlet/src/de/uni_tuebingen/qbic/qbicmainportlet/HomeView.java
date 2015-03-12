@@ -17,6 +17,7 @@ import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.Align;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
@@ -38,7 +39,7 @@ public class HomeView extends VerticalLayout implements View {
   FilterTable table;
   VerticalLayout homeview_content;
   VerticalLayout buttonLayoutSection = new VerticalLayout();
-
+  SpaceBean currentBean;
 
   DataHandler datahandler;
 
@@ -47,26 +48,21 @@ public class HomeView extends VerticalLayout implements View {
   public HomeView(DataHandler datahandler, SpaceBean datasource, String caption) {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
-
+    this.currentBean = datasource;
     this.setContainerDataSource(datasource, caption);
     this.datahandler = datahandler;
     
     this.tableClickChangeTreeView();
-
-    this.buildLayout(datasource);
   }
 
   public HomeView(DataHandler datahandler, FilterTable table, SpaceBean datasource, String caption) {
     homeview_content = new VerticalLayout();
     this.table = table;
-
+    this.currentBean = datasource;
     this.setContainerDataSource(datasource, caption);
     this.datahandler = datahandler;
     
     this.tableClickChangeTreeView();
-
-    this.buildLayout(datasource);
-
   }
 
   /**
@@ -124,7 +120,7 @@ public class HomeView extends VerticalLayout implements View {
 
 
   //private void buildLayout(SpaceInformation generalOpenBISInformation) {
-  private void buildLayout(SpaceBean spaceBean) {
+  private void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
   // clean up first
     homeview_content.removeAllComponents();
     this.setMargin(false);
@@ -133,12 +129,6 @@ public class HomeView extends VerticalLayout implements View {
     //homeview_content.setWidth("100%");
 
     //this.setHeight("600px");
-
-    // System.out.println(UI.getCurrent().getPage().getBrowserWindowHeight());
-    // System.out.println(UI.getCurrent().getPage().getBrowserWindowWidth());
-
-    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
-    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
 
     homeview_content.setWidth("100%");
     //this.setWidth(String.format("%spx", (browserWidth * 0.6)));
@@ -184,7 +174,7 @@ public class HomeView extends VerticalLayout implements View {
     statistics.setIcon(FontAwesome.FILE_TEXT_O);
 
     Label statContent = new Label(String.format("You have %s project(s), %s experiment(s), %s sample(s), and %s dataset(s).", 
-        spaceBean.getProjects().size(), spaceBean.getExperiments().size(), spaceBean.getSamples().size(), spaceBean.getDatasets().size()));
+        currentBean.getProjects().size(), currentBean.getExperiments().size(), currentBean.getSamples().size(), currentBean.getDatasets().size()));
         //generalOpenBISInformation.numberOfProjects, generalOpenBISInformation.numberOfExperiments, generalOpenBISInformation.numberOfSamples,
     //generalOpenBISInformation.numberOfDatasets) );
     statistics.addComponent(statContent);
@@ -299,5 +289,9 @@ public class HomeView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
 
+  }
+
+  public void rebuildLayout(int height, int width, WebBrowser browser) {
+    this.buildLayout(height, width, browser);
   }
 }

@@ -380,7 +380,7 @@ public class ProjectView extends VerticalLayout implements View {
 
     
     try {
-      GraphGenerator graphFrame = new GraphGenerator(projectBean);
+      GraphGenerator graphFrame = new GraphGenerator(projectBean, datahandler.openBisClient);
       Resource resource = graphFrame.getRes();
       //System.out.println(resource);
       if (resource != null) {
