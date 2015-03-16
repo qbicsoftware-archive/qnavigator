@@ -109,6 +109,11 @@ public class ProjectView extends VerticalLayout implements View {
   
   /**
    * init this view. builds the layout skeleton
+   * Menubar
+   * Description and others
+   * Statisitcs
+   * Experiment Table
+   * Graph
    */
   void initView() {
     this.table = this.buildFilterTable();
@@ -625,6 +630,10 @@ public class ProjectView extends VerticalLayout implements View {
     
     this.setContainerDataSource(datahandler.getProject(currentValue));
     updateContent();
+  }
+
+  public ProjectBean getCurrentBean() {
+    return currentBean;
   }
 
 }

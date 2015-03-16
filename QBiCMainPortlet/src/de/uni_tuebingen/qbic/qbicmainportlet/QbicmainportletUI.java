@@ -109,8 +109,8 @@ public class QbicmainportletUI extends UI {
       // show progress bar and initialize the view
 
       this.resUrl =
-          (String) getPortletSession().getAttribute("resUrl", PortletSession.APPLICATION_SCOPE);
-
+          (String) getPortletSession().getAttribute("resURL", PortletSession.APPLICATION_SCOPE);
+      System.out.println("resUrl: " + resUrl);
       initProgressBarAndThreading(request);
       // buildMainLayout();
     }
@@ -567,7 +567,7 @@ public class QbicmainportletUI extends UI {
     BarcodeView barcodeView =
         new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
             manager.getPathVariable());
-    ExperimentView experimentView = new ExperimentView(datahandler);
+    final ExperimentView experimentView = new ExperimentView(datahandler,state, resUrl);
     ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
 
@@ -620,6 +620,8 @@ public class QbicmainportletUI extends UI {
           homeView.rebuildLayout(height, width, browser);
         } else if (currentView instanceof ProjectView) {
           projectView.updateView(height, width, browser);
+        } else if(currentView instanceof ExperimentView){
+          experimentView.updateView(height, width, browser);
         }
       }
     });
@@ -633,20 +635,43 @@ public class QbicmainportletUI extends UI {
 
       @Override
       public boolean beforeViewChange(ViewChangeEvent event) {
+        int height = getPage().getBrowserWindowHeight();
+        int width = getPage().getBrowserWindowWidth();
+        WebBrowser browser = getPage().getWebBrowser();
+        
         currentView = event.getNewView();
+        if(currentView instanceof HomeView){
+          homeView.rebuildLayout(height, width, browser);
+        }
         if (currentView instanceof ProjectView) {
-          int height = getPage().getBrowserWindowHeight();
-          int width = getPage().getBrowserWindowWidth();
-          WebBrowser browser = getPage().getWebBrowser();
-          ProjectView projectView = (ProjectView) currentView;
           projectView.updateView(height, width, browser);
+        }
+        if (currentView instanceof ExperimentView) {
+          experimentView.updateView(height, width, browser);
         }
         return true;
       }
 
       @Override
       public void afterViewChange(ViewChangeEvent event) {
+        currentView = event.getNewView();
+        Object currentBean = null;
+        if (currentView instanceof ProjectView) {
+          currentBean = projectView.getCurrentBean();
+        }
+        if (currentView instanceof ExperimentView) {
+          currentBean = experimentView.getCurrentBean();
+        }
+        try{
+          PortletSession portletSession = QbicmainportletUI.getCurrent().getPortletSession();
+          if( portletSession != null){
+            portletSession.setAttribute("qbic_download", currentBean, PortletSession.APPLICATION_SCOPE);
+          }
+        }catch(NullPointerException e){
+          //nothing to do. during initialization that might happen. Nothing to worry about
+        }
 
+        
       }
 
     });

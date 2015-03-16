@@ -117,9 +117,11 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     Object bean =
         (Object) request.getPortletSession()
             .getAttribute("qbic_download", PortletSession.APPLICATION_SCOPE);
-    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
     if(bean instanceof ProjectBean){
       serveProject((ProjectBean)bean, new TarWriter(), response, dataHandler.openBisClient );
+    }
+    else if(bean instanceof ExperimentBean){
+      serveExperiment((ExperimentBean)bean, new TarWriter(), response, dataHandler.openBisClient );
     }
     else{
       response.setContentType("text/javascript");
@@ -175,6 +177,58 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     }
     writer.closeStream();
   }
+  
+  /**
+   * 
+   * Note: the provided stream will be closed.
+   * @param bean bean containing datasets.
+   * @param writer writes
+   * @param response writer writes to its outputstream
+   * @param openbisClient
+   */
+  private void serveExperiment(ExperimentBean bean, TarWriter writer, ResourceResponse response, OpenBisClient openbisClient) {
+    String filename = bean.getCode() + ".tar";
+    
+    response.setContentType(writer.getContentType());
+    StringBuilder sb = new StringBuilder("attachement; filename=\"");
+    sb.append(filename);
+    sb.append("\"");
+    response.setProperty("Content-Disposition", sb.toString());
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
+    
+    long tarFileLength = writer.computeTarLength2(entries);
+    // response.setContentLength((int) tarFileLength);
+    // For some reason setContentLength does not work
+    response.setProperty("Content-Length", String.valueOf(tarFileLength));
+    try {
+      writer.setOutputStream(response.getPortletOutputStream());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+    Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+    while (it.hasNext()) {
+      Entry<String, SimpleEntry<String, Long>> entry = it.next();
+      String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+      String[] splittedFilePath = entryKey.split("/");
+
+      if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
+            .getKey()), entry.getValue().getValue());
+      } else {
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
+            .getKey(), entryKey), entry.getValue().getValue());
+      }
+    }
+    writer.closeStream();
+  }
+  
+  
+  
+  
+  
   /**
    * if it is one of the openbis beans, then it will be converted into an entry.
    * Used to prepare a bean for download via a writer, e.g. a {@link TarWriter}
@@ -192,6 +246,14 @@ public class CustomVaadinPortlet extends VaadinPortlet {
           }
         }
       }      
+    }
+    else     if(bean instanceof ExperimentBean){
+      ExperimentBean experimentBean = (ExperimentBean) bean;
+        for(SampleBean sb : experimentBean.getSamples().getItemIds()){
+          for(DatasetBean db : sb.getDatasets().getItemIds()){
+            addEntry(db, entries);          
+          }
+        }   
     }
     return entries;
   }

@@ -532,6 +532,39 @@ public class DatasetView extends VerticalLayout implements View {
 
           }
           break;
+        case "experiment":
+          datasetContainer = new HierarchicalContainer();
+          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
+          datasetContainer.addContainerProperty("Project", String.class, null);
+          datasetContainer.addContainerProperty("Sample", String.class, null);
+          datasetContainer.addContainerProperty("Sample Type", String.class, null);
+          datasetContainer.addContainerProperty("File Name", String.class, null);
+          datasetContainer.addContainerProperty("File Type", String.class, null);
+          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
+          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
+          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
+          datasetContainer.addContainerProperty("File Size", String.class, null);
+          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
+          datasetContainer.addContainerProperty("dl_link", String.class, null);
+          datasetContainer.addContainerProperty("CODE", String.class, null);
+          ExperimentBean experimentBean = datahandler.getExperiment(map.get("id"));
+          BeanItemContainer<SampleBean> samplesbeans = experimentBean.getSamples();
+            for (SampleBean sb : samplesbeans.getItemIds()) {
+              BeanItemContainer<DatasetBean> datasetbeans = sb.getDatasets();
+              for (DatasetBean d : datasetbeans.getItemIds()) {
+                String sample = sb.getCode();
+                String sampleType = sb.getType();// this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
+                String project = experimentBean.getId().split("/")[1];
+                Date date = d.getRegistrationDate();
+                SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                String dateString = sd.format(date);
+                Timestamp ts = Timestamp.valueOf(dateString);
+                // recursive test
+                registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);
+              }
+            }
+          break;          
+
         default:
           datasetContainer = new HierarchicalContainer();
       }
