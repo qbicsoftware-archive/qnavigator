@@ -3,16 +3,11 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import helpers.Utils;
 
 import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.portlet.PortletSession;
 
 import logging.Log4j2Logger;
 import logging.Logger;
@@ -24,8 +19,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
@@ -33,8 +26,8 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
@@ -44,7 +37,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -54,46 +46,406 @@ public class ProjectView extends VerticalLayout implements View {
 
   FilterTable table;
   VerticalLayout projectview_content;
-  VerticalLayout buttonLayoutSection = new VerticalLayout();
+  VerticalLayout buttonLayoutSection;
 
-  private String id;
+
+  private ProjectBean currentBean;
+
   private Button export;
 
   private DataHandler datahandler;
 
   private State state;
 
+  private FileDownloader fileDownloader;
+
+  private String resourceUrl;
+
+  private MenuItem downloadCompleteProjectMenuItem;
+
+  private MenuItem datasetOverviewMenuItem;
+
+  private MenuItem createBarcodesMenuItem;
+
+  private MenuBar menubar;
+
+  private Label contact;
+
+  private Label descContent;
+
+  private VerticalLayout status;
+
+  private HorizontalLayout statContent;
+
+  private HorizontalLayout graphSectionContent;
+
+  private VerticalLayout membersSection;
+
   private static Logger LOGGER = new Log4j2Logger(ProjectView.class);
 
-  public ProjectView(DataHandler datahandler,State state, String id) {
-    this.datahandler = datahandler;
-    this.state = state;
-    projectview_content = new VerticalLayout();
 
-    this.id = id;
-
-    this.table = this.buildFilterTable();
-    // this.table.setSizeFull();
-
-    projectview_content.addComponent(this.table);
-    projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    // this.setContent(projectview_content);
-    this.addComponent(projectview_content);
-
-    this.tableClickChangeTreeView();
-
+  public ProjectView(DataHandler datahandler, State state, String resourceurl) {
+    this(datahandler, state);
+    this.resourceUrl = resourceurl;
   }
-
 
   public ProjectView(DataHandler datahandler, State state) {
-    // execute the above constructor with default settings, in order to have the same settings
-    this(datahandler,state, "No project selected");
+    this.datahandler = datahandler;
+    this.state = state;
+    resourceUrl = "javascript;";
+    initView();
   }
 
-  public void setSizeFull() {
-    this.table.setSizeFull();
-    projectview_content.setSizeFull();
-    super.setSizeFull();
+  /**
+   * updates view, if height, width or the browser changes.
+   * 
+   * @param browserHeight
+   * @param browserWidth
+   * @param browser
+   */
+  public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
+    setWidth((browserWidth * 0.6f), Unit.PIXELS);
+  }
+  
+  /**
+   * init this view. builds the layout skeleton
+   */
+  void initView() {
+    this.table = this.buildFilterTable();
+    this.tableClickChangeTreeView();
+
+    projectview_content = new VerticalLayout();
+    projectview_content.addComponent(initMenuBar());
+    projectview_content.addComponent(initDescription());
+    projectview_content.addComponent(initStatistics());
+    projectview_content.addComponent(initTable());
+    projectview_content.addComponent(initButtonLayout());
+    projectview_content.addComponent(initGraph());
+
+    // use the component that is returned by initTable
+    // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
+    projectview_content.setWidth("100%");
+    this.addComponent(projectview_content);
+  }
+
+  /**
+   * This function should be called each time currentBean is changed
+   */
+  public void updateContent() {
+    updateContentMenuBar();
+    updateContentDescription();
+    updateContentStatistics();
+    updateContentTable();
+    updateContentButtonLayout();
+    updateContentGraph();
+  }
+  
+  
+  /**
+   * 
+   * @return
+   */
+  HorizontalLayout initButtonLayout() {
+    this.export = new Button("Export as TSV");
+    buttonLayoutSection = new VerticalLayout();
+    HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setHeight(null);
+    buttonLayout.setWidth("100%");
+
+    buttonLayoutSection.addComponent(buttonLayout);
+    buttonLayout.addComponent(this.export);
+    return buttonLayout;
+  }
+  
+  void updateContentButtonLayout() {
+    if (fileDownloader != null)
+      this.export.removeExtension(fileDownloader);
+    StreamResource sr =
+        Utils.getTSVStream(Utils.containerToString(currentBean.getExperiments()),
+            currentBean.getId());
+    fileDownloader = new FileDownloader(sr);
+    fileDownloader.extend(this.export);
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  MenuBar initMenuBar() {
+    menubar = new MenuBar();
+    menubar.setWidth(100.0f, Unit.PERCENTAGE);
+    menubar.addStyleName("user-menu");
+
+    // set to true for the hack below
+    menubar.setHtmlContentAllowed(true);
+    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
+    downloadProject.setIcon(new ThemeResource("computer_test2.png"));
+    downloadProject.addSeparator();
+    this.downloadCompleteProjectMenuItem =
+        downloadProject
+            .addItem(
+                "<a href=\""
+                    + resourceUrl
+                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
+                null);
+    
+    // Open DatasetView
+    this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
+    MenuItem manage = menubar.addItem("Manage your data", null, null);
+    manage.setIcon(new ThemeResource("barcode_test2.png"));
+
+    // Another submenu item with a sub-submenu
+    this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
+    // Another top-level item
+    MenuItem workflows = menubar.addItem("Run workflows", null, null);
+    workflows.setIcon(new ThemeResource("dna_test2.png"));
+    workflows.setEnabled(false);
+
+    // Yet another top-level item
+    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
+    analyze.setIcon(new ThemeResource("graph_test2.png"));
+    analyze.setEnabled(false);
+    return menubar;
+  }
+
+  /**
+   * updates the menu bar based on the new content (currentbean was changed)
+   */
+  void updateContentMenuBar() {
+    downloadCompleteProjectMenuItem
+        .setText("<a href=\""
+            + resourceUrl
+            + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>");
+
+    datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
+
+      @Override
+      public void menuSelected(MenuItem selectedItem) {
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        StringBuilder sb = new StringBuilder("type=");
+        sb.append(navigateToLabel);
+        sb.append("&");
+        sb.append("id=");
+        sb.append(currentBean.getId());
+        message.add(sb.toString());
+        message.add(DatasetView.navigateToLabel);
+        state.notifyObservers(message);
+      }
+    });
+    createBarcodesMenuItem.setCommand(new MenuBar.Command() {
+
+      public void menuSelected(MenuItem selectedItem) {
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        message.add(currentBean.getId());
+        message.add(BarcodeView.navigateToLabel);
+        state.notifyObservers(message);
+      }
+    });
+
+  }
+
+  /**
+   * initializes the description layout
+   * 
+   * @return
+   */
+  VerticalLayout initDescription() {
+    VerticalLayout projDescription = new VerticalLayout();
+    VerticalLayout projDescriptionContent = new VerticalLayout();
+
+    // String desc = currentBean.getDescription();
+    // if (!desc.isEmpty()) {
+    // descContent.setValue(desc);
+    // }
+    descContent = new Label("");
+    // contact.setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+    // + currentBean.getId()
+    // + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
+    // + currentBean.getId() + "</a>");
+    contact = new Label("", ContentMode.HTML);
+    projDescriptionContent.addComponent(descContent);
+    projDescriptionContent.addComponent(contact);
+    projDescriptionContent.setMargin(true);
+    projDescriptionContent.setCaption("Description");
+    projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
+
+    projDescription.addComponent(projDescriptionContent);
+    membersSection = new VerticalLayout();
+    Component membersContent = new VerticalLayout();
+
+    membersContent.setIcon(FontAwesome.USERS);
+    membersContent.setCaption("Members");
+    membersSection.addComponent(membersContent);
+    membersSection.setMargin(true);
+    projDescription.addComponent(membersSection);
+    membersSection.setWidth("100%");
+
+    projDescription.setMargin(true);
+    projDescription.setWidth("100%");
+    return projDescription;
+  }
+  
+  void updateContentDescription() {
+    contact
+        .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+            + currentBean.getId()
+            + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
+            + currentBean.getId() + "</a>");
+    String desc = currentBean.getDescription();
+    if (!desc.isEmpty()) {
+      descContent.setValue(desc);
+    }
+    //TODO use space information to check whether members really have to be recalculated.
+    //For users chances are high, that they click on a project from the same space -> no recalculation needed!
+    Component membersContent = getMembersComponent(currentBean.getMembers());
+
+    membersContent.setIcon(FontAwesome.USERS);
+    membersContent.setCaption("Members");
+    membersContent.setWidth("100%");
+    membersSection.removeAllComponents();
+    membersSection.addComponent(membersContent);
+    membersSection.setMargin(true);
+  }
+  
+
+  /**
+   * 
+   * @return
+   * 
+   */
+  VerticalLayout initStatistics() {
+    VerticalLayout statistics = new VerticalLayout();
+
+    statContent = new HorizontalLayout();
+    statContent.setCaption("Statistics");
+    statContent.setIcon(FontAwesome.BAR_CHART_O);
+    statContent.addComponent(new Label(""));
+
+    // TODO
+    // statContent.addComponent(new Label(String.format("%s sample(s),", )));
+    // int numOfDatasets = datahandler.datasetMap.get(project.getId()).size();
+    // statContent.addComponent(new Label(String.format("%s dataset(s).", numOfDatasets)));
+
+    statContent.setMargin(true);
+    statContent.setSpacing(true);
+
+    /*
+     * if (numOfDatasets > 0) {
+     * 
+     * String lastSample = "No samples available"; // if
+     * (project.projectInformation.lastChangedSample != null) { // lastSample =
+     * projectInformation.lastChangedSample.split("/")[2]; lastSample = "not implemented"; // TODO
+     * // } statContent.addComponent(new Label(String.format("Last change %s",
+     * String.format("occurred in sample %s (%s)", lastSample, //
+     * projectInformation.lastChangedDataset.toString())))); "never")))); }
+     */
+
+    statistics.addComponent(statContent);
+    statistics.setMargin(true);
+
+
+    // status bar section
+
+    status = new VerticalLayout();
+    status.setMargin(true);
+    statistics.addComponent(status);
+    return statistics;
+  }
+  
+  /**
+   * 
+   */
+  void updateContentStatistics() {
+    statContent.removeAllComponents();
+    statContent.addComponent(new Label(String.format("%s experiment(s),", currentBean
+        .getExperiments().size())));
+
+    // TODO
+    // statContent.addComponent(new Label(String.format("%s sample(s),", )));
+    // int numOfDatasets = datahandler.datasetMap.get(project.getId()).size();
+    // statContent.addComponent(new Label(String.format("%s dataset(s).", numOfDatasets)));
+
+    status.removeAllComponents();
+    VerticalLayout statusContent =
+        this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
+    statusContent.setCaption("Status");
+    statusContent.setIcon(FontAwesome.CLOCK_O);
+
+    // TODO
+    // statusContent.addComponent(new Label(projectInformation.statusMessage));
+    statusContent.setSpacing(true);
+    statusContent.setMargin(true);
+
+    status.addComponent(statusContent);
+  }
+  
+  
+
+
+  VerticalLayout initTable() {
+    this.table = this.buildFilterTable();
+    VerticalLayout tableSection = new VerticalLayout();
+    VerticalLayout tableSectionContent = new VerticalLayout();
+
+    tableSectionContent.setCaption("Registered Experiments");
+    tableSectionContent.setIcon(FontAwesome.FLASK);
+    tableSectionContent.addComponent(this.table);
+
+    tableSectionContent.setMargin(true);
+    tableSection.setMargin(true);
+    this.table.setWidth("100%");
+    tableSection.setWidth("100%");
+    tableSectionContent.setWidth("100%");
+
+    tableSection.addComponent(tableSectionContent);
+
+    return tableSection;
+  }
+  
+  
+  void updateContentTable() {
+    // Nothing to do here at the moment
+    // table is already set in setdataresource
+  }
+  
+
+  /**
+   * 
+   * @return
+   */
+  VerticalLayout initGraph() {
+    VerticalLayout graphSection = new VerticalLayout();
+    graphSectionContent = new HorizontalLayout();
+
+    graphSectionContent.setCaption("Project Graph");
+    graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
+
+    graphSectionContent.setMargin(true);
+    graphSection.setMargin(true);
+    graphSection.setWidth("100%");
+    graphSectionContent.setWidth("100%");
+    graphSection.addComponent(graphSectionContent);
+    return graphSection;
+  }
+
+  void updateContentGraph() {
+    Resource resource = getGraphResource();
+    if (resource != null) {
+      graphSectionContent.removeAllComponents();
+      Image graphImage = new Image("", resource);
+      graphSectionContent.addComponent(graphImage);
+    }
+  }
+  
+
+  public void setResourceUrl(String resourceurl) {
+    this.resourceUrl = resourceurl;
+  }
+
+  public String getResourceUrl() {
+    return resourceUrl;
   }
 
   public String getNavigatorLabel() {
@@ -104,339 +456,31 @@ public class ProjectView extends VerticalLayout implements View {
    * sets the ContainerDataSource for showing it in a table and the id of the current Openbis
    * Project. The id is shown in the caption.
    * 
-   * @param projectInformation
-   * @param id
+   * @param projectBean
    */
-  public void setContainerDataSource(ProjectBean projectBean, String id) {
-    this.id = id;
-    this.setStatistics(projectBean);
-
-    // buttonLayoutSection = new VerticalLayout();
-    // buttonLayoutSection.setMargin(true);
-    buttonLayoutSection.removeAllComponents();
-    HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setHeight(null);
-    buttonLayout.setWidth("100%");
-    // buttonLayout.setSpacing(true);
-
-    buttonLayoutSection.addComponent(buttonLayout);
-
-    this.export = new Button("Export as TSV");
-    buttonLayout.addComponent(this.export);
-
-    // this.projectview_content.addComponent(buttonLayoutSection);
+  public void setContainerDataSource(ProjectBean projectBean) {
+    this.currentBean = projectBean;
     this.table.setContainerDataSource(projectBean.getExperiments());
-    this.table.setVisibleColumns(new Object[]{"code", "type", "registrationDate", "registrator", "status"});
-    this.table.setColumnHeader("code", "Name");
-    this.table.setColumnHeader("type", "Type");
-    this.table.setColumnHeader("registrationDate", "Registration Date");
-    this.table.setColumnHeader("registrator", "Registered By");
-    this.table.setColumnHeader("status", "Status");
-
-    StreamResource sr = Utils.getTSVStream(Utils.containerToString(projectBean.getExperiments()), this.id);
-    FileDownloader fileDownloader = new FileDownloader(sr);
-    fileDownloader.extend(this.export);
-
-    // this.updateCaption();
+    table.setVisibleColumns(new Object[] {"code", "type", "registrationDate", "registrator",
+        "status"});
   }
 
 
-  private void setStatistics(ProjectBean projectBean) {
-    // this.setWidth("100%");
-    projectview_content.removeAllComponents();
-
-    // TODO Toolbar in there or not?
-    // ToolBar toolbar = new ToolBar(ToolBar.View.Space);
-    // projectview_content.addComponent(toolbar);
-
-    MenuBar menubar = new MenuBar();
-    // menubar.addStyleName("qbicmainportlet");
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);
-    menubar.addStyleName("user-menu");
-    projectview_content.addComponent(menubar);
-
-    // A top-level menu item that opens a submenu
-
-    // set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-
-
-    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setIcon(new ThemeResource("computer_test2.png"));
-    downloadProject.addSeparator();
-    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-    //TODO getContainsData is always false!! Should be set correctly
-    //if(projectBean.getContainsData()){
-    //  downloadProject.setEnabled(false);
-    //}
-     portletSession.setAttribute("qbic_download", projectBean, PortletSession.APPLICATION_SCOPE);
-      
-      // add sub Item to download all projects
-      downloadProject
-          .addItem(
-              "<a href=\""
-                  + (String) portletSession
-                      .getAttribute("resURL", PortletSession.APPLICATION_SCOPE)
-                  + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
-              null);
-      //Open DatasetView
-      downloadProject.addItem("Dataset Overview", new MenuBar.Command() {
-
-        @Override
-        public void menuSelected(MenuItem selectedItem) {
-          State state = (State) UI.getCurrent().getSession().getAttribute("state");
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          StringBuilder sb = new StringBuilder("type=");
-          sb.append(navigateToLabel);
-          sb.append("&");
-          sb.append("id=");
-          sb.append(id);
-          message.add(sb.toString());
-          message.add(DatasetView.navigateToLabel);
-          state.notifyObservers(message);
-        }
-      });
-
-
-    MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_test2.png"));
-
-    // Another submenu item with a sub-submenu
-    MenuItem colds = manage.addItem("Create Barcodes", null, new MenuBar.Command() {
-
-      public void menuSelected(MenuItem selectedItem) {
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        message.add(id);
-        message.add("barcodeview");
-        state.notifyObservers(message);
-      }
-    });
-
-    // Another top-level item
-    MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_test2.png"));
-    workflows.setEnabled(false);
-
-    // Yet another top-level item
-    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    analyze.setIcon(new ThemeResource("graph_test2.png"));
-    analyze.setEnabled(false);
-
-    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
-    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
-
-    projectview_content.setWidth("100%");
-    this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    // this.setHeight(String.format("%spx", (browserHeight * 0.8)));
-
-
-    // Project description
-    VerticalLayout projDescription = new VerticalLayout();
-    VerticalLayout projDescriptionContent = new VerticalLayout();
-
-    Label descContent = new Label("none");
-    String desc = projectBean.getDescription();
-    if (!desc.isEmpty()) {
-      descContent = new Label(desc);
-    }
-
-    Label contact =
-        new Label(
-            "<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
-                + this.id
-                + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
-                + this.id + "</a>", ContentMode.HTML);
-    // contact.setIcon(FontAwesome.ENVELOPE);
-
-    // projDescription.setWidth("100%");
-    // projDescriptionContent.setWidth("100%");
-    // descContent.setWidth("100%");
-    // contact.setWidth("100%");
-
-    projDescriptionContent.addComponent(descContent);
-    projDescriptionContent.addComponent(contact);
-    projDescriptionContent.setMargin(true);
-    projDescriptionContent.setCaption("Description");
-    projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
-
-    projDescription.addComponent(projDescriptionContent);
-    projDescription.setMargin(true);
-    projDescription.setWidth("100%");
-    projectview_content.addComponent(projDescription);
-
-    // statistics.addComponent(projDescription);
-    // statistics.addComponent(vertical_spacer_big1);
-
-
-    // VerticalLayout contact = new VerticalLayout();
-    // contact.addComponent(new Label("QBiC contact:"));
-    // contact.addComponent(new Label(projectInformation.contact));
-
-    // TODO email address according to project ?
-
-    // members section
-
-    VerticalLayout members_section = new VerticalLayout();
-    Component membersContent = getMembersComponent(projectBean.getMembers());
-
-    membersContent.setIcon(FontAwesome.USERS);
-    membersContent.setCaption("Members");
-    members_section.addComponent(membersContent);
-    members_section.setMargin(true);
-
-    projectview_content.addComponent(members_section);
-
-
-
-    // statistics section
-    VerticalLayout statistics = new VerticalLayout();
-
-    HorizontalLayout statContent = new HorizontalLayout();
-    statContent.setCaption("Statistics");
-    statContent.setIcon(FontAwesome.BAR_CHART_O);
-    statContent.addComponent(new Label(String.format("%s experiment(s),", projectBean.getExperiments().size())));
-
-    //TODO 
-    //statContent.addComponent(new Label(String.format("%s sample(s),", )));
-    // int numOfDatasets = datahandler.datasetMap.get(project.getId()).size();
-    //statContent.addComponent(new Label(String.format("%s dataset(s).", numOfDatasets)));
-
-    statContent.setMargin(true);
-    statContent.setSpacing(true);
-    
-    /*
-    if (numOfDatasets > 0) {
-
-      String lastSample = "No samples available";
-      // if (project.projectInformation.lastChangedSample != null) {
-      // lastSample = projectInformation.lastChangedSample.split("/")[2];
-      lastSample = "not implemented"; // TODO
-      // }
-      statContent.addComponent(new Label(String.format("Last change %s",
-          String.format("occurred in sample %s (%s)", lastSample,
-          // projectInformation.lastChangedDataset.toString()))));
-              "never"))));
-    }
-  */
-
-    statistics.addComponent(statContent);
-    statistics.setMargin(true);
-    projectview_content.addComponent(statistics);
-
-
-    // status bar section
-
-    VerticalLayout status = new VerticalLayout();
-    
-    // use getProgress of projectBean ?
-    VerticalLayout statusContent =
-    this.createProjectStatusComponent(datahandler.computeProjectStatuses(projectBean));
-    statusContent.setCaption("Status");
-    statusContent.setIcon(FontAwesome.CLOCK_O);
-        
-    //TODO
-    //statusContent.addComponent(new Label(projectInformation.statusMessage));
-    statusContent.setSpacing(true);
-    statusContent.setMargin(true);
-
-    status.addComponent(statusContent);
-    status.setMargin(true);
-
-    projectview_content.addComponent(status);
-
-
-
-    // table section
-    VerticalLayout tableSection = new VerticalLayout();
-    VerticalLayout tableSectionContent = new VerticalLayout();
-
-    tableSectionContent.setCaption("Registered Experiments");
-    tableSectionContent.setIcon(FontAwesome.FLASK);
-    tableSectionContent.addComponent(this.table);
-    tableSectionContent.addComponent(buttonLayoutSection);
-
-    tableSectionContent.setMargin(true);
-    tableSection.setMargin(true);
-    this.table.setWidth("100%");
-    tableSection.setWidth("100%");
-    tableSectionContent.setWidth("100%");
-
-    tableSection.addComponent(tableSectionContent);
-    projectview_content.addComponent(tableSection);
-
-    // graph section
-    VerticalLayout graphSection = new VerticalLayout();
-    HorizontalLayout graphSectionContent = new HorizontalLayout();
-
-    graphSectionContent.setCaption("Project Graph");
-    graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
-
-    graphSectionContent.setMargin(true);
-    graphSection.setMargin(true);
-    graphSection.setWidth("100%");
-    graphSectionContent.setWidth("100%");
-
-    
+  /**
+   * returns Resource which represents the project graph of the current Bean. Can be set as the
+   * resource of an {@link com.vaadin.ui.Image}.
+   * 
+   * @return
+   */
+  private Resource getGraphResource() {
+    Resource resource = null;
     try {
-      GraphGenerator graphFrame = new GraphGenerator(projectBean, datahandler.openBisClient);
-      Resource resource = graphFrame.getRes();
-      //System.out.println(resource);
-      if (resource != null) {
-        Image graphImage = new Image("", graphFrame.getRes());
-        graphSectionContent.addComponent(graphImage);
-        graphSection.addComponent(graphSectionContent);
-        projectview_content.addComponent(graphSection);
-      }
+      GraphGenerator graphFrame = new GraphGenerator(currentBean, datahandler.openBisClient);
+      resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
     }
-    
-
-    // HorizontalLayout head = new HorizontalLayout();
-    // head.addComponent(statistics);
-    // head.addComponent(contact);
-    // head.setMargin(true);
-    // head.setSpacing(true);
-
-    // statistics.setSpacing(true);
-
-    //
-    // statistics.addComponent(vertical_spacer_big2);
-    // projectview_content.setMargin(true);
-    // projectview_content.setSpacing(true);
-    // projectview_content.addComponent(head);
-    // Label membersLabel = new Label(getMembersString(projectInformation.members));
-
-
-  }
-
-  private void addentry(Integer itemId, HierarchicalContainer htc,
-      Map<String, SimpleEntry<String, Long>> entries, String fileName) {
-    fileName =
-        Paths.get(fileName, (String) htc.getItem(itemId).getItemProperty("File Name").getValue())
-            .toString();
-
-    if (htc.hasChildren(itemId)) {
-
-      for (Object childId : htc.getChildren(itemId)) {
-        addentry((Integer) childId, htc, entries, fileName);
-      }
-
-    } else {
-      String datasetCode = (String) htc.getItem(itemId).getItemProperty("CODE").getValue();
-      Long datasetFileSize =
-          (Long) htc.getItem(itemId).getItemProperty("file_size_bytes").getValue();
-
-      entries
-          .put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode, datasetFileSize));
-    }
-  }
-
-
-  private void updateCaption() {
-    this.setCaption(String.format("Viewing Project %s", id));
+    return resource;
   }
 
   private void tableClickChangeTreeView() {
@@ -445,9 +489,13 @@ public class ProjectView extends VerticalLayout implements View {
     this.table.addValueChangeListener(new ViewTablesClickListener(table, "Experiment"));
   }
 
+  /**
+   * initializes and builds a filtering table for this view
+   * 
+   * @return
+   */
   private FilterTable buildFilterTable() {
     FilterTable filterTable = new FilterTable();
-    // filterTable.setSizeFull();
 
     filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
     filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
@@ -464,29 +512,21 @@ public class ProjectView extends VerticalLayout implements View {
 
     filterTable.setColumnReorderingAllowed(true);
 
-    // filterTable.setCaption("Registered Experiments");
-    //filterTable.setColumnAlignment("Status", com.vaadin.ui.CustomTable.Align.CENTER);
+
+    filterTable.setColumnHeader("code", "Name");
+    filterTable.setColumnHeader("type", "Type");
+    filterTable.setColumnHeader("registrationDate", "Registration Date");
+    filterTable.setColumnHeader("registrator", "Registered By");
+    filterTable.setColumnHeader("status", "Status");
 
     return filterTable;
   }
 
-  private String getMembersString(Set<String> members) {
-    String concat = new String("");
-    if (members != null) {
-      Object[] tmp = members.toArray();
-      concat = (String) tmp[0];
-
-      if (tmp.length > 1) {
-        for (int i = 1; i < tmp.length; ++i) {
-          concat = concat + ", " + tmp[i];
-        }
-      }
-    }
-
-    return concat;
-  }
-
-
+  /**
+   * 
+   * @param list
+   * @return
+   */
   private Component getMembersComponent(Set<String> list) {
     HorizontalLayout membersLayout = new HorizontalLayout();
     if (list != null) {
@@ -526,8 +566,6 @@ public class ProjectView extends VerticalLayout implements View {
               e.getStackTrace());
         }
 
-
-        // membersLayout.addComponent(new Label(member));
       }
       membersLayout.setSpacing(true);
       membersLayout.setMargin(true);
@@ -535,15 +573,19 @@ public class ProjectView extends VerticalLayout implements View {
     return membersLayout;
   }
 
-
+  /**
+   * 
+   * @param statusValues
+   * @return
+   */
   public VerticalLayout createProjectStatusComponent(Map<String, Integer> statusValues) {
     VerticalLayout projectStatusContent = new VerticalLayout();
 
-    Iterator it = statusValues.entrySet().iterator();
+    Iterator<Entry<String, Integer>> it = statusValues.entrySet().iterator();
     int finishedExperiments = 0;
 
     while (it.hasNext()) {
-      Map.Entry pairs = (Map.Entry) it.next();
+      Map.Entry<String, Integer> pairs = (Map.Entry<String, Integer>) it.next();
 
       if ((Integer) pairs.getValue() == 0) {
         Label statusLabel =
@@ -573,10 +615,16 @@ public class ProjectView extends VerticalLayout implements View {
     return projectStatusContent;
   }
 
+  /**
+   * 
+   */
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-
-    this.setContainerDataSource(datahandler.getProject(currentValue), currentValue);
+    //TODO updateContent only if currentProject is not equal to newProject
+    
+    this.setContainerDataSource(datahandler.getProject(currentValue));
+    updateContent();
   }
+
 }

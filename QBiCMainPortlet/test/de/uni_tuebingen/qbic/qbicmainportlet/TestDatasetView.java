@@ -123,7 +123,5 @@ public class TestDatasetView {
     datasetView.enter(event);
     long numberOfDatasets = datasetView.getContainerDataSource().size();
     ASSERT.that(numberOfDatasets).isEqualTo(3);
-    
   }
-
 }

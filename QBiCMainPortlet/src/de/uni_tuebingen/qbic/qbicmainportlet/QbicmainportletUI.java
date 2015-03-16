@@ -2,23 +2,23 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.portlet.PortletSession;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
 import logging.Log4j2Logger;
-import logging.SysOutLogger;
+import main.OpenBisClient;
+import model.DatasetBean;
+import model.ExperimentBean;
+import model.ProjectBean;
+import model.SampleBean;
+import model.SpaceBean;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
@@ -31,17 +31,18 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.server.WrappedPortletSession;
-import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -57,12 +58,6 @@ import com.vaadin.ui.VerticalLayout;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
-import model.DatasetBean;
-import model.ExperimentBean;
-import model.ProjectBean;
-import model.SampleBean;
-import model.SpaceBean;
-import main.OpenBisClient;
 
 /*
  * in portal-ext.properties the following settings must be set, in order to work
@@ -82,15 +77,17 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "377";
-  
+  private String revision = "380";
+  private String resUrl;
+
   @Override
   protected void init(VaadinRequest request) {
     if (LiferayAndVaadinUtils.getUser() == null) {
       buildNotLoggedinLayout();
     } else {
       // logging who is connecting, when.
-      LOGGER.info(String.format("QbicNavigator (%s.%s) used by: %s",version,revision, LiferayAndVaadinUtils.getUser().getScreenName()));
+      LOGGER.info(String.format("QbicNavigator (%s.%s) used by: %s", version, revision,
+          LiferayAndVaadinUtils.getUser().getScreenName()));
       // try to init connection to openbis and write some session attributes, that can be accessed
       // globally
       try {
@@ -99,9 +96,10 @@ public class QbicmainportletUI extends UI {
       } catch (Exception e) {
         // probably the connection to openbis failed
         buildOpenbisConnectionErrorLayout(request);
-        if(isInProductionMode())
+        if (isInProductionMode())
           try {
-            VaadinService.getCurrentResponse().sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT, "openbis could not be accessed.");
+            VaadinService.getCurrentResponse().sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT,
+                "openbis could not be accessed.");
           } catch (IOException | IllegalArgumentException e1) {
             // TODO Auto-generated catch block
             VaadinService.getCurrentResponse().setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
@@ -109,6 +107,10 @@ public class QbicmainportletUI extends UI {
         return;
       }
       // show progress bar and initialize the view
+
+      this.resUrl =
+          (String) getPortletSession().getAttribute("resUrl", PortletSession.APPLICATION_SCOPE);
+
       initProgressBarAndThreading(request);
       // buildMainLayout();
     }
@@ -190,6 +192,7 @@ public class QbicmainportletUI extends UI {
 
   private ProgressBar progress;
   private Label status;
+  protected View currentView;
 
 
   /**
@@ -215,9 +218,11 @@ public class QbicmainportletUI extends UI {
     final SpaceBean homeSpaceBean = null;
     status.setValue("Connecting to database.");
     PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-    DataHandler datahandler = (DataHandler)portletSession.getAttribute("datahandler",PortletSession.APPLICATION_SCOPE);
+    DataHandler datahandler =
+        (DataHandler) portletSession.getAttribute("datahandler", PortletSession.APPLICATION_SCOPE);
     final RunnableFillsContainer th =
-        new RunnableFillsContainer(datahandler, tc, homeSpaceBean, LiferayAndVaadinUtils.getUser().getScreenName());
+        new RunnableFillsContainer(datahandler, tc, homeSpaceBean, LiferayAndVaadinUtils.getUser()
+            .getScreenName());
     final Thread thread = new Thread(th);
     Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
       public void uncaughtException(Thread th, Throwable ex) {
@@ -242,35 +247,37 @@ public class QbicmainportletUI extends UI {
     // Volatile because read in another thread in access()
     volatile double current = 0.0;
     private HierarchicalContainer tc;
-    //private SpaceInformation homeViewInformation;
+    // private SpaceInformation homeViewInformation;
     private String userName;
     private SpaceBean homeSpaceBean;
     private DataHandler datahandler;
 
-    public RunnableFillsContainer(DataHandler dh, HierarchicalContainer tc, SpaceBean homeSpaceBean,
-        String user) {
+    public RunnableFillsContainer(DataHandler dh, HierarchicalContainer tc,
+        SpaceBean homeSpaceBean, String user) {
       this.tc = tc;
       this.homeSpaceBean = homeSpaceBean;
       this.userName = user;
       this.datahandler = dh;
     }
-    
+
     @Override
     public void run() {
       long startTime = System.nanoTime();
 
       status.setValue("Connecting to database.");
-      List<SpaceWithProjectsAndRoleAssignments> spaceList = datahandler.getSpacesWithProjectInformation();
+      List<SpaceWithProjectsAndRoleAssignments> spaceList =
+          datahandler.getSpacesWithProjectInformation();
 
       // Initialization of Tree Container
-       tc.addContainerProperty("identifier", String.class, "N/A");
+      tc.addContainerProperty("identifier", String.class, "N/A");
       tc.addContainerProperty("type", String.class, "N/A");
       tc.addContainerProperty("project", String.class, "N/A");
       tc.addContainerProperty("caption", String.class, "N/A");
 
       // Initialization of Home Information
-      final BeanItemContainer<SpaceBean> spaceContainer = new BeanItemContainer<SpaceBean>(SpaceBean.class);
-    
+      final BeanItemContainer<SpaceBean> spaceContainer =
+          new BeanItemContainer<SpaceBean>(SpaceBean.class);
+
       int number_of_projects = 0;
       int i = 0;
       int all = spaceList.size();
@@ -280,14 +287,22 @@ public class QbicmainportletUI extends UI {
       String lastModifiedExperiment = "N/A";
       String lastModifiedSample = "N/A";
       Date lastModifiedDate = new Date(0, 0, 0);
-      
-      final SpaceBean homeSpaceBean = new SpaceBean("homeSpace", "", false, new BeanItemContainer<ProjectBean>(ProjectBean.class),
-          new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new BeanItemContainer<SampleBean>(SampleBean.class), new BeanItemContainer<DatasetBean>(DatasetBean.class), new ArrayList<String>(), new ProgressBar());
 
-      BeanItemContainer<ProjectBean> projectContainer = new BeanItemContainer<ProjectBean>(ProjectBean.class);
-      BeanItemContainer<ExperimentBean> allExperimentsContainer = new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
-      BeanItemContainer<SampleBean> allSamplesContainer = new BeanItemContainer<SampleBean>(SampleBean.class);
-      BeanItemContainer<DatasetBean> allDatasetsContainer = new BeanItemContainer<DatasetBean>(DatasetBean.class);
+      final SpaceBean homeSpaceBean =
+          new SpaceBean("homeSpace", "", false, new BeanItemContainer<ProjectBean>(
+              ProjectBean.class), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
+              new BeanItemContainer<SampleBean>(SampleBean.class),
+              new BeanItemContainer<DatasetBean>(DatasetBean.class), new ArrayList<String>(),
+              new ProgressBar());
+
+      BeanItemContainer<ProjectBean> projectContainer =
+          new BeanItemContainer<ProjectBean>(ProjectBean.class);
+      BeanItemContainer<ExperimentBean> allExperimentsContainer =
+          new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
+      BeanItemContainer<SampleBean> allSamplesContainer =
+          new BeanItemContainer<SampleBean>(SampleBean.class);
+      BeanItemContainer<DatasetBean> allDatasetsContainer =
+          new BeanItemContainer<DatasetBean>(DatasetBean.class);
 
       List<String> project_identifiers_tmp = new ArrayList<String>();
 
@@ -299,30 +314,30 @@ public class QbicmainportletUI extends UI {
           if (spaceName.equals("QBIC_USER_SPACE")) {
             datahandler.fillPersonsContainer(spaceName);
           }
-                  
+
           List<Project> projects = s.getProjects();
-          number_of_projects += projects.size();          
-          
+          number_of_projects += projects.size();
+
           for (Project project : projects) {
 
             String projectIdentifier = project.getIdentifier();
             String projectCode = project.getCode();
             project_identifiers_tmp.add(projectIdentifier);
-            
-            //if (tc.containsId(project_name)) {
-            //  project_name = project.getIdentifier();
-            //}
-            
+
+            // if (tc.containsId(project_name)) {
+            // project_name = project.getIdentifier();
+            // }
+
             // Project descriptions can be long; truncate the string to provide a brief preview
             String desc = project.getDescription();
-
-            if (desc != null && desc.length() > 0) {
+            if (desc == null) {
+              desc = "";
+            } else if (desc.length() > 0) {
               desc = desc.substring(0, Math.min(desc.length(), 100));
               if (desc.length() == 100) {
                 desc += "...";
               }
             }
-            
             tc.addItem(projectIdentifier);
             tc.getContainerProperty(projectIdentifier, "type").setValue("project");
             tc.getContainerProperty(projectIdentifier, "identifier").setValue(projectIdentifier);
@@ -331,79 +346,85 @@ public class QbicmainportletUI extends UI {
 
             List<Project> tmp_list = new ArrayList<Project>();
             tmp_list.add(project);
-            List<Experiment> experiments = datahandler.openBisClient.listExperimentsOfProjects(tmp_list);
+            List<Experiment> experiments =
+                datahandler.openBisClient.listExperimentsOfProjects(tmp_list);
 
             // Add number of experiments for every project
             number_of_experiments += experiments.size();
 
             List<String> experiment_identifiers = new ArrayList<String>();
-            
+
             ProjectBean newProjectBean =
                 new ProjectBean(projectIdentifier, projectCode, desc, homeSpaceBean,
                     new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new ProgressBar(),
                     new Date(), "", "", null, false);
-            
+
             projectContainer.addBean(newProjectBean);
-            
+
             for (Experiment experiment : experiments) {
-              
+
               String experimentIdentifier = experiment.getIdentifier();
               experiment_identifiers.add(experimentIdentifier);
               String experimentCode = experiment.getCode();
-              
-              //if (tc.containsId(experiment_name)) {
-             //   experiment_name = experiment.getIdentifier();
-              //}
+
+              // if (tc.containsId(experiment_name)) {
+              // experiment_name = experiment.getIdentifier();
+              // }
               tc.addItem(experimentIdentifier);
               tc.setParent(experimentIdentifier, projectIdentifier);
               tc.getContainerProperty(experimentIdentifier, "type").setValue("experiment");
               tc.getContainerProperty(experimentIdentifier, "identifier").setValue(experimentCode);
               tc.getContainerProperty(experimentIdentifier, "project").setValue(projectIdentifier);
               tc.getContainerProperty(experimentIdentifier, "caption").setValue(
-                  String.format("%s (%s)",
-                      datahandler.openBisClient.openBIScodeToString(experiment.getExperimentTypeCode()),
-                      experimentCode));
- 
+                  String.format("%s (%s)", datahandler.openBisClient.openBIScodeToString(experiment
+                      .getExperimentTypeCode()), experimentCode));
+
               tc.setChildrenAllowed(experimentCode, false);
-              
-              //TODO empty constructor
-              ExperimentBean newExperimentBean = new ExperimentBean(experimentIdentifier, experimentCode, experiment.getExperimentTypeCode(), new Image(), 
-                  experiment.getRegistrationDetails().getUserId(), new Timestamp(experiment.getRegistrationDetails().getRegistrationDate().getTime()), null, null, null, null, null,null);
+
+              // TODO empty constructor
+              ExperimentBean newExperimentBean =
+                  new ExperimentBean(experimentIdentifier, experimentCode,
+                      experiment.getExperimentTypeCode(), new Image(), experiment
+                          .getRegistrationDetails().getUserId(), new Timestamp(experiment
+                          .getRegistrationDetails().getRegistrationDate().getTime()), null, null,
+                      null, null, null, null);
               allExperimentsContainer.addBean(newExperimentBean);
             }
-            
-            if(experiment_identifiers.size() > 0) {
-              List<DataSet> datasets = datahandler.openBisClient.getFacade().listDataSetsForExperiments(experiment_identifiers);
+
+            if (experiment_identifiers.size() > 0) {
+              List<DataSet> datasets =
+                  datahandler.openBisClient.getFacade().listDataSetsForExperiments(
+                      experiment_identifiers);
               newProjectBean.setContainsData(datasets.size() != 0);
-            } 
+            }
           }
         }
-           
-          //StringBuilder lce = new StringBuilder();
-          //StringBuilder lcs = new StringBuilder();
-          //dh.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
-          //String tmplastModifiedExperiment = lce.toString();
-          //String tmplastModifiedSample = lcs.toString();
-          //if (!tmplastModifiedSample.equals("N/A")) {
-            //lastModifiedExperiment = tmplastModifiedExperiment;
-            //lastModifiedSample = tmplastModifiedSample;
-          //}
+
+        // StringBuilder lce = new StringBuilder();
+        // StringBuilder lcs = new StringBuilder();
+        // dh.lastDatasetRegistered(datasets, lastModifiedDate, lce, lcs);
+        // String tmplastModifiedExperiment = lce.toString();
+        // String tmplastModifiedSample = lcs.toString();
+        // if (!tmplastModifiedSample.equals("N/A")) {
+        // lastModifiedExperiment = tmplastModifiedExperiment;
+        // lastModifiedSample = tmplastModifiedSample;
+        // }
 
         UI.getCurrent().access(
             new UpdateProgressbar(QbicmainportletUI.getCurrent().getProgressBar(),
                 QbicmainportletUI.getCurrent().getStatusLabel(), (double) (i + 1) / (double) all));
         ++i;
-      
-    }
-     
-      //TODO 3 samples are missing in comparison to openBIS ???!
+
+      }
+
+      // TODO 3 samples are missing in comparison to openBIS ???!
       List<Sample> samplesOfSpace = new ArrayList<Sample>();
       if (project_identifiers_tmp.size() > 0) {
         samplesOfSpace = datahandler.openBisClient.listSamplesForProjects(project_identifiers_tmp);
       } else {
-        //samplesOfSpace = dh.openBisClient.getSamplesofSpace(spaceName); 
+        // samplesOfSpace = dh.openBisClient.getSamplesofSpace(spaceName);
       }
-      
+
       System.out.println(samplesOfSpace.size());
       number_of_samples += samplesOfSpace.size();
       List<String> sample_identifiers_tmp = new ArrayList<String>();
@@ -419,22 +440,24 @@ public class QbicmainportletUI extends UI {
       if (sample_identifiers_tmp.size() > 0) {
         datasets = datahandler.openBisClient.listDataSetsForSamples(sample_identifiers_tmp);
       }
-      
-      for (DataSet ds: datasets) {
+
+      for (DataSet ds : datasets) {
         DatasetBean newDatasetBean = new DatasetBean();
         newDatasetBean.setCode(ds.getCode());
         allDatasetsContainer.addBean(newDatasetBean);
       }
-      
+
       homeSpaceBean.setProjects(projectContainer);
       homeSpaceBean.setExperiments(allExperimentsContainer);
       homeSpaceBean.setSamples(allSamplesContainer);
       homeSpaceBean.setDatasets(allDatasetsContainer);
       long endTime = System.nanoTime();
-      LOGGER.info(String.format("Took %f s",((endTime - startTime) / 1000000000.0)));
-      LOGGER.info(String.format("User %s has %d projects",userName, homeSpaceBean.getProjects().size()));
+      LOGGER.info(String.format("Took %f s", ((endTime - startTime) / 1000000000.0)));
+      LOGGER.info(String.format("User %s has %d projects", userName, homeSpaceBean.getProjects()
+          .size()));
       try {
-        Thread.currentThread().sleep(100); // Sleep for 100 milliseconds
+        Thread.currentThread();
+        Thread.sleep(100); // Sleep for 100 milliseconds
       } catch (InterruptedException e) {
       }
 
@@ -448,7 +471,7 @@ public class QbicmainportletUI extends UI {
           // Stop polling
           UI.getCurrent().setPollInterval(-1);
 
-          //QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
+          // QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
           System.out.println(spaceContainer.size());
           QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean);
         }
@@ -490,8 +513,9 @@ public class QbicmainportletUI extends UI {
   }
 
 
-  //public void buildMainLayout(HierarchicalContainer tc, SpaceInformation homeViewInformation) {
-  public void buildMainLayout(DataHandler datahandler, HierarchicalContainer tc, SpaceBean homeSpaceBean) {
+  // public void buildMainLayout(HierarchicalContainer tc, SpaceInformation homeViewInformation) {
+  public void buildMainLayout(DataHandler datahandler, HierarchicalContainer tc,
+      SpaceBean homeSpaceBean) {
     // HierarchicalContainer tc = new HierarchicalContainer();
     // System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
     // long startTime = System.nanoTime();
@@ -508,20 +532,25 @@ public class QbicmainportletUI extends UI {
     // System.out.println("User " +user.getScreenName() + " has " +
     // homeViewInformation.numberOfProjects + " projects.");
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
+    // TODO getContainsData is always false!! Should be set correctly
+    // if(projectBean.getContainsData()){
+    // downloadProject.setEnabled(false);
+    // }
 
-   // LevelView spaceView = new LevelView(new SpaceView());
-    //LevelView addspaceView =
-      //  new LevelView(
-        //    new Button(
-       //         "I am doing nothing. But you will be able to add workspaces some day in the \"early\" future."));// new
+    // LevelView spaceView = new LevelView(new SpaceView());
+    // LevelView addspaceView =
+    // new LevelView(
+    // new Button(
+    // "I am doing nothing. But you will be able to add workspaces some day in the \"early\" future."));//
+    // new
     // AddSpaceView(new
     // Table(),
     // spaces));
     final HomeView homeView;
 
-    //if (homeViewInformation.numberOfProjects > 0) {
+    // if (homeViewInformation.numberOfProjects > 0) {
     if (homeSpaceBean.getProjects().size() > 0) {
-      //homeView = new HomeView(homeViewInformation, "Your Projects");
+      // homeView = new HomeView(homeViewInformation, "Your Projects");
       homeView = new HomeView(datahandler, homeSpaceBean, "Your Projects");
     } else {
       homeView = new HomeView(datahandler);
@@ -534,25 +563,26 @@ public class QbicmainportletUI extends UI {
     LevelView searchView = new LevelView(new SearchForUsers());
     DatasetView datasetView = new DatasetView(datahandler);
     SampleView sampleView = new SampleView(datahandler);
-    ProjectView projectView = new ProjectView(datahandler,state);
-    BarcodeView barcodeView = new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
-        manager.getPathVariable());
+    final ProjectView projectView = new ProjectView(datahandler, state, resUrl);
+    BarcodeView barcodeView =
+        new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
+            manager.getPathVariable());
     ExperimentView experimentView = new ExperimentView(datahandler);
     ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
-    
-    
+
+
     VerticalLayout navigatorContent = new VerticalLayout();
-    
+
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
-    //navigator.addView("space", spaceView);
-    //navigator.addView("addspaceView", addspaceView);
+    // navigator.addView("space", spaceView);
+    // navigator.addView("addspaceView", addspaceView);
     navigator.addView(DatasetView.navigateToLabel, datasetView);
     navigator.addView(SampleView.navigateToLabel, sampleView);
     navigator.addView("", homeView);
 
     navigator.addView(ProjectView.navigateToLabel, projectView);
     navigator.addView(BarcodeView.navigateToLabel, barcodeView);
-    navigator.addView(ExperimentView.navigateToLabel,experimentView );
+    navigator.addView(ExperimentView.navigateToLabel, experimentView);
     navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
     navigator.addView("qcMlWorkflow", qcMlWorkflowView);
@@ -573,28 +603,53 @@ public class QbicmainportletUI extends UI {
     treeViewAndLevelView.addComponent(navigatorContent);
     mainLayout.addComponent(treeViewAndLevelView);
     mainLayout.addComponent(new Label(String.format("version: %s", version)));
-    if(!isInProductionMode()){
+    if (!isInProductionMode()) {
       mainLayout.addComponent(new Label(String.format("revision: %s", revision)));
     }
     setContent(mainLayout);
-    
-    //"Responsive design"
+
+    // "Responsive design"
     getPage().addBrowserWindowResizeListener(new BrowserWindowResizeListener() {
       @Override
       public void browserWindowResized(BrowserWindowResizeEvent event) {
         int height = event.getHeight();
         int width = event.getWidth();
         WebBrowser browser = event.getSource().getWebBrowser();
-        homeView.rebuildLayout(height, width, browser);
         tv.rebuildLayout(height, width, browser);
+        if (currentView instanceof HomeView) {
+          homeView.rebuildLayout(height, width, browser);
+        } else if (currentView instanceof ProjectView) {
+          projectView.updateView(height, width, browser);
+        }
       }
     });
     int height = getPage().getBrowserWindowHeight();
     int width = getPage().getBrowserWindowWidth();
-    WebBrowser browser = getPage().getWebBrowser();    
+    WebBrowser browser = getPage().getWebBrowser();
     homeView.rebuildLayout(height, width, browser);
     tv.rebuildLayout(height, width, browser);
-    
+
+    navigator.addViewChangeListener(new ViewChangeListener() {
+
+      @Override
+      public boolean beforeViewChange(ViewChangeEvent event) {
+        currentView = event.getNewView();
+        if (currentView instanceof ProjectView) {
+          int height = getPage().getBrowserWindowHeight();
+          int width = getPage().getBrowserWindowWidth();
+          WebBrowser browser = getPage().getWebBrowser();
+          ProjectView projectView = (ProjectView) currentView;
+          projectView.updateView(height, width, browser);
+        }
+        return true;
+      }
+
+      @Override
+      public void afterViewChange(ViewChangeEvent event) {
+
+      }
+
+    });
     navigator.navigateTo("");
   }
 
@@ -625,7 +680,7 @@ public class QbicmainportletUI extends UI {
     this.openBisConnection =
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
             manager.getDataSourceUrl());
-      this.openBisConnection.login();
+    this.openBisConnection.login();
     addDetachListener(new DetachListener() {
 
       @Override

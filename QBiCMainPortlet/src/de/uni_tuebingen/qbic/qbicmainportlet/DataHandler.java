@@ -765,7 +765,9 @@ public class DataHandler {
     
     newProjectBean.setId(project.getIdentifier());
     newProjectBean.setCode(project.getCode());
-    newProjectBean.setDescription(project.getDescription());
+    String desc = project.getDescription();
+    if(desc == null)desc = "";
+    newProjectBean.setDescription(desc);
     newProjectBean.setRegistrationDate(registrationDate);
     newProjectBean.setProgress(progressBar);
     newProjectBean.setRegistrator(project.getRegistrationDetails().getUserId());
