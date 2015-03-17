@@ -77,7 +77,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "382";
+  private String revision = "383";
   private String resUrl;
 
   @Override
@@ -661,11 +661,14 @@ public class QbicmainportletUI extends UI {
         if (currentView instanceof ProjectView) {
           currentBean = projectView.getCurrentBean();
         }
-        if (currentView instanceof ExperimentView) {
+        else if (currentView instanceof ExperimentView) {
           currentBean = experimentView.getCurrentBean();
         }
-        if(currentView instanceof SampleView){
+        else if(currentView instanceof SampleView){
           currentBean = sampleView.getCurrentBean();
+        }
+        else if(currentView instanceof DatasetView){
+          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
         }
         try{
           PortletSession portletSession = QbicmainportletUI.getCurrent().getPortletSession();

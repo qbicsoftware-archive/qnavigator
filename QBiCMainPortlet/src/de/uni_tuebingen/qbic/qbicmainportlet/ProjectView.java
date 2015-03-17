@@ -621,8 +621,9 @@ public class ProjectView extends VerticalLayout implements View {
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
     // TODO updateContent only if currentProject is not equal to newProject
-
+    this.table.unselect(this.table.getValue());
     this.setContainerDataSource(datahandler.getProject(currentValue));
+    
     updateContent();
   }
 

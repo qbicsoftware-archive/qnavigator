@@ -286,7 +286,6 @@ public class SampleView extends VerticalLayout implements View {
     experimentalFactorsContent.addComponent(experimentalFactorLabel);
 
     experimentalFactors.addComponent(experimentalFactorsContent);
-    experimentalFactors.setMargin(true);
     statistics.addComponent(experimentalFactors);
     return statistics;
   }
@@ -400,8 +399,9 @@ public class SampleView extends VerticalLayout implements View {
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
     // TODO updateContent only if currentExperiment is not equal to newExperiment
-
+    this.table.unselect(this.table.getValue());
     this.setContainerDataSource(datahandler.getSample(currentValue));
+    
     updateContent();
 
   }

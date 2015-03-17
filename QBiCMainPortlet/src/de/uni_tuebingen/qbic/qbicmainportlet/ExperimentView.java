@@ -385,8 +385,9 @@ public class ExperimentView extends VerticalLayout implements View {
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
     // TODO updateContent only if currentExperiment is not equal to newExperiment
-
+    this.table.unselect(this.table.getValue());
     this.setContainerDataSource(datahandler.getExperiment(currentValue));
+    
     updateContent();
   }
 

@@ -1,8 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
-import helpers.OpenBisFunctions;
-
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
@@ -21,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import main.OpenBisClient;
 import model.DatasetBean;
 import model.ExperimentBean;
 import model.ProjectBean;
@@ -31,8 +30,6 @@ import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
-
-import main.OpenBisClient;
 
 /**
  * 
@@ -124,13 +121,78 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       serveExperiment((ExperimentBean) bean, new TarWriter(), response, dataHandler.openBisClient);
     } else if (bean instanceof SampleBean) {
       serveSample((SampleBean) bean, new TarWriter(), response, dataHandler.openBisClient);
-    } else {
+    } else if(bean instanceof  Map<?,?>){
+      HashMap<String, AbstractMap.SimpleEntry<String, Long>> entry = null;
+      try{
+       entry = (HashMap<String, AbstractMap.SimpleEntry<String, Long>>)bean;
+      }catch(Exception e){
+        LOGGER.error("portlet session attribute 'qbic_download' contains wrong entry set", e.getStackTrace());
+        response.setContentType("text/javascript");
+        response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
+            String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
+        response.getWriter().append("Please select at least one dataset for download");
+        return;        
+      } 
+      serveEntries(entry, new TarWriter(), response, dataHandler.openBisClient);
+    }
+    else {
       response.setContentType("text/javascript");
       response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
           String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
       response.getWriter().append("Please select at least one dataset for download");
       return;
     }
+  }
+  
+  /**
+   * 
+   * Note: the provided stream will be closed.
+   * 
+   * @param bean bean containing datasets.
+   * @param writer writes
+   * @param response writer writes to its outputstream
+   * @param openbisClient
+   */
+  private void serveEntries(HashMap<String, SimpleEntry<String, Long>> entries,
+      TarWriter writer, ResourceResponse response, OpenBisClient openbisClient) {
+
+    String filename = "qbicdatasets" + ".tar";
+
+    response.setContentType(writer.getContentType());
+    StringBuilder sb = new StringBuilder("attachement; filename=\"");
+    sb.append(filename);
+    sb.append("\"");
+    response.setProperty("Content-Disposition", sb.toString());
+
+    long tarFileLength = writer.computeTarLength2(entries);
+    // response.setContentLength((int) tarFileLength);
+    // For some reason setContentLength does not work
+    response.setProperty("Content-Length", String.valueOf(tarFileLength));
+    try {
+      writer.setOutputStream(response.getPortletOutputStream());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+    
+    Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+    Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+    while (it.hasNext()) {
+      Entry<String, SimpleEntry<String, Long>> entry = it.next();
+      String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+      String[] splittedFilePath = entryKey.split("/");
+
+      if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+        writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(),
+            openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
+      } else {
+        writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(), openbisClient.getDatasetStream(
+            entry.getValue().getKey(), entryKey), entry.getValue().getValue());
+      }
+    }
+    writer.closeStream();
+    
   }
 
   /**
