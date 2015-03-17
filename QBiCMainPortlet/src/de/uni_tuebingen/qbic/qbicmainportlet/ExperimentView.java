@@ -26,7 +26,7 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.VerticalLayout;
 
-public class ExperimentView extends VerticalLayout implements View{
+public class ExperimentView extends VerticalLayout implements View {
 
   /**
    * 
@@ -52,21 +52,21 @@ public class ExperimentView extends VerticalLayout implements View{
   private Label statContentLabel;
   private Label propertiesContentLabel;
 
-  
-  public ExperimentView(DataHandler datahandler, State state, String resourceurl){
+
+  public ExperimentView(DataHandler datahandler, State state, String resourceurl) {
     this(datahandler, state);
     this.resourceUrl = resourceurl;
   }
-  
-  
+
+
   public ExperimentView(DataHandler datahandler, State state) {
     this.datahandler = datahandler;
     this.state = state;
     resourceUrl = "javascript;";
     initView();
   }
-  
-  
+
+
   /**
    * updates view, if height, width or the browser changes.
    * 
@@ -77,18 +77,12 @@ public class ExperimentView extends VerticalLayout implements View{
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
     setWidth((browserWidth * 0.6f), Unit.PIXELS);
   }
-  
+
   /**
-   * init this view. builds the layout skeleton
-   * Menubar
-   * Description and others
-   * Statisitcs
-   * Experiment Table
-   * Graph
+   * init this view. builds the layout skeleton Menubar Description and others Statisitcs Experiment
+   * Table Graph
    */
   void initView() {
-    this.table = this.buildFilterTable();
-    this.tableClickChangeTreeView();
 
     expview_content = new VerticalLayout();
     expview_content.addComponent(initMenuBar());
@@ -113,7 +107,7 @@ public class ExperimentView extends VerticalLayout implements View{
     updateContentTable();
     updateContentButtonLayout();
   }
-  
+
   /**
    * 
    * @return
@@ -129,13 +123,12 @@ public class ExperimentView extends VerticalLayout implements View{
     buttonLayout.addComponent(this.export);
     return buttonLayout;
   }
-  
+
   void updateContentButtonLayout() {
     if (fileDownloader != null)
       this.export.removeExtension(fileDownloader);
     StreamResource sr =
-        Utils.getTSVStream(Utils.containerToString(currentBean.getSamples()),
-            currentBean.getId());
+        Utils.getTSVStream(Utils.containerToString(currentBean.getSamples()), currentBean.getId());
     fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
   }
@@ -161,7 +154,7 @@ public class ExperimentView extends VerticalLayout implements View{
                     + resourceUrl
                     + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete experiment</a>",
                 null);
-    
+
     // Open DatasetView
     this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
     MenuItem manage = menubar.addItem("Manage your data", null, null);
@@ -217,9 +210,9 @@ public class ExperimentView extends VerticalLayout implements View{
       }
     });
 
-  }  
-  
-  
+  }
+
+
   /**
    * initializes the description layout
    * 
@@ -231,23 +224,23 @@ public class ExperimentView extends VerticalLayout implements View{
     generalInfoContent.setCaption("General Information");
     generalInfoContent.setIcon(FontAwesome.INFO);
     generalInfoLabel = new Label("");
-    
+
     generalInfoContent.addComponent(generalInfoLabel);
     generalInfoContent.setMargin(true);
     generalInfo.setMargin(true);
-    
+
     generalInfo.addComponent(generalInfoContent);
-    
-    
-    
+
+
+
     return generalInfo;
   }
-  
+
   void updateContentDescription() {
     generalInfoLabel.setValue(String.format("Kind:\t %s", currentBean.getType()));
-    
-  }  
-  
+
+  }
+
   /**
    * 
    * @return
@@ -260,33 +253,29 @@ public class ExperimentView extends VerticalLayout implements View{
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
 
-    
-    //int numberOfDatasets = dh.datasetMap.get(experimentBean.getId()).size();
+
+    // int numberOfDatasets = dh.datasetMap.get(experimentBean.getId()).size();
     statContentLabel = new Label("");
-    
+
     statContent.addComponent(statContentLabel);
-    //statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
+    // statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
     statContent.setMargin(true);
     statContent.setSpacing(true);
 
     /*
-    if (numberOfDatasets > 0) {
+     * if (numberOfDatasets > 0) {
+     * 
+     * String lastSample = "No samples available"; if (experimentBean.getLastChangedSample() !=
+     * null) { lastSample = experimentBean.getLastChangedSample();// .split("/")[2]; }
+     * statContent.addComponent(new Label(String.format( "Last change %s",
+     * String.format("occurred in sample %s (%s)", lastSample,
+     * experimentBean.getLastChangedDataset().toString())))); }
+     */
 
-      String lastSample = "No samples available";
-      if (experimentBean.getLastChangedSample() != null) {
-        lastSample = experimentBean.getLastChangedSample();// .split("/")[2];
-      }
-      statContent.addComponent(new Label(String.format(
-          "Last change %s",
-          String.format("occurred in sample %s (%s)", lastSample,
-              experimentBean.getLastChangedDataset().toString()))));
-    }
-    */
-    
 
     statistics.addComponent(statContent);
     statistics.setMargin(true);
-    
+
     // Properties of experiment
     VerticalLayout properties = new VerticalLayout();
     VerticalLayout propertiesContent = new VerticalLayout();
@@ -297,27 +286,27 @@ public class ExperimentView extends VerticalLayout implements View{
     properties.addComponent(propertiesContent);
     properties.setMargin(true);
     statistics.addComponent(properties);
-    
+
     return statistics;
   }
-  
+
   /**
    * 
    */
   void updateContentStatistics() {
-    statContentLabel.setValue(String.format("%s sample(s),",
-        currentBean.getSamples().size()));
+    statContentLabel.setValue(String.format("%s sample(s),", currentBean.getSamples().size()));
     propertiesContentLabel.setValue(currentBean.generatePropertiesFormattedString());
-  }  
-  
+  }
+
   VerticalLayout initTable() {
     this.table = this.buildFilterTable();
+    this.tableClickChangeTreeView();
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
     tableSectionContent.setCaption("Registered Samples");
     tableSectionContent.setIcon(FontAwesome.FLASK);
-    tableSectionContent.addComponent(this.table); 
-    
+    tableSectionContent.addComponent(this.table);
+
     tableSectionContent.setMargin(true);
     tableSection.setMargin(true);
     this.table.setWidth("100%");
@@ -328,13 +317,13 @@ public class ExperimentView extends VerticalLayout implements View{
 
     return tableSection;
   }
-  
-  
+
+
   void updateContentTable() {
     // Nothing to do here at the moment
     // table is already set in setdataresource
-  }  
-  
+  }
+
   public void setResourceUrl(String resourceurl) {
     this.resourceUrl = resourceurl;
   }
@@ -358,7 +347,7 @@ public class ExperimentView extends VerticalLayout implements View{
     this.currentBean = experimentBean;
 
     this.table.setContainerDataSource(experimentBean.getSamples());
-    this.table.setVisibleColumns(new Object[]{"code", "type"});
+    this.table.setVisibleColumns(new Object[] {"code", "type"});
   }
 
   private void tableClickChangeTreeView() {
@@ -384,7 +373,7 @@ public class ExperimentView extends VerticalLayout implements View{
     filterTable.setColumnCollapsingAllowed(true);
 
     filterTable.setColumnReorderingAllowed(true);
-    
+
     filterTable.setColumnHeader("code", "Name");
     filterTable.setColumnHeader("type", "Type");
 
@@ -395,8 +384,8 @@ public class ExperimentView extends VerticalLayout implements View{
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    //TODO updateContent only if currentExperiment is not equal to newExperiment
-    
+    // TODO updateContent only if currentExperiment is not equal to newExperiment
+
     this.setContainerDataSource(datahandler.getExperiment(currentValue));
     updateContent();
   }

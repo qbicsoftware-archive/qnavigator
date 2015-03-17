@@ -1,30 +1,33 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.Utils;
+
+import java.util.ArrayList;
+
 import javax.xml.bind.JAXBException;
 
 import model.SampleBean;
 
-import org.tepi.filtertable.FilterTable;
 import org.tepi.filtertable.FilterTreeTable;
 
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-public class SampleView extends VerticalLayout implements View{
+public class SampleView extends VerticalLayout implements View {
 
   /**
    * 
@@ -34,251 +37,338 @@ public class SampleView extends VerticalLayout implements View{
   FilterTreeTable table;
   VerticalLayout vert;
   private HierarchicalContainer datasets;
-  private ButtonLink download;
   private Button export;
-  private final String DOWNLOAD_BUTTON_CAPTION = "Download";
-  private final String[] SAMPLEVIEW_TABLE_COLUMNS = new String[] {"File Name", "File Type",
-      "Dataset Type", "Registration Date", "Validated", "File Size"};
 
-  private String id;
   private DataHandler datahandler;
+  private String resourceUrl;
+  private State state;
+  private VerticalLayout sampview_content;
+  private VerticalLayout buttonLayoutSection;
+  private FileDownloader fileDownloader;
+  private SampleBean currentBean;
+  private MenuBar menubar;
+  private MenuItem downloadCompleteProjectMenuItem;
+  private MenuItem datasetOverviewMenuItem;
+  private MenuItem createBarcodesMenuItem;
+  private Label sampleTypeLabel;
+  private Label sampleParentLabel;
+  private Label numberOfDatasetsLabel;
+  private Label lastChangedDatasetLabel;
+  private Label propertiesLabel;
+  private Label experimentalFactorLabel;
 
-  public SampleView(DataHandler datahandler, FilterTable table, HierarchicalContainer datasource, String id) {
+
+  public SampleView(DataHandler datahandler, State state, String resourceurl) {
+    this(datahandler, state);
+    this.resourceUrl = resourceurl;
+  }
+
+
+  public SampleView(DataHandler datahandler, State state) {
     this.datahandler = datahandler;
-    this.vert = new VerticalLayout();
-    this.id = id;
-
-    this.table = buildFilterTable();
-    this.table.setSelectable(true);
-    //this.table.setSizeFull();
-
-    vert.addComponent(this.table);
-    vert.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    //this.setContent(vert);
-    this.addComponent(vert);
-    
-    //this.vert.setSpacing(true);
-
-    this.table.setContainerDataSource(datasource);
-
-    this.download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
-    this.download.setEnabled(false);
-
+    this.state = state;
+    resourceUrl = "javascript;";
+    initView();
   }
 
-  public SampleView(DataHandler datahandler) {
-    // execute the above constructor with default settings, in order to have the same settings
-    this(datahandler,new FilterTable(), new HierarchicalContainer(), "No Sample has been selected!");
-  }
-  
   /**
-   * sets the ContainerDataSource for showing it in a table and the id of the current Openbis
-   * Sample. The id is shown in the caption.
+   * updates view, if height, width or the browser changes.
    * 
-   * @param sampleInformation
-   * @param id
+   * @param browserHeight
+   * @param browserWidth
+   * @param browser
    */
-  public void setContainerDataSource(SampleBean sampleBean, String id) {
-    this.setStatistics(sampleBean);
+  public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
+    setWidth((browserWidth * 0.6f), Unit.PIXELS);
+  }
 
+  /**
+   * init this view. builds the layout skeleton Menubar Description and others Statisitcs Experiment
+   * Table Graph
+   */
+  void initView() {
+    sampview_content = new VerticalLayout();
+    sampview_content.addComponent(initMenuBar());
+    sampview_content.addComponent(initDescription());
+    sampview_content.addComponent(initStatistics());
+    sampview_content.addComponent(initTable());
+    sampview_content.addComponent(initButtonLayout());
+
+    // use the component that is returned by initTable
+    // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
+    sampview_content.setWidth("100%");
+    this.addComponent(sampview_content);
+  }
+
+  /**
+   * This function should be called each time currentBean is changed
+   */
+  public void updateContent() {
+    updateContentMenuBar();
+    updateContentDescription();
+    updateContentStatistics();
+    updateContentTable();
+    updateContentButtonLayout();
+  }
+
+  /**
+   * 
+   * @return
+   */
+  HorizontalLayout initButtonLayout() {
+    this.export = new Button("Export as TSV");
+    buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
-    buttonLayout.setSpacing(true);
 
-    // this.download.setStyleName(Reindeer.BUTTON_SMALL);
-    buttonLayout.addComponent(this.download);
-    
-    this.export = new Button("Export as TSV");
+    buttonLayoutSection.addComponent(buttonLayout);
     buttonLayout.addComponent(this.export);
-
-    this.vert.addComponent(buttonLayout);
-
-    this.table.setContainerDataSource(sampleBean.getDatasets());
-    //this.table.setVisibleColumns((Object[]) SAMPLEVIEW_TABLE_COLUMNS);
-    
-    this.table.setVisibleColumns(new Object[]{"name", "type", "registrationDate", "fileSize"});
-    this.table.setColumnHeader("name", "Name");
-    this.table.setColumnHeader("type", "Type");
-    this.table.setColumnHeader("registrationDate", "Registration Date");
-    this.table.setColumnHeader("fileSize", "Size");
-
-    this.id = id;
-    
-    //TODO FIX THAT
-    //DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    //StreamResource sr = Utils.getTSVStream(Utils.containerToString(sampInformation.datasets), this.id);
-    //FileDownloader fileDownloader = new FileDownloader(sr);
-    //fileDownloader.extend(this.export);
-    
-   // this.updateCaption();
+    return buttonLayout;
   }
 
-  private void setStatistics(SampleBean sampleBean) {
-    this.vert.removeAllComponents();
-    
-    int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
-    int browserHeight = UI.getCurrent().getPage().getBrowserWindowHeight();
+  void updateContentButtonLayout() {
+    if (fileDownloader != null)
+      this.export.removeExtension(fileDownloader);
+    StreamResource sr =
+        Utils.getTSVStream(Utils.containerToString(currentBean.getDatasets()), currentBean.getId());
+    fileDownloader = new FileDownloader(sr);
+    fileDownloader.extend(this.export);
+  }
 
-    vert.setWidth("100%");
-    this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
-    
-    MenuBar menubar = new MenuBar();
-    // A top-level menu item that opens a submenu
-    
-    //set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-    this.vert.addComponent(menubar);
-
-    //menubar.addStyleName("qbicmainportlet");
+  /**
+   * 
+   * @return
+   */
+  MenuBar initMenuBar() {
+    menubar = new MenuBar();
+    menubar.setWidth(100.0f, Unit.PERCENTAGE);
     menubar.addStyleName("user-menu");
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);    
+
+    // set to true for the hack below
+    menubar.setHtmlContentAllowed(true);
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_test2.png"));
-    downloadProject.setEnabled(false);
-    
+    downloadProject.addSeparator();
+    this.downloadCompleteProjectMenuItem =
+        downloadProject
+            .addItem(
+                "<a href=\""
+                    + resourceUrl
+                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete sample</a>",
+                null);
+
+    // Open DatasetView
+    this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_test2.png"));
-    manage.setEnabled(false);
 
+    // Another submenu item with a sub-submenu
+    this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
     // Another top-level item
     MenuItem workflows = menubar.addItem("Run workflows", null, null);
     workflows.setIcon(new ThemeResource("dna_test2.png"));
     workflows.setEnabled(false);
-            
+
     // Yet another top-level item
     MenuItem analyze = menubar.addItem("Analyze your data", null, null);
     analyze.setIcon(new ThemeResource("graph_test2.png"));
     analyze.setEnabled(false);
-    
-    // Description of sample   
+    return menubar;
+  }
+
+  /**
+   * updates the menu bar based on the new content (currentbean was changed)
+   */
+  void updateContentMenuBar() {
+    downloadCompleteProjectMenuItem
+        .setText("<a href=\""
+            + resourceUrl
+            + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete sample</a>");
+
+    datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
+
+      @Override
+      public void menuSelected(MenuItem selectedItem) {
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        StringBuilder sb = new StringBuilder("type=");
+        sb.append(navigateToLabel);
+        sb.append("&");
+        sb.append("id=");
+        sb.append(currentBean.getId());
+        message.add(sb.toString());
+        message.add(DatasetView.navigateToLabel);
+        state.notifyObservers(message);
+      }
+    });
+    createBarcodesMenuItem.setCommand(new MenuBar.Command() {
+
+      public void menuSelected(MenuItem selectedItem) {
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        message.add(currentBean.getId());
+        message.add(BarcodeView.navigateToLabel);
+        state.notifyObservers(message);
+      }
+    });
+
+  }
+
+
+  /**
+   * initializes the description layout
+   * 
+   * @return
+   */
+  VerticalLayout initDescription() {
     VerticalLayout sampleDescription = new VerticalLayout();
     VerticalLayout sampleDescriptionContent = new VerticalLayout();
     sampleDescriptionContent.setMargin(true);
     sampleDescriptionContent.setCaption("Description");
     sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
-    sampleDescriptionContent.addComponent(new Label(String.format("%s.", sampleBean.getType())));
-    
-    sampleDescriptionContent.addComponent(new Label(sampleBean.getParentsFormattedString(), ContentMode.HTML));
+    sampleTypeLabel = new Label("");
+    sampleDescriptionContent.addComponent(sampleTypeLabel);
+    sampleParentLabel = new Label("", ContentMode.HTML);
+    sampleDescriptionContent.addComponent(sampleParentLabel);
     sampleDescription.addComponent(sampleDescriptionContent);
     sampleDescription.setMargin(true);
-    this.vert.addComponent(sampleDescription);
-    
-    
+    return sampleDescription;
+  }
+
+  void updateContentDescription() {
+    sampleTypeLabel.setValue(String.format("%s.", currentBean.getType()));
+    sampleParentLabel.setValue(currentBean.getParentsFormattedString());
+  }
+
+  /**
+   * 
+   * @return
+   * 
+   */
+  VerticalLayout initStatistics() {
+
     // Statistics of sample
-    int numberOfDatasets = sampleBean.getDatasets().size();
     VerticalLayout statistics = new VerticalLayout();
     HorizontalLayout statContent = new HorizontalLayout();
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
-    statContent.addComponent(new Label(String.format("%s dataset(s).",
-        numberOfDatasets)));
+    numberOfDatasetsLabel = new Label("");
+    statContent.addComponent(numberOfDatasetsLabel);
+    lastChangedDatasetLabel = new Label("");
+    statContent.addComponent(lastChangedDatasetLabel);
     statContent.setMargin(true);
-    statContent.setSpacing(true);   
-    if (numberOfDatasets > 0) {
+    statContent.setSpacing(true);
 
-      String lastDataset = "No Datasets available!";
-      if (sampleBean.getLastChangedDataset() != null) {
-        lastDataset = sampleBean.getLastChangedDataset().toString();
-        statContent.addComponent(new Label(String.format(
-            "Last Change: %s",
-            String.format("Dataset added on %s",
-                lastDataset))));
-      } else {
-        statContent.addComponent(new Label(lastDataset));
-      }
-    }  
     statistics.addComponent(statContent);
     statistics.setMargin(true);
-    this.vert.addComponent(statistics);
-    
-    
+
+
     // Properties of sample
     VerticalLayout properties = new VerticalLayout();
     VerticalLayout propertiesContent = new VerticalLayout();
     propertiesContent.setCaption("Properties");
     propertiesContent.setIcon(FontAwesome.LIST_UL);
-    
-    try {
-      propertiesContent.addComponent(new Label(sampleBean.generatePropertiesFormattedString(), ContentMode.HTML));
-    } catch (JAXBException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }  
+    propertiesLabel = new Label("", ContentMode.HTML);
+
+    propertiesContent.addComponent(propertiesLabel);
+
     properties.addComponent(propertiesContent);
     properties.setMargin(true);
-    this.vert.addComponent(properties);
+    statistics.addComponent(properties);
 
     // Experimental factors of sample
     VerticalLayout experimentalFactors = new VerticalLayout();
     VerticalLayout experimentalFactorsContent = new VerticalLayout();
     experimentalFactorsContent.setCaption("Experimental Factors");
     experimentalFactorsContent.setIcon(FontAwesome.TH);
-    
+    experimentalFactorLabel = new Label("", ContentMode.HTML);
+    experimentalFactorsContent.addComponent(experimentalFactorLabel);
+
+    experimentalFactors.addComponent(experimentalFactorsContent);
+    experimentalFactors.setMargin(true);
+    statistics.addComponent(experimentalFactors);
+    return statistics;
+  }
+
+
+  /**
+   * 
+   */
+  void updateContentStatistics() {
+    int numberOfDatasets = currentBean.getDatasets().size();
+    numberOfDatasetsLabel.setValue(String.format("%s dataset(s).", numberOfDatasets));
+    if (numberOfDatasets > 0) {
+
+      String lastDataset = "No Datasets available!";
+      if (currentBean.getLastChangedDataset() != null) {
+        lastDataset = currentBean.getLastChangedDataset().toString();
+        lastChangedDatasetLabel.setValue(String.format("Last Change: %s",
+            String.format("Dataset added on %s", lastDataset)));
+      } else {
+        lastChangedDatasetLabel.setValue(lastDataset);
+      }
+    }
+
     try {
-      experimentalFactorsContent.addComponent(new Label(sampleBean.generateXMLPropertiesFormattedString(), ContentMode.HTML));
+      propertiesLabel.setValue(currentBean.generatePropertiesFormattedString());
+      experimentalFactorLabel.setValue(currentBean.generateXMLPropertiesFormattedString());
     } catch (JAXBException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }  
-    experimentalFactors.addComponent(experimentalFactorsContent);
-    experimentalFactors.setMargin(true);
-    this.vert.addComponent(experimentalFactors);
-   
-    // Table (containing datasets) section
+    }
+  }
+
+
+  VerticalLayout initTable() {
+    this.table = this.buildFilterTable();
+
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
-    
     tableSectionContent.setCaption("Registered Datasets");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
-    
+
     tableSectionContent.setMargin(true);
     tableSection.setMargin(true);
-    
-    tableSectionContent.setWidth("100%");
-    tableSection.setWidth("100%");
     this.table.setWidth("100%");
-    
+    tableSection.setWidth("100%");
+    tableSectionContent.setWidth("100%");
+
     tableSection.addComponent(tableSectionContent);
-    this.vert.addComponent(tableSection);
+
+    return tableSection;
   }
 
-  public void setSizeFull() {
-    this.vert.setSizeFull();
-    this.table.setSizeFull();
-    // super.setSizeFull();
+
+  void updateContentTable() {
+    // Nothing to do here at the moment
+    // table is already set in setdataresource
   }
 
-  /**
-   * sets the ContainerDataSource for showing it in a table and the id of the current Openbis Space.
-   * The id is shown in the caption.
-   * 
-   * @param spaceViewIndexedContainer
-   * @param id
-   */
-  /*public void setContainerDataSource(IndexedContainer spaceViewIndexedContainer, String id) {
-    this.datasets = (IndexedContainer) spaceViewIndexedContainer;
-    this.table.setContainerDataSource(this.datasets);
-
-    this.table.setColumnCollapsed("state", true);
-
-    // this.table.setVisibleColumns((Object[]) SAMPLEVIEW_TABLE_COLUMNS);
-    this.id = id;
-
-    this.updateCaption();
-    this.setSizeFull();
+  public void setResourceUrl(String resourceurl) {
+    this.resourceUrl = resourceurl;
   }
-*/
-  private void updateCaption() {
-    this.setCaption(String.format("Viewing Sample %s", id));
+
+  public String getResourceUrl() {
+    return resourceUrl;
+  }
+
+  public String getNavigatorLabel() {
+    return navigateToLabel;
+  }
+
+  public void setContainerDataSource(SampleBean sampleBean) {
+    this.currentBean = sampleBean;
+
+    this.table.setContainerDataSource(sampleBean.getDatasets());
+    this.table.setVisibleColumns(new Object[] {"name", "type", "registrationDate", "fileSize"});
   }
 
   private FilterTreeTable buildFilterTable() {
     FilterTreeTable filterTable = new FilterTreeTable();
-    
-    //filterTable.setSizeFull();
+
+    // filterTable.setSizeFull();
 
     filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
     filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
@@ -295,10 +385,13 @@ public class SampleView extends VerticalLayout implements View{
 
     filterTable.setColumnReorderingAllowed(true);
 
-    if(this.datasets != null) {
+    if (this.datasets != null) {
       filterTable.setContainerDataSource(this.datasets);
     }
-    //filterTable.setCaption("Registered Datasets");
+    filterTable.setColumnHeader("name", "Name");
+    filterTable.setColumnHeader("type", "Type");
+    filterTable.setColumnHeader("registrationDate", "Registration Date");
+    filterTable.setColumnHeader("fileSize", "Size");
 
     return filterTable;
   }
@@ -306,15 +399,15 @@ public class SampleView extends VerticalLayout implements View{
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    //System.out.println("currentValue: " + currentValue);
-    //System.out.println("navigateToLabel: " + navigateToLabel);
-    try {
-      //TODO fix data handler method
-      this.setContainerDataSource(datahandler.getSample(currentValue), currentValue);
-    } catch (Exception e) {
-      System.out.println("Exception in SampleView.enter");
-      // e.printStackTrace();
-    }
-    
-  } 
+    // TODO updateContent only if currentExperiment is not equal to newExperiment
+
+    this.setContainerDataSource(datahandler.getSample(currentValue));
+    updateContent();
+
+  }
+
+  public SampleBean getCurrentBean() {
+    return currentBean;
+  }
+
 }

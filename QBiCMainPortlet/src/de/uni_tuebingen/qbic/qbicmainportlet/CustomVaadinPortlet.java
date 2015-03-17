@@ -52,14 +52,14 @@ public class CustomVaadinPortlet extends VaadinPortlet {
      */
     private static final long serialVersionUID = -6282242585931296999L;
 
-    
-    
+
+
     public CustomVaadinPortletService(final VaadinPortlet portlet,
         final DeploymentConfiguration config) throws ServiceException {
       super(portlet, config);
     }
-    
-    
+
+
     /**
      * This method is used to determine the uri for Vaadin resources like theme or widgetset. It's
      * overriden to point to this web application context, instead of ROOT context
@@ -71,6 +71,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       // return request.getContextPath();
     }
   }
+
   private static Logger LOGGER = new Log4j2Logger(CustomVaadinPortletService.class);
   public static final String RESOURCE_ID = "mainPortletResourceId";
   public static final String RESOURCE_ATTRIBUTE = "resURL";
@@ -115,15 +116,15 @@ public class CustomVaadinPortlet extends VaadinPortlet {
         (DataHandler) request.getPortletSession().getAttribute("datahandler",
             PortletSession.APPLICATION_SCOPE);
     Object bean =
-        (Object) request.getPortletSession()
-            .getAttribute("qbic_download", PortletSession.APPLICATION_SCOPE);
-    if(bean instanceof ProjectBean){
-      serveProject((ProjectBean)bean, new TarWriter(), response, dataHandler.openBisClient );
-    }
-    else if(bean instanceof ExperimentBean){
-      serveExperiment((ExperimentBean)bean, new TarWriter(), response, dataHandler.openBisClient );
-    }
-    else{
+        (Object) request.getPortletSession().getAttribute("qbic_download",
+            PortletSession.APPLICATION_SCOPE);
+    if (bean instanceof ProjectBean) {
+      serveProject((ProjectBean) bean, new TarWriter(), response, dataHandler.openBisClient);
+    } else if (bean instanceof ExperimentBean) {
+      serveExperiment((ExperimentBean) bean, new TarWriter(), response, dataHandler.openBisClient);
+    } else if (bean instanceof SampleBean) {
+      serveSample((SampleBean) bean, new TarWriter(), response, dataHandler.openBisClient);
+    } else {
       response.setContentType("text/javascript");
       response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
           String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
@@ -131,24 +132,27 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       return;
     }
   }
+
   /**
    * 
    * Note: the provided stream will be closed.
+   * 
    * @param bean bean containing datasets.
    * @param writer writes
    * @param response writer writes to its outputstream
    * @param openbisClient
    */
-  private void serveProject(ProjectBean bean, TarWriter writer, ResourceResponse response, OpenBisClient openbisClient) {
+  private void serveProject(ProjectBean bean, TarWriter writer, ResourceResponse response,
+      OpenBisClient openbisClient) {
     String filename = bean.getCode() + ".tar";
-    
+
     response.setContentType(writer.getContentType());
     StringBuilder sb = new StringBuilder("attachement; filename=\"");
     sb.append(filename);
     sb.append("\"");
     response.setProperty("Content-Disposition", sb.toString());
     Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
-    
+
     long tarFileLength = writer.computeTarLength2(entries);
     // response.setContentLength((int) tarFileLength);
     // For some reason setContentLength does not work
@@ -168,34 +172,36 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       String[] splittedFilePath = entryKey.split("/");
 
       if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
-        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
-            .getKey()), entry.getValue().getValue());
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(),
+            openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
       } else {
-        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
-            .getKey(), entryKey), entry.getValue().getValue());
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(
+            entry.getValue().getKey(), entryKey), entry.getValue().getValue());
       }
     }
     writer.closeStream();
   }
-  
+
   /**
    * 
    * Note: the provided stream will be closed.
+   * 
    * @param bean bean containing datasets.
    * @param writer writes
    * @param response writer writes to its outputstream
    * @param openbisClient
    */
-  private void serveExperiment(ExperimentBean bean, TarWriter writer, ResourceResponse response, OpenBisClient openbisClient) {
+  private void serveExperiment(ExperimentBean bean, TarWriter writer, ResourceResponse response,
+      OpenBisClient openbisClient) {
     String filename = bean.getCode() + ".tar";
-    
+
     response.setContentType(writer.getContentType());
     StringBuilder sb = new StringBuilder("attachement; filename=\"");
     sb.append(filename);
     sb.append("\"");
     response.setProperty("Content-Disposition", sb.toString());
     Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
-    
+
     long tarFileLength = writer.computeTarLength2(entries);
     // response.setContentLength((int) tarFileLength);
     // For some reason setContentLength does not work
@@ -215,90 +221,153 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       String[] splittedFilePath = entryKey.split("/");
 
       if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
-        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
-            .getKey()), entry.getValue().getValue());
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(),
+            openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
       } else {
-        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
-            .getKey(), entryKey), entry.getValue().getValue());
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(
+            entry.getValue().getKey(), entryKey), entry.getValue().getValue());
       }
     }
     writer.closeStream();
   }
-  
-  
-  
-  
-  
+
+
+
   /**
-   * if it is one of the openbis beans, then it will be converted into an entry.
-   * Used to prepare a bean for download via a writer, e.g. a {@link TarWriter}
+   * 
+   * Note: the provided stream will be closed.
+   * 
+   * @param bean bean containing datasets.
+   * @param writer writes
+   * @param response writer writes to its outputstream
+   * @param openbisClient
+   */
+  private void serveSample(SampleBean bean, TarWriter writer, ResourceResponse response,
+      OpenBisClient openbisClient) {
+    String filename = bean.getCode() + ".tar";
+
+    response.setContentType(writer.getContentType());
+    StringBuilder sb = new StringBuilder("attachement; filename=\"");
+    sb.append(filename);
+    sb.append("\"");
+    response.setProperty("Content-Disposition", sb.toString());
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
+
+    long tarFileLength = writer.computeTarLength2(entries);
+    // response.setContentLength((int) tarFileLength);
+    // For some reason setContentLength does not work
+    response.setProperty("Content-Length", String.valueOf(tarFileLength));
+    try {
+      writer.setOutputStream(response.getPortletOutputStream());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+    Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+    while (it.hasNext()) {
+      Entry<String, SimpleEntry<String, Long>> entry = it.next();
+      String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+      String[] splittedFilePath = entryKey.split("/");
+
+      if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(),
+            openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
+      } else {
+        writer.writeEntry(bean.getCode() + "/" + entry.getKey(), openbisClient.getDatasetStream(
+            entry.getValue().getKey(), entryKey), entry.getValue().getValue());
+      }
+    }
+    writer.closeStream();
+  }
+
+
+
+  /**
+   * if it is one of the openbis beans, then it will be converted into an entry. Used to prepare a
+   * bean for download via a writer, e.g. a {@link TarWriter}
+   * 
    * @param bean
    * @return
    */
   Map<String, SimpleEntry<String, Long>> convertBeanToEntries(Object bean) {
-    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-    if(bean instanceof ProjectBean){
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
+        new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+    if (bean instanceof ProjectBean) {
       ProjectBean projectBean = (ProjectBean) bean;
-      for(ExperimentBean eb : projectBean.getExperiments().getItemIds()){
-        for(SampleBean sb : eb.getSamples().getItemIds()){
-          for(DatasetBean db : sb.getDatasets().getItemIds()){
-            addEntry(db, entries);          
+      for (ExperimentBean eb : projectBean.getExperiments().getItemIds()) {
+        for (SampleBean sb : eb.getSamples().getItemIds()) {
+          for (DatasetBean db : sb.getDatasets().getItemIds()) {
+            addEntry(db, entries);
           }
         }
-      }      
-    }
-    else     if(bean instanceof ExperimentBean){
+      }
+    } else if (bean instanceof ExperimentBean) {
       ExperimentBean experimentBean = (ExperimentBean) bean;
-        for(SampleBean sb : experimentBean.getSamples().getItemIds()){
-          for(DatasetBean db : sb.getDatasets().getItemIds()){
-            addEntry(db, entries);          
-          }
-        }   
+      for (SampleBean sb : experimentBean.getSamples().getItemIds()) {
+        for (DatasetBean db : sb.getDatasets().getItemIds()) {
+          addEntry(db, entries);
+        }
+      }
     }
+
+    else if (bean instanceof SampleBean) {
+      SampleBean sampleBean = (SampleBean) bean;
+      for (DatasetBean db : sampleBean.getDatasets().getItemIds()) {
+        addEntry(db, entries);
+      }
+    }
+
     return entries;
   }
-  
+
   /**
-   * Given datasetbean (and its children) is included into the entry, which can be used for download 
+   * Given datasetbean (and its children) is included into the entry, which can be used for download
+   * 
    * @param db
    * @param entries
    * @return
    */
-  Map<String, AbstractMap.SimpleEntry<String, Long>> addEntry(DatasetBean db, Map<String, AbstractMap.SimpleEntry<String, Long>> entries){
+  Map<String, AbstractMap.SimpleEntry<String, Long>> addEntry(DatasetBean db,
+      Map<String, AbstractMap.SimpleEntry<String, Long>> entries) {
     StringBuilder sb = new StringBuilder(db.getCode());
     sb.append("/");
     sb.append(db.getName());
-    if(db.isDirectory()){
-      for(DatasetBean child : db.getChildren()){
+    if (db.isDirectory()) {
+      for (DatasetBean child : db.getChildren()) {
         addChildrensEntry(child, entries, sb.toString());
       }
-    }else{
-      entries.put(sb.toString(), new AbstractMap.SimpleEntry<String, Long>(db.getCode(), db.getFileSize()));
+    } else {
+      entries.put(sb.toString(),
+          new AbstractMap.SimpleEntry<String, Long>(db.getCode(), db.getFileSize()));
     }
     return entries;
   }
-  
+
   /**
    * Helper function of addEntry. Adds name of parent db to children.
+   * 
    * @param db
    * @param entries
    * @param name
    * @return
    */
-  private Map<String, AbstractMap.SimpleEntry<String, Long>> addChildrensEntry(DatasetBean db, Map<String, SimpleEntry<String, Long>> entries,
-      String name) {
+  private Map<String, AbstractMap.SimpleEntry<String, Long>> addChildrensEntry(DatasetBean db,
+      Map<String, SimpleEntry<String, Long>> entries, String name) {
     StringBuilder sb = new StringBuilder(name);
     sb.append("/");
-    sb.append(db.getName());    
-    if(db.isDirectory()){
-      for(DatasetBean child : db.getChildren()){
+    sb.append(db.getName());
+    if (db.isDirectory()) {
+      for (DatasetBean child : db.getChildren()) {
         addChildrensEntry(child, entries, sb.toString());
       }
-    }else{
-      entries.put(sb.toString(), new AbstractMap.SimpleEntry<String, Long>(db.getCode(), db.getFileSize()));
+    } else {
+      entries.put(sb.toString(),
+          new AbstractMap.SimpleEntry<String, Long>(db.getCode(), db.getFileSize()));
     }
     return entries;
-    
+
   }
 
   @Override

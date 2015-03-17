@@ -77,7 +77,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "380";
+  private String revision = "382";
   private String resUrl;
 
   @Override
@@ -110,7 +110,6 @@ public class QbicmainportletUI extends UI {
 
       this.resUrl =
           (String) getPortletSession().getAttribute("resURL", PortletSession.APPLICATION_SCOPE);
-      System.out.println("resUrl: " + resUrl);
       initProgressBarAndThreading(request);
       // buildMainLayout();
     }
@@ -562,7 +561,7 @@ public class QbicmainportletUI extends UI {
     LevelView testRunWorkflowView = new LevelView(new Button("testRunWorkflowView"));
     LevelView searchView = new LevelView(new SearchForUsers());
     DatasetView datasetView = new DatasetView(datahandler);
-    SampleView sampleView = new SampleView(datahandler);
+    final SampleView sampleView = new SampleView(datahandler,state, resUrl);
     final ProjectView projectView = new ProjectView(datahandler, state, resUrl);
     BarcodeView barcodeView =
         new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
@@ -649,6 +648,9 @@ public class QbicmainportletUI extends UI {
         if (currentView instanceof ExperimentView) {
           experimentView.updateView(height, width, browser);
         }
+        if (currentView instanceof SampleView) {
+          sampleView.updateView(height, width, browser);
+        }
         return true;
       }
 
@@ -661,6 +663,9 @@ public class QbicmainportletUI extends UI {
         }
         if (currentView instanceof ExperimentView) {
           currentBean = experimentView.getCurrentBean();
+        }
+        if(currentView instanceof SampleView){
+          currentBean = sampleView.getCurrentBean();
         }
         try{
           PortletSession portletSession = QbicmainportletUI.getCurrent().getPortletSession();

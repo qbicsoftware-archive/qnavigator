@@ -106,19 +106,12 @@ public class ProjectView extends VerticalLayout implements View {
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
     setWidth((browserWidth * 0.6f), Unit.PIXELS);
   }
-  
+
   /**
-   * init this view. builds the layout skeleton
-   * Menubar
-   * Description and others
-   * Statisitcs
-   * Experiment Table
-   * Graph
+   * init this view. builds the layout skeleton Menubar Description and others Statisitcs Experiment
+   * Table Graph
    */
   void initView() {
-    this.table = this.buildFilterTable();
-    this.tableClickChangeTreeView();
-
     projectview_content = new VerticalLayout();
     projectview_content.addComponent(initMenuBar());
     projectview_content.addComponent(initDescription());
@@ -144,8 +137,8 @@ public class ProjectView extends VerticalLayout implements View {
     updateContentButtonLayout();
     updateContentGraph();
   }
-  
-  
+
+
   /**
    * 
    * @return
@@ -161,7 +154,7 @@ public class ProjectView extends VerticalLayout implements View {
     buttonLayout.addComponent(this.export);
     return buttonLayout;
   }
-  
+
   void updateContentButtonLayout() {
     if (fileDownloader != null)
       this.export.removeExtension(fileDownloader);
@@ -171,7 +164,7 @@ public class ProjectView extends VerticalLayout implements View {
     fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
   }
-  
+
   /**
    * 
    * @return
@@ -193,7 +186,7 @@ public class ProjectView extends VerticalLayout implements View {
                     + resourceUrl
                     + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
                 null);
-    
+
     // Open DatasetView
     this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
     MenuItem manage = menubar.addItem("Manage your data", null, null);
@@ -291,7 +284,7 @@ public class ProjectView extends VerticalLayout implements View {
     projDescription.setWidth("100%");
     return projDescription;
   }
-  
+
   void updateContentDescription() {
     contact
         .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
@@ -302,8 +295,9 @@ public class ProjectView extends VerticalLayout implements View {
     if (!desc.isEmpty()) {
       descContent.setValue(desc);
     }
-    //TODO use space information to check whether members really have to be recalculated.
-    //For users chances are high, that they click on a project from the same space -> no recalculation needed!
+    // TODO use space information to check whether members really have to be recalculated.
+    // For users chances are high, that they click on a project from the same space -> no
+    // recalculation needed!
     Component membersContent = getMembersComponent(currentBean.getMembers());
 
     membersContent.setIcon(FontAwesome.USERS);
@@ -313,7 +307,7 @@ public class ProjectView extends VerticalLayout implements View {
     membersSection.addComponent(membersContent);
     membersSection.setMargin(true);
   }
-  
+
 
   /**
    * 
@@ -358,7 +352,7 @@ public class ProjectView extends VerticalLayout implements View {
     statistics.addComponent(status);
     return statistics;
   }
-  
+
   /**
    * 
    */
@@ -385,12 +379,12 @@ public class ProjectView extends VerticalLayout implements View {
 
     status.addComponent(statusContent);
   }
-  
-  
+
 
 
   VerticalLayout initTable() {
     this.table = this.buildFilterTable();
+    this.tableClickChangeTreeView();
     VerticalLayout tableSection = new VerticalLayout();
     VerticalLayout tableSectionContent = new VerticalLayout();
 
@@ -408,13 +402,13 @@ public class ProjectView extends VerticalLayout implements View {
 
     return tableSection;
   }
-  
-  
+
+
   void updateContentTable() {
     // Nothing to do here at the moment
     // table is already set in setdataresource
   }
-  
+
 
   /**
    * 
@@ -443,7 +437,7 @@ public class ProjectView extends VerticalLayout implements View {
       graphSectionContent.addComponent(graphImage);
     }
   }
-  
+
 
   public void setResourceUrl(String resourceurl) {
     this.resourceUrl = resourceurl;
@@ -626,8 +620,8 @@ public class ProjectView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    //TODO updateContent only if currentProject is not equal to newProject
-    
+    // TODO updateContent only if currentProject is not equal to newProject
+
     this.setContainerDataSource(datahandler.getProject(currentValue));
     updateContent();
   }
