@@ -133,7 +133,7 @@ public class DatasetView extends VerticalLayout implements View {
 
     this.vert.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
 
     MenuBar menubar = new MenuBar();
     // A top-level menu item that opens a submenu
@@ -221,15 +221,6 @@ public class DatasetView extends VerticalLayout implements View {
     /**
      * prepare download.
      */
-    Map<String, AbstractMap.SimpleEntry<String, Long>> selected_datasets =
-        new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-
-    PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-    portletSession.setAttribute("qbic_download",
-        new HashMap<String, AbstractMap.SimpleEntry<String, Long>>(),
-        PortletSession.APPLICATION_SCOPE);
-    String resourceUrl =
-        (String) portletSession.getAttribute("resURL", PortletSession.APPLICATION_SCOPE);
     download.setResource(new ExternalResource("javascript:"));
     download.setEnabled(false);
 
