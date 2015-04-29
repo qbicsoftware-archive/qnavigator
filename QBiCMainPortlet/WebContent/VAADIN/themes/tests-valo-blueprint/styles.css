@@ -626,11 +626,53 @@
 
 /**
  *
- *
- * @param {string} $primaryStyleName (v-escalator) - 
- *
- * @group escalator
+ * @group table
  */
+
+@-webkit-keyframes valo-grid-editor-footer-animate-in {
+		0% {
+		margin-top: -41px;
+	}
+	}
+
+@-moz-keyframes valo-grid-editor-footer-animate-in {
+		0% {
+		margin-top: -41px;
+	}
+	}
+
+@keyframes valo-grid-editor-footer-animate-in {
+		0% {
+		margin-top: -41px;
+	}
+	}
+
+@-webkit-keyframes valo-grid-editor-footer-animate-in-alt {
+		0% {
+		margin-bottom: -42px;
+	}
+		100% {
+		margin-bottom: -1px;
+	}
+	}
+
+@-moz-keyframes valo-grid-editor-footer-animate-in-alt {
+		0% {
+		margin-bottom: -42px;
+	}
+		100% {
+		margin-bottom: -1px;
+	}
+	}
+
+@keyframes valo-grid-editor-footer-animate-in-alt {
+		0% {
+		margin-bottom: -42px;
+	}
+		100% {
+		margin-bottom: -1px;
+	}
+	}
 
 /**
  *
@@ -869,7 +911,7 @@
  */
 
 .v-vaadin-version:after {
-	content: "7.3.10";
+	content: "7.4.2";
 }
 
 .v-widget {
@@ -1027,6 +1069,10 @@ div.v-layout.v-horizontal.v-widget {
 
 .v-horizontal > .v-slot, .v-horizontal > .v-expand > .v-slot {
 	height: 100%;
+}
+
+.v-horizontal > .v-expand > .v-slot {
+	position: relative;
 }
 
 .v-vertical > .v-spacing, .v-vertical > .v-expand > .v-spacing {
@@ -3898,18 +3944,20 @@ div.v-layout.v-horizontal.v-widget {
 	margin-left: 7px;
 }
 
-.tests-valo-blueprint .v-escalator {
+.tests-valo-blueprint .v-grid {
 	position: relative;
-	background-color: white;
 }
 
-.tests-valo-blueprint .v-escalator-scroller {
+.tests-valo-blueprint .v-grid-scroller {
 	position: absolute;
-	overflow: auto;
-	z-index: 20;
+	z-index: 1;
+	outline: none;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 }
 
-.tests-valo-blueprint .v-escalator-scroller-horizontal {
+.tests-valo-blueprint .v-grid-scroller-horizontal {
 	left: 0;
 	right: 0;
 	bottom: 0;
@@ -3917,7 +3965,7 @@ div.v-layout.v-horizontal.v-widget {
 	-ms-overflow-y: hidden;
 }
 
-.tests-valo-blueprint .v-escalator-scroller-vertical {
+.tests-valo-blueprint .v-grid-scroller-vertical {
 	right: 0;
 	top: 0;
 	bottom: 0;
@@ -3925,74 +3973,524 @@ div.v-layout.v-horizontal.v-widget {
 	-ms-overflow-x: hidden;
 }
 
-.tests-valo-blueprint .v-escalator-tablewrapper {
+.tests-valo-blueprint .v-grid-tablewrapper {
 	position: absolute;
 	overflow: hidden;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	z-index: 5;
 }
 
-.tests-valo-blueprint .v-escalator-tablewrapper > table {
+.tests-valo-blueprint .v-grid-tablewrapper > table {
 	border-spacing: 0;
 	table-layout: fixed;
 	width: inherit;
 }
 
-.tests-valo-blueprint .v-escalator-header, .tests-valo-blueprint .v-escalator-body, .tests-valo-blueprint .v-escalator-footer {
+.tests-valo-blueprint .v-grid-header-deco, .tests-valo-blueprint .v-grid-footer-deco {
+	position: absolute;
+	right: 0;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.tests-valo-blueprint .v-grid-horizontal-scrollbar-deco {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.tests-valo-blueprint .v-grid-header, .tests-valo-blueprint .v-grid-body, .tests-valo-blueprint .v-grid-footer {
 	position: absolute;
 	left: 0;
 	width: inherit;
 	z-index: 10;
 }
 
-.tests-valo-blueprint .v-escalator-header {
+.tests-valo-blueprint .v-grid-header, .tests-valo-blueprint .v-grid-header-deco {
 	top: 0;
 }
 
-.tests-valo-blueprint .v-escalator-footer {
+.tests-valo-blueprint .v-grid-footer, .tests-valo-blueprint .v-grid-footer-deco {
 	bottom: 0;
 }
 
-.tests-valo-blueprint .v-escalator-body {
+.tests-valo-blueprint .v-grid-body {
 	z-index: 0;
 	top: 0;
 }
 
-.tests-valo-blueprint .v-escalator-body .v-escalator-row {
+.tests-valo-blueprint .v-grid-body .v-grid-row {
 	position: absolute;
 	top: 0;
 	left: 0;
 }
 
-.tests-valo-blueprint .v-escalator-row {
+.tests-valo-blueprint .v-grid-row {
 	display: block;
 }
 
-.v-ie8 .tests-valo-blueprint .v-escalator-row {
+.v-ie8 .tests-valo-blueprint .v-grid-row, .v-ie9 .tests-valo-blueprint .v-grid-row {
 	float: left;
 	clear: left;
 	margin-top: 0;
 }
 
-.tests-valo-blueprint .v-escalator-row  > td, .tests-valo-blueprint .v-escalator-row  > th {
-	background-color: white;
+.tests-valo-blueprint .v-grid-row  > td, .tests-valo-blueprint .v-grid-row  > th {
+	background-color: #195cae;
 }
 
-.tests-valo-blueprint .v-escalator-row {
+.tests-valo-blueprint .v-grid-row {
 	width: inherit;
 }
 
-.tests-valo-blueprint .v-escalator-cell {
+.tests-valo-blueprint .v-grid-cell {
 	display: block;
 	float: left;
-	border: 1px solid #aaa;
 	padding: 2px;
 	white-space: nowrap;
+	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+	overflow: hidden;
+	font-size: 18px;
 }
 
-.tests-valo-blueprint .v-escalator-cell.frozen {
+.tests-valo-blueprint .v-grid-cell.frozen {
 	position: relative;
-	z-index: 0;
+	z-index: 1;
+}
+
+.tests-valo-blueprint .v-grid {
+	outline: none;
+}
+
+.tests-valo-blueprint .v-grid-scroller-vertical, .tests-valo-blueprint .v-grid-scroller-horizontal {
+	border: 1px solid #6b96cb;
+}
+
+.tests-valo-blueprint .v-grid-scroller-vertical {
+	border-left: none;
+}
+
+.tests-valo-blueprint .v-grid-scroller-horizontal {
+	border-top: none;
+}
+
+.tests-valo-blueprint .v-grid-tablewrapper {
+	border: 1px solid #6b96cb;
+}
+
+.tests-valo-blueprint .v-grid-cell {
+	background-color: #195cae;
+	padding: 0 14px;
+	line-height: 41px;
+	text-overflow: ellipsis;
+}
+
+.tests-valo-blueprint .v-grid-cell  > * {
+	line-height: 1.55;
+	vertical-align: middle;
+}
+
+.tests-valo-blueprint .v-grid-cell  > div {
+	display: inline-block;
+}
+
+.tests-valo-blueprint .v-grid-cell.frozen {
+	-webkit-box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
+	box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
+	border-right: 1px solid #6b96cb;
+}
+
+.tests-valo-blueprint .v-grid-cell.frozen  + th, .tests-valo-blueprint .v-grid-cell.frozen  + td {
+	border-left: none;
+}
+
+.tests-valo-blueprint .v-grid-row > td, .tests-valo-blueprint .v-grid-editor-cells > div {
+	border-left: 1px solid #6b96cb;
+	border-bottom: 1px solid #6b96cb;
+}
+
+.tests-valo-blueprint .v-grid-row > td:first-child, .tests-valo-blueprint .v-grid-editor-cells > div:first-child {
+	border-left: none;
+}
+
+.tests-valo-blueprint .v-grid-row-stripe > td {
+	background-color: #1859a7;
+}
+
+.tests-valo-blueprint .v-grid-row-selected > td {
+	background: #fff;
+}
+
+.tests-valo-blueprint .v-grid-row-focused > td {
+	
+}
+
+.tests-valo-blueprint .v-grid-header th {
+	position: relative;
+	background-color: #1a61b7;
+	font-size: 15px;
+	font-weight: inherit;
+	border-left: 1px solid #6b96cb;
+	border-bottom: 1px solid #6b96cb;
+	
+	text-align: left;
+}
+
+.tests-valo-blueprint .v-grid-header th:first-child {
+	border-left: none;
+}
+
+.tests-valo-blueprint .v-grid-header .sort-asc, .tests-valo-blueprint .v-grid-header .sort-desc {
+	padding-right: 32px;
+}
+
+.tests-valo-blueprint .v-grid-header .sort-asc:after, .tests-valo-blueprint .v-grid-header .sort-desc:after {
+	font-family: FontAwesome, sans-serif;
+	content: "\f0de" " " attr(sort-order);
+	position: absolute;
+	right: 14px;
+	font-size: 13px;
+}
+
+.tests-valo-blueprint .v-grid-header .sort-desc:after {
+	content: "\f0dd" " " attr(sort-order);
+}
+
+.tests-valo-blueprint .v-grid-footer td {
+	background-color: #1a61b7;
+	font-size: 15px;
+	font-weight: inherit;
+	border-left: 1px solid #6b96cb;
+	border-top: 1px solid #6b96cb;
+	border-bottom: none;
+	
+}
+
+.tests-valo-blueprint .v-grid-footer td:first-child {
+	border-left: none;
+}
+
+.tests-valo-blueprint .v-grid-header-deco {
+	border-top: 1px solid #6b96cb;
+	border-right: 1px solid #6b96cb;
+	background-color: #1a61b7;
+}
+
+.tests-valo-blueprint .v-grid-footer-deco {
+	border-bottom: 1px solid #6b96cb;
+	border-right: 1px solid #6b96cb;
+	background-color: #1a61b7;
+}
+
+.tests-valo-blueprint .v-grid-horizontal-scrollbar-deco {
+	background-color: #1a61b7;
+	border: 1px solid #6b96cb;
+	border-top: none;
+}
+
+.tests-valo-blueprint .v-grid-cell-focused {
+	position: relative;
+}
+
+.tests-valo-blueprint .v-grid-cell-focused:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	border: 2px solid #fff;
+	display: none;
+	pointer-events: none;
+}
+
+.ie8 .tests-valo-blueprint .v-grid-cell-focused:before, .ie9 .tests-valo-blueprint .v-grid-cell-focused:before, .ie10 .tests-valo-blueprint .v-grid-cell-focused:before {
+	content: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg==);
+}
+
+.tests-valo-blueprint .v-grid:focus .v-grid-cell-focused:before {
+	display: block;
+}
+
+.tests-valo-blueprint .v-grid.v-disabled:focus .v-grid-cell-focused:before {
+	display: none;
+}
+
+.tests-valo-blueprint .v-grid-editor {
+	position: absolute;
+	z-index: 20;
+	overflow: hidden;
+	left: 0;
+	right: 0;
+	border: 1px solid #6b96cb;
+	margin-top: -1px;
+	-webkit-box-shadow: 0 0 9px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 0 9px rgba(0, 0, 0, 0.2);
+}
+
+.tests-valo-blueprint .v-grid-editor-cells {
+	position: relative;
+	white-space: nowrap;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells  > div {
+	display: inline-block;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	vertical-align: middle;
+	background: #195cae;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells  > div:first-child {
+	border-left: none;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells  > div  > * {
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells  > div .v-textfield, .tests-valo-blueprint .v-grid-editor-cells  > div .v-datefield, .tests-valo-blueprint .v-grid-editor-cells  > div .v-filterselect {
+	min-width: 100%;
+	max-width: 100%;
+	min-height: 100%;
+	max-height: 100%;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells  > div .v-select, .tests-valo-blueprint .v-grid-editor-cells  > div .v-select-select {
+	min-width: 100%;
+	max-width: 100%;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells .error::before {
+	position: absolute;
+	display: block;
+	height: 0;
+	width: 0;
+	content: "";
+	border-top: 5px solid red;
+	border-right: 5px solid transparent;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells .error, .tests-valo-blueprint .v-grid-editor-cells .error > input {
+	background-color: #fee;
+}
+
+.tests-valo-blueprint .v-grid-editor-footer {
+	display: table;
+	height: 41px;
+	border-top: 1px solid #6b96cb;
+	margin-top: -1px;
+	background: #195cae;
+	padding: 0 5px;
+}
+
+.tests-valo-blueprint .v-grid-editor-footer  + .v-grid-editor-cells > div {
+	border-bottom: none;
+	border-top: 1px solid #6b96cb;
+}
+
+.tests-valo-blueprint .v-grid-editor-footer:first-child {
+	border-top: none;
+	margin-top: 0;
+	border-bottom: 1px solid #6b96cb;
+	margin-bottom: -1px;
+}
+
+.tests-valo-blueprint .v-grid-editor-message, .tests-valo-blueprint .v-grid-editor-buttons {
+	display: table-cell;
+	white-space: nowrap;
+	vertical-align: middle;
+}
+
+.tests-valo-blueprint .v-grid-editor-message {
+	width: 100%;
+	position: relative;
+}
+
+.tests-valo-blueprint .v-grid-editor-message  > div {
+	position: absolute;
+	width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 41px;
+	top: 0;
+}
+
+.tests-valo-blueprint .v-grid-editor-save {
+	margin-right: 4px;
+}
+
+.tests-valo-blueprint .v-grid-cell > .v-progressbar {
+	width: 100%;
+}
+
+.tests-valo-blueprint .v-grid {
+	-webkit-user-select: text;
+	-moz-user-select: text;
+	-ms-user-select: text;
+	user-select: text;
+	background-color: #1a61b7;
+}
+
+.tests-valo-blueprint .v-grid-header .v-grid-cell {
+	background: #1a61b7;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.tests-valo-blueprint .v-grid-footer .v-grid-cell {
+	background: #1a61b7;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.tests-valo-blueprint .v-grid-header-deco {
+	background: #1a61b7;
+}
+
+.tests-valo-blueprint .v-grid-footer-deco, .tests-valo-blueprint .v-grid-horizontal-scrollbar-deco {
+	background: #1a61b7;
+}
+
+.tests-valo-blueprint .v-grid-row-selected  > .v-grid-cell {
+	background: #fff;
+	color: #474747;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+	border-color: #ebebeb;
+}
+
+.tests-valo-blueprint .v-grid-row-selected  > .v-grid-cell-focused:before {
+	border-color: white;
+}
+
+.tests-valo-blueprint .v-grid-editor {
+	-webkit-box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+	border-color: #fff;
+}
+
+.tests-valo-blueprint .v-grid-editor-footer {
+	font-size: 16px;
+	padding: 0 7px;
+	background: #1a61b7;
+	-webkit-animation: valo-grid-editor-footer-animate-in 200ms 120ms backwards;
+	-moz-animation: valo-grid-editor-footer-animate-in 200ms 120ms backwards;
+	animation: valo-grid-editor-footer-animate-in 200ms 120ms backwards;
+}
+
+.tests-valo-blueprint .v-grid-editor-footer:first-child {
+	-webkit-animation: valo-grid-editor-footer-animate-in-alt 200ms 120ms backwards;
+	-moz-animation: valo-grid-editor-footer-animate-in-alt 200ms 120ms backwards;
+	animation: valo-grid-editor-footer-animate-in-alt 200ms 120ms backwards;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells {
+	z-index: 1;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells > div:before {
+	content: "";
+	display: inline-block;
+	height: 100%;
+	vertical-align: middle;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells > div .error::before {
+	border-top: 10px solid #ed473b;
+	border-right: 10px solid transparent;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells > div .error, .tests-valo-blueprint .v-grid-editor-cells > div .error > input {
+	background-color: #fffbfb;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells > div .v-textfield, .tests-valo-blueprint .v-grid-editor-cells > div .v-textfield-focus, .tests-valo-blueprint .v-grid-editor-cells > div .v-datefield, .tests-valo-blueprint .v-grid-editor-cells > div .v-datefield .v-textfield-focus, .tests-valo-blueprint .v-grid-editor-cells > div .v-filterselect-input, .tests-valo-blueprint .v-grid-editor-cells > div .v-filterselect-input:focus {
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells > div .v-textfield-focus, .tests-valo-blueprint .v-grid-editor-cells > div .v-datefield .v-textfield-focus, .tests-valo-blueprint .v-grid-editor-cells > div .v-filterselect-input:focus {
+	position: relative;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells > div .v-select {
+	padding-left: 7px;
+	padding-right: 7px;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells > div .v-checkbox {
+	margin: 0 7px;
+}
+
+.tests-valo-blueprint .v-grid-editor-cells > div .v-checkbox label {
+	white-space: nowrap;
+}
+
+.tests-valo-blueprint .v-grid-editor-message > div:before {
+	display: inline-block;
+	color: #ed473b;
+	font-weight: 600;
+	width: 21px;
+	text-align: center;
+	content: "!";
+}
+
+.tests-valo-blueprint .v-grid-editor-save, .tests-valo-blueprint .v-grid-editor-cancel {
+	cursor: pointer;
+	color: #fff;
+	text-decoration: underline;
+	font-weight: inherit;
+	-webkit-transition: color 140ms;
+	-moz-transition: color 140ms;
+	transition: color 140ms;
+	font-weight: 400;
+	text-decoration: none;
+	border: none;
+	background: transparent;
+	padding: 7px 7px;
+	margin: 0;
+	outline: none;
+}
+
+.tests-valo-blueprint .v-grid-editor-save:hover, .tests-valo-blueprint .v-grid-editor-cancel:hover {
+	color: white;
+}
+
+.tests-valo-blueprint .v-grid-editor-save.v-disabled, .tests-valo-blueprint .v-grid-editor-cancel.v-disabled {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.tests-valo-blueprint .v-grid-scroller::-webkit-scrollbar {
+	border: none;
+}
+
+.tests-valo-blueprint .v-grid-scroller::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	border: 4px solid transparent;
+	background: rgba(255, 255, 255, 0.3);
+	-webkit-background-clip: content-box;
+	background-clip: content-box;
+}
+
+.tests-valo-blueprint .v-grid-scroller-vertical::-webkit-scrollbar-thumb {
+	min-height: 30px;
+}
+
+.tests-valo-blueprint .v-grid-scroller-horizontal::-webkit-scrollbar-thumb {
+	min-width: 30px;
 }
 
 .tests-valo-blueprint .v-textfield {
@@ -7277,6 +7775,14 @@ div.v-layout.v-horizontal.v-widget {
 	color: #8eb0da;
 }
 
+.tests-valo-blueprint .v-window-restorebox-disabled  ~ .v-window-closebox ~ .v-window-header, .tests-valo-blueprint .v-window-maximizebox-disabled  ~ .v-window-closebox ~ .v-window-header {
+	margin-right: 41px;
+}
+
+.tests-valo-blueprint .v-window-restorebox-disabled  ~ .v-window-closebox-disabled ~ .v-window-header, .tests-valo-blueprint .v-window-maximizebox-disabled  ~ .v-window-closebox-disabled ~ .v-window-header {
+	margin-right: 14px;
+}
+
 .tests-valo-blueprint .v-window-closebox, .tests-valo-blueprint .v-window-maximizebox, .tests-valo-blueprint .v-window-restorebox {
 	position: absolute;
 	z-index: 3;
@@ -7331,11 +7837,11 @@ div.v-layout.v-horizontal.v-widget {
 	border-bottom-left-radius: 0;
 }
 
-.tests-valo-blueprint .v-window-restorebox-disabled, .tests-valo-blueprint .v-window-maximizebox-disabled {
+.tests-valo-blueprint .v-window-closebox-disabled, .tests-valo-blueprint .v-window-resizebox-disabled, .tests-valo-blueprint .v-window-restorebox-disabled, .tests-valo-blueprint .v-window-maximizebox-disabled {
 	display: none;
 }
 
-.tests-valo-blueprint .v-window-restorebox-disabled  + .v-window-closebox, .tests-valo-blueprint .v-window-maximizebox-disabled  + .v-window-closebox {
+.tests-valo-blueprint .v-window-closebox-disabled  + .v-window-closebox, .tests-valo-blueprint .v-window-resizebox-disabled  + .v-window-closebox, .tests-valo-blueprint .v-window-restorebox-disabled  + .v-window-closebox, .tests-valo-blueprint .v-window-maximizebox-disabled  + .v-window-closebox {
 	width: 41px;
 	padding-right: 0;
 	border-bottom-left-radius: 4px;
@@ -7449,10 +7955,6 @@ div.v-layout.v-horizontal.v-widget {
 
 .v-ie8 .tests-valo-blueprint .v-window-resizebox, .v-ie9 .tests-valo-blueprint .v-window-resizebox {
 	cursor: se-resize;
-}
-
-.tests-valo-blueprint .v-window-resizebox-disabled {
-	display: none;
 }
 
 .tests-valo-blueprint .v-window-modalitycurtain:active  ~ .v-window {

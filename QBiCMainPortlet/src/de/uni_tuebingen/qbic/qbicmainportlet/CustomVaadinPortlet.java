@@ -63,9 +63,9 @@ public class CustomVaadinPortlet extends VaadinPortlet {
      */
     @Override
     public String getStaticFileLocation(final VaadinRequest request) {
-      return super.getStaticFileLocation(request);
+      //return super.getStaticFileLocation(request);
       // self contained approach:
-      // return request.getContextPath();
+       return request.getContextPath();
     }
   }
 

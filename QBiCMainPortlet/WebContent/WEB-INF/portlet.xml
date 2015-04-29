@@ -13,6 +13,11 @@
             <value>de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletUI</value>
         </init-param>
         
+        <init-param>
+            <name>widgetset</name>
+            <value>de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset</value>
+        </init-param>
+        
         <!-- Supported portlet modes and content types. -->
         <supports>
             <mime-type>text/html</mime-type>

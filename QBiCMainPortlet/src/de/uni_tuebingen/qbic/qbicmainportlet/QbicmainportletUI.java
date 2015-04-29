@@ -41,6 +41,7 @@ import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.server.WrappedPortletSession;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -66,15 +67,18 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
  */
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
-// @Widgetset("de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
-@WebServlet(value = "/*", asyncSupported = true)
-@VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class,
-    widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
 public class QbicmainportletUI extends UI {
 
+  @WebServlet(value = "/*", asyncSupported = true)
+  @VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class, widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")//,
+     // widgetset = "com.example.workflowmockup.widgetset.WorkflowmockupWidgetset")
+  public static class Servlet extends VaadinServlet {
+  }
+  
+  
   private OpenBisClient openBisConnection;
   private VerticalLayout mainLayout;
-  private ConfigurationManager manager = ConfigurationManagerFactory.getInstance();
+  private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
   private String revision = "383";
@@ -85,6 +89,7 @@ public class QbicmainportletUI extends UI {
     if (LiferayAndVaadinUtils.getUser() == null) {
       buildNotLoggedinLayout();
     } else {
+      manager = ConfigurationManagerFactory.getInstance();
       // logging who is connecting, when.
       LOGGER.info(String.format("QbicNavigator (%s.%s) used by: %s", version, revision,
           LiferayAndVaadinUtils.getUser().getScreenName()));
