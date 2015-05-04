@@ -11,6 +11,10 @@ import com.vaadin.ui.ProgressBar;
 
 public class ProjectBean implements Serializable{
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = -4463436578711695346L;
   private String id;
   private String code;
   private String description;

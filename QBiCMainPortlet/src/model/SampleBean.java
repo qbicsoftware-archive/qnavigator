@@ -1,7 +1,6 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -16,10 +15,13 @@ import properties.Qproperties;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.HierarchicalContainer;
 
-public class SampleBean implements Comparable<Object> {
+public class SampleBean implements Comparable<Object>, Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = -61486023394904818L;
   private String id;
   private String code;
   private String type;

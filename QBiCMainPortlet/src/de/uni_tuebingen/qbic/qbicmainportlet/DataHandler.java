@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -107,9 +108,14 @@ import main.OpenBisClient;
 // }
 
 
-public class DataHandler {
+public class DataHandler implements Serializable{
 
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = -4814000017404997233L;
+  
   // Map<String, SpaceInformation> spaces = new HashMap<String, SpaceInformation>();
   // Map<String, ProjectInformation> projectInformations = new HashMap<String,
   // ProjectInformation>();

@@ -14,6 +14,10 @@ import com.vaadin.ui.Image;
 
 public class ExperimentBean implements Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = -1927159369993633824L;
   private String id;
   private String code;
   private String type;
