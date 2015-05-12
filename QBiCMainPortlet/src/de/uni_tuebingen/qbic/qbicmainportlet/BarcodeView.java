@@ -77,11 +77,11 @@ public class BarcodeView extends VerticalLayout implements View {
   ArrayList<IBarcodeBean> barcodeBeans;
 
   private OpenBisClient openbis;
-  
 
 
-  public BarcodeView(OpenBisClient openbisClient, FilterTable table, IndexedContainer datasource, String id, String scripts,
-      String paths) {
+
+  public BarcodeView(OpenBisClient openbisClient, FilterTable table, IndexedContainer datasource,
+      String id, String scripts, String paths) {
     this.openbis = openbisClient;
     projectview_content = new VerticalLayout();
 
@@ -108,7 +108,8 @@ public class BarcodeView extends VerticalLayout implements View {
 
   public BarcodeView(OpenBisClient openBisClient, String scripts, String path) {
     // execute the above constructor with default settings, in order to have the same settings
-    this(openBisClient, new FilterTable(), new IndexedContainer(), "No project selected", scripts, path);
+    this(openBisClient, new FilterTable(), new IndexedContainer(), "No project selected", scripts,
+        path);
   }
 
   public void setSizeFull() {
@@ -257,7 +258,7 @@ public class BarcodeView extends VerticalLayout implements View {
       Collection<ExperimentBarcodeSummaryBean> experiments) {
     ArrayList<NewSampleModelBean> samples = new ArrayList<NewSampleModelBean>();
     for (ExperimentBarcodeSummaryBean b : experiments) {
-      for (Sample s : openbis.getSamplesofExperiment(b.getExperiment())) {
+      for (Sample s : openbis.getSamplesofExperiment(b.getExperimentID())) {
         String type = s.getSampleTypeCode();
         String bioType = "unknown";
         if (type.equals("Q_BIOLOGICAL_SAMPLE")) {
@@ -358,7 +359,7 @@ public class BarcodeView extends VerticalLayout implements View {
 
     projectview_content.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    // this.setHeight(String.format("%spx", (browserHeight * 0.8)));
 
 
     // table section
@@ -448,7 +449,7 @@ public class BarcodeView extends VerticalLayout implements View {
     for (Experiment e : openbis.getExperimentsOfProjectByIdentifier(project)) {
       String type = e.getExperimentTypeCode();
       if (barcodeExperiments.contains(type)) {
-        String expCode = e.getCode();
+        String expID = e.getIdentifier();
         List<Sample> samples = openbis.getSamplesofExperiment(e.getCode());
         int numOfSamples = samples.size();
         List<String> ids = new ArrayList<String>();
@@ -463,7 +464,7 @@ public class BarcodeView extends VerticalLayout implements View {
           bioType = samples.get(0).getProperties().get("Q_SAMPLE_TYPE");
         }
         beans.add(new ExperimentBarcodeSummaryBean(BarcodeFunctions.getBarcodeRange(ids), bioType,
-            Integer.toString(numOfSamples), expCode));
+            Integer.toString(numOfSamples), expID));
       }
     }
     return beans;
