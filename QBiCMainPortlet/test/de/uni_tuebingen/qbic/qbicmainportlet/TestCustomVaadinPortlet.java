@@ -1,8 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import static org.junit.Assert.*;
+import static com.google.common.truth.Truth.ASSERT;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +27,6 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
-import static com.google.common.truth.Truth.ASSERT;
 
 public class TestCustomVaadinPortlet {
   static ProjectBean projectBean;

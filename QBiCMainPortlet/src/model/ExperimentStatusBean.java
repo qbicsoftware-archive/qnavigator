@@ -2,9 +2,6 @@ package model;
 
 import java.io.Serializable;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-
 public class ExperimentStatusBean implements Serializable {
  
   String description;

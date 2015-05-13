@@ -1,7 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.BarcodesReadyRunnable;
 import helpers.BarcodeFunctions;
+import helpers.BarcodesReadyRunnable;
 import helpers.Utils;
 
 import java.util.ArrayList;
@@ -14,6 +14,7 @@ import java.util.Map;
 import logging.Log4j2Logger;
 import logging.Logger;
 import main.BarcodeCreator;
+import main.OpenBisClient;
 import model.ExperimentBarcodeSummaryBean;
 import model.IBarcodeBean;
 import model.NewModelBarcodeBean;
@@ -37,18 +38,16 @@ import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-
-import main.OpenBisClient;
 
 public class BarcodeView extends VerticalLayout implements View {
 

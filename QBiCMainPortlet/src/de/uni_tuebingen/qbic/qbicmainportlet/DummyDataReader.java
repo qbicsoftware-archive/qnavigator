@@ -1,8 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,7 +10,6 @@ import java.util.HashMap;
 
 import model.SampleBean;
 
-import com.vaadin.server.VaadinService;
 import com.vaadin.ui.UI;
 
 public class DummyDataReader {

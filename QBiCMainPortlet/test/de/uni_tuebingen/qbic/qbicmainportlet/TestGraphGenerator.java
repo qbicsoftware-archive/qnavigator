@@ -1,11 +1,10 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import static org.junit.Assert.*;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import main.OpenBisClient;
 
 import org.junit.After;
 import org.junit.AfterClass;

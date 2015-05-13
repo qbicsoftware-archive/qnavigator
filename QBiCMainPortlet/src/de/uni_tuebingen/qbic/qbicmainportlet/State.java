@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Observable;
 
-import logging.SysOutLogger;
-
 import com.vaadin.ui.UI;
 
 public class State extends Observable implements Serializable {

@@ -1,7 +1,5 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.OpenBisFunctions;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -18,16 +16,12 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.SwingConstants;
 
+import main.OpenBisClient;
 import model.ExperimentBean;
 import model.ProjectBean;
 import model.SampleBean;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.util.mxCellRenderer;
@@ -36,9 +30,6 @@ import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.ui.UI;
-
-import main.OpenBisClient;
 
 //public class HelloWorld extends JFrame
 public class GraphGenerator 

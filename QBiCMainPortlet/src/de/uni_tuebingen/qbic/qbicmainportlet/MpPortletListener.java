@@ -1,22 +1,12 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.OpenBisFunctions;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 
 import javax.portlet.ActionRequest;
@@ -35,11 +25,10 @@ import org.tepi.filtertable.FilterTable;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.VaadinPortletSession.PortletListener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinResponse;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.server.VaadinPortletSession.PortletListener;
-import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.UI;
 
 public class MpPortletListener implements PortletListener,

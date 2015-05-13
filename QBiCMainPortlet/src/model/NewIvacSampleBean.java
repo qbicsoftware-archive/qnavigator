@@ -2,10 +2,6 @@ package model;
 
 import java.io.Serializable;
 
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.TextField;
-
 public class NewIvacSampleBean implements Serializable{
   
   String type;

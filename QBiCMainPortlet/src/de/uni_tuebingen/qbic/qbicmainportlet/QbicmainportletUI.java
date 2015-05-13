@@ -81,12 +81,12 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "383";
+  private String revision = "466";
   private String resUrl;
 
   @Override
   protected void init(VaadinRequest request) {
-    if (LiferayAndVaadinUtils.getUser() == null) {
+    if (LiferayAndVaadinUtils.getUser() == null) {      
       buildNotLoggedinLayout();
     } else {
       manager = ConfigurationManagerFactory.getInstance();
@@ -226,7 +226,7 @@ public class QbicmainportletUI extends UI {
         (DataHandler) portletSession.getAttribute("datahandler", PortletSession.APPLICATION_SCOPE);
     final RunnableFillsContainer th =
         new RunnableFillsContainer(datahandler, tc, homeSpaceBean, LiferayAndVaadinUtils.getUser()
-            .getScreenName());
+            .getScreenName(), request);
     final Thread thread = new Thread(th);
     Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
       public void uncaughtException(Thread th, Throwable ex) {
@@ -255,13 +255,15 @@ public class QbicmainportletUI extends UI {
     private String userName;
     private SpaceBean homeSpaceBean;
     private DataHandler datahandler;
+    private VaadinRequest request;
 
     public RunnableFillsContainer(DataHandler dh, HierarchicalContainer tc,
-        SpaceBean homeSpaceBean, String user) {
+        SpaceBean homeSpaceBean, String user, VaadinRequest request) {
       this.tc = tc;
       this.homeSpaceBean = homeSpaceBean;
       this.userName = user;
       this.datahandler = dh;
+      this.request = request;
     }
 
     @Override
@@ -484,7 +486,7 @@ public class QbicmainportletUI extends UI {
 
           // QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
           System.out.println(spaceContainer.size());
-          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, includePatientCreation);
+          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, includePatientCreation, request);
         }
       });
     }
@@ -526,7 +528,7 @@ public class QbicmainportletUI extends UI {
 
   // public void buildMainLayout(HierarchicalContainer tc, SpaceInformation homeViewInformation) {
   public void buildMainLayout(DataHandler datahandler, HierarchicalContainer tc,
-      SpaceBean homeSpaceBean, Boolean patientCreation) {
+      SpaceBean homeSpaceBean, Boolean patientCreation, VaadinRequest request) {
     // HierarchicalContainer tc = new HierarchicalContainer();
     // System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
     // long startTime = System.nanoTime();
@@ -702,7 +704,17 @@ public class QbicmainportletUI extends UI {
       }
 
     });
-    navigator.navigateTo("");
+    
+    String requestParams = Page.getCurrent().getUriFragment();
+    
+    LOGGER.info("used urifragement: " + requestParams);
+    if(requestParams != null){
+      navigator.navigateTo(requestParams.startsWith("!")?requestParams.substring(1):requestParams);
+    }
+    else {
+      navigator.navigateTo("");
+    }
+    
   }
 
   public PortletSession getPortletSession() {

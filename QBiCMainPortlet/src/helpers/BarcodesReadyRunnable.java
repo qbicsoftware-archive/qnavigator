@@ -3,7 +3,6 @@ package helpers;
 import java.util.ArrayList;
 import java.util.List;
 
-import logging.SysOutLogger;
 import main.BarcodeCreator;
 import model.IBarcodeBean;
 

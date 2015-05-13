@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import main.OpenBisClient;
 import model.DatasetBean;
 import model.ExperimentBean;
 import model.ExperimentStatusBean;
@@ -38,15 +39,12 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import de.uni_tuebingen.qbic.util.DashboardUtil;
-import main.OpenBisClient;
 
 //
 // class SpaceInformation {

@@ -1,9 +1,7 @@
 package model;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 import com.vaadin.data.util.BeanItemContainer;

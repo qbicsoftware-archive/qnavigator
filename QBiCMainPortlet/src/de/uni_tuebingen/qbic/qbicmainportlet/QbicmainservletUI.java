@@ -1,7 +1,5 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.OpenBisFunctions;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
@@ -11,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.portlet.PortletSession;
-import javax.servlet.annotation.WebServlet;
 
+import main.OpenBisClient;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
@@ -22,7 +20,6 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRo
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
@@ -34,6 +31,7 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.WrappedPortletSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -41,11 +39,9 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickEvent;
 
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 
 /*
  * in portal-ext.properties the following settings must be set, in order to work

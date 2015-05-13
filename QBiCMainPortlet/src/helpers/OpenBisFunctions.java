@@ -1,18 +1,5 @@
 package helpers;
 
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
-import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import de.uni_tuebingen.qbic.qbicmainportlet.OpenBisClient;
 
 public class OpenBisFunctions {
 
@@ -28,23 +15,23 @@ public class OpenBisFunctions {
     else
       return sample.substring(0, 5);
   }
-  
+
   public static double statusToDoubleValue(String status) {
-    
+
     double value = 0.0;
-    
+
     switch (status) {
       case "STARTED":
-          value = 0.25;
-          break;
+        value = 0.25;
+        break;
       case "RUNNING":
         value = 0.5;
         break;
       case "FINISHED":
         value = 1.0;
         break;
-         
-  }
+
+    }
     return value;
   }
 }

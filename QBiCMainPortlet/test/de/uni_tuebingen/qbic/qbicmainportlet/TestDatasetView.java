@@ -1,7 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import static org.junit.Assert.*;
 import static com.google.common.truth.Truth.ASSERT;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,15 +23,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ibm.icu.impl.Assert;
-import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
-
-import static org.mockito.Mockito.*;
 public class TestDatasetView {
 
   DatasetView datasetView;

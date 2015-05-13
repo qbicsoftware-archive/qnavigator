@@ -2,15 +2,10 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
 import helpers.Utils;
-
-import java.util.Iterator;
-
-import model.ProjectBean;
 import model.SpaceBean;
 
 import org.tepi.filtertable.FilterTable;
 
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
@@ -18,19 +13,18 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomTable.Align;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 public class HomeView extends VerticalLayout implements View {
 
