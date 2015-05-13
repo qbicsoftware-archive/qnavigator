@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -185,6 +186,13 @@ public class Utils {
       rowString += "\n";
     }
     return header + "\n" + rowString;
+  }
+  
+  public static void printMapContent(Map<String, Object> map) {
+    for (Map.Entry<String, Object> entry : map.entrySet())
+    {
+        System.out.println(entry.getKey() + ": " + entry.getValue());
+    }
   }
 
 }

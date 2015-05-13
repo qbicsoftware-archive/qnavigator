@@ -310,15 +310,19 @@ public class QbicmainportletUI extends UI {
 
       List<String> project_identifiers_tmp = new ArrayList<String>();
 
+      Boolean patientCreation = false;
       for (SpaceWithProjectsAndRoleAssignments s : spaceList) {
         if (s.getUsers().contains(userName)) {
           String spaceName = s.getCode();
+          
+          if(!patientCreation & spaceName.contains("IVAC")) {
+            patientCreation = true;
+          }
 
           // TODO does this work for everyone? should it? empty container would be the aim, probably
           if (spaceName.equals("QBIC_USER_SPACE")) {
             datahandler.fillPersonsContainer(spaceName);
           }
-
           List<Project> projects = s.getProjects();
           number_of_projects += projects.size();
 
@@ -455,6 +459,9 @@ public class QbicmainportletUI extends UI {
       homeSpaceBean.setExperiments(allExperimentsContainer);
       homeSpaceBean.setSamples(allSamplesContainer);
       homeSpaceBean.setDatasets(allDatasetsContainer);
+      
+      final Boolean includePatientCreation = patientCreation;
+
       long endTime = System.nanoTime();
       LOGGER.info(String.format("Took %f s", ((endTime - startTime) / 1000000000.0)));
       LOGGER.info(String.format("User %s has %d projects", userName, homeSpaceBean.getProjects()
@@ -477,7 +484,7 @@ public class QbicmainportletUI extends UI {
 
           // QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
           System.out.println(spaceContainer.size());
-          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean);
+          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, includePatientCreation);
         }
       });
     }
@@ -519,7 +526,7 @@ public class QbicmainportletUI extends UI {
 
   // public void buildMainLayout(HierarchicalContainer tc, SpaceInformation homeViewInformation) {
   public void buildMainLayout(DataHandler datahandler, HierarchicalContainer tc,
-      SpaceBean homeSpaceBean) {
+      SpaceBean homeSpaceBean, Boolean patientCreation) {
     // HierarchicalContainer tc = new HierarchicalContainer();
     // System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
     // long startTime = System.nanoTime();
@@ -555,7 +562,7 @@ public class QbicmainportletUI extends UI {
     // if (homeViewInformation.numberOfProjects > 0) {
     if (homeSpaceBean.getProjects().size() > 0) {
       // homeView = new HomeView(homeViewInformation, "Your Projects");
-      homeView = new HomeView(datahandler, homeSpaceBean, "Your Projects");
+      homeView = new HomeView(datahandler, homeSpaceBean, "Your Projects", patientCreation);
     } else {
       homeView = new HomeView(datahandler);
     }
@@ -573,7 +580,9 @@ public class QbicmainportletUI extends UI {
             manager.getPathVariable());
     final ExperimentView experimentView = new ExperimentView(datahandler,state, resUrl);
     ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
-
+    
+    final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
+    final PatientView patientView = new PatientView(datahandler, state, resUrl);
 
     VerticalLayout navigatorContent = new VerticalLayout();
 
@@ -588,10 +597,15 @@ public class QbicmainportletUI extends UI {
     navigator.addView(BarcodeView.navigateToLabel, barcodeView);
     navigator.addView(ExperimentView.navigateToLabel, experimentView);
     navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
+    
+    navigator.addView(PatientView.navigateTolabel, patientView);
+    navigator.addView(AddPatientView.navigateTolabel, addPatientView);
+    
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
     navigator.addView("qcMlWorkflow", qcMlWorkflowView);
     navigator.addView("testRunWorkflow", testRunWorkflowView);
     navigator.addView("searchView", searchView);
+    
 
     setNavigator(navigator);
 

@@ -3,6 +3,7 @@ package helpers;
 import java.util.ArrayList;
 import java.util.List;
 
+import logging.SysOutLogger;
 import main.BarcodeCreator;
 import model.IBarcodeBean;
 
@@ -33,10 +34,14 @@ public class BarcodesReadyRunnable implements Runnable {
   private void attachDownloadsToButtons() {
     if (pdfDL != null)
       pdfDL.remove();
+    
     pdfDL = new FileDownloader(creator.zipAndDownloadBarcodes(barcodeBeans));
     pdfDL.extend(view.getButtonTube());
     if (sheetDL != null)
       sheetDL.remove();
+    for(IBarcodeBean b : barcodeBeans)
+      System.out.println(b);
+    System.out.println(view.getSorter());
     sheetDL = new FileDownloader(creator.createAndDLSheet(barcodeBeans, view.getSorter()));
     sheetDL.extend(view.getButtonSheet());
   }

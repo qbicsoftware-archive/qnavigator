@@ -19,14 +19,18 @@ import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomTable.Align;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class HomeView extends VerticalLayout implements View {
 
@@ -40,17 +44,19 @@ public class HomeView extends VerticalLayout implements View {
   VerticalLayout homeview_content;
   VerticalLayout buttonLayoutSection = new VerticalLayout();
   SpaceBean currentBean;
+  Boolean includePatientCreation;
 
   DataHandler datahandler;
 
   private Button export;
   
-  public HomeView(DataHandler datahandler, SpaceBean datasource, String caption) {
+  public HomeView(DataHandler datahandler, SpaceBean datasource, String caption, Boolean patientCreation) {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
     this.currentBean = datasource;
     this.setContainerDataSource(datasource, caption);
     this.datahandler = datahandler;
+    this.includePatientCreation = patientCreation;
     
     this.tableClickChangeTreeView();
   }
@@ -170,6 +176,27 @@ public class HomeView extends VerticalLayout implements View {
     // view overall statistics
     VerticalLayout statistics = new VerticalLayout();
     VerticalLayout homeViewDescription = new VerticalLayout();
+    
+    if (includePatientCreation) {
+      Button addPatient = new Button("Add Patient");
+      addPatient.setIcon(FontAwesome.PLUS);
+      //addPatient.addStyleName(ValoTheme.BUTTON_HUGE);
+      //addPatient.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+      addPatient.setStyleName("addpatient");
+
+      
+      addPatient.addClickListener(new ClickListener() {
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+          UI.getCurrent().getNavigator().navigateTo(String.format("addivacproject"));
+
+        }
+      });
+      statistics.addComponent(addPatient);
+      statistics.setComponentAlignment(addPatient, Alignment.TOP_RIGHT);
+    }
+     
     statistics.setCaption("Statistics");
     statistics.setIcon(FontAwesome.FILE_TEXT_O);
 

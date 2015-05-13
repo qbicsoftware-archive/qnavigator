@@ -232,7 +232,6 @@ public class ProjectView extends VerticalLayout implements View {
       }
     });
     createBarcodesMenuItem.setCommand(new MenuBar.Command() {
-
       public void menuSelected(MenuItem selectedItem) {
         ArrayList<String> message = new ArrayList<String>();
         message.add("clicked");

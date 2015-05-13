@@ -1,8 +1,11 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.Utils;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,7 +18,9 @@ import javax.xml.bind.JAXBException;
 
 import model.DatasetBean;
 import model.ExperimentBean;
+import model.ExperimentStatusBean;
 import model.ExperimentType;
+import model.NewIvacSampleBean;
 import model.ProjectBean;
 import model.SampleBean;
 import parser.PersonParser;
@@ -33,10 +38,13 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 import main.OpenBisClient;
 
@@ -130,6 +138,8 @@ public class DataHandler implements Serializable{
       new HashMap<String, SampleBean>();
   Map<String, DatasetBean> datasetMap =
       new HashMap<String, DatasetBean>();
+  
+  Map<String, String> spaceToProjectPrefixMap = new HashMap<String, String>();
 
   // Map<String, IndexedContainer> space_to_projects = new HashMap<String, IndexedContainer>();
   //
@@ -1482,6 +1492,59 @@ public class DataHandler implements Serializable{
       res.put("Data Registered", 0);
     return res;
   }
+  
+  public BeanItemContainer<ExperimentStatusBean> computIvacPatientStatus(ProjectBean projectBean) {
+    
+    BeanItemContainer<ExperimentStatusBean> res = new BeanItemContainer<ExperimentStatusBean>(ExperimentStatusBean.class);
+    BeanItemContainer<ExperimentBean> cont = projectBean.getExperiments();
+    
+    //TODO set download link and workflow triggering
+    
+    ExperimentStatusBean barcode = new ExperimentStatusBean();
+    barcode.setDescription("Barcode Generation");
+    barcode.setStatus(1.0);
+    
+    ExperimentStatusBean ngsMeasure = new ExperimentStatusBean();
+    ngsMeasure.setDescription("NGS Sequncing");
+    ngsMeasure.setStatus(0.0);
+ 
+    ExperimentStatusBean ngsCall = new ExperimentStatusBean();
+    ngsCall.setDescription("Variant Calling");
+    ngsCall.setStatus(0.0);
+ 
+    ExperimentStatusBean hlaType = new ExperimentStatusBean();
+    hlaType.setDescription("HLA Typing");
+    hlaType.setStatus(0.0);
+  
+    ExperimentStatusBean epitopePred = new ExperimentStatusBean();
+    epitopePred.setDescription("Epitope Prediction");
+    epitopePred.setStatus(0.0);
+  
+    for (ExperimentBean bean : cont.getItemIds()) {
+      String type = bean.getType();
+      
+      if (type.equalsIgnoreCase(ExperimentType.Q_NGS_MEASUREMENT.name())) {
+        ngsMeasure.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties().get("Q_CURRENT_STATUS").toString()));
+      }
+      if (type.equalsIgnoreCase(ExperimentType.Q_NGS_VARIANT_CALLING.name())) {
+        ngsCall.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties().get("Q_CURRENT_STATUS").toString()));
+      }
+      if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_HLATYPING.name())) {
+        hlaType.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties().get("Q_CURRENT_STATUS").toString()));
+      }
+      if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_EPITOPE_PREDICTION.name())) {
+        epitopePred.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties().get("Q_CURRENT_STATUS").toString()));
+      }
+    }
+    
+    res.addBean(barcode);
+    res.addBean(ngsMeasure);
+    res.addBean(ngsCall);
+    res.addBean(hlaType);
+    res.addBean(epitopePred);
+
+    return res;
+  }
 
   public ThemeResource setExperimentStatusColor(String status) {
     ThemeResource resource = null;
@@ -1556,5 +1619,276 @@ public class DataHandler implements Serializable{
       }
     }
   }
+  
+  public void registerNewPatients(int numberPatients, List<String> secondaryNames,
+      BeanItemContainer<NewIvacSampleBean> samplesToRegister, String space, String description) {
 
+    // get prefix code for projects for corresponding space
+    String projectPrefix = model.spaceToProjectPrefixMap.myMap.get(space);
+    
+    // extract to function for that
+    List<Integer> projectCodes = new ArrayList<Integer>();
+    for(Project p: openBisClient.getProjectsOfSpace(space)) {
+      //String maxValue = Collections.max(p.getCode());
+      String maxValue = p.getCode().replaceAll("\\D+","");
+      int codeAsNumber = Integer.parseInt(maxValue);
+      projectCodes.add(codeAsNumber);
+    }
+    
+    int numberOfProject;
+    
+    if(projectCodes.size() == 0) {
+      numberOfProject = 0;
+    }
+    else {
+      numberOfProject = Collections.max(projectCodes);
+    }
+    
+    for (int i = 0; i < numberPatients; i++) {
+      Map<String, Object> projectMap = new HashMap<String, Object>();
+      Map<String, Object> firstLevel = new HashMap<String, Object>();
+
+      numberOfProject += 1;
+      int numberOfRegisteredExperiments = 1;
+      int numberOfRegisteredSamples = 1;
+
+      // register new patient (project)
+      String newProjectCode = projectPrefix + Utils.createCountString(numberOfProject, 3);
+
+      projectMap.put("code", newProjectCode);
+      projectMap.put("space", space);
+      projectMap.put("desc", description + " [" + secondaryNames.get(i) + "]");
+      projectMap.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
+
+      // call of ingestion service to register project
+      this.openBisClient.triggerIngestionService("register-proj", projectMap);
+      helpers.Utils.printMapContent(projectMap);
+
+      String newProjectDetailsCode =
+          projectPrefix + Utils.createCountString(numberOfProject, 3) + "E_INFO";
+      String newProjectDetailsID = "/" + space + "/" + newProjectCode + "/" + newProjectDetailsCode;
+
+      String newExperimentalDesignCode =
+          projectPrefix + Utils.createCountString(numberOfProject, 3) + "E"
+              + numberOfRegisteredExperiments;
+      String newExperimentalDesignID =
+          "/" + space + "/" + newProjectCode + "/" + newExperimentalDesignCode;
+      numberOfRegisteredExperiments += 1;
+
+      String newBiologicalEntitiyCode =
+          newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "H";
+      String newBiologicalEntitiyID =
+          "/" + space + "/" + newBiologicalEntitiyCode
+          + helpers.BarcodeFunctions.checksum(newBiologicalEntitiyCode);
+      numberOfRegisteredSamples += 1;
+
+      // register first level of new patient
+      firstLevel.put("lvl", "1");
+      firstLevel.put("projectDetails", newProjectDetailsID);
+      firstLevel.put("experimentalDesign", newExperimentalDesignID);
+      firstLevel.put("secondaryName", secondaryNames.get(i));
+      firstLevel.put("biologicalEntity", newBiologicalEntitiyID);
+      firstLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
+      
+      this.openBisClient.triggerIngestionService("register-ivac-lvl", firstLevel);
+      System.out.println("Level 1: ");
+
+      helpers.Utils.printMapContent(firstLevel);
+      
+      for (Iterator iter = samplesToRegister.getItemIds().iterator(); iter.hasNext();) {
+
+        NewIvacSampleBean sampleBean = (NewIvacSampleBean) iter.next();
+
+        for (int ii = 1; ii <= sampleBean.getAmount(); ii++) {
+          Map<String, Object> secondLevel = new HashMap<String, Object>();
+          Map<String, Object> thirdLevel = new HashMap<String, Object>();
+          Map<String, Object> fourthLevel = new HashMap<String, Object>();
+
+          List<String> newSamplePreparationIDs = new ArrayList<String>();
+          List<String> newTestSampleIDs = new ArrayList<String>();
+          List<String> testTypes = new ArrayList<String>();
+
+          List<String> newNGSMeasurementIDs = new ArrayList<String>();
+          List<String> newNGSRunIDs = new ArrayList<String>();
+          List<Boolean> additionalInfo = new ArrayList<Boolean>();
+          List<String> parents = new ArrayList<String>();
+
+          List<String> newSampleExtractionIDs = new ArrayList<String>();
+          List<String> newBiologicalSampleIDs = new ArrayList<String>();
+          List<String> primaryTissues = new ArrayList<String>();
+          List<String> detailedTissue = new ArrayList<String>();
+          List<String> sequencerDevice = new ArrayList<String>();
+
+          String newSampleExtractionCode =
+              newProjectCode + "E"
+                  + numberOfRegisteredExperiments;
+          newSampleExtractionIDs.add("/" + space + "/" + newProjectCode + "/"
+              + newSampleExtractionCode);
+          numberOfRegisteredExperiments += 1;
+
+          String newBiologicalSampleCode =
+              newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "B";
+          String newBiologicalSampleID =
+              "/" + space + "/" + newBiologicalSampleCode
+              + helpers.BarcodeFunctions.checksum(newBiologicalSampleCode);
+          
+          newBiologicalSampleIDs.add(newBiologicalSampleID);
+          System.out.println(numberOfRegisteredSamples);
+          numberOfRegisteredSamples += 1;
+
+          primaryTissues.add(sampleBean.getTissue());
+          detailedTissue.add(sampleBean.getType());
+          sequencerDevice.add(sampleBean.getSeqDevice());
+          
+          // register second level of new patient
+          secondLevel.put("lvl", "2");
+          secondLevel.put("sampleExtraction", newSampleExtractionIDs);
+          secondLevel.put("biologicalSamples", newBiologicalSampleIDs);
+          secondLevel.put("secondaryNames", secondaryNames.get(i));
+          secondLevel.put("parent", newBiologicalEntitiyID);
+          secondLevel.put("primaryTissue", primaryTissues);
+          secondLevel.put("detailedTissue", detailedTissue);
+          secondLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
+
+          this.openBisClient.triggerIngestionService("register-ivac-lvl", secondLevel);
+          System.out.println("Level 2: ");
+          helpers.Utils.printMapContent(secondLevel);
+          
+          if (sampleBean.getDnaSeq()) {
+            String newSamplePreparationCode =
+                newProjectCode + "E"
+                    + numberOfRegisteredExperiments;
+            String newSamplePreparationID =
+                "/" + space + "/" + newProjectCode + "/" + newSamplePreparationCode;
+            newSamplePreparationIDs.add(newSamplePreparationID);
+            numberOfRegisteredExperiments += 1;
+
+            String newTestSampleCode =
+                newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "B";
+            String newTestSampleID =
+                "/" + space + "/" + newTestSampleCode
+                + helpers.BarcodeFunctions.checksum(newTestSampleCode);
+            newTestSampleIDs.add(newTestSampleID);
+            numberOfRegisteredSamples += 1;
+            testTypes.add("DNA");
+
+            String newNGSMeasurementCode =
+                newProjectCode + "E"
+                    + numberOfRegisteredExperiments;
+            String newNGSMeasurementID =
+                "/" + space + "/" + newProjectCode + "/" + newNGSMeasurementCode;
+            newNGSMeasurementIDs.add(newNGSMeasurementID);
+            numberOfRegisteredExperiments += 1;
+
+            String newNGSRunCode =
+                newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "R";
+            String newNGSRunID = "/" + space + "/" + newNGSRunCode+ helpers.BarcodeFunctions.checksum(newNGSRunCode);
+            newNGSRunIDs.add(newNGSRunID);
+            numberOfRegisteredSamples += 1;
+
+            additionalInfo.add(false);
+            parents.add(newTestSampleID);
+
+          }
+
+          if (sampleBean.getRnaSeq()) {
+            String newSamplePreparationCode =
+                newProjectCode + "E"
+                    + numberOfRegisteredExperiments;
+            String newSamplePreparationID =
+                "/" + space + "/" + newProjectCode + "/" + newSamplePreparationCode;
+            newSamplePreparationIDs.add(newSamplePreparationID);
+            numberOfRegisteredExperiments += 1;
+
+            String newTestSampleCode =
+                newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "B";
+            String newTestSampleID =
+                "/" + space + "/" + newTestSampleCode
+                + helpers.BarcodeFunctions.checksum(newTestSampleCode);
+            newTestSampleIDs.add(newTestSampleID);
+            numberOfRegisteredSamples += 1;
+            testTypes.add("RNA");
+
+            String newNGSMeasurementCode =
+                newProjectCode + "E"
+                    + numberOfRegisteredExperiments;
+            String newNGSMeasurementID =
+                "/" + space + "/" + newProjectCode + "/" + newNGSMeasurementCode;
+            newNGSMeasurementIDs.add(newNGSMeasurementID);
+            numberOfRegisteredExperiments += 1;
+
+            String newNGSRunCode =
+                newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "R";
+            String newNGSRunID = "/" + space + "/" + newNGSRunCode + helpers.BarcodeFunctions.checksum(newNGSRunCode);
+            newNGSRunIDs.add(newNGSRunID);
+            numberOfRegisteredSamples += 1;
+
+            additionalInfo.add(false);
+            parents.add(newTestSampleID);
+          }
+
+          if (sampleBean.getDeepSeq()) {
+            String newSamplePreparationCode =
+                newProjectCode + "E"
+                    + numberOfRegisteredExperiments;
+            String newSamplePreparationID =
+                "/" + space + "/" + newProjectCode + "/" + newSamplePreparationCode;
+            newSamplePreparationIDs.add(newSamplePreparationID);
+            numberOfRegisteredExperiments += 1;
+
+            String newTestSampleCode =
+                newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "B";
+            String newTestSampleID =
+                "/" + space + "/" + newTestSampleCode
+                + helpers.BarcodeFunctions.checksum(newTestSampleCode);
+            newTestSampleIDs.add(newTestSampleID);
+            numberOfRegisteredSamples += 1;
+            testTypes.add("DNA");
+
+            String newNGSMeasurementCode =
+                newProjectCode + "E"
+                    + numberOfRegisteredExperiments;
+            String newNGSMeasurementID =
+                "/" + space + "/" + newProjectCode + "/" + newNGSMeasurementCode;
+            newNGSMeasurementIDs.add(newNGSMeasurementID);
+            numberOfRegisteredExperiments += 1;
+
+            String newNGSRunCode =
+                newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "R";
+            String newNGSRunID = "/" + space + "/" + newNGSRunCode + helpers.BarcodeFunctions.checksum(newNGSRunCode);
+            newNGSRunIDs.add(newNGSRunID);
+            numberOfRegisteredSamples += 1;
+
+            additionalInfo.add(true);
+            parents.add(newTestSampleID);
+          }
+
+          // register third and fourth level of new patient
+          thirdLevel.put("lvl", "3");
+          thirdLevel.put("parent", newBiologicalSampleID);
+          thirdLevel.put("experiments", newSamplePreparationIDs);
+          thirdLevel.put("samples", newTestSampleIDs);
+          thirdLevel.put("types", testTypes);
+          thirdLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
+
+          fourthLevel.put("lvl", "4");
+          fourthLevel.put("experiments", newNGSMeasurementIDs);
+          fourthLevel.put("samples", newNGSRunIDs);
+          fourthLevel.put("parents", parents);
+          fourthLevel.put("types", testTypes);
+          fourthLevel.put("info", additionalInfo);
+          fourthLevel.put("device", sequencerDevice);
+          fourthLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
+
+          // call of ingestion services for differeny levels
+          System.out.println("Level 3: ");
+          helpers.Utils.printMapContent(thirdLevel);
+          System.out.println("Level 4: ");
+          helpers.Utils.printMapContent(fourthLevel);
+          this.openBisClient.triggerIngestionService("register-ivac-lvl", thirdLevel);
+          this.openBisClient.triggerIngestionService("register-ivac-lvl", fourthLevel);
+        }
+      }
+    }
+  }
 }

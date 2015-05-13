@@ -161,7 +161,7 @@ public class BarcodeView extends VerticalLayout implements View {
     resetButton.setEnabled(false);
     comparators = new OptionGroup("Sort Sheet by");
     comparators.addItems(SortBy.values());
-    comparators.setValue(SortBy.DESCRIPTION);
+    comparators.setValue(SortBy.ID);
 
     buttonLayoutSection.addComponent(comparators);
     buttonLayout.addComponent(sheetDownloadButton);
@@ -267,9 +267,21 @@ public class BarcodeView extends VerticalLayout implements View {
         if (type.equals("Q_TEST_SAMPLE")) {
           bioType = s.getProperties().get("Q_SAMPLE_TYPE");
         }
-        samples.add(new NewSampleModelBean(s.getCode(), s.getProperties().get("Q_SECONDARY_NAME"),
-            bioType));
-      }
+        if (type.equals("Q_NGS_MEASUREMENT")) {
+          bioType = s.getProperties().get("Q_SEQUENCING_TYPE");
+        }
+        String secName = s.getProperties().get("Q_SECONDARY_NAME");
+        
+        if(secName == null) {
+          samples.add(new NewSampleModelBean(s.getCode(), "",
+              bioType));
+        }
+        else {
+          samples.add(new NewSampleModelBean(s.getCode(), s.getProperties().get("Q_SECONDARY_NAME"),
+              bioType));
+         
+        }
+         }
     }
     return translateBeans(samples);
   }
@@ -433,9 +445,10 @@ public class BarcodeView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    // System.out.println("currentValue: " + currentValue);
+     System.out.println("currentValue: " + currentValue);
     // System.out.println("navigateToLabel: " + navigateToLabel);
     try {
+      System.out.println(openbis.loggedin());
       this.setContainerDataSource(getSummaryBeans(openbis, currentValue), currentValue);
     } catch (Exception e) {
       LOGGER.error("setting container datasource from bean failed", e.getStackTrace());
@@ -444,13 +457,16 @@ public class BarcodeView extends VerticalLayout implements View {
 
   private List<ExperimentBarcodeSummaryBean> getSummaryBeans(OpenBisClient openbis, String project) {
     List<String> barcodeExperiments =
-        new ArrayList<String>(Arrays.asList("Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION"));
+        new ArrayList<String>(Arrays.asList("Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION", "Q_NGS_MEASUREMENT"));
     List<ExperimentBarcodeSummaryBean> beans = new ArrayList<ExperimentBarcodeSummaryBean>();
+    System.out.println(openbis.getExperimentsOfProjectByIdentifier(project));
+    
     for (Experiment e : openbis.getExperimentsOfProjectByIdentifier(project)) {
       String type = e.getExperimentTypeCode();
       if (barcodeExperiments.contains(type)) {
         String expID = e.getIdentifier();
-        List<Sample> samples = openbis.getSamplesofExperiment(e.getCode());
+        List<Sample> samples = openbis.getSamplesofExperiment(e.getIdentifier());
+        System.out.println(openbis.getSamplesofExperiment(e.getIdentifier()));
         int numOfSamples = samples.size();
         List<String> ids = new ArrayList<String>();
         for (Sample s : samples) {
@@ -458,10 +474,18 @@ public class BarcodeView extends VerticalLayout implements View {
         }
         String bioType = "unknown";
         if (type.equals(barcodeExperiments.get(0))) {
+          System.out.println(samples.get(0).getCode());
+          System.out.println(samples.get(0).getProperties().get("Q_PRIMARY_TISSUE"));
           bioType = samples.get(0).getProperties().get("Q_PRIMARY_TISSUE");
         }
         if (type.equals(barcodeExperiments.get(1))) {
+          System.out.println(samples.get(0).getCode());
+          System.out.println(samples.get(0).getProperties().get("Q_SAMPLE_TYPE"));
           bioType = samples.get(0).getProperties().get("Q_SAMPLE_TYPE");
+        }
+        if (type.equals(barcodeExperiments.get(2))) {
+          System.out.println(samples.get(0).getCode());
+          bioType = e.getProperties().get("Q_SEQUENCING_TYPE");
         }
         beans.add(new ExperimentBarcodeSummaryBean(BarcodeFunctions.getBarcodeRange(ids), bioType,
             Integer.toString(numOfSamples), expID));

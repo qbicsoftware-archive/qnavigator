@@ -28,4 +28,23 @@ public class OpenBisFunctions {
     else
       return sample.substring(0, 5);
   }
+  
+  public static double statusToDoubleValue(String status) {
+    
+    double value = 0.0;
+    
+    switch (status) {
+      case "STARTED":
+          value = 0.25;
+          break;
+      case "RUNNING":
+        value = 0.5;
+        break;
+      case "FINISHED":
+        value = 1.0;
+        break;
+         
+  }
+    return value;
+  }
 }
