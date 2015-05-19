@@ -142,24 +142,24 @@ public class DatasetView extends VerticalLayout implements View {
     menubar.setHtmlContentAllowed(true);
     this.vert.addComponent(menubar);
 
-    menubar.addStyleName("qbicmainportlet");
+    menubar.addStyleName("user-menu");
     menubar.setWidth(100.0f, Unit.PERCENTAGE);
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setIcon(new ThemeResource("computer_test2.png"));
+    downloadProject.setIcon(new ThemeResource("computer_higher.png"));
     downloadProject.setEnabled(false);
 
     MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_test2.png"));
+    manage.setIcon(new ThemeResource("barcode_higher.png"));
     manage.setEnabled(false);
 
     // Another top-level item
     MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_test2.png"));
+    workflows.setIcon(new ThemeResource("dna_higher.png"));
     workflows.setEnabled(false);
 
     // Yet another top-level item
     MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    analyze.setIcon(new ThemeResource("graph_test2.png"));
+    analyze.setIcon(new ThemeResource("graph_higher.png"));
     analyze.setEnabled(false);
 
     VerticalLayout statistics = new VerticalLayout();

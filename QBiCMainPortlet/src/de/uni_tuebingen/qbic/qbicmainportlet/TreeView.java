@@ -56,7 +56,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     
     MenuBar menubar = new MenuBar();
     MenuItem pseudoItem = menubar.addItem("", null);
-    pseudoItem.setIcon(new ThemeResource("qbic_logo.png"));
+    //pseudoItem.setIcon(new ThemeResource("qbic_logo.png"));
     menubar.setWidth("100%");
     menubar.addStyleName("user-menu");
     vl.addComponent(menubar);

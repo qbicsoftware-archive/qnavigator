@@ -146,11 +146,11 @@ public class HomeView extends VerticalLayout implements View {
     //menubar.addStyleName("qbicmainportlet");
     //menubar.setWidth(100.0f, Unit.PERCENTAGE);
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setIcon(new ThemeResource("computer_test2.png"));
+    downloadProject.setIcon(new ThemeResource("computer_higher.png"));
     downloadProject.setEnabled(false);
     
     MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_test2.png"));
+    manage.setIcon(new ThemeResource("barcode_higher.png"));
     manage.setEnabled(false);
    
     // Another submenu item with a sub-submenu
@@ -158,12 +158,12 @@ public class HomeView extends VerticalLayout implements View {
 
     // Another top-level item
     MenuItem snacks = menubar.addItem("Run workflows", null, null);
-    snacks.setIcon(new ThemeResource("dna_test2.png"));
+    snacks.setIcon(new ThemeResource("dna_higher.png"));
     snacks.setEnabled(false);
             
     // Yet another top-level item
     MenuItem servs = menubar.addItem("Analyze your data", null, null);
-    servs.setIcon(new ThemeResource("graph_test2.png"));
+    servs.setIcon(new ThemeResource("graph_higher.png"));
     servs.addItem("Car Service", null, null);
     servs.setEnabled(false);
 
