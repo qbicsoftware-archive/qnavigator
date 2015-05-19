@@ -7,8 +7,10 @@ import java.util.Set;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import model.ExperimentBean;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
+import model.SampleBean;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -44,6 +46,7 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.ProgressBarRenderer;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class PatientView extends VerticalLayout implements View {
 
@@ -60,6 +63,8 @@ public class PatientView extends VerticalLayout implements View {
   private Label contact;
 
   private Label descContent;
+  
+  private Label patientInformation;
 
   private VerticalLayout status;
 
@@ -74,6 +79,8 @@ public class PatientView extends VerticalLayout implements View {
   private MenuBar menubar;
 
   private VerticalLayout membersSection;
+
+  private Label hlaTypeLabel;
 
   private static Logger LOGGER = new Log4j2Logger(ProjectView.class);
 
@@ -121,6 +128,7 @@ public class PatientView extends VerticalLayout implements View {
     patientViewContent.addComponent(initMenuBar());
     patientViewContent.addComponent(initProjectStatus());
     patientViewContent.addComponent(initDescription());
+    patientViewContent.addComponent(initHLALayout());
     patientViewContent.addComponent(initGraph());
 
     patientViewContent.setWidth("100%");
@@ -132,6 +140,7 @@ public class PatientView extends VerticalLayout implements View {
    */
   public void updateContent() {
     //updateContentMenuBar();
+    updateHLALayout();
     updateContentDescription();
     updateProjectStatus();
     updateContentGraph();
@@ -156,13 +165,21 @@ public class PatientView extends VerticalLayout implements View {
     // + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
     // + currentBean.getId() + "</a>");
     contact = new Label("", ContentMode.HTML);
+    
+    patientInformation = new Label("No patient information provided.", ContentMode.HTML);
+     
+    projDescriptionContent.addComponent(patientInformation);
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
     projDescriptionContent.setMargin(true);
-    projDescriptionContent.setCaption("Description");
+    projDescriptionContent.setCaption("General Information");
     projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
 
     projDescription.addComponent(projDescriptionContent);
+    
+    descContent.setStyleName("patientview");
+    contact.setStyleName("patientview");
+    patientInformation.setStyleName("patientview");
     
     membersSection = new VerticalLayout();
     Component membersContent = new VerticalLayout();
@@ -174,7 +191,7 @@ public class PatientView extends VerticalLayout implements View {
     projDescription.addComponent(membersSection);
     membersSection.setWidth("100%");
 
-    projDescription.setMargin(true);
+    projDescription.setMargin(new MarginInfo(false, true, false, true));
     projDescription.setWidth("100%");
     return projDescription;
   }
@@ -183,11 +200,41 @@ public class PatientView extends VerticalLayout implements View {
     contact
         .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
             + currentBean.getId()
-            + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
-            + currentBean.getId() + "</a>");
+            + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding patient "
+            + currentBean.getCode() + "</a>");
     String desc = currentBean.getDescription();
     if (!desc.isEmpty()) {
       descContent.setValue(desc);
+    }
+    String patientInfo = "";
+    Boolean available = false;
+    for (Iterator i = currentBean.getExperiments().getItemIds().iterator(); i.hasNext();) {
+      // Get the current item identifier, which is an integer.
+      ExperimentBean expBean = (ExperimentBean) i.next();
+      System.out.println(expBean.getType());
+
+      if (expBean.getType().equalsIgnoreCase(model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name())) {
+        for (Iterator ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
+          SampleBean sampBean = (SampleBean) ii.next();
+          System.out.println(sampBean.getType());
+          if (sampBean.getType().equals("Q_BIOLOGICAL_ENTITY")) {
+            if(sampBean.getProperties().get("Q_ADDITIONAL_INFO") != null) {
+              available = true;
+              String[] splitted = sampBean.getProperties().get("Q_ADDITIONAL_INFO").split(";");
+              for(String s: splitted) {
+                String[] splitted2 = s.split(":");
+                patientInfo += String.format("<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
+
+              }
+            }
+          }
+          }
+      }
+    }
+    
+    System.out.println(patientInfo);
+    if(available) {
+      patientInformation.setValue(patientInfo);
     }
     // TODO use space information to check whether members really have to be recalculated.
     // For users chances are high, that they click on a project from the same space -> no
@@ -200,6 +247,72 @@ public class PatientView extends VerticalLayout implements View {
     membersSection.removeAllComponents();
     membersSection.addComponent(membersContent);
     //membersSection.setMargin(true);
+  }
+  
+  /**
+   * initializes the hla type layout
+   * 
+   * @return
+   */
+  VerticalLayout initHLALayout() {
+    VerticalLayout hlaTyping = new VerticalLayout();
+    VerticalLayout hlaTypingContent = new VerticalLayout();
+
+    // String desc = currentBean.getDescription();
+    // if (!desc.isEmpty()) {
+    // descContent.setValue(desc);
+    // }
+    hlaTypeLabel = new Label("Not available.", ContentMode.HTML);
+    hlaTypeLabel.setStyleName("patientview");
+
+    hlaTypingContent.setMargin(true);
+    hlaTypingContent.setCaption("HLA Typing");
+    hlaTypingContent.setIcon(FontAwesome.BARCODE);
+    hlaTypingContent.addComponent(hlaTypeLabel);
+    
+    hlaTyping.addComponent(hlaTypingContent);
+
+    hlaTyping.setMargin(new MarginInfo(false, true, false, true));
+    hlaTyping.setWidth("100%");
+    return hlaTyping;
+  }
+
+  void updateHLALayout() {
+
+    String labelContent = "<head> <title></title> </head> <body> ";
+
+    Boolean available = false;
+
+    for (Iterator i = currentBean.getExperiments().getItemIds().iterator(); i.hasNext();) {
+      // Get the current item identifier, which is an integer.
+      ExperimentBean expBean = (ExperimentBean) i.next();
+
+      if (expBean.getType().equalsIgnoreCase(model.ExperimentType.Q_NGS_HLATYPING.name())) {
+        for (Iterator ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
+          SampleBean sampBean = (SampleBean) ii.next();
+          if (sampBean.getType().equalsIgnoreCase(model.ExperimentType.Q_NGS_HLATYPING.name())) {
+            available = true;
+            String classString = sampBean.getProperties().get("Q_HLA_CLASS");
+            String[] splitted = classString.split("_");
+            String lastOne = splitted[splitted.length-1];
+            String addInformation = "";
+            
+            if (!(sampBean.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
+              addInformation = sampBean.getProperties().get("Q_ADDITIONAL_INFO");
+            }
+            
+            labelContent += String.format("MHC Class %s "
+                    + "<p><u>Patient</u>: %s </p> "
+                    + "<p>%s </p> ",lastOne, sampBean.getProperties().get("Q_HLA_TYPING"),addInformation);
+
+          }
+        }
+      }
+    }
+    labelContent += "</body>";
+    if (available) {
+      hlaTypeLabel.setValue(labelContent);
+    }
   }
 
   /**
@@ -301,7 +414,6 @@ public class PatientView extends VerticalLayout implements View {
     status.removeAllComponents();
     status.setWidth(100.0f, Unit.PERCENTAGE);
 
-    experiments.setSizeFull();
     
  // Generate button caption column
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(experimentBeans);
@@ -340,6 +452,7 @@ public class PatientView extends VerticalLayout implements View {
     experiments.setHeaderVisible(false);
     experiments.setHeightMode(HeightMode.ROW);
     experiments.setHeightByRows(5.0);
+    experiments.setWidth("100%");
     
     experiments.getColumn("status").setRenderer(new ProgressBarRenderer());
     experiments.setColumnOrder("started", "description","status","download", "runWorkflow");
@@ -459,7 +572,7 @@ public class PatientView extends VerticalLayout implements View {
     graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
 
     graphSectionContent.setMargin(true);
-    graphSection.setMargin(true);
+    graphSection.setMargin(new MarginInfo(false, true, false, true));
     graphSection.setWidth("100%");
     graphSectionContent.setWidth("100%");
     graphSection.addComponent(graphSectionContent);

@@ -1,7 +1,10 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import model.NewIvacSampleBean;
 
@@ -13,12 +16,15 @@ import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
@@ -27,6 +33,7 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -47,9 +54,15 @@ public class AddPatientView extends VerticalLayout implements View {
   private VerticalLayout buttonLayoutSection;
   
   private ComboBox projects = new ComboBox();
+  private ComboBox typingMethod = new ComboBox("Typing Method");
   private TextField numberOfPatients = new TextField();
   private TextField secondaryNames = new TextField();
   private TextField description = new TextField();
+  private CheckBox registerHLAI = new CheckBox("MHC Class I");
+  private CheckBox registerHLAII = new CheckBox("MHC Class II");
+  
+  private TextArea hlaItypes = new TextArea();
+  private TextArea hlaIItypes = new TextArea();
 
   private MenuBar menubar;
   
@@ -92,6 +105,8 @@ public class AddPatientView extends VerticalLayout implements View {
     
     addPatientViewContent.addComponent(initExperimentalSetupLayout());
     addPatientViewContent.addComponent(initOptionLayout());
+    
+    addPatientViewContent.addComponent(hlaTypingLayout());
 
     addPatientViewContent.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.6f, Unit.PIXELS);
     addPatientViewContent.setMargin(true);
@@ -119,7 +134,7 @@ public class AddPatientView extends VerticalLayout implements View {
       }
     );
     
-    optionLayout.setMargin(new MarginInfo(true,false, true, true));
+    optionLayout.setMargin(new MarginInfo(true,false, false, true));
     optionLayout.setHeight(null);
     optionLayout.setWidth("100%");
     optionLayout.setSpacing(true);
@@ -264,7 +279,16 @@ public class AddPatientView extends VerticalLayout implements View {
     
     projDescriptionContent.addComponent(projectInfo);
     projDescriptionContent.addComponent(projects);
-    projects.addItems(datahandler.openBisClient.listSpaces());
+    
+    List visibleSpaces = new ArrayList<String>();
+    
+    for(String spaceCode: datahandler.openBisClient.listSpaces()) {
+      if(spaceCode.startsWith("IVAC")) {
+        visibleSpaces.add(spaceCode);
+      }
+    }
+    
+    projects.addItems(visibleSpaces);
     projects.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
     
     projDescriptionContent.addComponent(numberInfo);
@@ -282,7 +306,7 @@ public class AddPatientView extends VerticalLayout implements View {
     numberOfPatients.setConverter(new StringToIntegerConverter());
     secondaryNames.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
 
-    projDescriptionContent.setCaption("Experimental Design");
+    projDescriptionContent.setCaption("Patient Registration");
     projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
 
     projDescription.addComponent(projDescriptionContent);
@@ -290,12 +314,80 @@ public class AddPatientView extends VerticalLayout implements View {
     return projDescription;
   }
   
+  /**
+   * initializes the hla typing registration layout
+   * 
+   * @return
+   */
+  VerticalLayout hlaTypingLayout() {
+    
+    VerticalLayout hlaTypingSection = new VerticalLayout();
+    hlaTypingSection.setWidth("100%");
+    
+    VerticalLayout typingLayout = new VerticalLayout();
+    
+    typingLayout.setMargin(new MarginInfo(true,false, true, true));
+    typingLayout.setHeight(null);
+    typingLayout.setWidth("100%");
+    typingLayout.setSpacing(true);
+    
+    Label hlaInfo = new Label("Register available HLA typing for this patient (one allele per line)");
+    hlaInfo.setStyleName("info");
+    hlaInfo.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
+    
+    typingLayout.addComponent(hlaInfo);
+
+    HorizontalLayout hlalayout = new HorizontalLayout();
+    hlalayout.addComponent(registerHLAI);
+    hlalayout.addComponent(hlaItypes);
+    hlalayout.addComponent(registerHLAII);
+    hlalayout.addComponent(hlaIItypes);
+    hlalayout.setSpacing(true);
+    
+    typingMethod.addItems(datahandler.openBisClient.getVocabCodesForVocab("Q_HLA_TYPING_METHODS"));
+    typingLayout.addComponent(typingMethod);
+    typingLayout.addComponent(hlalayout);
+
+    hlaTypingSection.addComponent(typingLayout);
+    
+    return hlaTypingSection;
+    
+  }
+  
   public void callPatientRegistration() {
     List<String> secondaryIDs = Arrays.asList(secondaryNames.getValue().split("\\s*,\\s*"));
+    Map<String, List<String>> hlaTyping = new HashMap<String,List<String>>();
+    
+    List<String> hlaTypingI = new ArrayList<String>();
+    List<String> hlaTypingII = new ArrayList<String>();
+    
+    if(registerHLAI.getValue()) {
+      hlaTypingI.add(hlaItypes.getValue());
+      hlaTypingI.add(typingMethod.getValue().toString());
+      hlaTyping.put("MHC_CLASS_I", hlaTypingI);
+    }
+    
+    if(registerHLAII.getValue()) {
+      hlaTypingII.add(hlaIItypes.getValue());
+      hlaTypingII.add(typingMethod.getValue().toString());
+      hlaTyping.put("MHC_CLASS_II", hlaTypingII);
+    }
+    
     Integer numberPatients = Integer.parseInt(numberOfPatients.getValue());
     
+ // Notification with default settings for a warning
+    Notification sucess = new Notification("Patients successfully registered.", Type.TRAY_NOTIFICATION);
+
+    // Customize it
+    sucess.setDelayMsec(20000);
+    sucess.setStyleName(ValoTheme.NOTIFICATION_SUCCESS);
+    sucess.setPosition(Position.TOP_CENTER);
+    sucess.setIcon(FontAwesome.CHECK);
+                   
+    
     if(numberPatients.equals(secondaryIDs.size())) {
-      datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects.getValue().toString(), description.getValue());
+      datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects.getValue().toString(), description.getValue(), hlaTyping);
+      sucess.show(Page.getCurrent());
     }
     else {
       Notification.show("Registration failed. Number of Patients and secondary IDs has to be the same.", Type.ERROR_MESSAGE);

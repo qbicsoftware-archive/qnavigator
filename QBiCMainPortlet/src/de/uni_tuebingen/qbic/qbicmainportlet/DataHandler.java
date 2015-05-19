@@ -1497,13 +1497,14 @@ public class DataHandler implements Serializable{
     BeanItemContainer<ExperimentBean> cont = projectBean.getExperiments();
     
     //TODO set download link and workflow triggering
+    //TODO add immune monitoring, report generation, vaccine design
     
     ExperimentStatusBean barcode = new ExperimentStatusBean();
     barcode.setDescription("Barcode Generation");
     barcode.setStatus(1.0);
     
     ExperimentStatusBean ngsMeasure = new ExperimentStatusBean();
-    ngsMeasure.setDescription("NGS Sequncing");
+    ngsMeasure.setDescription("NGS Sequencing");
     ngsMeasure.setStatus(0.0);
  
     ExperimentStatusBean ngsCall = new ExperimentStatusBean();
@@ -1527,7 +1528,7 @@ public class DataHandler implements Serializable{
       if (type.equalsIgnoreCase(ExperimentType.Q_NGS_VARIANT_CALLING.name())) {
         ngsCall.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties().get("Q_CURRENT_STATUS").toString()));
       }
-      if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_HLATYPING.name())) {
+      if (type.equalsIgnoreCase(ExperimentType.Q_NGS_HLATYPING.name())) {
         hlaType.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties().get("Q_CURRENT_STATUS").toString()));
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_EPITOPE_PREDICTION.name())) {
@@ -1619,7 +1620,7 @@ public class DataHandler implements Serializable{
   }
   
   public void registerNewPatients(int numberPatients, List<String> secondaryNames,
-      BeanItemContainer<NewIvacSampleBean> samplesToRegister, String space, String description) {
+      BeanItemContainer<NewIvacSampleBean> samplesToRegister, String space, String description, Map<String,List<String>> hlaTyping) {
 
     // get prefix code for projects for corresponding space
     String projectPrefix = model.spaceToProjectPrefixMap.myMap.get(space);
@@ -1693,6 +1694,18 @@ public class DataHandler implements Serializable{
 
       helpers.Utils.printMapContent(firstLevel);
       
+      Map<String, Object> fithLevel = new HashMap<String, Object>();
+
+      List<String> newHLATypingIDs = new ArrayList<String>();
+      List<String> newHLATypingSampleIDs = new ArrayList<String>();
+      List<String> hlaClasses = new ArrayList<String>();
+      List<String> typings = new ArrayList<String>();
+      List<String> typingMethods = new ArrayList<String>();
+      
+      //TODO choose parent sample for hlaTyping
+      String parentHLA = "";
+
+      
       for (Iterator iter = samplesToRegister.getItemIds().iterator(); iter.hasNext();) {
 
         NewIvacSampleBean sampleBean = (NewIvacSampleBean) iter.next();
@@ -1730,13 +1743,14 @@ public class DataHandler implements Serializable{
               "/" + space + "/" + newBiologicalSampleCode
               + helpers.BarcodeFunctions.checksum(newBiologicalSampleCode);
           
+          parentHLA = newBiologicalSampleID;
+          
           newBiologicalSampleIDs.add(newBiologicalSampleID);
           System.out.println(numberOfRegisteredSamples);
           numberOfRegisteredSamples += 1;
 
           primaryTissues.add(sampleBean.getTissue());
           detailedTissue.add(sampleBean.getType());
-          sequencerDevice.add(sampleBean.getSeqDevice());
           
           // register second level of new patient
           secondLevel.put("lvl", "2");
@@ -1785,6 +1799,7 @@ public class DataHandler implements Serializable{
             numberOfRegisteredSamples += 1;
 
             additionalInfo.add(false);
+            sequencerDevice.add(sampleBean.getSeqDevice());
             parents.add(newTestSampleID);
 
           }
@@ -1822,6 +1837,7 @@ public class DataHandler implements Serializable{
             numberOfRegisteredSamples += 1;
 
             additionalInfo.add(false);
+            sequencerDevice.add(sampleBean.getSeqDevice());
             parents.add(newTestSampleID);
           }
 
@@ -1858,6 +1874,7 @@ public class DataHandler implements Serializable{
             numberOfRegisteredSamples += 1;
 
             additionalInfo.add(true);
+            sequencerDevice.add(sampleBean.getSeqDevice());
             parents.add(newTestSampleID);
           }
 
@@ -1877,6 +1894,8 @@ public class DataHandler implements Serializable{
           fourthLevel.put("info", additionalInfo);
           fourthLevel.put("device", sequencerDevice);
           fourthLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
+          
+          //TODO additional level for HLA typing
 
           // call of ingestion services for differeny levels
           System.out.println("Level 3: ");
@@ -1887,6 +1906,44 @@ public class DataHandler implements Serializable{
           this.openBisClient.triggerIngestionService("register-ivac-lvl", fourthLevel);
         }
       }
+      
+      for (Map.Entry<String, List<String>> entry : hlaTyping.entrySet()) {
+        
+        String newHLATyping =
+            newProjectCode + "E"
+                + numberOfRegisteredExperiments;
+        
+        newHLATypingIDs.add("/" + space + "/" + newProjectCode + "/"
+            + newHLATyping);
+        
+        numberOfRegisteredExperiments += 1;
+
+        String newHLATypingSampleCode =
+            newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "H";
+        
+        String newHLATypingSampleID =
+            "/" + space + "/" + newHLATypingSampleCode
+            + helpers.BarcodeFunctions.checksum(newHLATypingSampleCode);
+        
+        newHLATypingSampleIDs.add(newHLATypingSampleID);
+        System.out.println(numberOfRegisteredSamples);
+        numberOfRegisteredSamples += 1;
+        
+        hlaClasses.add(entry.getKey());
+        typings.add(entry.getValue().get(0));
+        typingMethods.add(entry.getValue().get(1));
+      }
+      
+      fithLevel.put("lvl", "5");
+      fithLevel.put("experiments", newHLATypingIDs);
+      fithLevel.put("samples", newHLATypingSampleIDs);
+      fithLevel.put("typings", typings);
+      fithLevel.put("classes", hlaClasses);
+      fithLevel.put("methods", typingMethods);
+      fithLevel.put("parent", parentHLA);
+      
+      this.openBisClient.triggerIngestionService("register-ivac-lvl", fithLevel);
+
     }
   }
 }
