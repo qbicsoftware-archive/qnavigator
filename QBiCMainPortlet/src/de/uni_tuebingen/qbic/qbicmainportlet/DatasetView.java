@@ -216,8 +216,20 @@ public class DatasetView extends VerticalLayout implements View {
       }
     });
 
+    Button uncheckAll = new Button("Unselect all datasets");
+    uncheckAll.addClickListener(new ClickListener() {
+     
+      @Override
+      public void buttonClick(ClickEvent event) {
+        for(Object itemId: table.getItemIds()){
+          ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
+          .setValue(false);
+        }
+      }   
+    }); 
+    
     buttonLayout.addComponent(checkAll);
-
+    buttonLayout.addComponent(uncheckAll);
     /**
      * prepare download.
      */
@@ -259,11 +271,17 @@ public class DatasetView extends VerticalLayout implements View {
         Object next = iterator.next();
         String datasetType =
             (String) table.getItem(next).getItemProperty("Dataset Type").getValue();
+        String fileName =
+            (String) table.getItem(next).getItemProperty("File Name").getValue();
         // TODO: No hardcoding!!
-        if (datasetType.equals("FASTQC") || datasetType.equals("QCML") || datasetType.equals("BAM")
-            || datasetType.equals("VCF")) {
+        //if (datasetType.equals("FASTQC") || datasetType.equals("QCML") || datasetType.equals("BAM")
+        //|| datasetType.equals("VCF")) {
+        if(datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS") && (fileName.endsWith(".html")|| fileName.endsWith(".qcML"))){
           visualize.setEnabled(true);
-        } else {
+        } else if(datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS") && (fileName.endsWith(".err")|| fileName.endsWith(".out"))){
+          visualize.setEnabled(true);
+        }
+         else {
           visualize.setEnabled(false);
         }
       }
@@ -332,7 +350,14 @@ public class DatasetView extends VerticalLayout implements View {
             (String) table.getItem(next).getItemProperty("File Name").getValue();
         URL url;
         try {
-          url = datahandler.openBisClient.getUrlForDataset(datasetCode, datasetFileName);
+          Object parent = table.getParent(next);
+          if(parent != null){
+            String parentDatasetFileName = (String) table.getItem(parent).getItemProperty("File Name").getValue();
+            url = datahandler.openBisClient.getUrlForDataset(datasetCode, parentDatasetFileName + "/"+ datasetFileName);
+          }else {
+            url = datahandler.openBisClient.getUrlForDataset(datasetCode, datasetFileName);
+          }
+          
           Window subWindow =
               new Window("QC of Sample: "
                   + (String) table.getItem(next).getItemProperty("Sample").getValue());
@@ -346,12 +371,23 @@ public class DatasetView extends VerticalLayout implements View {
               (String) table.getItem(next).getItemProperty("Dataset Type").getValue();
           final RequestHandler rh = new ProxyForGenomeViewerRestApi();
           boolean rhAttached = false;
-          if (datasetType.equals("QCML")) {
+          if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS") && datasetFileName.endsWith(".qcML")) {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-            StreamResource streamres = new StreamResource(re, "test-file");
+            StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("application/xml");
             res = streamres;
-          } else if (datasetType.equals("FASTQC")) {
+          } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS") && datasetFileName.endsWith(".html")) {
+            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+            StreamResource streamres = new StreamResource(re, datasetFileName);
+            streamres.setMIMEType("text/html");
+            res = streamres;
+          }  else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS") && (datasetFileName.endsWith(".err")|| datasetFileName.endsWith(".out"))) {
+            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+            StreamResource streamres = new StreamResource(re, datasetFileName);
+            streamres.setMIMEType("text/plain");
+            res = streamres;
+          } 
+          else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath = (String) table.getItem(next).getItemProperty("dl_link").getValue();
@@ -381,7 +417,7 @@ public class DatasetView extends VerticalLayout implements View {
                             "http://localhost:7778/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
                             host, title, fileId, filePath));
           }
-          LOGGER.debug(res.toString());
+          LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
           BrowserFrame frame = new BrowserFrame("", res);
           if (rhAttached) {
             frame.addDetachListener(new DetachListener() {

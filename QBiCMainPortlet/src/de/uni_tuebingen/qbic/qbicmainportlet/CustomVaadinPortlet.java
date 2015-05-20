@@ -42,7 +42,7 @@ import com.vaadin.server.VaadinRequest;
  */
 public class CustomVaadinPortlet extends VaadinPortlet {
   private static final long serialVersionUID = -13615405654173335L;
-
+  
   private class CustomVaadinPortletService extends VaadinPortletService {
     /**
      *
@@ -112,6 +112,14 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     DataHandler dataHandler =
         (DataHandler) request.getPortletSession().getAttribute("datahandler",
             PortletSession.APPLICATION_SCOPE);
+    String liferayUserId = request.getRemoteUser();
+    LOGGER.info("User is downloading: " + liferayUserId );
+    //String attribute = null;
+    /*if(liferayUserId != null && !liferayUserId.isEmpty()){
+      attribute = liferayUserId + "_qbic_download";
+    }else{
+      attribute = "qbic_download";
+    }*/
     Object bean =
         (Object) request.getPortletSession().getAttribute("qbic_download",
             PortletSession.APPLICATION_SCOPE);
