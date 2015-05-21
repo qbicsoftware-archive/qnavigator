@@ -7,8 +7,12 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.ProgressBar;
 
 
-public class SpaceBean implements Serializable{
+public class SpaceBean implements Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 5127186974184020095L;
   private String id;
   private String description;
   private Boolean containsData;
@@ -19,10 +23,13 @@ public class SpaceBean implements Serializable{
   // TODO bean ?
   private List<String> members;
   private ProgressBar progress;
+
   // TODO statistics ? LastChanged?
-  
-  public SpaceBean(String id, String description, Boolean containsData, BeanItemContainer<ProjectBean> projects,
-      BeanItemContainer<ExperimentBean> experiments, BeanItemContainer<SampleBean> samples, BeanItemContainer<DatasetBean> datasets, List<String> members, ProgressBar progress) {
+
+  public SpaceBean(String id, String description, Boolean containsData,
+      BeanItemContainer<ProjectBean> projects, BeanItemContainer<ExperimentBean> experiments,
+      BeanItemContainer<SampleBean> samples, BeanItemContainer<DatasetBean> datasets,
+      List<String> members, ProgressBar progress) {
     super();
     this.id = id;
     this.description = description;
@@ -34,10 +41,8 @@ public class SpaceBean implements Serializable{
     this.setMembers(members);
     this.setProgress(progress);
   }
-  
-  public SpaceBean()
-  {
-    }
+
+  public SpaceBean() {}
 
   public String getId() {
     return id;
@@ -140,5 +145,5 @@ public class SpaceBean implements Serializable{
   public void setProgress(ProgressBar progress) {
     this.progress = progress;
   }
- 
+
 }

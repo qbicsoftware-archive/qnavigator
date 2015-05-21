@@ -48,21 +48,26 @@ public class HomeView extends VerticalLayout implements View {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
     this.currentBean = datasource;
-    this.setContainerDataSource(datasource, caption);
     this.datahandler = datahandler;
     this.includePatientCreation = patientCreation;
     
-    this.tableClickChangeTreeView();
+    if(datasource.getProjects() != null  && datasource.getProjects().size() > 0){
+      this.setContainerDataSource(datasource, caption);
+      this.tableClickChangeTreeView();
+    }
+
   }
 
   public HomeView(DataHandler datahandler, FilterTable table, SpaceBean datasource, String caption) {
     homeview_content = new VerticalLayout();
     this.table = table;
     this.currentBean = datasource;
-    this.setContainerDataSource(datasource, caption);
     this.datahandler = datahandler;
     
-    this.tableClickChangeTreeView();
+    if(datasource.getProjects() != null  && datasource.getProjects().size() > 0){
+      this.setContainerDataSource(datasource, caption);
+      this.tableClickChangeTreeView();
+    }
   }
 
   /**
@@ -70,7 +75,7 @@ public class HomeView extends VerticalLayout implements View {
    */
   public HomeView(DataHandler datahandler) {
     //this(new FilterTable(), new SpaceInformation(),
-    this(datahandler, new FilterTable(), new SpaceBean(),"You seem to have no registered projects. Please contact QBiC.");
+    this(datahandler, new SpaceBean(),"You seem to have no registered projects. Please contact QBiC.", false);
   }
 
   public void setSizeFull() {
@@ -103,19 +108,19 @@ public class HomeView extends VerticalLayout implements View {
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayoutSection.addComponent(buttonLayout);
-
-    this.export = new Button("Export as TSV");
-    buttonLayout.addComponent(this.export);
     
-    StreamResource sr = Utils.getTSVStream(Utils.containerToString(spaceBean.getProjects()), this.caption);
-    FileDownloader fileDownloader = new FileDownloader(sr);
-    fileDownloader.extend(this.export);
+      this.export = new Button("Export as TSV");
+      buttonLayout.addComponent(this.export);
       
-    this.table.setContainerDataSource(spaceBean.getProjects());
-    this.table.setVisibleColumns(new Object[]{"code", "description", "containsData"});
-    this.table.setColumnHeader("code", "Name");
-    this.table.setColumnHeader("description", "Description");
-    this.table.setColumnHeader("containsData", "Contains Datasets");
+      StreamResource sr = Utils.getTSVStream(Utils.containerToString(spaceBean.getProjects()), this.caption);
+      FileDownloader fileDownloader = new FileDownloader(sr);
+      fileDownloader.extend(this.export);
+      this.table.setContainerDataSource(spaceBean.getProjects());
+      this.table.setVisibleColumns(new Object[]{"code", "description", "containsData"});
+      this.table.setColumnHeader("code", "Name");
+      this.table.setColumnHeader("description", "Description");
+      this.table.setColumnHeader("containsData", "Contains Datasets");
+
   }
 
 

@@ -70,23 +70,25 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 public class QbicmainportletUI extends UI {
 
   @WebServlet(value = "/*", asyncSupported = true)
-  @VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class, widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")//,
-     // widgetset = "com.example.workflowmockup.widgetset.WorkflowmockupWidgetset")
+  @VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class,
+      widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
+  // ,
+  // widgetset = "com.example.workflowmockup.widgetset.WorkflowmockupWidgetset")
   public static class Servlet extends VaadinServlet {
   }
-  
-  
+
+
   private OpenBisClient openBisConnection;
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "474";
+  private String revision = "476";
   private String resUrl;
 
   @Override
   protected void init(VaadinRequest request) {
-    if (LiferayAndVaadinUtils.getUser() == null) {      
+    if (LiferayAndVaadinUtils.getUser() == null) {
       buildNotLoggedinLayout();
     } else {
       manager = ConfigurationManagerFactory.getInstance();
@@ -316,8 +318,8 @@ public class QbicmainportletUI extends UI {
       for (SpaceWithProjectsAndRoleAssignments s : spaceList) {
         if (s.getUsers().contains(userName)) {
           String spaceName = s.getCode();
-          
-          if(!patientCreation & spaceName.contains("IVAC")) {
+
+          if (!patientCreation & spaceName.contains("IVAC")) {
             patientCreation = true;
           }
 
@@ -461,7 +463,7 @@ public class QbicmainportletUI extends UI {
       homeSpaceBean.setExperiments(allExperimentsContainer);
       homeSpaceBean.setSamples(allSamplesContainer);
       homeSpaceBean.setDatasets(allDatasetsContainer);
-      
+
       final Boolean includePatientCreation = patientCreation;
 
       long endTime = System.nanoTime();
@@ -486,9 +488,11 @@ public class QbicmainportletUI extends UI {
 
           // QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
           System.out.println(spaceContainer.size());
-          //TODO include iVac functionality when tested
-          //QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, includePatientCreation, request);
-          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, false, request);
+          // TODO include iVac functionality when tested
+          // QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean,
+          // includePatientCreation, request);
+          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, false,
+              request);
         }
       });
     }
@@ -531,45 +535,11 @@ public class QbicmainportletUI extends UI {
   // public void buildMainLayout(HierarchicalContainer tc, SpaceInformation homeViewInformation) {
   public void buildMainLayout(DataHandler datahandler, HierarchicalContainer tc,
       SpaceBean homeSpaceBean, Boolean patientCreation, VaadinRequest request) {
-    // HierarchicalContainer tc = new HierarchicalContainer();
-    // System.out.println("Filling HierarchicalTreeContainer and preparing HomeView..");
-    // long startTime = System.nanoTime();
 
-
-
-    // DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-    // User user = LiferayAndVaadinUtils.getUser();
-    // SpaceInformation homeViewInformation = dh.initTreeAndHomeInfo(tc, user.getScreenName());
-
-    // long endTime = System.nanoTime();
-    // System.out.println("Took "+((endTime - startTime)/ 1000000000.0) + " s");
-
-    // System.out.println("User " +user.getScreenName() + " has " +
-    // homeViewInformation.numberOfProjects + " projects.");
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
-    // TODO getContainsData is always false!! Should be set correctly
-    // if(projectBean.getContainsData()){
-    // downloadProject.setEnabled(false);
-    // }
 
-    // LevelView spaceView = new LevelView(new SpaceView());
-    // LevelView addspaceView =
-    // new LevelView(
-    // new Button(
-    // "I am doing nothing. But you will be able to add workspaces some day in the \"early\" future."));//
-    // new
-    // AddSpaceView(new
-    // Table(),
-    // spaces));
-    final HomeView homeView;
-
-    // if (homeViewInformation.numberOfProjects > 0) {
-    if (homeSpaceBean.getProjects().size() > 0) {
-      // homeView = new HomeView(homeViewInformation, "Your Projects");
-      homeView = new HomeView(datahandler, homeSpaceBean, "Your Projects", patientCreation);
-    } else {
-      homeView = new HomeView(datahandler);
-    }
+    final HomeView homeView =
+        new HomeView(datahandler, homeSpaceBean, "Your Projects", patientCreation);
     LevelView maxQuantWorkflowView = new LevelView(new Button("maxQuantWorkflowView"));
     QcMlWorkflowView qcmlView = new QcMlWorkflowView();
     state.addObserver(qcmlView);
@@ -577,22 +547,21 @@ public class QbicmainportletUI extends UI {
     LevelView testRunWorkflowView = new LevelView(new Button("testRunWorkflowView"));
     LevelView searchView = new LevelView(new SearchForUsers());
     DatasetView datasetView = new DatasetView(datahandler);
-    final SampleView sampleView = new SampleView(datahandler,state, resUrl);
+    final SampleView sampleView = new SampleView(datahandler, state, resUrl);
     final ProjectView projectView = new ProjectView(datahandler, state, resUrl);
     BarcodeView barcodeView =
         new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
             manager.getPathVariable());
-    final ExperimentView experimentView = new ExperimentView(datahandler,state, resUrl);
+    final ExperimentView experimentView = new ExperimentView(datahandler, state, resUrl);
     ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
-    
+
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
     final PatientView patientView = new PatientView(datahandler, state, resUrl);
 
     VerticalLayout navigatorContent = new VerticalLayout();
 
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
-    // navigator.addView("space", spaceView);
-    // navigator.addView("addspaceView", addspaceView);
+
     navigator.addView(DatasetView.navigateToLabel, datasetView);
     navigator.addView(SampleView.navigateToLabel, sampleView);
     navigator.addView("", homeView);
@@ -601,15 +570,15 @@ public class QbicmainportletUI extends UI {
     navigator.addView(BarcodeView.navigateToLabel, barcodeView);
     navigator.addView(ExperimentView.navigateToLabel, experimentView);
     navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
-    
+
     navigator.addView(PatientView.navigateTolabel, patientView);
     navigator.addView(AddPatientView.navigateTolabel, addPatientView);
-    
+
     navigator.addView("maxQuantWorkflow", maxQuantWorkflowView);
     navigator.addView("qcMlWorkflow", qcMlWorkflowView);
     navigator.addView("testRunWorkflow", testRunWorkflowView);
     navigator.addView("searchView", searchView);
-    
+
 
     setNavigator(navigator);
 
@@ -642,7 +611,7 @@ public class QbicmainportletUI extends UI {
           homeView.rebuildLayout(height, width, browser);
         } else if (currentView instanceof ProjectView) {
           projectView.updateView(height, width, browser);
-        } else if(currentView instanceof ExperimentView){
+        } else if (currentView instanceof ExperimentView) {
           experimentView.updateView(height, width, browser);
         }
       }
@@ -660,9 +629,9 @@ public class QbicmainportletUI extends UI {
         int height = getPage().getBrowserWindowHeight();
         int width = getPage().getBrowserWindowWidth();
         WebBrowser browser = getPage().getWebBrowser();
-        
+
         currentView = event.getNewView();
-        if(currentView instanceof HomeView){
+        if (currentView instanceof HomeView) {
           homeView.rebuildLayout(height, width, browser);
         }
         if (currentView instanceof ProjectView) {
@@ -683,40 +652,38 @@ public class QbicmainportletUI extends UI {
         Object currentBean = null;
         if (currentView instanceof ProjectView) {
           currentBean = projectView.getCurrentBean();
-        }
-        else if (currentView instanceof ExperimentView) {
+        } else if (currentView instanceof ExperimentView) {
           currentBean = experimentView.getCurrentBean();
-        }
-        else if(currentView instanceof SampleView){
+        } else if (currentView instanceof SampleView) {
           currentBean = sampleView.getCurrentBean();
-        }
-        else if(currentView instanceof DatasetView){
+        } else if (currentView instanceof DatasetView) {
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
         }
-        try{
+        try {
           PortletSession portletSession = QbicmainportletUI.getCurrent().getPortletSession();
-          if( portletSession != null){
-            portletSession.setAttribute("qbic_download", currentBean, PortletSession.APPLICATION_SCOPE);
+          if (portletSession != null) {
+            portletSession.setAttribute("qbic_download", currentBean,
+                PortletSession.APPLICATION_SCOPE);
           }
-        }catch(NullPointerException e){
-          //nothing to do. during initialization that might happen. Nothing to worry about
+        } catch (NullPointerException e) {
+          // nothing to do. during initialization that might happen. Nothing to worry about
         }
 
-        
+
       }
 
     });
-    
+
     String requestParams = Page.getCurrent().getUriFragment();
-    
+
     LOGGER.info("used urifragement: " + requestParams);
-    if(requestParams != null){
-      navigator.navigateTo(requestParams.startsWith("!")?requestParams.substring(1):requestParams);
-    }
-    else {
+    if (requestParams != null) {
+      navigator.navigateTo(requestParams.startsWith("!") ? requestParams.substring(1)
+          : requestParams);
+    } else {
       navigator.navigateTo("");
     }
-    
+
   }
 
   public PortletSession getPortletSession() {
