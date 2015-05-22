@@ -4,7 +4,7 @@
   
         <description>Portlet for navigating QBiC Projects</description>
         <portlet-name>QbicmainportletApplicationPortlet</portlet-name>
-        <display-name>QBiCMainPortlet</display-name>
+        <display-name>QNavigator</display-name>
 
         <portlet-class>de.uni_tuebingen.qbic.qbicmainportlet.CustomVaadinPortlet</portlet-class>
        <!--<portlet-class>com.vaadin.server.VaadinPortlet</portlet-class> -->
@@ -26,8 +26,8 @@
         
         <!-- Not always required but Liferay uses these. -->
         <portlet-info>
-            <title>QBiCMainPortlet</title>
-            <short-title>QBiCMainPortlet</short-title>
+            <title>QNavigator</title>
+            <short-title>QNavigator</short-title>
         </portlet-info>
 
 </portlet>
