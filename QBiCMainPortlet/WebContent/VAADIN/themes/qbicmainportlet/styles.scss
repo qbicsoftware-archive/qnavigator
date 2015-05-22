@@ -6,6 +6,18 @@
 .qbicmainportlet {
   @include addons;
   @include qbicmainportlet;
+ 
+ /*Mouse hover events on table rows show different color and change the cursor to point. That way it should be more clear, that table rows can be clicked.*/
+ .v-table-row:hover {
+    background-color: #2ECCFA;
+    cursor: pointer;
+  }
+  .v-table-row-odd:hover {
+      background-color: #2ECCFA;
+      cursor: pointer;
+    }
+ 
+ 
   
  .toolbar .v-button {
       display: block;
