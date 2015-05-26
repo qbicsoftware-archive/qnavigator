@@ -83,7 +83,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "481";
+  private String revision = "482";
   private String resUrl;
 
   @Override
@@ -629,6 +629,7 @@ public class QbicmainportletUI extends UI {
         WebBrowser browser = getPage().getWebBrowser();
         View oldView = event.getOldView();
         this.setEnabled(oldView, false);
+        
         currentView = event.getNewView();
         if (currentView instanceof HomeView) {
           homeView.rebuildLayout(height, width, browser);
@@ -646,22 +647,18 @@ public class QbicmainportletUI extends UI {
       }
 
       private void setEnabled(View view, boolean enabled) {
-        LOGGER.debug("enableing view:" + enabled);
         tv.setEnabled(enabled);
         if (view instanceof HomeView) {
           homeView.setEnabled(enabled);
-          LOGGER.debug("homeview");
         }
         if (view instanceof ProjectView) {
           projectView.setEnabled(enabled);
-          LOGGER.debug("projectview " + projectView.getId());
         }
         if (view instanceof ExperimentView) {
           experimentView.setEnabled(enabled);
-          LOGGER.debug("experimentview "+ experimentView.getId());
         }
         if (view instanceof SampleView) {
-          sampleView.setEnabled(enabled);LOGGER.debug("sampleview "+ sampleView.getId());
+          sampleView.setEnabled(enabled);
         }
       }
 

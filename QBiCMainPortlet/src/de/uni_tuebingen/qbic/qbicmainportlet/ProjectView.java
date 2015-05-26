@@ -17,7 +17,11 @@ import org.tepi.filtertable.FilterTable;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
+import com.liferay.portal.model.Company;
 import com.liferay.portal.model.User;
+import com.liferay.portal.service.CompanyLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -26,6 +30,8 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
@@ -38,6 +44,9 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
+
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import de.uni_tuebingen.qbic.user.UserRelated;
 
 @SuppressWarnings("serial")
 public class ProjectView extends VerticalLayout implements View {
@@ -533,18 +542,31 @@ public class ProjectView extends VerticalLayout implements View {
   private Component getMembersComponent(Set<String> list) {
     HorizontalLayout membersLayout = new HorizontalLayout();
     if (list != null) {
-      // membersLayout.addComponent(new Label("Members:"));
       for (String member : list) {
 
-        // Cool idea, but let's do this when we have more portrait pictures in Liferay
-
+        String webId =  PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
+        
+        Company company;
+        User user = null;
         try {
-          // companyId. We have presumable just one portal id, which equals the companyId.
-          User user = UserLocalServiceUtil.getUserByScreenName(1, member);
+          company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
+          long companyId = company.getCompanyId();
+          LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId, companyId));
+          user = UserLocalServiceUtil.getUserByScreenName(companyId, member);
+        } catch (PortalException | SystemException e) {
+          LOGGER.debug("Liferay error.");
+          //LOGGER.error("liferay error", e.getStackTrace());
+        }
+        
+        
+        
+        if(user == null){
+          LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
+          membersLayout.addComponent(new Label(member));
+        }
+        else{
           String fullname = user.getFullName();
           String email = user.getEmailAddress();
-
-
           // VaadinSession.getCurrent().getService();
           // ThemeDisplay themedisplay =
           // (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
@@ -559,15 +581,8 @@ public class ProjectView extends VerticalLayout implements View {
                   + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
           Label userLabel = new Label(labelString, ContentMode.HTML);
           membersLayout.addComponent(userLabel);
-
-        } catch (com.liferay.portal.NoSuchUserException e) {
-          LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
-          membersLayout.addComponent(new Label(member));
-        } catch (PortalException | SystemException e) {
-          LOGGER.error(
-              "reading out openbis members and matching their names to liferay users failed",
-              e.getStackTrace());
         }
+
 
       }
       membersLayout.setSpacing(true);
