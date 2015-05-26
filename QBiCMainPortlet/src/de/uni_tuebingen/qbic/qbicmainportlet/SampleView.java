@@ -147,11 +147,12 @@ public class SampleView extends VerticalLayout implements View {
 
     // set to true for the hack below
     menubar.setHtmlContentAllowed(true);
-    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setIcon(new ThemeResource("computer_higher.png"));
-    downloadProject.addSeparator();
+    MenuItem downloadSample = menubar.addItem("Download your data", null, null);
+    downloadSample.setIcon(new ThemeResource("computer_higher.png"));
+    downloadSample.addSeparator();
+    downloadSample.setEnabled(false);
     this.downloadCompleteProjectMenuItem =
-        downloadProject
+        downloadSample
             .addItem(
                 "<a href=\""
                     + resourceUrl
@@ -159,28 +160,34 @@ public class SampleView extends VerticalLayout implements View {
                 null);
 
     // Open DatasetView
-    this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
+    this.datasetOverviewMenuItem = downloadSample.addItem("Dataset Overview", null);
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_higher.png"));
 
-    // Another submenu item with a sub-submenu
     this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
-    // Another top-level item
+    
+    /*
     MenuItem workflows = menubar.addItem("Run workflows", null, null);
     workflows.setIcon(new ThemeResource("dna_higher.png"));
     workflows.setEnabled(false);
 
-    // Yet another top-level item
     MenuItem analyze = menubar.addItem("Analyze your data", null, null);
     analyze.setIcon(new ThemeResource("graph_higher.png"));
-    analyze.setEnabled(false);
+    analyze.setEnabled(false);*/
+    
     return menubar;
   }
+
+  boolean containsDatasets() {
+    return currentBean.getDatasets() != null && currentBean.getDatasets().size() > 0;
+  }
+
 
   /**
    * updates the menu bar based on the new content (currentbean was changed)
    */
   void updateContentMenuBar() {
+    downloadCompleteProjectMenuItem.getParent().setEnabled(containsDatasets());
     downloadCompleteProjectMenuItem
         .setText("<a href=\""
             + resourceUrl

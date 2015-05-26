@@ -28,6 +28,7 @@ public class ExperimentBean implements Serializable {
   private Map<String, String> properties;
   private Map<String, List<String>> controlledVocabularies;
   private Map<String, String> typeLabels;
+  private Boolean containsData;
 
   public Map<String, String> getTypeLabels() {
     return typeLabels;
@@ -252,5 +253,17 @@ public class ExperimentBean implements Serializable {
     propertiesBottom += "</ul>";
 
     return propertiesHeader + propertiesBottom;
+  }
+
+
+
+  public Boolean getContainsData() {
+    return containsData;
+  }
+
+
+
+  public void setContainsData(Boolean containsData) {
+    this.containsData = containsData;
   }
 }

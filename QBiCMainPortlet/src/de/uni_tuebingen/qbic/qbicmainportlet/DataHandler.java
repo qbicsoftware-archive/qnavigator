@@ -302,17 +302,19 @@ public class DataHandler implements Serializable{
     if (proj instanceof Project) {
       project = (Project) proj;
       newProjectBean = this.createProjectBean(project);
+      this.projectMap.put(newProjectBean.getId(), newProjectBean);
     }
     else {
       if (this.projectMap.get((String) proj) != null) {
-        System.out.println("taking it from the map");
+
         newProjectBean = this.projectMap.get(proj);
       } else {      
         project = this.openBisClient.getProjectByIdentifier((String) proj);
         newProjectBean = this.createProjectBean(project);
+        this.projectMap.put(newProjectBean.getId(), newProjectBean);
       }
     }
-    this.projectMap.put(newProjectBean.getId(), newProjectBean);
+    
     return newProjectBean;
   }
   
@@ -330,6 +332,7 @@ public class DataHandler implements Serializable{
     if (exp instanceof Experiment) {
       experiment = (Experiment) exp;
       newExperimentBean = this.createExperimentBean(experiment);
+      this.experimentMap.put(newExperimentBean.getId(), newExperimentBean);
       }
     
     else {
@@ -338,10 +341,11 @@ public class DataHandler implements Serializable{
       } else {
         experiment = this.openBisClient.getExperimentById((String) exp);
         newExperimentBean = this.createExperimentBean(experiment);
+        this.experimentMap.put(newExperimentBean.getId(), newExperimentBean);
       }
     }
     
-    this.experimentMap.put(newExperimentBean.getId(), newExperimentBean);
+    
     return newExperimentBean;
   }
   
@@ -359,6 +363,7 @@ public class DataHandler implements Serializable{
     if (samp instanceof Sample) {
       sample = (Sample) samp;
       newSampleBean = this.createSampleBean(sample);
+      this.sampleMap.put(newSampleBean.getId(), newSampleBean);
     }
 
     else {
@@ -367,9 +372,10 @@ public class DataHandler implements Serializable{
       } else {
         sample = this.openBisClient.getSampleByIdentifier((String) samp);
         newSampleBean = this.createSampleBean(sample);
+        this.sampleMap.put(newSampleBean.getId(), newSampleBean);
       }
     }
-    this.sampleMap.put(newSampleBean.getId(), newSampleBean);
+    
     return newSampleBean;
   }
   
@@ -789,9 +795,16 @@ public class DataHandler implements Serializable{
 
     BeanItemContainer<ExperimentBean> experimentBeans = new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
     
+    List<String> experiment_identifiers = new ArrayList<String>();
+    
     for (Experiment experiment: experiments) {
       experimentBeans.addBean(this.getExperiment(experiment));
+      experiment_identifiers.add(experiment.getIdentifier());
     }
+    List<DataSet> datasets =
+        (experiment_identifiers.size()>0)?openBisClient.getFacade().listDataSetsForExperiments(
+            experiment_identifiers):new ArrayList<DataSet>();
+    newProjectBean.setContainsData(datasets.size() != 0);
 
     newProjectBean.setExperiments(experimentBeans);
     newProjectBean.setMembers(this.openBisClient.getSpaceMembers(project.getSpaceCode()));
@@ -825,8 +838,6 @@ public class DataHandler implements Serializable{
     if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
       status = assignedProperties.get("Q_CURRENT_STATUS");
     }
-    
-    System.out.println("hjere");
     
     for (PropertyType p : completeProperties) {
       
@@ -863,17 +874,16 @@ public class DataHandler implements Serializable{
     
     //TODO do we want to have that ? (last Changed)
     newExperimentBean.setLastChangedSample(null);
-    newExperimentBean.setLastChangedSample(null);
+    newExperimentBean.setContainsData(false);
     
-    System.out.println("Creating sample Beans");
     // Create sample Beans (or fetch them) for samples of experiment
     BeanItemContainer<SampleBean> sampleBeans = new BeanItemContainer<SampleBean>(SampleBean.class);
-    int test = 0;
     for (Sample sample: samples) {
-      test += 1;
-      sampleBeans.addBean(this.getSample(sample));
-      System.out.println(test);
-
+      SampleBean sbean = this.getSample(sample);
+      if(sbean.getDatasets().size() > 0){
+        newExperimentBean.setContainsData(true);
+      }
+      sampleBeans.addBean(sbean);
     }
     newExperimentBean.setSamples(sampleBeans);
    

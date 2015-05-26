@@ -83,7 +83,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "476";
+  private String revision = "480";
   private String resUrl;
 
   @Override
@@ -372,7 +372,7 @@ public class QbicmainportletUI extends UI {
                     new Date(), "", "", null, false);
 
             projectContainer.addBean(newProjectBean);
-
+            
             for (Experiment experiment : experiments) {
 
               String experimentIdentifier = experiment.getIdentifier();
@@ -436,8 +436,6 @@ public class QbicmainportletUI extends UI {
       } else {
         // samplesOfSpace = dh.openBisClient.getSamplesofSpace(spaceName);
       }
-
-      System.out.println(samplesOfSpace.size());
       number_of_samples += samplesOfSpace.size();
       List<String> sample_identifiers_tmp = new ArrayList<String>();
       for (Sample sa : samplesOfSpace) {
@@ -458,7 +456,7 @@ public class QbicmainportletUI extends UI {
         newDatasetBean.setCode(ds.getCode());
         allDatasetsContainer.addBean(newDatasetBean);
       }
-
+      
       homeSpaceBean.setProjects(projectContainer);
       homeSpaceBean.setExperiments(allExperimentsContainer);
       homeSpaceBean.setSamples(allSamplesContainer);
@@ -487,7 +485,7 @@ public class QbicmainportletUI extends UI {
           UI.getCurrent().setPollInterval(-1);
 
           // QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
-          System.out.println(spaceContainer.size());
+          //System.out.println(spaceContainer.size());
           // TODO include iVac functionality when tested
           // QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean,
           // includePatientCreation, request);

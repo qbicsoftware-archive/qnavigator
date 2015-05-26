@@ -152,15 +152,14 @@ public class DatasetView extends VerticalLayout implements View {
     manage.setIcon(new ThemeResource("barcode_higher.png"));
     manage.setEnabled(false);
 
-    // Another top-level item
+    /*
     MenuItem workflows = menubar.addItem("Run workflows", null, null);
     workflows.setIcon(new ThemeResource("dna_higher.png"));
     workflows.setEnabled(false);
 
-    // Yet another top-level item
     MenuItem analyze = menubar.addItem("Analyze your data", null, null);
     analyze.setIcon(new ThemeResource("graph_higher.png"));
-    analyze.setEnabled(false);
+    analyze.setEnabled(false);*/
 
     VerticalLayout statistics = new VerticalLayout();
     HorizontalLayout statContent = new HorizontalLayout();

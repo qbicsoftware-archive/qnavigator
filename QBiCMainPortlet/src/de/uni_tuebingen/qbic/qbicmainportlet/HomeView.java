@@ -158,19 +158,14 @@ public class HomeView extends VerticalLayout implements View {
     manage.setIcon(new ThemeResource("barcode_higher.png"));
     manage.setEnabled(false);
    
-    // Another submenu item with a sub-submenu
-    MenuItem colds = manage.addItem("test2", null, null);
-
-    // Another top-level item
-    MenuItem snacks = menubar.addItem("Run workflows", null, null);
-    snacks.setIcon(new ThemeResource("dna_higher.png"));
-    snacks.setEnabled(false);
+    /*MenuItem runWorkflows = menubar.addItem("Run workflows", null, null);
+    runWorkflows.setIcon(new ThemeResource("dna_higher.png"));
+    runWorkflows.setEnabled(false);
             
-    // Yet another top-level item
-    MenuItem servs = menubar.addItem("Analyze your data", null, null);
-    servs.setIcon(new ThemeResource("graph_higher.png"));
-    servs.addItem("Car Service", null, null);
-    servs.setEnabled(false);
+    MenuItem analyzeData = menubar.addItem("Analyze your data", null, null);
+    analyzeData.setIcon(new ThemeResource("graph_higher.png"));
+    analyzeData.addItem("Car Service", null, null);
+    analyzeData.setEnabled(false);*/
 
     // view overall statistics
     VerticalLayout statistics = new VerticalLayout();
