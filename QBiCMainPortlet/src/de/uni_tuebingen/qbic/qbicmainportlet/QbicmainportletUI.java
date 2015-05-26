@@ -83,7 +83,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "482";
+  private String revision = "483";
   private String resUrl;
 
   @Override

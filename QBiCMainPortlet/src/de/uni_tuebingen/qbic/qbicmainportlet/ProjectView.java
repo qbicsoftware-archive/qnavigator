@@ -542,6 +542,7 @@ public class ProjectView extends VerticalLayout implements View {
   private Component getMembersComponent(Set<String> list) {
     HorizontalLayout membersLayout = new HorizontalLayout();
     if (list != null) {
+      StringBuilder memberString = new StringBuilder();
       for (String member : list) {
 
         String webId =  PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
@@ -558,11 +559,14 @@ public class ProjectView extends VerticalLayout implements View {
           //LOGGER.error("liferay error", e.getStackTrace());
         }
         
-        
+        if(memberString.length() > 0){
+          memberString.append(" , ");
+        }
         
         if(user == null){
           LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
-          membersLayout.addComponent(new Label(member));
+          memberString.append(member);
+          //membersLayout.addComponent(new Label(member));
         }
         else{
           String fullname = user.getFullName();
@@ -576,15 +580,22 @@ public class ProjectView extends VerticalLayout implements View {
           // image.setHeight(80, Unit.PIXELS);
           // image.setWidth(65, Unit.PIXELS);
           // membersLayout.addComponent(image);
-          String labelString =
-              new String("<a href=\"mailto:" + email
-                  + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
-          Label userLabel = new Label(labelString, ContentMode.HTML);
-          membersLayout.addComponent(userLabel);
+          //String labelString =
+          //    new String("<a href=\"mailto:" + email
+          //        + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
+          //Label userLabel = new Label(labelString, ContentMode.HTML);
+          //membersLayout.addComponent(userLabel);
+          memberString.append("<a href=\"mailto:");
+          memberString.append(email);
+          memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
+          memberString.append(fullname);
+          memberString.append("</a>");
         }
 
 
       }
+      Label label = new Label(memberString.toString(),ContentMode.HTML);
+      membersLayout.addComponent(label);
       membersLayout.setSpacing(true);
       membersLayout.setMargin(true);
     }
