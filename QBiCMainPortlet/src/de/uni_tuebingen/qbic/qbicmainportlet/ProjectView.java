@@ -177,8 +177,8 @@ public class ProjectView extends VerticalLayout implements View {
     // set to true for the hack below
     menubar.setHtmlContentAllowed(true);
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setEnabled(false); 
-    
+    downloadProject.setEnabled(false);
+
     downloadProject.setIcon(new ThemeResource("computer_higher.png"));
     downloadProject.addSeparator();
     this.downloadCompleteProjectMenuItem =
@@ -188,7 +188,7 @@ public class ProjectView extends VerticalLayout implements View {
                     + resourceUrl
                     + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
                 null);
-    
+
     // Open DatasetView
     this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
     MenuItem manage = menubar.addItem("Manage your data", null, null);
@@ -197,13 +197,13 @@ public class ProjectView extends VerticalLayout implements View {
     // Another submenu item with a sub-submenu
     this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
 
-    /*MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_higher.png"));
-    workflows.setEnabled(false);
-
-    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    analyze.setIcon(new ThemeResource("graph_higher.png"));
-    analyze.setEnabled(false);*/
+    /*
+     * MenuItem workflows = menubar.addItem("Run workflows", null, null); workflows.setIcon(new
+     * ThemeResource("dna_higher.png")); workflows.setEnabled(false);
+     * 
+     * MenuItem analyze = menubar.addItem("Analyze your data", null, null); analyze.setIcon(new
+     * ThemeResource("graph_higher.png")); analyze.setEnabled(false);
+     */
     return menubar;
   }
 
@@ -211,14 +211,10 @@ public class ProjectView extends VerticalLayout implements View {
    * updates the menu bar based on the new content (currentbean was changed)
    */
   void updateContentMenuBar() {
-    LOGGER.debug("downloadCompleteProjectMenuItem.getParent() is " + downloadCompleteProjectMenuItem.getParent());
-    LOGGER.debug("currentBean is " + currentBean);
-    LOGGER.debug("currentBean.getContainsData() is " + currentBean.getContainsData());
     Boolean containsData = currentBean.getContainsData();
     MenuItem downloadProject = this.downloadCompleteProjectMenuItem.getParent();
-    LOGGER.debug("setting downloadProject " + downloadProject + " enabled: " + containsData );
     downloadProject.setEnabled(containsData);
-    
+
     downloadCompleteProjectMenuItem
         .setText("<a href=\""
             + resourceUrl
@@ -631,12 +627,26 @@ public class ProjectView extends VerticalLayout implements View {
     // TODO updateContent only if currentProject is not equal to newProject
     this.table.unselect(this.table.getValue());
     this.setContainerDataSource(datahandler.getProject(currentValue));
-    
+
     updateContent();
   }
 
   public ProjectBean getCurrentBean() {
     return currentBean;
   }
+
+  /**
+   * Enables or disables the component. The user can not interact disabled components, which are
+   * shown with a style that indicates the status, usually shaded in light gray color. Components
+   * are enabled by default.
+   */
+  public void setEnabled(boolean enabled) {
+    this.export.setEnabled(enabled);
+    this.table.setEnabled(enabled);
+    // this.createBarcodesMenuItem.getParent().setEnabled(false);
+    // this.downloadCompleteProjectMenuItem.getParent().setEnabled(false);
+    this.menubar.setEnabled(enabled);
+  }
+
 
 }

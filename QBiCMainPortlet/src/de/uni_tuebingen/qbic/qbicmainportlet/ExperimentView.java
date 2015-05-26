@@ -398,4 +398,18 @@ public class ExperimentView extends VerticalLayout implements View {
     return currentBean;
   }
 
+  /**
+   * Enables or disables the component. The user can not interact disabled components, which are
+   * shown with a style that indicates the status, usually shaded in light gray color. Components
+   * are enabled by default.
+   */
+  public void setEnabled(boolean enabled) {
+    this.export.setEnabled(enabled);
+    this.table.setEnabled(enabled);
+    // this.createBarcodesMenuItem.getParent().setEnabled(false);
+    // this.downloadCompleteProjectMenuItem.getParent().setEnabled(false);
+    this.menubar.setEnabled(enabled);
+  }
+  
+  
 }

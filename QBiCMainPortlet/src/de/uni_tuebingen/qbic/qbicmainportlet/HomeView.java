@@ -315,4 +315,15 @@ public class HomeView extends VerticalLayout implements View {
   public void rebuildLayout(int height, int width, WebBrowser browser) {
     this.buildLayout(height, width, browser);
   }
+ 
+  /**
+   * Enables or disables the component. The user can not interact disabled components, which are
+   * shown with a style that indicates the status, usually shaded in light gray color. Components
+   * are enabled by default.
+   */
+  public void setEnabled(boolean enabled){
+    this.export.setEnabled(enabled);
+    this.table.setEnabled(enabled);
+  }
+  
 }

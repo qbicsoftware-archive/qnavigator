@@ -11,7 +11,6 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
@@ -224,6 +223,16 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
   @Override
   public void afterViewChange(ViewChangeEvent event) {
   //nothing to do here
+  }
+
+  /**
+   * Enables or disables the component. The user can not interact disabled components, which are
+   * shown with a style that indicates the status, usually shaded in light gray color. Components
+   * are enabled by default.
+   */
+  public void setEnabled(boolean enabled) {
+    this.tree.setEnabled(enabled);
+    this.backButton.setEnabled(enabled);    
   }
 
 }

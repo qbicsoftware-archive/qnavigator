@@ -83,7 +83,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.2.0";
-  private String revision = "480";
+  private String revision = "481";
   private String resUrl;
 
   @Override
@@ -627,7 +627,8 @@ public class QbicmainportletUI extends UI {
         int height = getPage().getBrowserWindowHeight();
         int width = getPage().getBrowserWindowWidth();
         WebBrowser browser = getPage().getWebBrowser();
-
+        View oldView = event.getOldView();
+        this.setEnabled(oldView, false);
         currentView = event.getNewView();
         if (currentView instanceof HomeView) {
           homeView.rebuildLayout(height, width, browser);
@@ -644,9 +645,30 @@ public class QbicmainportletUI extends UI {
         return true;
       }
 
+      private void setEnabled(View view, boolean enabled) {
+        LOGGER.debug("enableing view:" + enabled);
+        tv.setEnabled(enabled);
+        if (view instanceof HomeView) {
+          homeView.setEnabled(enabled);
+          LOGGER.debug("homeview");
+        }
+        if (view instanceof ProjectView) {
+          projectView.setEnabled(enabled);
+          LOGGER.debug("projectview " + projectView.getId());
+        }
+        if (view instanceof ExperimentView) {
+          experimentView.setEnabled(enabled);
+          LOGGER.debug("experimentview "+ experimentView.getId());
+        }
+        if (view instanceof SampleView) {
+          sampleView.setEnabled(enabled);LOGGER.debug("sampleview "+ sampleView.getId());
+        }
+      }
+
       @Override
       public void afterViewChange(ViewChangeEvent event) {
         currentView = event.getNewView();
+        this.setEnabled(currentView, true);
         Object currentBean = null;
         if (currentView instanceof ProjectView) {
           currentBean = projectView.getCurrentBean();
@@ -674,7 +696,7 @@ public class QbicmainportletUI extends UI {
 
     String requestParams = Page.getCurrent().getUriFragment();
 
-    LOGGER.info("used urifragement: " + requestParams);
+    LOGGER.debug("used urifragement: " + requestParams);
     if (requestParams != null) {
       navigator.navigateTo(requestParams.startsWith("!") ? requestParams.substring(1)
           : requestParams);
