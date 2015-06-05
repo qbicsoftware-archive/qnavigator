@@ -278,7 +278,8 @@ public class DataHandler implements Serializable {
       String curFolder = dataset.get(0).getParent();
       for (AggregationAdaptorBean b : dataset) {
         DatasetBean newBean = new DatasetBean();
-        newBean.setFileName(b.getPath());
+        newBean.setFileName(b.getName());
+        newBean.setDssPath(b.getPath());
         newBean.setFileSize(b.getSize());
         newBean.setCode(b.getDs());
         if (!b.getParent().equals(curFolder)) {
