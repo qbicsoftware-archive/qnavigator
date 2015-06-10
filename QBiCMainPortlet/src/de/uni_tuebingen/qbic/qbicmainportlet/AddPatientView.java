@@ -3,14 +3,18 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import model.NewIvacSampleBean;
 
+import com.google.gwt.validation.client.constraints.NotNullValidator;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
+import com.vaadin.data.validator.IntegerValidator;
+import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.navigator.View;
@@ -290,18 +294,37 @@ public class AddPatientView extends VerticalLayout implements View {
     
     projects.addItems(visibleSpaces);
     projects.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
+    projects.setRequired(true);
+    projects.setRequiredError("Please choose one project.");
+    projects.setImmediate(true);
     
     projDescriptionContent.addComponent(numberInfo);
     projDescriptionContent.addComponent(numberOfPatients);
     numberOfPatients.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
     
+    //numberOfPatients.setValue(null);
+    numberOfPatients.setRequired(true);
+    //numberOfPatients.addValidator(new NullValidator("Please provide the number of patients.", false));
+    //numberOfPatients.addValidator(new IntegerValidator("Only integer values are allowed."));
+    //numberOfPatients.setValidationVisible(true);
+    numberOfPatients.setImmediate(true);
+    numberOfPatients.setRequiredError("Please provide the number of patients.");
+    numberOfPatients.setNullRepresentation("");
+    
     projDescriptionContent.addComponent(namesInfo);
     projDescriptionContent.addComponent(secondaryNames);
+    //secondaryNames.setValue(null);
     secondaryNames.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
+    secondaryNames.setRequired(true);
+    //secondaryNames.addValidator(new NullValidator("Please provide a comma separated list of secondary IDs.", false));
+    secondaryNames.setImmediate(true);
+    secondaryNames.setRequiredError("Please provide a comma separated list of secondary IDs.");
+    secondaryNames.setNullRepresentation("");
     
     projDescriptionContent.addComponent(descInfo);
     projDescriptionContent.addComponent(description);
     description.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
+    description.setValue("");
     
     numberOfPatients.setConverter(new StringToIntegerConverter());
     secondaryNames.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
@@ -355,44 +378,98 @@ public class AddPatientView extends VerticalLayout implements View {
   }
   
   public void callPatientRegistration() {
+    
     List<String> secondaryIDs = Arrays.asList(secondaryNames.getValue().split("\\s*,\\s*"));
     Map<String, List<String>> hlaTyping = new HashMap<String,List<String>>();
     
     List<String> hlaTypingI = new ArrayList<String>();
     List<String> hlaTypingII = new ArrayList<String>();
+    boolean hlaIvalid = true;
+    boolean hlaIIvalid = true;
     
-    if(registerHLAI.getValue()) {
-      hlaTypingI.add(hlaItypes.getValue());
-      hlaTypingI.add(typingMethod.getValue().toString());
-      hlaTyping.put("MHC_CLASS_I", hlaTypingI);
+    if (registerHLAI.getValue()) {
+      if (hlaItypes.getValue() != null & typingMethod.getValue() != null) {
+        hlaTypingI.add(hlaItypes.getValue());
+        hlaTypingI.add(typingMethod.getValue().toString());
+        hlaTyping.put("MHC_CLASS_I", hlaTypingI);
+      } else {
+        Notification.show("HLA Typing not fully specified.", Type.ERROR_MESSAGE);
+        hlaIvalid = false;
+      }
     }
-    
-    if(registerHLAII.getValue()) {
-      hlaTypingII.add(hlaIItypes.getValue());
-      hlaTypingII.add(typingMethod.getValue().toString());
-      hlaTyping.put("MHC_CLASS_II", hlaTypingII);
+
+    if (registerHLAII.getValue()) {
+
+      if (hlaIItypes.getValue() != null & typingMethod.getValue() != null) {
+        hlaTypingII.add(hlaIItypes.getValue());
+        hlaTypingII.add(typingMethod.getValue().toString());
+        hlaTyping.put("MHC_CLASS_II", hlaTypingII);
+      }
+      else {
+        Notification.show("HLA Typing not fully specified.", Type.ERROR_MESSAGE);
+        hlaIIvalid = false;
+      }
     }
-    
+
     Integer numberPatients = Integer.parseInt(numberOfPatients.getValue());
     
- // Notification with default settings for a warning
+    // Notification with default settings for a warning
     Notification sucess = new Notification("Patients successfully registered.", Type.TRAY_NOTIFICATION);
-
+    Notification failure = new Notification("Registration failed. Number of Patients and secondary IDs has to be the same and tissues have to be fully specified.", Type.ERROR_MESSAGE);
+    
     // Customize it
     sucess.setDelayMsec(20000);
     sucess.setStyleName(ValoTheme.NOTIFICATION_SUCCESS);
     sucess.setPosition(Position.TOP_CENTER);
-    sucess.setIcon(FontAwesome.CHECK);
+    //sucess.setIcon(FontAwesome.CHECK);
+    
+    failure.setDelayMsec(20000);
+    failure.setStyleName(ValoTheme.NOTIFICATION_FAILURE);
+    failure.setPosition(Position.TOP_CENTER);
+    
                    
     
-    if(numberPatients.equals(secondaryIDs.size())) {
-      datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects.getValue().toString(), description.getValue(), hlaTyping);
+    if(numberPatients.equals(secondaryIDs.size()) & checkRegisteredSamplesTable() & hlaIvalid & hlaIIvalid) {
+      //datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects.getValue().toString(), description.getValue(), hlaTyping);
       sucess.show(Page.getCurrent());
     }
     else {
-      Notification.show("Registration failed. Number of Patients and secondary IDs has to be the same.", Type.ERROR_MESSAGE);
+      failure.show(Page.getCurrent());
     }
     
+  }
+  
+  public boolean checkRegisteredSamplesTable() {
+    boolean valid = true;
+    
+    if(sampleOptions.size() == 0) {
+      return false;
+    }
+   
+
+    for (Iterator iter = sampleOptions.getItemIds().iterator(); iter.hasNext();) {
+      boolean expsSpecified = false;
+      boolean tissueSpecified = false;
+      boolean instrumentSpecified = false;
+
+      
+      NewIvacSampleBean sampleBean = (NewIvacSampleBean) iter.next();
+      
+      System.out.println("DeepSeq " + sampleBean.getDeepSeq());
+      System.out.println("Tissue " + sampleBean.getTissue());
+      
+      expsSpecified = ((sampleBean.getDeepSeq() == true) | (sampleBean.getDnaSeq() == true) | (sampleBean.getRnaSeq() == true));
+      tissueSpecified = (!sampleBean.getTissue().equals(""));
+      instrumentSpecified = (!sampleBean.getSeqDevice().equals(""));
+      
+      valid = valid & (expsSpecified & tissueSpecified & instrumentSpecified);
+      System.out.println(expsSpecified);
+      System.out.println(tissueSpecified);
+      System.out.println(instrumentSpecified);
+
+    }
+    
+    return valid;
   }
 
   @Override

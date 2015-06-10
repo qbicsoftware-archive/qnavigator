@@ -4,6 +4,9 @@ import helpers.Utils;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -11,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -249,8 +253,18 @@ public class DataHandler implements Serializable {
    * @return A list of DatasetBeans denoting the roots of the folder structure of each dataset.
    *         Subfolders and files can be reached by calling the getChildren() function on each Bean.
    */
-  public List<DatasetBean> queryDatasetsForFolderStructure(List<String> dsCodes) {
+  public List<DatasetBean> queryDatasetsForFolderStructure(List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> datasets) {
     Map<String, Object> params = new HashMap<String, Object>();
+    List<String> dsCodes = new ArrayList<String>();
+    Map<String, Object> samples = new HashMap<String,Object>();
+    Map<String, String> types = new HashMap<String,String>();
+    
+    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds: datasets) {
+      dsCodes.add(ds.getCode());
+      types.put(ds.getCode(), ds.getDataSetTypeCode());
+      samples.put(ds.getCode(), this.getSample(ds.getSampleIdentifierOrNull()));
+    }
+    
     params.put("codes", dsCodes);
     QueryTableModel res = openBisClient.getAggregationService("query-files", params);
 
@@ -281,7 +295,23 @@ public class DataHandler implements Serializable {
         newBean.setFileName(b.getName());
         newBean.setDssPath(b.getPath());
         newBean.setFileSize(b.getSize());
+        newBean.setType(types.get(b.getDs()));
+        newBean.setSample((SampleBean) samples.get(b.getDs()));
+        
+        // 2015-05-31 23:47:10 +0200
+        Date date = null;
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+          date = formatter.parse(b.getLastmodified().split("\\+")[0]);
+          System.out.println(date);
+          System.out.println(formatter.format(date));
+   
+      } catch (ParseException e) {
+          e.printStackTrace();
+      }
+        
         newBean.setCode(b.getDs());
+        newBean.setRegistrationDate(date);
         if (!b.getParent().equals(curFolder)) {
           lastLevel = curLevel;
           curLevel = new ArrayList<DatasetBean>();
@@ -1488,10 +1518,6 @@ public class DataHandler implements Serializable {
     barcode.setDescription("Barcode Generation");
     barcode.setStatus(1.0);
 
-    ExperimentStatusBean ngsMeasure = new ExperimentStatusBean();
-    ngsMeasure.setDescription("NGS Sequencing");
-    ngsMeasure.setStatus(0.0);
-
     ExperimentStatusBean ngsCall = new ExperimentStatusBean();
     ngsCall.setDescription("Variant Calling");
     ngsCall.setStatus(0.0);
@@ -1508,25 +1534,37 @@ public class DataHandler implements Serializable {
       String type = bean.getType();
 
       if (type.equalsIgnoreCase(ExperimentType.Q_NGS_MEASUREMENT.name())) {
+        ExperimentStatusBean ngsMeasure = new ExperimentStatusBean();
+        ngsMeasure.setDescription("NGS Sequencing");
+        ngsMeasure.setStatus(0.0);
         ngsMeasure.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
             .get("Q_CURRENT_STATUS").toString()));
+        ngsMeasure.setCode(bean.getCode());
+        ngsMeasure.setIdentifier(bean.getId());
+        
+        res.addBean(ngsMeasure);
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_NGS_VARIANT_CALLING.name())) {
         ngsCall.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
             .get("Q_CURRENT_STATUS").toString()));
+        ngsCall.setCode(bean.getCode());
+        ngsCall.setIdentifier(bean.getId());
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_NGS_HLATYPING.name())) {
         hlaType.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
             .get("Q_CURRENT_STATUS").toString()));
+        hlaType.setCode(bean.getCode());
+        hlaType.setIdentifier(bean.getId());
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_EPITOPE_PREDICTION.name())) {
         epitopePred.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
             .get("Q_CURRENT_STATUS").toString()));
+        epitopePred.setCode(bean.getCode());
+        epitopePred.setIdentifier(bean.getId());
       }
     }
 
     res.addBean(barcode);
-    res.addBean(ngsMeasure);
     res.addBean(ngsCall);
     res.addBean(hlaType);
     res.addBean(epitopePred);

@@ -1,16 +1,22 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import model.DatasetBean;
 import model.ExperimentBean;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
 import model.SampleBean;
+import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -38,7 +44,9 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
@@ -337,6 +345,7 @@ public class PatientView extends VerticalLayout implements View {
     // Open DatasetView
     // this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
     downloadProject.addItem("Dataset Overview", null);
+    
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_higher.png"));
 
@@ -344,14 +353,6 @@ public class PatientView extends VerticalLayout implements View {
     // this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
     // Another top-level item
     manage.addItem("Create Barcodes", null, null);
-    MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_higher.png"));
-    workflows.setEnabled(false);
-
-    // Yet another top-level item
-    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    analyze.setIcon(new ThemeResource("graph_higher.png"));
-    analyze.setEnabled(false);
     return menubar;
   }
 
@@ -416,7 +417,7 @@ public class PatientView extends VerticalLayout implements View {
 
     
  // Generate button caption column
-    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(experimentBeans);
+    final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(experimentBeans);
       gpc.addGeneratedProperty("started",
         new PropertyValueGenerator<String>() {
 
@@ -447,25 +448,67 @@ public class PatientView extends VerticalLayout implements View {
           return status.toString();
         }
     });
+      
+    gpc.removeContainerProperty("identifier");
+
     
     experiments.setContainerDataSource(gpc);
     experiments.setHeaderVisible(false);
     experiments.setHeightMode(HeightMode.ROW);
-    experiments.setHeightByRows(5.0);
-    experiments.setWidth("100%");
+    experiments.setHeightByRows(gpc.size());
+    experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.35f, Unit.PIXELS);
     
     experiments.getColumn("status").setRenderer(new ProgressBarRenderer());
-    experiments.setColumnOrder("started", "description","status","download", "runWorkflow");
-    experiments.getColumn("download").setRenderer(new ButtonRenderer());
+    experiments.setColumnOrder("started", "code", "description","status","download", "runWorkflow");
+    
+    experiments.getColumn("download").setRenderer(new ButtonRenderer(new RendererClickListener() {
+      @Override
+      public void click(RendererClickEvent event) {        
+        ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
+          
+          if(esb.getDescription().equals("Barcode Generation")) {
+            new Notification("Download of Barcodes not available.",
+                "<br/>Please create barcodes by clicking 'Run'.",
+                Type.WARNING_MESSAGE, true)
+                .show(Page.getCurrent());
+          }
+          else {
+          ArrayList<String> message = new ArrayList<String>();
+          message.add("clicked");
+          StringBuilder sb = new StringBuilder("type=");
+          sb.append("filtered");
+          sb.append("&");
+          sb.append("id=");
+          //sb.append(currentBean.getId());
+          sb.append(esb.getIdentifier());
+          message.add(sb.toString());
+          message.add(DatasetView.navigateToLabel);
+          System.out.println(message);
+          state.notifyObservers(message);
+          }
+        }
+      
+  }));
+    
     experiments.getColumn("runWorkflow").setRenderer(new ButtonRenderer(new RendererClickListener() {
       @Override
       public void click(RendererClickEvent event) {
+        ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
+        
         //TODO idea get description of item to navigate to the correct workflow ?!
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        message.add(currentBean.getId());
-        message.add(BarcodeView.navigateToLabel);
-        state.notifyObservers(message);
+        if(esb.getDescription().equals("Barcode Generation")) {
+          ArrayList<String> message = new ArrayList<String>();
+          message.add("clicked");
+          message.add(currentBean.getId());
+          message.add(BarcodeView.navigateToLabel);
+          state.notifyObservers(message);
+        }
+        else {
+          new Notification("Workflow for this experiment not yet available.",
+              "<br/>Please get in contact with your project manager.",
+              Type.WARNING_MESSAGE, true)
+              .show(Page.getCurrent());
+        }
       }
   }));
   
@@ -489,9 +532,8 @@ public class PatientView extends VerticalLayout implements View {
 
     
     for (Iterator i = experimentBeans.getItemIds().iterator(); i.hasNext();) {
-      // Get the current item identifier, which is an integer.
       ExperimentStatusBean statusBean = (ExperimentStatusBean) i.next();
-      
+            
       //HorizontalLayout experimentStatusRow = new HorizontalLayout();
       //experimentStatusRow.setSpacing(true);
       

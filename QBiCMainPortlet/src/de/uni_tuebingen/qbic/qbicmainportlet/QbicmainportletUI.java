@@ -486,11 +486,15 @@ public class QbicmainportletUI extends UI {
 
           // QbicmainportletUI.getCurrent().buildMainLayout(tc, homeViewInformation);
           //System.out.println(spaceContainer.size());
+          //TODO include iVac functionality when tested
+          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, includePatientCreation, request);
+          //QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, false, request);
+          //System.out.println(spaceContainer.size());
           // TODO include iVac functionality when tested
           // QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean,
           // includePatientCreation, request);
-          QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, false,
-              request);
+          //QbicmainportletUI.getCurrent().buildMainLayout(datahandler, tc, homeSpaceBean, false,
+          //    request);
         }
       });
     }

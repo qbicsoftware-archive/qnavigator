@@ -37,6 +37,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
@@ -53,9 +54,11 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -510,6 +513,9 @@ public class DatasetView extends VerticalLayout implements View {
     if (parameters == null || parameters.equals(""))
       return;
     String[] params = parameters.split("&");
+    for(String s: params) {
+      System.out.println(s);
+    }
     if (params == null || params.length != 2)
       return;
     HashMap<String, String> map = new HashMap<String, String>();
@@ -618,7 +624,69 @@ public class DatasetView extends VerticalLayout implements View {
                 // recursive test
                 registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);
               }
-          break;  
+          break;
+        //TODO add "filtered" to message which is send to state when datasetview is trigged
+        case "filtered":
+          datasetContainer = new HierarchicalContainer();
+          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
+          datasetContainer.addContainerProperty("Project", String.class, null);
+          datasetContainer.addContainerProperty("Sample", String.class, null);
+          datasetContainer.addContainerProperty("Sample Type", String.class, null);
+          datasetContainer.addContainerProperty("File Name", String.class, null);
+          datasetContainer.addContainerProperty("File Type", String.class, null);
+          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
+          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
+          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
+          datasetContainer.addContainerProperty("File Size", String.class, null);
+          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
+          datasetContainer.addContainerProperty("dl_link", String.class, null);
+          datasetContainer.addContainerProperty("CODE", String.class, null);
+          //ProjectBean projectBeanFiltered = datahandler.getProject(map.get("id"));
+          
+          //BeanItemContainer<ExperimentBean> projectExperiments = projectBeanFiltered.getExperiments();
+          //for (ExperimentBean eb : projectExperiments.getItemIds()) {
+           // BeanItemContainer<SampleBean> bsb = eb.getSamples();
+          
+          String experimentIdentifier = map.get("id");
+          String projectCode = experimentIdentifier.split("/")[2];
+            
+          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> experimentDatasets =
+              datahandler.openBisClient
+                  .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
+
+          if (experimentDatasets.size() == 0) {
+            new Notification("No datasets available for this experiment.",
+                "<br/>Please contact the project manager.",
+                Type.WARNING_MESSAGE, true)
+                .show(Page.getCurrent());
+          } else {
+            //for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : experimentDatasets) {
+            //  datasets.add(ds);
+            //  codes.add(ds.getCode());
+            //  System.out.println("DSCODES: " + ds.getCode());
+            //}
+
+            List<DatasetBean> dsBeans = datahandler.queryDatasetsForFolderStructure(experimentDatasets);
+
+            for (DatasetBean d : dsBeans) {
+              // String sample = sampleBean.getCode();
+              // String sampleType = sampleBean.getType();//
+              // this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
+              // String project = sampleBean.getId().split("/")[2];
+              Date date = d.getRegistrationDate();
+              SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+              String dateString = sd.format(date);
+              Timestamp ts = Timestamp.valueOf(dateString);
+              String sampleID = d.getSample().getId();
+              String sampleType = d.getSample().getType();
+              // recursive test
+
+              registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts,sampleType, 
+                  null);
+            }
+          }
+          break;
+          
         default:
           datasetContainer = new HierarchicalContainer();
       }
@@ -631,8 +699,6 @@ public class DatasetView extends VerticalLayout implements View {
           e.getStackTrace());
     }
   }
-
-
 
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
       String project, String sample, Timestamp ts, String sampleType, Object parent) {

@@ -4,16 +4,36 @@ import java.io.Serializable;
 
 public class ExperimentStatusBean implements Serializable {
  
+  String identifier;
+  String code; 
   String description;
   String download;
   String runWorkflow;
   Double status;
   
-  public ExperimentStatusBean(String description, String download, String runWorkflow, Double status) {
+  public ExperimentStatusBean(String identifier, String code, String description, String download, String runWorkflow, Double status) {
+    this.identifier = identifier;
+    this.code = code;
     this.description = description;
     this.download = download;
     this.runWorkflow = runWorkflow;
     this.status = status;    
+  }
+  
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+  
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
   }
   
   public ExperimentStatusBean() {
