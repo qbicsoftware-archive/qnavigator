@@ -470,7 +470,7 @@ public class PatientView extends VerticalLayout implements View {
           ArrayList<String> message = new ArrayList<String>();
           message.add("clicked");
           StringBuilder sb = new StringBuilder("type=");
-          sb.append("filtered");
+          sb.append("experiment");
           sb.append("&");
           sb.append("id=");
           //sb.append(currentBean.getId());

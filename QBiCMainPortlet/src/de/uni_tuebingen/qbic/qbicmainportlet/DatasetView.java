@@ -19,6 +19,7 @@ import javax.portlet.PortletSession;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import logging.SysOutLogger;
 import model.DatasetBean;
 import model.ExperimentBean;
 import model.ProjectBean;
@@ -26,6 +27,8 @@ import model.SampleBean;
 
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -82,7 +85,7 @@ public class DatasetView extends VerticalLayout implements View {
       ""));
 
   private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Project", "Sample",
-      "Sample Type", "File Name", "Dataset Type", "Registration Date", "File Size"};
+      "File Name", "Dataset Type", "Registration Date", "File Size"};
 
   public DatasetView(DataHandler dh) {
 
@@ -318,7 +321,7 @@ public class DatasetView extends VerticalLayout implements View {
           String space = datahandler.openBisClient.getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
           message.add(project);
           message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
-          message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
+          //message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
           message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
           message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
           message.add(space);
@@ -510,7 +513,7 @@ public class DatasetView extends VerticalLayout implements View {
 
     return filterTable;
   }
-
+  
   @Override
   public void enter(ViewChangeEvent event) {
     String parameters = event.getParameters();
@@ -529,170 +532,80 @@ public class DatasetView extends VerticalLayout implements View {
         return;
       map.put(kv[0], kv[1]);
     }
-    try {
-      HierarchicalContainer datasetContainer = null;
+    
+    try {      
+          HierarchicalContainer datasetContainer = new HierarchicalContainer();
+          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
+          datasetContainer.addContainerProperty("Project", String.class, null);
+          datasetContainer.addContainerProperty("Sample", String.class, null);
+          //datasetContainer.addContainerProperty("Sample Type", String.class, null);
+          datasetContainer.addContainerProperty("File Name", String.class, null);
+          datasetContainer.addContainerProperty("File Type", String.class, null);
+          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
+          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
+          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
+          datasetContainer.addContainerProperty("File Size", String.class, null);
+          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
+          datasetContainer.addContainerProperty("dl_link", String.class, null);
+          datasetContainer.addContainerProperty("CODE", String.class, null);
+          
+          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = null;
+      
       switch (map.get("type")) {
         case "project":
-          datasetContainer = new HierarchicalContainer();
-          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
-          datasetContainer.addContainerProperty("Project", String.class, null);
-          datasetContainer.addContainerProperty("Sample", String.class, null);
-          datasetContainer.addContainerProperty("Sample Type", String.class, null);
-          datasetContainer.addContainerProperty("File Name", String.class, null);
-          datasetContainer.addContainerProperty("File Type", String.class, null);
-          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
-          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
-          datasetContainer.addContainerProperty("File Size", String.class, null);
-          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
-          datasetContainer.addContainerProperty("dl_link", String.class, null);
-          datasetContainer.addContainerProperty("CODE", String.class, null);
-          ProjectBean projectBean = datahandler.getProject(map.get("id"));
-          BeanItemContainer<ExperimentBean> bic = projectBean.getExperiments();
-          for (ExperimentBean eb : bic.getItemIds()) {
-            BeanItemContainer<SampleBean> bsb = eb.getSamples();
-            for (SampleBean sb : bsb.getItemIds()) {
-              BeanItemContainer<DatasetBean> datasetbeans = sb.getDatasets();
-              for (DatasetBean d : datasetbeans.getItemIds()) {
-                String sample = sb.getCode();
-                String sampleType = sb.getType();// this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
-                String project = projectBean.getCode();
-                Date date = d.getRegistrationDate();
-                SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                String dateString = sd.format(date);
-                Timestamp ts = Timestamp.valueOf(dateString);
-                // recursive test
-                registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);
-              }
-            }
+          String projectIdentifier = map.get("id");
+          retrievedDatasets =
+              datahandler.openBisClient
+                  .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
+          break;
 
-          }
-          break;
         case "experiment":
-          datasetContainer = new HierarchicalContainer();
-          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
-          datasetContainer.addContainerProperty("Project", String.class, null);
-          datasetContainer.addContainerProperty("Sample", String.class, null);
-          datasetContainer.addContainerProperty("Sample Type", String.class, null);
-          datasetContainer.addContainerProperty("File Name", String.class, null);
-          datasetContainer.addContainerProperty("File Type", String.class, null);
-          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
-          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
-          datasetContainer.addContainerProperty("File Size", String.class, null);
-          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
-          datasetContainer.addContainerProperty("dl_link", String.class, null);
-          datasetContainer.addContainerProperty("CODE", String.class, null);
-          ExperimentBean experimentBean = datahandler.getExperiment(map.get("id"));
-          BeanItemContainer<SampleBean> samplesbeans = experimentBean.getSamples();
-          for (SampleBean sb : samplesbeans.getItemIds()) {
-            BeanItemContainer<DatasetBean> datasetbeans = sb.getDatasets();
-            for (DatasetBean d : datasetbeans.getItemIds()) {
-              String sample = sb.getCode();
-              String sampleType = sb.getType();// this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
-              String project = experimentBean.getId().split("/")[2];
-              Date date = d.getRegistrationDate();
-              SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-              String dateString = sd.format(date);
-              Timestamp ts = Timestamp.valueOf(dateString);
-              // recursive test
-              registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);
-            }
-          }
-          break;
-        case "sample":
-          datasetContainer = new HierarchicalContainer();
-          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
-          datasetContainer.addContainerProperty("Project", String.class, null);
-          datasetContainer.addContainerProperty("Sample", String.class, null);
-          datasetContainer.addContainerProperty("Sample Type", String.class, null);
-          datasetContainer.addContainerProperty("File Name", String.class, null);
-          datasetContainer.addContainerProperty("File Type", String.class, null);
-          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
-          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
-          datasetContainer.addContainerProperty("File Size", String.class, null);
-          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
-          datasetContainer.addContainerProperty("dl_link", String.class, null);
-          datasetContainer.addContainerProperty("CODE", String.class, null);
-          SampleBean sampleBean = datahandler.getSample(map.get("id"));
-              BeanItemContainer<DatasetBean> datasetbeans = sampleBean.getDatasets();
-              for (DatasetBean d : datasetbeans.getItemIds()) {
-                String sample = sampleBean.getCode();
-                String sampleType = sampleBean.getType();// this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
-                String project = sampleBean.getId().split("/")[2];
-                Date date = d.getRegistrationDate();
-                SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                String dateString = sd.format(date);
-                Timestamp ts = Timestamp.valueOf(dateString);
-                // recursive test
-                registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);
-              }
-          break;
-        //TODO add "filtered" to message which is send to state when datasetview is trigged
-        case "filtered":
-          datasetContainer = new HierarchicalContainer();
-          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
-          datasetContainer.addContainerProperty("Project", String.class, null);
-          datasetContainer.addContainerProperty("Sample", String.class, null);
-          datasetContainer.addContainerProperty("Sample Type", String.class, null);
-          datasetContainer.addContainerProperty("File Name", String.class, null);
-          datasetContainer.addContainerProperty("File Type", String.class, null);
-          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
-          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
-          datasetContainer.addContainerProperty("File Size", String.class, null);
-          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
-          datasetContainer.addContainerProperty("dl_link", String.class, null);
-          datasetContainer.addContainerProperty("CODE", String.class, null);
-          //ProjectBean projectBeanFiltered = datahandler.getProject(map.get("id"));
-          
-          //BeanItemContainer<ExperimentBean> projectExperiments = projectBeanFiltered.getExperiments();
-          //for (ExperimentBean eb : projectExperiments.getItemIds()) {
-           // BeanItemContainer<SampleBean> bsb = eb.getSamples();
-          
           String experimentIdentifier = map.get("id");
-          String projectCode = experimentIdentifier.split("/")[2];
-            
-          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> experimentDatasets =
+          retrievedDatasets =
               datahandler.openBisClient
                   .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
+          break;
 
-          if (experimentDatasets.size() == 0) {
-            new Notification("No datasets available for this experiment.",
-                "<br/>Please contact the project manager.",
-                Type.WARNING_MESSAGE, true)
-                .show(Page.getCurrent());
+        case "sample":
+          String sampleIdentifier = map.get("id");
+          String sampleCode = sampleIdentifier.split("/")[2];
+          retrievedDatasets = datahandler.openBisClient.getDataSetsOfSample(sampleCode);
+          break;
+
+        default:
+          retrievedDatasets =
+              new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
+          break;
+      }
+      
+          
+          if (retrievedDatasets.size() == 0) {
+            new Notification("No datasets available.",
+                "<br/>Please contact the project manager.", Type.WARNING_MESSAGE, true).show(Page
+                .getCurrent());
           } else {
-            //for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : experimentDatasets) {
-            //  datasets.add(ds);
-            //  codes.add(ds.getCode());
-            //  System.out.println("DSCODES: " + ds.getCode());
-            //}
+            
+            Map<String, String> samples = new HashMap<String, String>();
+                        
+            // project same for all datasets
+            String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
+            for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: retrievedDatasets) {
+              samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);    
+            }
 
-            List<DatasetBean> dsBeans = datahandler.queryDatasetsForFolderStructure(experimentDatasets);
-
+            List<DatasetBean> dsBeans =
+                datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
+            
             for (DatasetBean d : dsBeans) {
-              // String sample = sampleBean.getCode();
-              // String sampleType = sampleBean.getType();//
-              // this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
-              // String project = sampleBean.getId().split("/")[2];
               Date date = d.getRegistrationDate();
               SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
               String dateString = sd.format(date);
               Timestamp ts = Timestamp.valueOf(dateString);
-              String sampleID = d.getSample().getId();
-              String sampleType = d.getSample().getType();
-              // recursive test
-
-              registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts,sampleType, 
+              String sampleID = samples.get(d.getCode());
+              
+              registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts,
                   null);
             }
-          }
-          break;
-          
-        default:
-          datasetContainer = new HierarchicalContainer();
       }
 
       this.setContainerDataSource(datasetContainer);
@@ -704,8 +617,10 @@ public class DatasetView extends VerticalLayout implements View {
     }
   }
 
+  
+  
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
-      String project, String sample, Timestamp ts, String sampleType, Object parent) {
+      String project, String sample, Timestamp ts, Object parent) {
     if (d.hasChildren()) {
 
       Object new_ds = dataset_container.addItem();
@@ -719,11 +634,11 @@ public class DatasetView extends VerticalLayout implements View {
 
       dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
-      dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
-          d.getSample().getType());
+      //dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
+      //    d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
-      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue("-");
+      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(d.getType());
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
@@ -735,7 +650,7 @@ public class DatasetView extends VerticalLayout implements View {
       }
 
       for (DatasetBean file : subList) {
-        registerDatasetInTable(file, dataset_container, project, sample, ts, sampleType, new_ds);
+        registerDatasetInTable(file, dataset_container, project, sample, ts, new_ds);
       }
 
     } else {
@@ -747,7 +662,7 @@ public class DatasetView extends VerticalLayout implements View {
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
-      dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
+      //dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
       dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());

@@ -149,18 +149,16 @@ public class DataHandler implements Serializable {
       List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> datasets) {
     Map<String, Object> params = new HashMap<String, Object>();
     List<String> dsCodes = new ArrayList<String>();
-    Map<String, Object> samples = new HashMap<String, Object>();
     Map<String, String> types = new HashMap<String, String>();
 
     for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : datasets) {
       dsCodes.add(ds.getCode());
       types.put(ds.getCode(), ds.getDataSetTypeCode());
-      samples.put(ds.getCode(), this.getSample(ds.getSampleIdentifierOrNull()));
     }
 
     params.put("codes", dsCodes);
     QueryTableModel res = openBisClient.getAggregationService("query-files", params);
-
+  
     List<List<AggregationAdaptorBean>> beans = new ArrayList<List<AggregationAdaptorBean>>();
     String curDS = (String) res.getRows().get(0)[0];
     List<AggregationAdaptorBean> filesInDataset = new ArrayList<AggregationAdaptorBean>();
@@ -178,7 +176,7 @@ public class DataHandler implements Serializable {
     }
     beans.add(filesInDataset);
     List<DatasetBean> roots = new ArrayList<DatasetBean>();
-
+  
     for (List<AggregationAdaptorBean> dataset : beans) {
       List<DatasetBean> lastLevel = new ArrayList<DatasetBean>();
       List<DatasetBean> curLevel = new ArrayList<DatasetBean>();
@@ -189,7 +187,7 @@ public class DataHandler implements Serializable {
         newBean.setDssPath(b.getPath());
         newBean.setFileSize(b.getSize());
         newBean.setType(types.get(b.getDs()));
-        newBean.setSample((SampleBean) samples.get(b.getDs()));
+        
 
         // 2015-05-31 23:47:10 +0200
         Date date = null;
@@ -214,7 +212,6 @@ public class DataHandler implements Serializable {
       }
       roots.add(curLevel.get(curLevel.size() - 1));
     }
-
     return roots;
 
   }
