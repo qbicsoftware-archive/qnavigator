@@ -92,7 +92,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.3.2";
-  private String revision = "484";
+  private String revision = "502";
   private String resUrl;
 
   @Override
@@ -475,7 +475,6 @@ public class QbicmainportletUI extends UI {
             new ProjectBean(projectIdentifier, projectCode, desc, homeSpaceBean,
                 new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new ProgressBar(),
                 new Date(), "", "", null, false);
-
         projectContainer.addBean(newProjectBean);
       }
       homeSpaceBean.setProjects(projectContainer);

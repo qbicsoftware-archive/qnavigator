@@ -640,7 +640,6 @@ public class PatientView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    System.out.println(currentValue);
     this.setContainerDataSource(datahandler.getProject(currentValue));
     updateContent();
   }
