@@ -289,6 +289,7 @@ public class TarWriter {
 
   /**
    * returns the content type of this particular writer
+   * 
    * @return
    */
   public String getContentType() {

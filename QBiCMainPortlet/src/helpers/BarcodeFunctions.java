@@ -35,6 +35,7 @@ public class BarcodeFunctions {
 
   /**
    * Returns a String denoting the range of a list of barcodes as used in QBiC
+   * 
    * @param ids List of code strings
    * @return String denoting a range of the barcodes
    */
@@ -51,9 +52,10 @@ public class BarcodeFunctions {
     }
     return head + min + "-" + max;
   }
-  
+
   /**
    * Checks if a String fits the QBiC barcode pattern
+   * 
    * @param code A String that may be a barcode
    * @return true if String is a QBiC barcode, false if not
    */

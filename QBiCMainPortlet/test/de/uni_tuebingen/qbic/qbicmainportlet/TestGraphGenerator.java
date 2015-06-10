@@ -18,6 +18,7 @@ public class TestGraphGenerator {
   private static String DATASOURCE_USER = "datasource.user";
   private static String DATASOURCE_PASS = "datasource.password";
   private static String DATASOURCE_URL = "datasource.url";
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {}
 
@@ -34,11 +35,16 @@ public class TestGraphGenerator {
   public void testTimeForGeneration() {
     Properties config = new Properties();
     try {
-      config.load(new FileReader("/home/wojnar/QBiC/Portlets/GenericWorkflowInterfaceConfigurationFiles/portlets/portlets.properties"));
-    }catch(IOException e){
+      config
+          .load(new FileReader(
+              "/home/wojnar/QBiC/Portlets/GenericWorkflowInterfaceConfigurationFiles/portlets/portlets.properties"));
+    } catch (IOException e) {
       e.printStackTrace();
     }
-    OpenBisClient openbisClient = new OpenBisClient( config.getProperty(DATASOURCE_USER), config.getProperty(DATASOURCE_PASS), config.getProperty(DATASOURCE_URL), false);
+    OpenBisClient openbisClient =
+        new OpenBisClient(config.getProperty(DATASOURCE_USER), config.getProperty(DATASOURCE_PASS),
+            config.getProperty(DATASOURCE_URL));
+    openbisClient.login();
     
     long time = 0;
     int reruns = 5;
@@ -46,7 +52,7 @@ public class TestGraphGenerator {
     int samples = 80;
     int ds = 40;
 
-    for(int i = 0; i < reruns; i++){
+    for (int i = 0; i < reruns; i++) {
       long start = System.nanoTime();
       GraphGenerator graphFrame;
       try {
@@ -56,7 +62,7 @@ public class TestGraphGenerator {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-      
+
       long stop = System.nanoTime();
       time += stop - start;
     }
@@ -66,7 +72,7 @@ public class TestGraphGenerator {
     project = "/TEST28/QTEST";
     samples = 352;
     ds = 29;
-    for(int i = 0; i < reruns; i++){
+    for (int i = 0; i < reruns; i++) {
       long start = System.nanoTime();
       GraphGenerator graphFrame;
       try {
@@ -76,18 +82,18 @@ public class TestGraphGenerator {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-      
+
       long stop = System.nanoTime();
       time += stop - start;
     }
-    printRunTimeInfo("GraphGenerator", time, reruns, project, samples, ds);    
-    
-    //QJFPH 160 150
+    printRunTimeInfo("GraphGenerator", time, reruns, project, samples, ds);
+
+    // QJFPH 160 150
     time = 0;
     project = "QJFPH";
     samples = 160;
     ds = 150;
-    for(int i = 0; i < reruns; i++){
+    for (int i = 0; i < reruns; i++) {
       long start = System.nanoTime();
       GraphGenerator graphFrame;
       try {
@@ -97,14 +103,21 @@ public class TestGraphGenerator {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-      
+
       long stop = System.nanoTime();
       time += stop - start;
     }
     printRunTimeInfo("GraphGenerator", time, reruns, project, samples, ds);
   }
-  public void printRunTimeInfo(String funcname, long time, int reruns, String project, int samples, int ds){
-    System.out.println(String.format("%s took %f s for %s reloads for project %s with ~ %d samples and %d datasets Makes %f s on average. ",funcname, time /1000000000.0, reruns, project,samples,ds, time / 1000000000.0 / reruns));
+
+  public void printRunTimeInfo(String funcname, long time, int reruns, String project, int samples,
+      int ds) {
+    System.out
+        .println(String
+            .format(
+                "%s took %f s for %s reloads for project %s with ~ %d samples and %d datasets Makes %f s on average. ",
+                funcname, time / 1000000000.0, reruns, project, samples, ds, time / 1000000000.0
+                    / reruns));
   }
 
 }

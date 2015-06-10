@@ -33,19 +33,21 @@ public class ProxyForGenomeViewerRestApi implements RequestHandler {
    * 
    */
   private static final long serialVersionUID = 3929423697741337860L;
-  private long session; 
-  
-  public ProxyForGenomeViewerRestApi(){
+  private long session;
+
+  public ProxyForGenomeViewerRestApi() {
     Random rand = new Random();
-    rand.setSeed(System.nanoTime() + Long.parseLong(LiferayAndVaadinUtils.getUser().getScreenName(), 36));
+    rand.setSeed(System.nanoTime()
+        + Long.parseLong(LiferayAndVaadinUtils.getUser().getScreenName(), 36));
     session = rand.nextLong();
     UI.getCurrent().getSession().setAttribute("gv-restapi-session", session);
   }
 
   @Override
-  public boolean handleRequest(VaadinSession session, VaadinRequest request,
-      VaadinResponse response) throws IOException {
-    if(UI.getCurrent() != null && UI.getCurrent().getPage() != null && UI.getCurrent().getPage().getUriFragment() != null){
+  public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response)
+      throws IOException {
+    if (UI.getCurrent() != null && UI.getCurrent().getPage() != null
+        && UI.getCurrent().getPage().getUriFragment() != null) {
       System.out.println(UI.getCurrent().getPage().getUriFragment());
     }
     System.out.println("is handling request");
@@ -55,52 +57,53 @@ public class ProxyForGenomeViewerRestApi implements RequestHandler {
     Map<String, String[]> para = request.getParameterMap();
     Set<Entry<String, String[]>> s = para.entrySet();
     Iterator<Entry<String, String[]>> it = s.iterator();
-    while(it.hasNext()){
+    while (it.hasNext()) {
       Entry<String, String[]> en = it.next();
       System.out.println("Key: " + en.getKey());
       System.out.println("Value:");
-      for(int i = 0; i < en.getValue().length ; i++){
+      for (int i = 0; i < en.getValue().length; i++) {
         System.out.println(en.getValue()[i]);
       }
       System.out.println("Next");
     }
     Enumeration<String> enu = portletRequest.getParameterNames();
-    while(enu.hasMoreElements()){
+    while (enu.hasMoreElements()) {
       String su = enu.nextElement();
       System.out.println(su + " " + portletRequest.getParameter(su));
     }
     enu = portletRequest.getPropertyNames();
-    while(enu.hasMoreElements()){
+    while (enu.hasMoreElements()) {
       String su = enu.nextElement();
       System.out.println(su + " " + portletRequest.getProperty(su));
     }
     HttpServletRequest httpRequest = PortalUtil.getHttpServletRequest(portletRequest);
     System.out.println(httpRequest.getPathInfo());
     enu = httpRequest.getParameterNames();
-    while(enu.hasMoreElements()){
+    while (enu.hasMoreElements()) {
       String su = enu.nextElement();
       System.out.println(su + " " + httpRequest.getParameter(su));
     }
     System.out.println(httpRequest.getQueryString());
-    enu =  PortalUtil.getOriginalServletRequest(httpRequest).getParameterNames();
+    enu = PortalUtil.getOriginalServletRequest(httpRequest).getParameterNames();
     System.out.println(PortalUtil.getOriginalServletRequest(httpRequest).getPathInfo());
-    while(enu.hasMoreElements()){
+    while (enu.hasMoreElements()) {
       String su = enu.nextElement();
-      System.out.println(su + " " + PortalUtil.getOriginalServletRequest(httpRequest).getParameter(su));
+      System.out.println(su + " "
+          + PortalUtil.getOriginalServletRequest(httpRequest).getParameter(su));
     }
-    
-    
-    if(!String.valueOf(session).equals(request.getPathInfo())) {
+
+
+    if (!String.valueOf(session).equals(request.getPathInfo())) {
       return false;
     }
-    
+
     String fileId = request.getParameter("fileId");
     String filepaths = request.getParameter("filepath");
     String removeZeroGenotypes = request.getParameter("removeZeroGenotypes");
     String region = request.getParameter("region");
     String interval = request.getParameter("interval");
     String histogram = request.getParameter("histogram");
-    
+
     URL u;
     try {
       StringBuilder sb = new StringBuilder();
@@ -110,19 +113,20 @@ public class ProxyForGenomeViewerRestApi implements RequestHandler {
       sb.append(filepaths);
       sb.append("&region=");
       sb.append(region);
-      if(interval != null){
+      if (interval != null) {
         sb.append("&interval=");
         sb.append(interval);
       }
-      if(histogram != null){
+      if (histogram != null) {
         sb.append("&histogram=");
         sb.append(histogram);
       }
-      if(removeZeroGenotypes != null){
+      if (removeZeroGenotypes != null) {
         sb.append("");
       }
       u = new URL(sb.toString());
-      //u = new URL("http://localhost:7777/vizrest/rest/data/QBAMS001AB.bam/fetch?filepaths=/store/1/0EEF79A2-8140-4FC7-BA67-E51908FE4619/f0/91/36/20141116104428925-3161/original/QBAMS001AB.bam&removeZeroGenotypes=false&region=9:117163200-117164799,9:117164800-117166399,9:117166400-117167999,9:117168000-117169599&interval=1600&h");
+      // u = new
+      // URL("http://localhost:7777/vizrest/rest/data/QBAMS001AB.bam/fetch?filepaths=/store/1/0EEF79A2-8140-4FC7-BA67-E51908FE4619/f0/91/36/20141116104428925-3161/original/QBAMS001AB.bam&removeZeroGenotypes=false&region=9:117163200-117164799,9:117164800-117166399,9:117166400-117167999,9:117168000-117169599&interval=1600&h");
       URLConnection urlConnection = u.openConnection();
 
       urlConnection.setUseCaches(false);
@@ -140,7 +144,7 @@ public class ProxyForGenomeViewerRestApi implements RequestHandler {
         }
         out.write(buffer, 0, readCount);
       }
-      
+
     } catch (MalformedURLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

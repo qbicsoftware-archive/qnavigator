@@ -30,11 +30,12 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
@@ -42,11 +43,10 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
-
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
-import de.uni_tuebingen.qbic.user.UserRelated;
 
 @SuppressWarnings("serial")
 public class ProjectView extends VerticalLayout implements View {
@@ -144,7 +144,7 @@ public class ProjectView extends VerticalLayout implements View {
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
-    updateContentGraph();
+    //updateContentGraph();
   }
 
 
@@ -152,16 +152,18 @@ public class ProjectView extends VerticalLayout implements View {
    * 
    * @return
    */
-  HorizontalLayout initButtonLayout() {
+  Component initButtonLayout() {
     this.export = new Button("Export as TSV");
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
-
-    buttonLayoutSection.addComponent(buttonLayout);
     buttonLayout.addComponent(this.export);
-    return buttonLayout;
+    buttonLayoutSection.addComponent(buttonLayout);
+    buttonLayoutSection.setSpacing(true);
+    buttonLayoutSection.setMargin(new MarginInfo(true, false, false, false));
+    
+    return buttonLayoutSection;
   }
 
   void updateContentButtonLayout() {
@@ -278,7 +280,7 @@ public class ProjectView extends VerticalLayout implements View {
     contact = new Label("", ContentMode.HTML);
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
-    projDescriptionContent.setMargin(true);
+    projDescriptionContent.setMargin(new MarginInfo(false,false,false, true));
     projDescriptionContent.setCaption("Description");
     projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
 
@@ -289,11 +291,11 @@ public class ProjectView extends VerticalLayout implements View {
     membersContent.setIcon(FontAwesome.USERS);
     membersContent.setCaption("Members");
     membersSection.addComponent(membersContent);
-    membersSection.setMargin(true);
+    membersSection.setMargin(new MarginInfo(false,false,false, true));
     projDescription.addComponent(membersSection);
     membersSection.setWidth("100%");
 
-    projDescription.setMargin(true);
+    projDescription.setMargin(new MarginInfo(false,false,false, true));
     projDescription.setWidth("100%");
     return projDescription;
   }
@@ -318,7 +320,7 @@ public class ProjectView extends VerticalLayout implements View {
     membersContent.setWidth("100%");
     membersSection.removeAllComponents();
     membersSection.addComponent(membersContent);
-    membersSection.setMargin(true);
+    membersSection.setMargin(new MarginInfo(false,false,false, true));
   }
 
 
@@ -340,7 +342,7 @@ public class ProjectView extends VerticalLayout implements View {
     // int numOfDatasets = datahandler.datasetMap.get(project.getId()).size();
     // statContent.addComponent(new Label(String.format("%s dataset(s).", numOfDatasets)));
 
-    statContent.setMargin(true);
+    statContent.setMargin(new MarginInfo(false,false,false, true));
     statContent.setSpacing(true);
 
     /*
@@ -355,13 +357,13 @@ public class ProjectView extends VerticalLayout implements View {
      */
 
     statistics.addComponent(statContent);
-    statistics.setMargin(true);
+    statistics.setMargin(new MarginInfo(false,false,false, true));
 
 
     // status bar section
 
     status = new VerticalLayout();
-    status.setMargin(true);
+    status.setMargin(new MarginInfo(false,false,false, true));
     statistics.addComponent(status);
     return statistics;
   }
@@ -388,7 +390,7 @@ public class ProjectView extends VerticalLayout implements View {
     // TODO
     // statusContent.addComponent(new Label(projectInformation.statusMessage));
     statusContent.setSpacing(true);
-    statusContent.setMargin(true);
+    statusContent.setMargin(new MarginInfo(false,false,false, true));
 
     status.addComponent(statusContent);
   }
@@ -405,8 +407,8 @@ public class ProjectView extends VerticalLayout implements View {
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
 
-    tableSectionContent.setMargin(true);
-    tableSection.setMargin(true);
+    tableSectionContent.setMargin(new MarginInfo(false,false,false, true));
+    tableSection.setMargin(new MarginInfo(false,false,false, true));
     this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
@@ -422,7 +424,13 @@ public class ProjectView extends VerticalLayout implements View {
     // table is already set in setdataresource
   }
 
-
+  void resetGraph(){
+    graphSectionContent.removeAllComponents();
+    VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
+    graphSection.getComponent(0).setVisible(true);
+    graphSection.getComponent(0).setEnabled(true);
+  }
+  
   /**
    * 
    * @return
@@ -434,20 +442,74 @@ public class ProjectView extends VerticalLayout implements View {
     graphSectionContent.setCaption("Project Graph");
     graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
 
-    graphSectionContent.setMargin(true);
-    graphSection.setMargin(true);
+    graphSectionContent.setMargin(new MarginInfo(false,false,false, true));
+    graphSection.setMargin(new MarginInfo(false,false,false, true));
     graphSection.setWidth("100%");
     graphSectionContent.setWidth("100%");
+    final Button loadGraph = new Button("[+]");
+    loadGraph.setStyleName(ValoTheme.BUTTON_LINK);
+    loadGraph.addClickListener(new ClickListener(){
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        if(graphSectionContent.getComponentCount() == 0 || !(graphSectionContent.getComponent(0) instanceof Image) ){
+          ProgressBar progress = new ProgressBar();
+          progress.setIndeterminate(true);
+          Label info = new Label("Computing the project graph can take several seconds on big projects. Please be patient.");
+          info.setStyleName(ValoTheme.LABEL_SUCCESS);
+          graphSectionContent.addComponent(info);
+          graphSectionContent.addComponent(progress);
+          Worker worker = new Worker(getCurrent());
+          worker.start();
+          UI.getCurrent().setPollInterval(500);
+          loadGraph.setEnabled(false);
+        }
+
+        
+      }
+      public void processed(){
+        UI.getCurrent().setPollInterval(-1);
+        loadGraph.setVisible(false);
+      }
+      
+      class Worker extends Thread {
+        private ProjectView projectView;
+
+        public Worker(ProjectView current) {
+          projectView = current;
+        }
+
+        @Override
+        public void run(){
+          projectView.updateContentGraph();
+          synchronized (UI.getCurrent()) {
+            processed();
+          }
+         
+        }
+      }     
+    });
+
+    
+    graphSection.addComponent(loadGraph);
     graphSection.addComponent(graphSectionContent);
     return graphSection;
   }
-
+  public ProjectView getCurrent(){
+    return this;
+  }
   void updateContentGraph() {
     Resource resource = getGraphResource();
     if (resource != null) {
       graphSectionContent.removeAllComponents();
       Image graphImage = new Image("", resource);
       graphSectionContent.addComponent(graphImage);
+    }else{
+      Label error = new Label("Project Graph can not be computed at that time for this project.");
+      error.setStyleName(ValoTheme.LABEL_FAILURE);
+      graphSectionContent.removeAllComponents();
+      graphSectionContent.addComponent(error);
+      LOGGER.error(error.getValue());
     }
   }
 
@@ -487,7 +549,7 @@ public class ProjectView extends VerticalLayout implements View {
   private Resource getGraphResource() {
     Resource resource = null;
     try {
-      GraphGenerator graphFrame = new GraphGenerator(currentBean, datahandler.openBisClient);
+      GraphGenerator graphFrame = new GraphGenerator(datahandler.getProject(currentBean.getId()), datahandler.openBisClient);
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
@@ -541,34 +603,41 @@ public class ProjectView extends VerticalLayout implements View {
    */
   private Component getMembersComponent(Set<String> list) {
     HorizontalLayout membersLayout = new HorizontalLayout();
+
+
     if (list != null) {
+
+      Company company = null;
+      long companyId = 1;
+      try {
+        String webId = PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
+        company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
+        companyId = company.getCompanyId();
+        LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
+            companyId));
+      } catch (PortalException | SystemException e) {
+        LOGGER.error(
+            "liferay error, could not retrieve companyId. Trying default companyId, which is "
+                + companyId, e.getStackTrace());
+      }
+
       StringBuilder memberString = new StringBuilder();
       for (String member : list) {
-
-        String webId =  PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
-        
-        Company company;
         User user = null;
         try {
-          company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
-          long companyId = company.getCompanyId();
-          LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId, companyId));
           user = UserLocalServiceUtil.getUserByScreenName(companyId, member);
         } catch (PortalException | SystemException e) {
-          LOGGER.debug("Liferay error.");
-          //LOGGER.error("liferay error", e.getStackTrace());
         }
-        
-        if(memberString.length() > 0){
+
+        if (memberString.length() > 0) {
           memberString.append(" , ");
         }
-        
-        if(user == null){
+
+        if (user == null) {
           LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
           memberString.append(member);
-          //membersLayout.addComponent(new Label(member));
-        }
-        else{
+          // membersLayout.addComponent(new Label(member));
+        } else {
           String fullname = user.getFullName();
           String email = user.getEmailAddress();
           // VaadinSession.getCurrent().getService();
@@ -580,11 +649,11 @@ public class ProjectView extends VerticalLayout implements View {
           // image.setHeight(80, Unit.PIXELS);
           // image.setWidth(65, Unit.PIXELS);
           // membersLayout.addComponent(image);
-          //String labelString =
-          //    new String("<a href=\"mailto:" + email
-          //        + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
-          //Label userLabel = new Label(labelString, ContentMode.HTML);
-          //membersLayout.addComponent(userLabel);
+          // String labelString =
+          // new String("<a href=\"mailto:" + email
+          // + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
+          // Label userLabel = new Label(labelString, ContentMode.HTML);
+          // membersLayout.addComponent(userLabel);
           memberString.append("<a href=\"mailto:");
           memberString.append(email);
           memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
@@ -594,10 +663,10 @@ public class ProjectView extends VerticalLayout implements View {
 
 
       }
-      Label label = new Label(memberString.toString(),ContentMode.HTML);
+      Label label = new Label(memberString.toString(), ContentMode.HTML);
       membersLayout.addComponent(label);
       membersLayout.setSpacing(true);
-      membersLayout.setMargin(true);
+      membersLayout.setMargin(new MarginInfo(false,false,false, true));
     }
     return membersLayout;
   }
@@ -652,9 +721,16 @@ public class ProjectView extends VerticalLayout implements View {
     String currentValue = event.getParameters();
     // TODO updateContent only if currentProject is not equal to newProject
     this.table.unselect(this.table.getValue());
-    this.setContainerDataSource(datahandler.getProject(currentValue));
-
+    LOGGER.debug(currentValue);
+    ProjectBean pbean = datahandler.getProject2(currentValue);
+    LOGGER.debug(pbean.getCode());
+    //if the new project bean is different than reset the graph.
+    if(currentBean != null && !pbean.getId().equals(currentBean.getId())){
+      resetGraph();
+    }
+    this.setContainerDataSource(pbean);
     updateContent();
+   
   }
 
   public ProjectBean getCurrentBean() {

@@ -165,16 +165,15 @@ public class SampleView extends VerticalLayout implements View {
     manage.setIcon(new ThemeResource("barcode_higher.png"));
 
     this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
-    
-    /*
-    MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_higher.png"));
-    workflows.setEnabled(false);
 
-    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    analyze.setIcon(new ThemeResource("graph_higher.png"));
-    analyze.setEnabled(false);*/
-    
+    /*
+     * MenuItem workflows = menubar.addItem("Run workflows", null, null); workflows.setIcon(new
+     * ThemeResource("dna_higher.png")); workflows.setEnabled(false);
+     * 
+     * MenuItem analyze = menubar.addItem("Analyze your data", null, null); analyze.setIcon(new
+     * ThemeResource("graph_higher.png")); analyze.setEnabled(false);
+     */
+
     return menubar;
   }
 
@@ -408,7 +407,7 @@ public class SampleView extends VerticalLayout implements View {
     // TODO updateContent only if currentExperiment is not equal to newExperiment
     this.table.unselect(this.table.getValue());
     this.setContainerDataSource(datahandler.getSample(currentValue));
-    
+
     updateContent();
 
   }
@@ -416,8 +415,8 @@ public class SampleView extends VerticalLayout implements View {
   public SampleBean getCurrentBean() {
     return currentBean;
   }
-  
-  
+
+
   /**
    * Enables or disables the component. The user can not interact disabled components, which are
    * shown with a style that indicates the status, usually shaded in light gray color. Components

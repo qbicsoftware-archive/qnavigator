@@ -14,8 +14,9 @@ public class SysOutLogger implements Logger {
   private String className;
   private LogLevel loglevel = LogLevel.info;
   private boolean isDebug = false;
-  private boolean isInfo  = true;
-  private boolean isWarn = true;  
+  private boolean isInfo = true;
+  private boolean isWarn = true;
+
   /**
    * initializes the underlying logger object. For the given class.
    * 
@@ -27,7 +28,8 @@ public class SysOutLogger implements Logger {
 
   @Override
   public void debug(String message) {
-    if(isDebug)log(getDateTime(), "DEBUG: ", message);
+    if (isDebug)
+      log(getDateTime(), "DEBUG: ", message);
   }
 
   public void log(String time, String mode, String message) {
@@ -36,13 +38,15 @@ public class SysOutLogger implements Logger {
 
   @Override
   public void info(String message) {
-    if(isInfo)log(getDateTime(), "INFO: ", message);
+    if (isInfo)
+      log(getDateTime(), "INFO: ", message);
 
   }
 
   @Override
   public void warn(String message) {
-    if(isWarn)log(getDateTime(), "WARN: ", message);
+    if (isWarn)
+      log(getDateTime(), "WARN: ", message);
 
   }
 
@@ -55,34 +59,33 @@ public class SysOutLogger implements Logger {
   @Override
   public void error(String message, Throwable t) {
     log(getDateTime(), "ERROR", message);
-    if(t == null || t.getStackTrace() == null){
+    if (t == null || t.getStackTrace() == null) {
       return;
-    }
-    else if(t.getStackTrace().length > 10){
+    } else if (t.getStackTrace().length > 10) {
       t.setStackTrace(Arrays.copyOfRange(t.getStackTrace(), 0, 10));
     }
-    
+
     System.out.println(t.getMessage());
   }
+
   @Override
   public void error(String message, StackTraceElement[] stackTraceElement) {
     log(getDateTime(), "ERROR", message);
-    if(stackTraceElement == null){
+    if (stackTraceElement == null) {
       return;
-    }
-    else if(stackTraceElement.length > 10){
+    } else if (stackTraceElement.length > 10) {
       stackTraceElement = Arrays.copyOfRange(stackTraceElement, 0, 10);
-    } 
+    }
     System.out.println(stackTraceElement);
-    
+
   }
-  
+
   public void setLogLevel(LogLevel loglevel) {
     this.loglevel = loglevel;
     isDebug = false;
-    isInfo  = false;
+    isInfo = false;
     isWarn = false;
-    switch(loglevel){
+    switch (loglevel) {
       case debug:
         isDebug = true;
       case info:
@@ -94,7 +97,7 @@ public class SysOutLogger implements Logger {
     }
   }
 
-  
+
   public LogLevel getLogLevel() {
     return this.loglevel;
   }

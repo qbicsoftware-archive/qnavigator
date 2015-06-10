@@ -28,10 +28,11 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
+
 public class TestDatasetView {
 
   DatasetView datasetView;
-  
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {}
 
@@ -41,18 +42,29 @@ public class TestDatasetView {
   @Before
   public void setUp() throws Exception {
     DataHandler dh = mock(DataHandler.class);
-    
-    SpaceBean spaceBean = new SpaceBean("space-id", "i am a space", true, null, null, null, null, null, null);
-    
-    BeanItemContainer<DatasetBean> datasets1 = new BeanItemContainer<DatasetBean>(DatasetBean.class);
-    BeanItemContainer<DatasetBean> datasets2 = new BeanItemContainer<DatasetBean>(DatasetBean.class);
-    BeanItemContainer<DatasetBean> datasets3 = new BeanItemContainer<DatasetBean>(DatasetBean.class);
-    BeanItemContainer<DatasetBean> datasets4 = new BeanItemContainer<DatasetBean>(DatasetBean.class);
-    
+
+    SpaceBean spaceBean =
+        new SpaceBean("space-id", "i am a space", true, null, null, null, null, null, null);
+
+    BeanItemContainer<DatasetBean> datasets1 =
+        new BeanItemContainer<DatasetBean>(DatasetBean.class);
+    BeanItemContainer<DatasetBean> datasets2 =
+        new BeanItemContainer<DatasetBean>(DatasetBean.class);
+    BeanItemContainer<DatasetBean> datasets3 =
+        new BeanItemContainer<DatasetBean>(DatasetBean.class);
+    BeanItemContainer<DatasetBean> datasets4 =
+        new BeanItemContainer<DatasetBean>(DatasetBean.class);
+
     List<DatasetBean> children1 = new ArrayList<DatasetBean>();
     DatasetBean datasetBean1 = new DatasetBean();
-    DatasetBean datasetBean01 = new DatasetBean(new CheckBox(), null, null, null, "dataset01-code", "dataset01.txt", "txt", 5, "5 B", "/dss/openbis/oscureCode1/dataset01.txt", new Date(), "me", false, datasetBean1, datasetBean1, null);
-    DatasetBean datasetBean02 = new DatasetBean(new CheckBox(), null, null, null, "dataset02-code", "dataset02.html", "html", 10, "10 B", "/dss/openbis/oscureCode1/dataset02.html", new Date(), "me", false, datasetBean1, datasetBean1, null);
+    DatasetBean datasetBean01 =
+        new DatasetBean(new CheckBox(), null, null, null, "dataset01-code", "dataset01.txt", "txt",
+            5, "5 B", "/dss/openbis/oscureCode1/dataset01.txt", new Date(), "me", false,
+            datasetBean1, datasetBean1, null);
+    DatasetBean datasetBean02 =
+        new DatasetBean(new CheckBox(), null, null, null, "dataset02-code", "dataset02.html",
+            "html", 10, "10 B", "/dss/openbis/oscureCode1/dataset02.html", new Date(), "me", false,
+            datasetBean1, datasetBean1, null);
     children1.add(datasetBean02);
     children1.add(datasetBean01);
     datasetBean1.setChildren(children1);
@@ -71,43 +83,60 @@ public class TestDatasetView {
     datasetBean1.setRoot(null);
     datasetBean1.setSample(null);
     datasetBean1.setSelected(false);
-    
+
     datasets1.addBean(datasetBean1);
-    
-    
+
+
     BeanItemContainer<SampleBean> samples1 = new BeanItemContainer<SampleBean>(SampleBean.class);
     BeanItemContainer<SampleBean> samples2 = new BeanItemContainer<SampleBean>(SampleBean.class);
-    SampleBean sample1 = new SampleBean("sample1-id", "sample1-code", "sample1-type", null, datasets1, new Date(), null, null,null);
-    SampleBean sample2 = new SampleBean("sample2-id", "sample2-code", "sample2-type", null, datasets2, new Date(), null, null,null);
-    SampleBean sample3 = new SampleBean("sample3-id", "sample3-code", "sample3-type", null, datasets3, new Date(), null, null,null);
-    SampleBean sample4 = new SampleBean("sample4-id", "sample4-code", "sample4-type", null, datasets4, new Date(), null, null,null);
-    
+    SampleBean sample1 =
+        new SampleBean("sample1-id", "sample1-code", "sample1-type", null, datasets1, new Date(),
+            null, null, null);
+    SampleBean sample2 =
+        new SampleBean("sample2-id", "sample2-code", "sample2-type", null, datasets2, new Date(),
+            null, null, null);
+    SampleBean sample3 =
+        new SampleBean("sample3-id", "sample3-code", "sample3-type", null, datasets3, new Date(),
+            null, null, null);
+    SampleBean sample4 =
+        new SampleBean("sample4-id", "sample4-code", "sample4-type", null, datasets4, new Date(),
+            null, null, null);
+
     samples1.addBean(sample1);
     samples1.addBean(sample2);
     samples1.addBean(sample3);
     samples2.addBean(sample4);
-    
-    
-    
-    ExperimentBean expbean1 = new ExperimentBean("expbean1-id", "expbean1-code", "expbean1-type", new Image(), "Lister", new Date(), samples1, "sample1-id", new Date(), new HashMap<String,String>(), new  HashMap<String, List<String>>(), new HashMap<String, String> ());
-    ExperimentBean expbean2 = new ExperimentBean("expbean2-id", "expbean2-code", "expbean2-type", new Image(), "Lister", new Date(), samples2, "sample4-id", new Date(), new HashMap<String,String>(), new  HashMap<String, List<String>>(), new HashMap<String, String> ());
-    BeanItemContainer<ExperimentBean> expbeans = new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
+
+
+
+    ExperimentBean expbean1 =
+        new ExperimentBean("expbean1-id", "expbean1-code", "expbean1-type", new Image(), "Lister",
+            new Date(), samples1, "sample1-id", new Date(), new HashMap<String, String>(),
+            new HashMap<String, List<String>>(), new HashMap<String, String>());
+    ExperimentBean expbean2 =
+        new ExperimentBean("expbean2-id", "expbean2-code", "expbean2-type", new Image(), "Lister",
+            new Date(), samples2, "sample4-id", new Date(), new HashMap<String, String>(),
+            new HashMap<String, List<String>>(), new HashMap<String, String>());
+    BeanItemContainer<ExperimentBean> expbeans =
+        new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
     expbeans.addBean(expbean1);
     expbeans.addBean(expbean2);
     Set<String> members = new HashSet<String>();
-    
-    ProjectBean projectBean = new ProjectBean("project-id", "project-code", "project-description", spaceBean, expbeans, new ProgressBar(0.25f), new Date(), "Davinci", "Donatello", members, true);
+
+    ProjectBean projectBean =
+        new ProjectBean("project-id", "project-code", "project-description", spaceBean, expbeans,
+            new ProgressBar(0.25f), new Date(), "Davinci", "Donatello", members, true);
     datasetBean1.setProject(projectBean);
     datasetBean1.setExperiment(expbean1);
     datasetBean1.setSample(sample1);
-    
-    //stubbing
+
+    // stubbing
     when(dh.getProject("project-id")).thenReturn(projectBean);
-    
-    
+
+
     datasetView = new DatasetView(dh);
-    
-    
+
+
   }
 
   @After

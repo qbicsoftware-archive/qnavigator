@@ -270,17 +270,15 @@ public class BarcodeView extends VerticalLayout implements View {
           bioType = s.getProperties().get("Q_SEQUENCING_TYPE");
         }
         String secName = s.getProperties().get("Q_SECONDARY_NAME");
-        
-        if(secName == null) {
-          samples.add(new NewSampleModelBean(s.getCode(), "",
-              bioType));
+
+        if (secName == null) {
+          samples.add(new NewSampleModelBean(s.getCode(), "", bioType));
+        } else {
+          samples.add(new NewSampleModelBean(s.getCode(),
+              s.getProperties().get("Q_SECONDARY_NAME"), bioType));
+
         }
-        else {
-          samples.add(new NewSampleModelBean(s.getCode(), s.getProperties().get("Q_SECONDARY_NAME"),
-              bioType));
-         
-        }
-         }
+      }
     }
     return translateBeans(samples);
   }
@@ -444,7 +442,7 @@ public class BarcodeView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-     System.out.println("currentValue: " + currentValue);
+    System.out.println("currentValue: " + currentValue);
     // System.out.println("navigateToLabel: " + navigateToLabel);
     try {
       System.out.println(openbis.loggedin());
@@ -456,10 +454,11 @@ public class BarcodeView extends VerticalLayout implements View {
 
   private List<ExperimentBarcodeSummaryBean> getSummaryBeans(OpenBisClient openbis, String project) {
     List<String> barcodeExperiments =
-        new ArrayList<String>(Arrays.asList("Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION", "Q_NGS_MEASUREMENT"));
+        new ArrayList<String>(Arrays.asList("Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION",
+            "Q_NGS_MEASUREMENT"));
     List<ExperimentBarcodeSummaryBean> beans = new ArrayList<ExperimentBarcodeSummaryBean>();
     System.out.println(openbis.getExperimentsOfProjectByIdentifier(project));
-    
+
     for (Experiment e : openbis.getExperimentsOfProjectByIdentifier(project)) {
       String type = e.getExperimentTypeCode();
       if (barcodeExperiments.contains(type)) {

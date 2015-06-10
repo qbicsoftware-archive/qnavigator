@@ -2,8 +2,8 @@ package model;
 
 import java.io.Serializable;
 
-public class NewIvacSampleBean implements Serializable{
-  
+public class NewIvacSampleBean implements Serializable {
+
   String type;
   Integer amount;
   String tissue;
@@ -11,8 +11,9 @@ public class NewIvacSampleBean implements Serializable{
   Boolean dnaSeq;
   Boolean rnaSeq;
   Boolean deepSeq;
-  
-  public NewIvacSampleBean(String type, Integer amount, String tissue, Boolean dnaSeq, Boolean rnaSeq, Boolean deepSeq, String seqDevice) {
+
+  public NewIvacSampleBean(String type, Integer amount, String tissue, Boolean dnaSeq,
+      Boolean rnaSeq, Boolean deepSeq, String seqDevice) {
     this.type = type;
     this.amount = amount;
     this.tissue = tissue;
@@ -21,9 +22,9 @@ public class NewIvacSampleBean implements Serializable{
     this.deepSeq = deepSeq;
     this.seqDevice = seqDevice;
   }
-  
+
   public NewIvacSampleBean() {
-    
+
   }
 
   public String getType() {
@@ -73,7 +74,7 @@ public class NewIvacSampleBean implements Serializable{
   public void setDeepSeq(Boolean deepSeq) {
     this.deepSeq = deepSeq;
   }
-  
+
   public String getSeqDevice() {
     return seqDevice;
   }
@@ -83,4 +84,3 @@ public class NewIvacSampleBean implements Serializable{
   }
 
 }
-  

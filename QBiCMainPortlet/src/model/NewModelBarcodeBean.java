@@ -15,10 +15,10 @@ public class NewModelBarcodeBean implements IBarcodeBean {
     this.type = type;
     this.parents = parents;
   }
-  
+
   @Override
   public String toString() {
-    return Code+" "+Secondary_Name+" "+type+" "+parents;
+    return Code + " " + Secondary_Name + " " + type + " " + parents;
   }
 
   public String getCode() {

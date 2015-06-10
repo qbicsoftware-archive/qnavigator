@@ -33,8 +33,8 @@ public class ButtonLink extends Label {
     buildHTMLCode(externalResource.getURL());
     super.setContentMode(ContentMode.HTML);
   }
-  
-//The following lines are copy pasted from rendered Vaadin v6.1 buttons.
+
+  // The following lines are copy pasted from rendered Vaadin v6.1 buttons.
   private void buildHTMLCode(String url) {
     StringBuilder sb = new StringBuilder("<a href='");
     sb.append(url);

@@ -26,7 +26,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
   private String code;
   private String type;
   // Map containing parents of the sample and the corresponding sample types
-  //private Map<String, String> parents;
+  // private Map<String, String> parents;
   private List<Sample> parents;
   private List<Sample> children;
   private BeanItemContainer<DatasetBean> datasets;
@@ -48,9 +48,9 @@ public class SampleBean implements Comparable<Object>, Serializable {
     this.typeLabels = typeLabels;
     this.children = children;
   }
-  
+
   public SampleBean() {
-    
+
   }
 
 
@@ -136,7 +136,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
   public void setProperties(Map<String, String> properties) {
     this.properties = properties;
   }
-  
+
   public Map<String, String> getTypeLabels() {
     return typeLabels;
   }
@@ -165,24 +165,24 @@ public class SampleBean implements Comparable<Object>, Serializable {
   public int hashCode() {
     return id.hashCode();
   }
-  
+
   public String getParentsFormattedString() {
     String parentsHeader = "This sample has been derived from the following samples: ";
     String parentsBottom = "<ul>";
 
-    if (this.getParents().isEmpty()) {
-      return  parentsHeader += "None";
-
+    if (this.getParents() == null || this.getParents().isEmpty()) {
+      return parentsHeader += "None";
     } else {
-        for(Sample sample: this.getParents()) {
-        parentsBottom += "<li><b>" + sample.getCode() + "</b> (" + sample.getSampleTypeCode() + ") </li>";
+      for (Sample sample : this.getParents()) {
+        parentsBottom +=
+            "<li><b>" + sample.getCode() + "</b> (" + sample.getSampleTypeCode() + ") </li>";
       }
       parentsBottom += "</ul>";
-      
+
       return parentsHeader + parentsBottom;
     }
   }
-  
+
   public String generatePropertiesFormattedString() throws JAXBException {
     String propertiesBottom = "<ul> ";
 
@@ -191,16 +191,16 @@ public class SampleBean implements Comparable<Object>, Serializable {
       Map.Entry pairs = (Map.Entry) it.next();
       if (pairs.getKey().equals("Q_PROPERTIES")) {
         continue;
-        }
-      else {
-       propertiesBottom += "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
+      } else {
+        propertiesBottom +=
+            "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
       }
     }
     propertiesBottom += "</ul>";
 
     return propertiesBottom;
   }
-  
+
   public String generateXMLPropertiesFormattedString() throws JAXBException {
 
     String xmlPropertiesBottom = "<ul> ";
@@ -220,13 +220,14 @@ public class SampleBean implements Comparable<Object>, Serializable {
 
           xmlPropertiesBottom +=
               "<li><b>"
-                  + (typeLabels.get(pairsProperties.getKey()) + ":</b> " + pairsProperties.getValue() + "</li>");
+                  + (typeLabels.get(pairsProperties.getKey()) + ":</b> "
+                      + pairsProperties.getValue() + "</li>");
         }
         break;
       }
     }
     return xmlPropertiesBottom;
-}
+  }
 
   public List<Sample> getChildren() {
     return children;
@@ -235,5 +236,5 @@ public class SampleBean implements Comparable<Object>, Serializable {
   public void setChildren(List<Sample> children) {
     this.children = children;
   }
-  
+
 }

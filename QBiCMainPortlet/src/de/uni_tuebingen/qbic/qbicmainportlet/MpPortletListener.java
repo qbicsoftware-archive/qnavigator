@@ -101,110 +101,100 @@ public class MpPortletListener implements PortletListener,
 
   private boolean handleRequestHelper2(ResourceResponse response, ResourceRequest request, UI uI) {
     boolean ret = true;
-      // int bufferSize = 0;
-      // if (bufferSize <= 0 || bufferSize > MAX_BUFFER_SIZE) {
-      int bufferSize = DEFAULT_BUFFER_SIZE;
-      // }
-      OutputStream out = null;
-      InputStream fis = null;
-      TarOutputStream zipWriter = null;
-      try {
-        // Sets content type
-        response.setContentType(contentType);
+    // int bufferSize = 0;
+    // if (bufferSize <= 0 || bufferSize > MAX_BUFFER_SIZE) {
+    int bufferSize = DEFAULT_BUFFER_SIZE;
+    // }
+    OutputStream out = null;
+    InputStream fis = null;
+    TarOutputStream zipWriter = null;
+    try {
+      // Sets content type
+      response.setContentType(contentType);
 
-        // Sets cache headers
-        String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
-        response.setProperty("Content-Disposition", contentDispositionValue);
+      // Sets cache headers
+      String contentDispositionValue = "attachement; filename=\"" + filename + "\"";
+      response.setProperty("Content-Disposition", contentDispositionValue);
 
-        long[] file_sizes = new long[this.currentSelectedTableIndices.size()];
-        int i = 0;
-        Iterator<Object> iterator = this.currentSelectedTableIndices.iterator();
+      long[] file_sizes = new long[this.currentSelectedTableIndices.size()];
+      int i = 0;
+      Iterator<Object> iterator = this.currentSelectedTableIndices.iterator();
 
-        //
-        while (iterator.hasNext()) {
-          file_sizes[i] =
-              (Long) this.table.getItem(iterator.next()).getItemProperty("file_size_bytes")
-                  .getValue();
-          System.out.println(file_sizes[i]);
-          i++;
-        }
+      //
+      while (iterator.hasNext()) {
+        file_sizes[i] =
+            (Long) this.table.getItem(iterator.next()).getItemProperty("file_size_bytes")
+                .getValue();
+        System.out.println(file_sizes[i]);
+        i++;
+      }
 
-        long tarFileLength = computeTarLength(file_sizes, tar_record_size, tar_block_size);
+      long tarFileLength = computeTarLength(file_sizes, tar_record_size, tar_block_size);
 
-        // response.setContentLength((int) tarFileLength);
-        // For some reason setContentLength does not work
-        response.setProperty("Content-Length", String.valueOf(tarFileLength));
+      // response.setContentLength((int) tarFileLength);
+      // For some reason setContentLength does not work
+      response.setProperty("Content-Length", String.valueOf(tarFileLength));
 
-        final byte[] buffer = new byte[bufferSize];
+      final byte[] buffer = new byte[bufferSize];
 
-        out = response.getPortletOutputStream();
+      out = response.getPortletOutputStream();
 
-        zipWriter =
-            new TarOutputStream(new BufferedOutputStream(out), tar_block_size, tar_record_size);// new
-                                                                                                // ZipOutputStream(new
-                                                                                                // BufferedOutputStream(out));
+      zipWriter =
+          new TarOutputStream(new BufferedOutputStream(out), tar_block_size, tar_record_size);// new
+                                                                                              // ZipOutputStream(new
+                                                                                              // BufferedOutputStream(out));
 
-        i = 0;
-        iterator = this.currentSelectedTableIndices.iterator();
-        while (iterator.hasNext()) {
-          Object next = iterator.next();
-          String fileName =
-              (String) this.table.getItem(next).getItemProperty("File Name").getValue();
-          System.out.println(fileName);
-          int bytesRead = 0;
+      i = 0;
+      iterator = this.currentSelectedTableIndices.iterator();
+      while (iterator.hasNext()) {
+        Object next = iterator.next();
+        String fileName = (String) this.table.getItem(next).getItemProperty("File Name").getValue();
+        System.out.println(fileName);
+        int bytesRead = 0;
 
-          fis =
-              dataHandler.openBisClient.getDatasetStream((String) this.table.getItem(next)
-                  .getItemProperty("CODE").getValue());
-          System.out.println((String) this.table.getItem(next)
-                  .getItemProperty("CODE").getValue());
+        fis =
+            dataHandler.openBisClient.getDatasetStream((String) this.table.getItem(next)
+                .getItemProperty("CODE").getValue());
+        System.out.println((String) this.table.getItem(next).getItemProperty("CODE").getValue());
 
-          BufferedInputStream fif = new BufferedInputStream(fis);
+        BufferedInputStream fif = new BufferedInputStream(fis);
 
-          TarEntry tar_entry = new TarEntry(fileName);
-          tar_entry.setSize(file_sizes[i]);
-          i++;
-          zipWriter.putNextEntry(tar_entry);// putNextEntry( new
-                                            // org.apache.tools.zip.ZipEntry(fileName +
-                                            // String.valueOf(i)));
-          long totalWritten = 0;
+        TarEntry tar_entry = new TarEntry(fileName);
+        tar_entry.setSize(file_sizes[i]);
+        i++;
+        zipWriter.putNextEntry(tar_entry);// putNextEntry( new
+                                          // org.apache.tools.zip.ZipEntry(fileName +
+                                          // String.valueOf(i)));
+        long totalWritten = 0;
 
-          while ((bytesRead = fif.read(buffer)) > 0) {
-            // zipWriter.write(buffer, 0, bytesRead);
-            zipWriter.write(buffer, 0, bytesRead);
-            totalWritten += bytesRead;
-            if (totalWritten >= buffer.length) {
-              // Avoid chunked encoding for small resources
-              // zipWriter.flush();
-              zipWriter.flush();
-            }
+        while ((bytesRead = fif.read(buffer)) > 0) {
+          // zipWriter.write(buffer, 0, bytesRead);
+          zipWriter.write(buffer, 0, bytesRead);
+          totalWritten += bytesRead;
+          if (totalWritten >= buffer.length) {
+            // Avoid chunked encoding for small resources
+            // zipWriter.flush();
+            zipWriter.flush();
           }
-          // StreamUtil.transfer(fif, zipWriter,false);
-          zipWriter.closeEntry();
-          // out.flush();
-          try {
-            // try to close stream
-            if (fis != null) {
-              fis.close();
-            }
-          } catch (IOException e1) {
-            // NOP
-          }
-
         }
-        out.close();
- /*
+        // StreamUtil.transfer(fif, zipWriter,false);
+        zipWriter.closeEntry();
+        // out.flush();
         try {
           // try to close stream
-          if (zipWriter != null) {
-            zipWriter.close();
-          }
-          if (out != null) {
-            out.close();
+          if (fis != null) {
+            fis.close();
           }
         } catch (IOException e1) {
           // NOP
-        }  */
+        }
+
+      }
+      out.close();
+      /*
+       * try { // try to close stream if (zipWriter != null) { zipWriter.close(); } if (out != null)
+       * { out.close(); } } catch (IOException e1) { // NOP }
+       */
 
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -279,8 +269,8 @@ public class MpPortletListener implements PortletListener,
             fis =
                 dataHandler.openBisClient.getDatasetStream((String) this.table.getItem(next)
                     .getItemProperty("CODE").getValue());
-            System.out.println((String) this.table.getItem(next)
-                    .getItemProperty("CODE").getValue());
+            System.out
+                .println((String) this.table.getItem(next).getItemProperty("CODE").getValue());
             BufferedInputStream fif = new BufferedInputStream(fis);
 
             TarEntry tar_entry = new TarEntry(fileName + String.valueOf(i));
@@ -400,8 +390,8 @@ public class MpPortletListener implements PortletListener,
         String datasetCode = (String) table.getItem(next).getItemProperty("CODE").getValue();
         String datasetType = (String) table.getItem(next).getItemProperty("File Name").getValue();
         try {
-          this.open.setResource(new ExternalResource(dataHandler.openBisClient.getUrlForDataset(datasetCode,
-              datasetType)));
+          this.open.setResource(new ExternalResource(dataHandler.openBisClient.getUrlForDataset(
+              datasetCode, datasetType)));
           this.open.setEnabled(true);
         } catch (MalformedURLException e) {
           // TODO Auto-generated catch block
@@ -409,12 +399,16 @@ public class MpPortletListener implements PortletListener,
         }
         this.currentSelectedTableIndices = null;
       } else if (this.currentSelectedTableIndices.size() > 1) {
-        if(this.resURL == null){System.out.println("res is null");}
-        if(this.open == null) {System.out.println("open is null??");}
+        if (this.resURL == null) {
+          System.out.println("res is null");
+        }
+        if (this.open == null) {
+          System.out.println("open is null??");
+        }
         this.resURL.setResourceID(RESOURCE_ID);
         System.out.println(this.resURL);
         this.open.setResource(new ExternalResource(this.resURL.toString()));
-        this.open.setEnabled(true);//UI.getCurrent().getPage().getWebBrowser().isChrome());
+        this.open.setEnabled(true);// UI.getCurrent().getPage().getWebBrowser().isChrome());
       } else {
         // nothing selected. Probably will never occur, because then the set is probably null
         this.currentSelectedTableIndices = null;

@@ -104,7 +104,7 @@ public class Utils {
       return (char) (charValue + 1);
     }
   }
-  
+
   public static StreamResource getTSVStream(final String content, String id) {
     StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
       private static final long serialVersionUID = 946357391804404061L;
@@ -122,7 +122,7 @@ public class Utils {
     }, String.format("%s_table_contents.tsv", id));
     return resource;
   }
-  
+
   public static String containerToString(Container container) {
     String header = "";
     Collection<?> i = container.getItemIds();
@@ -154,8 +154,8 @@ public class Utils {
     }
     return header + "\n" + rowString;
   }
-  
-  //TODO fix and test
+
+  // TODO fix and test
   public static String containerToString(BeanItemContainer container) {
     String header = "";
     Collection<?> i = container.getItemIds();
@@ -187,11 +187,10 @@ public class Utils {
     }
     return header + "\n" + rowString;
   }
-  
+
   public static void printMapContent(Map<String, Object> map) {
-    for (Map.Entry<String, Object> entry : map.entrySet())
-    {
-        System.out.println(entry.getKey() + ": " + entry.getValue());
+    for (Map.Entry<String, Object> entry : map.entrySet()) {
+      System.out.println(entry.getKey() + ": " + entry.getValue());
     }
   }
 

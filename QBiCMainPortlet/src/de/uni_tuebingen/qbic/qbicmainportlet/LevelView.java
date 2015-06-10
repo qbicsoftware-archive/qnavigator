@@ -24,15 +24,14 @@ public class LevelView extends VerticalLayout implements View {
   Component mainComponent;
   String navigateToLabel;
 
-  public LevelView() {
+  public LevelView() {}
+
+  public LevelView(Component component) {
+    this(component, "");
   }
-  
-  public LevelView(Component component){
-    this(component,"");
-  }
-  
-  
-  public LevelView( Component component, String navigateToLabel) {
+
+
+  public LevelView(Component component, String navigateToLabel) {
     this.navigateToLabel = navigateToLabel;
     this.mainComponent = component;
     this.buildLayout();
@@ -99,80 +98,73 @@ public class LevelView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     /*
-    String currentValue = event.getParameters();
-    System.out.println("currentValue: " + currentValue);
-    System.out.println("navigateToLabel: " + navigateToLabel);
-    // System.out.println("type: " +
-    // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue());
-    // System.out.println("ID: " +
-    // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("identifier").getValue());
-    DataHandler dh = (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
-*/
-    /*if (this.mainComponent instanceof DatasetView) {
-      DatasetView ds = (DatasetView) this.mainComponent;
-      try {
-        ds.setContainerDataSource(dh.getDatasets((String) currentValue, navigateToLabel));
-      } catch (Exception e) {
-        System.out.println("Exception in LevelView.enter. mainComponent is DatasetView");
-         e.printStackTrace();
-      }
-      // ds.setInfo(name, type);
-
-    }*/ /*else if (this.mainComponent instanceof SampleView) {
-      SampleView sv = (SampleView) this.mainComponent;
-      try {
-        sv.setContainerDataSource(dh.getSampleInformation(currentValue), currentValue);
-      } catch (Exception e) {
-        System.out.println("Exception in LevelView.enter. mainComponent is SampleView");
-        // e.printStackTrace();
-      }
-    } *//*else if (this.mainComponent instanceof SpaceView) {
-      SpaceView sv = (SpaceView) this.mainComponent;
-      try {
-
-        // String type =
-        // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        sv.setContainerDataSource(dh.getSpace(currentValue), currentValue);
-      } catch (Exception e) {
-        System.out.println("Exception in LevelView.enter. mainComponent is SpaceView");
-        // e.printStackTrace();
-      }
-    } *//*else if (this.mainComponent instanceof ProjectView) {
-      ProjectView pv = (ProjectView) this.mainComponent;
-      try {
-
-        // String type =
-        // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-
-        // String type =
-        // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        Project project = dh.openBisClient.getProjectByCode(currentValue);
-        String projectIdentifier = project.getIdentifier();
-
-        pv.setContainerDataSource(dh.getProjectInformation(projectIdentifier), currentValue);
-      } catch (Exception e) {
-        System.out.println("Exception in LevelView.enter. mainComponent is ProjectView");
-        // e.printStackTrace();
-      }
-    } *//*else if (this.mainComponent instanceof ExperimentView) {
-      ExperimentView ev = (ExperimentView) this.mainComponent;
-      try {
-        // String type =
-        // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        ev.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }*//* else if (this.mainComponent instanceof ChangePropertiesView) {
-      ChangePropertiesView cpv = (ChangePropertiesView) this.mainComponent;
-      try {
-        // String type =
-        // this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty("type").getValue().toString();
-        cpv.setContainerDataSource(dh.getExperimentInformation(currentValue), currentValue);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }*/
+     * String currentValue = event.getParameters(); System.out.println("currentValue: " +
+     * currentValue); System.out.println("navigateToLabel: " + navigateToLabel); //
+     * System.out.println("type: " + //
+     * this.treeView.getContainerDataSource().getItem(currentValue).
+     * getItemProperty("type").getValue()); // System.out.println("ID: " + //
+     * this.treeView.getContainerDataSource
+     * ().getItem(currentValue).getItemProperty("identifier").getValue()); DataHandler dh =
+     * (DataHandler) UI.getCurrent().getSession().getAttribute("datahandler");
+     */
+    /*
+     * if (this.mainComponent instanceof DatasetView) { DatasetView ds = (DatasetView)
+     * this.mainComponent; try { ds.setContainerDataSource(dh.getDatasets((String) currentValue,
+     * navigateToLabel)); } catch (Exception e) {
+     * System.out.println("Exception in LevelView.enter. mainComponent is DatasetView");
+     * e.printStackTrace(); } // ds.setInfo(name, type);
+     * 
+     * }
+     *//*
+        * else if (this.mainComponent instanceof SampleView) { SampleView sv = (SampleView)
+        * this.mainComponent; try { sv.setContainerDataSource(dh.getSampleInformation(currentValue),
+        * currentValue); } catch (Exception e) {
+        * System.out.println("Exception in LevelView.enter. mainComponent is SampleView"); //
+        * e.printStackTrace(); } }
+        *//*
+           * else if (this.mainComponent instanceof SpaceView) { SpaceView sv = (SpaceView)
+           * this.mainComponent; try {
+           * 
+           * // String type = //
+           * this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty
+           * ("type").getValue().toString(); sv.setContainerDataSource(dh.getSpace(currentValue),
+           * currentValue); } catch (Exception e) {
+           * System.out.println("Exception in LevelView.enter. mainComponent is SpaceView"); //
+           * e.printStackTrace(); } }
+           *//*
+              * else if (this.mainComponent instanceof ProjectView) { ProjectView pv = (ProjectView)
+              * this.mainComponent; try {
+              * 
+              * // String type = //
+              * this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty
+              * ("type").getValue().toString();
+              * 
+              * // String type = //
+              * this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty
+              * ("type").getValue().toString(); Project project =
+              * dh.openBisClient.getProjectByCode(currentValue); String projectIdentifier =
+              * project.getIdentifier();
+              * 
+              * pv.setContainerDataSource(dh.getProjectInformation(projectIdentifier),
+              * currentValue); } catch (Exception e) {
+              * System.out.println("Exception in LevelView.enter. mainComponent is ProjectView"); //
+              * e.printStackTrace(); } }
+              *//*
+                 * else if (this.mainComponent instanceof ExperimentView) { ExperimentView ev =
+                 * (ExperimentView) this.mainComponent; try { // String type = //
+                 * this.treeView.getContainerDataSource
+                 * ().getItem(currentValue).getItemProperty("type").getValue().toString();
+                 * ev.setContainerDataSource(dh.getExperimentInformation(currentValue),
+                 * currentValue); } catch (Exception e) { e.printStackTrace(); } }
+                 *//*
+                    * else if (this.mainComponent instanceof ChangePropertiesView) {
+                    * ChangePropertiesView cpv = (ChangePropertiesView) this.mainComponent; try { //
+                    * String type = //
+                    * this.treeView.getContainerDataSource().getItem(currentValue).getItemProperty
+                    * ("type").getValue().toString();
+                    * cpv.setContainerDataSource(dh.getExperimentInformation(currentValue),
+                    * currentValue); } catch (Exception e) { e.printStackTrace(); } }
+                    */
     // UI.getCurrent().scrollIntoView(mainComponent);
   }
 }

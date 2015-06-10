@@ -59,5 +59,5 @@ public interface Logger {
    * @param stackTraceElement StackTraceElement to expand log
    */
   public void error(String message, StackTraceElement[] stackTraceElement);
-  
+
 }

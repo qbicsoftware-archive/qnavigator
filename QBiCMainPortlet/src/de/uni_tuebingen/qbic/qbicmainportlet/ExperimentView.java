@@ -147,7 +147,7 @@ public class ExperimentView extends VerticalLayout implements View {
     MenuItem downloadExperiment = menubar.addItem("Download your data", null, null);
     downloadExperiment.setIcon(new ThemeResource("computer_higher.png"));
     downloadExperiment.addSeparator();
-    downloadExperiment.setEnabled(false); 
+    downloadExperiment.setEnabled(false);
     this.downloadCompleteProjectMenuItem =
         downloadExperiment
             .addItem(
@@ -162,15 +162,14 @@ public class ExperimentView extends VerticalLayout implements View {
     manage.setIcon(new ThemeResource("barcode_higher.png"));
 
     this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
-    
-    /*
-    MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_higher.png"));
-    workflows.setEnabled(false);
 
-    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    analyze.setIcon(new ThemeResource("graph_higher.png"));
-    analyze.setEnabled(false);*/
+    /*
+     * MenuItem workflows = menubar.addItem("Run workflows", null, null); workflows.setIcon(new
+     * ThemeResource("dna_higher.png")); workflows.setEnabled(false);
+     * 
+     * MenuItem analyze = menubar.addItem("Analyze your data", null, null); analyze.setIcon(new
+     * ThemeResource("graph_higher.png")); analyze.setEnabled(false);
+     */
     return menubar;
   }
 
@@ -347,7 +346,7 @@ public class ExperimentView extends VerticalLayout implements View {
    */
   public void setContainerDataSource(ExperimentBean experimentBean) {
     this.currentBean = experimentBean;
-
+    LOGGER.debug(String.valueOf(experimentBean.getSamples().size()));
     this.table.setContainerDataSource(experimentBean.getSamples());
     this.table.setVisibleColumns(new Object[] {"code", "type"});
   }
@@ -386,10 +385,11 @@ public class ExperimentView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
+    LOGGER.debug(currentValue);
     // TODO updateContent only if currentExperiment is not equal to newExperiment
     this.table.unselect(this.table.getValue());
-    this.setContainerDataSource(datahandler.getExperiment(currentValue));
-    
+    this.setContainerDataSource(datahandler.getExperiment2(currentValue));
+
     updateContent();
   }
 
@@ -410,6 +410,6 @@ public class ExperimentView extends VerticalLayout implements View {
     // this.downloadCompleteProjectMenuItem.getParent().setEnabled(false);
     this.menubar.setEnabled(enabled);
   }
-  
-  
+
+
 }

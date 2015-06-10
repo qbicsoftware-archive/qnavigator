@@ -136,7 +136,7 @@ public class DatasetView extends VerticalLayout implements View {
 
     this.vert.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
-    //this.setHeight(String.format("%spx", (browserHeight * 0.8)));
+    // this.setHeight(String.format("%spx", (browserHeight * 0.8)));
 
     MenuBar menubar = new MenuBar();
     // A top-level menu item that opens a submenu
@@ -156,13 +156,12 @@ public class DatasetView extends VerticalLayout implements View {
     manage.setEnabled(false);
 
     /*
-    MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_higher.png"));
-    workflows.setEnabled(false);
-
-    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    analyze.setIcon(new ThemeResource("graph_higher.png"));
-    analyze.setEnabled(false);*/
+     * MenuItem workflows = menubar.addItem("Run workflows", null, null); workflows.setIcon(new
+     * ThemeResource("dna_higher.png")); workflows.setEnabled(false);
+     * 
+     * MenuItem analyze = menubar.addItem("Analyze your data", null, null); analyze.setIcon(new
+     * ThemeResource("graph_higher.png")); analyze.setEnabled(false);
+     */
 
     VerticalLayout statistics = new VerticalLayout();
     HorizontalLayout statContent = new HorizontalLayout();
@@ -220,16 +219,15 @@ public class DatasetView extends VerticalLayout implements View {
 
     Button uncheckAll = new Button("Unselect all datasets");
     uncheckAll.addClickListener(new ClickListener() {
-     
+
       @Override
       public void buttonClick(ClickEvent event) {
-        for(Object itemId: table.getItemIds()){
-          ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
-          .setValue(false);
+        for (Object itemId : table.getItemIds()) {
+          ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue()).setValue(false);
         }
-      }   
-    }); 
-    
+      }
+    });
+
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
     /**
@@ -273,17 +271,18 @@ public class DatasetView extends VerticalLayout implements View {
         Object next = iterator.next();
         String datasetType =
             (String) table.getItem(next).getItemProperty("Dataset Type").getValue();
-        String fileName =
-            (String) table.getItem(next).getItemProperty("File Name").getValue();
+        String fileName = (String) table.getItem(next).getItemProperty("File Name").getValue();
         // TODO: No hardcoding!!
-        //if (datasetType.equals("FASTQC") || datasetType.equals("QCML") || datasetType.equals("BAM")
-        //|| datasetType.equals("VCF")) {
-        if(datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS") && (fileName.endsWith(".html")|| fileName.endsWith(".qcML"))){
+        // if (datasetType.equals("FASTQC") || datasetType.equals("QCML") ||
+        // datasetType.equals("BAM")
+        // || datasetType.equals("VCF")) {
+        if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS")
+            && (fileName.endsWith(".html") || fileName.endsWith(".qcML"))) {
           visualize.setEnabled(true);
-        } else if(datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS") && (fileName.endsWith(".err")|| fileName.endsWith(".out"))){
+        } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
+            && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
           visualize.setEnabled(true);
-        }
-         else {
+        } else {
           visualize.setEnabled(false);
         }
       }
@@ -353,13 +352,16 @@ public class DatasetView extends VerticalLayout implements View {
         URL url;
         try {
           Object parent = table.getParent(next);
-          if(parent != null){
-            String parentDatasetFileName = (String) table.getItem(parent).getItemProperty("File Name").getValue();
-            url = datahandler.openBisClient.getUrlForDataset(datasetCode, parentDatasetFileName + "/"+ datasetFileName);
-          }else {
+          if (parent != null) {
+            String parentDatasetFileName =
+                (String) table.getItem(parent).getItemProperty("File Name").getValue();
+            url =
+                datahandler.openBisClient.getUrlForDataset(datasetCode, parentDatasetFileName + "/"
+                    + datasetFileName);
+          } else {
             url = datahandler.openBisClient.getUrlForDataset(datasetCode, datasetFileName);
           }
-          
+
           Window subWindow =
               new Window("QC of Sample: "
                   + (String) table.getItem(next).getItemProperty("Sample").getValue());
@@ -373,23 +375,25 @@ public class DatasetView extends VerticalLayout implements View {
               (String) table.getItem(next).getItemProperty("Dataset Type").getValue();
           final RequestHandler rh = new ProxyForGenomeViewerRestApi();
           boolean rhAttached = false;
-          if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS") && datasetFileName.endsWith(".qcML")) {
+          if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS")
+              && datasetFileName.endsWith(".qcML")) {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("application/xml");
             res = streamres;
-          } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS") && datasetFileName.endsWith(".html")) {
+          } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS")
+              && datasetFileName.endsWith(".html")) {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/html");
             res = streamres;
-          }  else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS") && (datasetFileName.endsWith(".err")|| datasetFileName.endsWith(".out"))) {
+          } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
+              && (datasetFileName.endsWith(".err") || datasetFileName.endsWith(".out"))) {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/plain");
             res = streamres;
-          } 
-          else if (datasetType.equals("FASTQC")) {
+          } else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath = (String) table.getItem(next).getItemProperty("dl_link").getValue();
@@ -581,21 +585,21 @@ public class DatasetView extends VerticalLayout implements View {
           datasetContainer.addContainerProperty("CODE", String.class, null);
           ExperimentBean experimentBean = datahandler.getExperiment(map.get("id"));
           BeanItemContainer<SampleBean> samplesbeans = experimentBean.getSamples();
-            for (SampleBean sb : samplesbeans.getItemIds()) {
-              BeanItemContainer<DatasetBean> datasetbeans = sb.getDatasets();
-              for (DatasetBean d : datasetbeans.getItemIds()) {
-                String sample = sb.getCode();
-                String sampleType = sb.getType();// this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
-                String project = experimentBean.getId().split("/")[2];
-                Date date = d.getRegistrationDate();
-                SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                String dateString = sd.format(date);
-                Timestamp ts = Timestamp.valueOf(dateString);
-                // recursive test
-                registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);
-              }
+          for (SampleBean sb : samplesbeans.getItemIds()) {
+            BeanItemContainer<DatasetBean> datasetbeans = sb.getDatasets();
+            for (DatasetBean d : datasetbeans.getItemIds()) {
+              String sample = sb.getCode();
+              String sampleType = sb.getType();// this.openBisClient.getSampleByIdentifier(sample).getSampleTypeCode();
+              String project = experimentBean.getId().split("/")[2];
+              Date date = d.getRegistrationDate();
+              SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+              String dateString = sd.format(date);
+              Timestamp ts = Timestamp.valueOf(dateString);
+              // recursive test
+              registerDatasetInTable(d, datasetContainer, project, sample, ts, sampleType, null);
             }
-          break;          
+          }
+          break;
         case "sample":
           datasetContainer = new HierarchicalContainer();
           datasetContainer.addContainerProperty("Select", CheckBox.class, null);

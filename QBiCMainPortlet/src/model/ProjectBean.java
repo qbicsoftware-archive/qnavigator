@@ -7,8 +7,8 @@ import java.util.Set;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.ProgressBar;
 
-public class ProjectBean implements Serializable{
-  
+public class ProjectBean implements Serializable {
+
   /**
    * 
    */
@@ -22,10 +22,10 @@ public class ProjectBean implements Serializable{
   private Date registrationDate;
   private String registrator;
   private String contact;
-  //TODO userBean ?
+  // TODO userBean ?
   private Set<String> members;
   private Boolean containsData;
-  
+
   public ProjectBean(String id, String code, String description, SpaceBean space,
       BeanItemContainer<ExperimentBean> experiments, ProgressBar progress, Date registrationDate,
       String registrator, String contact, Set<String> members, Boolean containsData) {
@@ -163,5 +163,5 @@ public class ProjectBean implements Serializable{
 
   public void setContainsData(Boolean containsData) {
     this.containsData = containsData;
-  }  
+  }
 }

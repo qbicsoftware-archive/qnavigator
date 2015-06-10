@@ -2,11 +2,14 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -24,6 +27,9 @@ import model.DatasetBean;
 import model.ExperimentBean;
 import model.ProjectBean;
 import model.SampleBean;
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
+import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
+import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
@@ -42,7 +48,7 @@ import com.vaadin.server.VaadinRequest;
  */
 public class CustomVaadinPortlet extends VaadinPortlet {
   private static final long serialVersionUID = -13615405654173335L;
-  
+
   private class CustomVaadinPortletService extends VaadinPortletService {
     /**
      *
@@ -63,9 +69,9 @@ public class CustomVaadinPortlet extends VaadinPortlet {
      */
     @Override
     public String getStaticFileLocation(final VaadinRequest request) {
-      //return super.getStaticFileLocation(request);
+      // return super.getStaticFileLocation(request);
       // self contained approach:
-       return request.getContextPath();
+      return request.getContextPath();
     }
   }
 
@@ -109,41 +115,40 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 
   public void serveDownloadResource(javax.portlet.ResourceRequest request,
       javax.portlet.ResourceResponse response) throws PortletException, IOException {
-    DataHandler dataHandler =
-        (DataHandler) request.getPortletSession().getAttribute("datahandler",
+    OpenBisClient openBisClient =
+        (OpenBisClient) request.getPortletSession().getAttribute("openbisClient",
             PortletSession.APPLICATION_SCOPE);
     String liferayUserId = request.getRemoteUser();
-    LOGGER.info("User is downloading: " + liferayUserId );
-    //String attribute = null;
-    /*if(liferayUserId != null && !liferayUserId.isEmpty()){
-      attribute = liferayUserId + "_qbic_download";
-    }else{
-      attribute = "qbic_download";
-    }*/
+    LOGGER.info(String.format("Liferay User %s is downloading...", liferayUserId));
+    // String attribute = null;
+    /*
+     * if(liferayUserId != null && !liferayUserId.isEmpty()){ attribute = liferayUserId +
+     * "_qbic_download"; }else{ attribute = "qbic_download"; }
+     */
     Object bean =
         (Object) request.getPortletSession().getAttribute("qbic_download",
             PortletSession.APPLICATION_SCOPE);
     if (bean instanceof ProjectBean) {
-      serveProject((ProjectBean) bean, new TarWriter(), response, dataHandler.openBisClient);
+      serveProject2((ProjectBean) bean, new TarWriter(), response, openBisClient);
     } else if (bean instanceof ExperimentBean) {
-      serveExperiment((ExperimentBean) bean, new TarWriter(), response, dataHandler.openBisClient);
+      serveExperiment2((ExperimentBean) bean, new TarWriter(), response, openBisClient);
     } else if (bean instanceof SampleBean) {
-      serveSample((SampleBean) bean, new TarWriter(), response, dataHandler.openBisClient);
-    } else if(bean instanceof  Map<?,?>){
+      serveSample2((SampleBean) bean, new TarWriter(), response, openBisClient);
+    } else if (bean instanceof Map<?, ?>) {
       HashMap<String, AbstractMap.SimpleEntry<String, Long>> entry = null;
-      try{
-       entry = (HashMap<String, AbstractMap.SimpleEntry<String, Long>>)bean;
-      }catch(Exception e){
-        LOGGER.error("portlet session attribute 'qbic_download' contains wrong entry set", e.getStackTrace());
+      try {
+        entry = (HashMap<String, AbstractMap.SimpleEntry<String, Long>>) bean;
+      } catch (Exception e) {
+        LOGGER.error("portlet session attribute 'qbic_download' contains wrong entry set",
+            e.getStackTrace());
         response.setContentType("text/javascript");
         response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
             String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
         response.getWriter().append("Please select at least one dataset for download");
-        return;        
-      } 
-      serveEntries(entry, new TarWriter(), response, dataHandler.openBisClient);
-    }
-    else {
+        return;
+      }
+      serveEntries(entry, new TarWriter(), response, openBisClient);
+    } else {
       response.setContentType("text/javascript");
       response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
           String.valueOf(HttpServletResponse.SC_BAD_REQUEST));
@@ -151,7 +156,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       return;
     }
   }
-  
+
   /**
    * 
    * Note: the provided stream will be closed.
@@ -161,8 +166,8 @@ public class CustomVaadinPortlet extends VaadinPortlet {
    * @param response writer writes to its outputstream
    * @param openbisClient
    */
-  private void serveEntries(HashMap<String, SimpleEntry<String, Long>> entries,
-      TarWriter writer, ResourceResponse response, OpenBisClient openbisClient) {
+  private void serveEntries(HashMap<String, SimpleEntry<String, Long>> entries, TarWriter writer,
+      ResourceResponse response, OpenBisClient openbisClient) {
 
     String filename = "qbicdatasets" + ".tar";
 
@@ -182,8 +187,8 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    
-    
+
+
     Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
     Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
     while (it.hasNext()) {
@@ -195,12 +200,138 @@ public class CustomVaadinPortlet extends VaadinPortlet {
         writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(),
             openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
       } else {
-        writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(), openbisClient.getDatasetStream(
+        writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(), openbisClient
+            .getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
+      }
+    }
+    writer.closeStream();
+
+  }
+
+  void serveProject2(ProjectBean bean, TarWriter writer, ResourceResponse response,
+      OpenBisClient openbisClient) {
+    long startTime = System.nanoTime();
+
+    List<DataSet> datasets =
+        openbisClient.getClientDatasetsOfProjectByIdentifierWithSearchCriteria(bean.getId());
+    long endTime = System.nanoTime();
+    LOGGER.debug(String.format("getClientDatasetsOfProjectByIdentifierWithSearchCriteria took %f s", ((endTime - startTime) / 1000000000.0)));
+    startTime = System.nanoTime();
+    List<String> codes = new ArrayList<String>();
+    for(DataSet dataset: datasets) {
+      codes.add(dataset.getCode());
+    }   
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("codes", codes);
+    QueryTableModel res = openbisClient.getAggregationService("query-files", params);
+    endTime = System.nanoTime();
+    LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
+    download(res, writer, response, openbisClient, bean.getCode());
+  }
+  
+  void serveExperiment2(ExperimentBean bean, TarWriter writer, ResourceResponse response,
+      OpenBisClient openbisClient) {
+    long startTime = System.nanoTime();
+
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> datasets =
+        openbisClient.getDataSetsOfExperimentByCodeWithSearchCriteria(bean.getCode());
+    long endTime = System.nanoTime();
+    LOGGER.debug(String.format("getDataSetsOfExperimentByCodeWithSearchCriteria took %f s", ((endTime - startTime) / 1000000000.0)));
+    
+    startTime = System.nanoTime();
+    List<String> codes = new ArrayList<String>();
+    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: datasets) {
+      codes.add(dataset.getCode());
+    }   
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("codes", codes);
+    QueryTableModel res = openbisClient.getAggregationService("query-files", params);
+    endTime = System.nanoTime();
+    LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
+    
+    download(res, writer, response, openbisClient, bean.getCode());
+  }
+  void serveSample2(SampleBean bean, TarWriter writer, ResourceResponse response,
+      OpenBisClient openbisClient) {
+    long startTime = System.nanoTime();
+
+    List<DataSet> datasets =
+        openbisClient.getDataSetsOfSampleByIdentifier(bean.getId());
+    long endTime = System.nanoTime();
+    LOGGER.debug(String.format("getDataSetsOfProjectByIdentifier took %f s", ((endTime - startTime) / 1000000000.0)));
+    startTime = System.nanoTime();
+    List<String> codes = new ArrayList<String>();
+    for(DataSet dataset: datasets) {
+      codes.add(dataset.getCode());
+    }   
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("codes", codes);
+    QueryTableModel res = openbisClient.getAggregationService("query-files", params);
+    endTime = System.nanoTime();
+    LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
+    download(res, writer, response, openbisClient, bean.getCode());
+  }
+  
+  
+  
+
+  void download(QueryTableModel res, TarWriter writer, ResourceResponse response,
+      OpenBisClient openbisClient, String openbisCode){
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertQueryTabelModelToEntries(res);
+    String filename = openbisCode + ".tar";
+    writeToClient(response, writer, filename, entries, openbisClient, openbisCode);  
+  }
+  
+  
+  void writeToClient(ResourceResponse response, TarWriter writer, String filename, Map<String, AbstractMap.SimpleEntry<String, Long>> entries, OpenBisClient openbisClient, String openbisCode){
+    response.setContentType(writer.getContentType());
+    StringBuilder sb = new StringBuilder("attachement; filename=\"");
+    sb.append(filename);
+    sb.append("\"");
+    response.setProperty("Content-Disposition", sb.toString());
+
+    long tarFileLength = writer.computeTarLength2(entries);
+    LOGGER.debug(String.valueOf(tarFileLength));
+    // response.setContentLength((int) tarFileLength);
+    // For some reason setContentLength did not work as expected (liferay 6.1.2)
+    response.setProperty("Content-Length", String.valueOf(tarFileLength));
+    try {
+      writer.setOutputStream(response.getPortletOutputStream());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+    Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+    while (it.hasNext()) {
+      Entry<String, SimpleEntry<String, Long>> entry = it.next();
+      String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+      String[] splittedFilePath = entryKey.split("/");
+
+      if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+        writer.writeEntry(openbisCode + "/" + entry.getKey(),
+            openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
+      } else {
+        writer.writeEntry(openbisCode + "/" + entry.getKey(), openbisClient.getDatasetStream(
             entry.getValue().getKey(), entryKey), entry.getValue().getValue());
       }
     }
     writer.closeStream();
-    
+  }
+  
+  
+  private Map<String, SimpleEntry<String, Long>> convertQueryTabelModelToEntries(QueryTableModel res) {
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
+        new HashMap<String, AbstractMap.SimpleEntry<String, Long>>(); 
+    for (Serializable[] ss : res.getRows()) {
+        String filePath = (String)ss[1];
+        if(filePath.startsWith("original")){
+          filePath = filePath.substring(9);
+        }
+        entries.put(filePath, new AbstractMap.SimpleEntry<String, Long>((String)ss[0]/*code*/,(Long)ss[3] /*filelentgth*/ ));
+    }
+    return entries;
   }
 
   /**
@@ -271,7 +402,9 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     sb.append("\"");
     response.setProperty("Content-Disposition", sb.toString());
     Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
-
+    if(!entries.isEmpty()){
+      LOGGER.debug(entries.entrySet().iterator().next().getKey());
+    }
     long tarFileLength = writer.computeTarLength2(entries);
     // response.setContentLength((int) tarFileLength);
     // For some reason setContentLength does not work
@@ -353,6 +486,43 @@ public class CustomVaadinPortlet extends VaadinPortlet {
   }
 
 
+  Map<String, SimpleEntry<String, Long>> convertDatasetsToEntries(List<DataSet> datasets) {
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
+        new HashMap<String, AbstractMap.SimpleEntry<String, Long>>((int) (datasets.size() * 1.3));
+    for (DataSet dataset : datasets) {
+
+      FileInfoDssDTO[] filelist = dataset.listFiles("original", true);
+      String download_link = filelist[0].getPathInDataSet();
+      /*
+       * if (filelist[0].isDirectory()) { System.out.println(" is a directory"); FileInfoDssDTO[]
+       * subList = dataset.listFiles(download_link, false); System.out.println(subList.length);
+       * addDatasetFiles(subList, dataset, entries); }else{ System.out.println("is a file");
+       * String[] splitted_link = download_link.split("/"); String fileName =
+       * splitted_link[splitted_link.length - 1]; entries.put(fileName, new
+       * AbstractMap.SimpleEntry<String, Long>(dataset.getCode(), filelist[0].getFileSize() )); }
+       */
+    }
+    return entries;
+
+  }
+
+  Map<String, SimpleEntry<String, Long>> addDatasetFiles(FileInfoDssDTO[] fileList,
+      DataSet dataset, Map<String, SimpleEntry<String, Long>> entries) {
+    for (FileInfoDssDTO dto : fileList) {
+      if (dto.isDirectory()) {
+        String folderPath = dto.getPathInDataSet();
+        FileInfoDssDTO[] subList = dataset.listFiles(folderPath, false);
+        addDatasetFiles(subList, dataset, entries);
+      } else {
+        String download_link = dto.getPathInDataSet();
+        String[] splitted_link = download_link.split("/");
+        String fileName = splitted_link[splitted_link.length - 1];
+        entries.put(fileName,
+            new AbstractMap.SimpleEntry<String, Long>(dataset.getCode(), dto.getFileSize()));
+      }
+    }
+    return entries;
+  }
 
   /**
    * if it is one of the openbis beans, then it will be converted into an entry. Used to prepare a
@@ -391,6 +561,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 
     return entries;
   }
+
 
   /**
    * Given datasetbean (and its children) is included into the entry, which can be used for download

@@ -47,10 +47,10 @@ public class DatasetBean implements Serializable {
   private boolean isDirectory;
 
   private DatasetBean parent;
-  
+
   private DatasetBean root;
   private List<DatasetBean> children;
-  
+
 
 
   public DatasetBean(CheckBox isSelected, ProjectBean project, SampleBean sample,
@@ -79,19 +79,19 @@ public class DatasetBean implements Serializable {
     // TODO Auto-generated constructor stub
   }
 
-  public boolean hasParent(){
+  public boolean hasParent() {
     return parent != null;
   }
-  
-  public boolean hasChildren(){
+
+  public boolean hasChildren() {
     return children != null && children.size() > 0;
   }
-  
-  public boolean isRoot(){
+
+  public boolean isRoot() {
     return root == null;
   }
-  
-  
+
+
   public DatasetBean getParent() {
     return parent;
   }
@@ -191,15 +191,19 @@ public class DatasetBean implements Serializable {
   public void setSample(SampleBean sample) {
     this.sample = sample;
   }
+
   /**
    * same as {@link getName}
+   * 
    * @return
    */
   public String getFileName() {
     return name;
   }
+
   /**
    * same as {@link setName}
+   * 
    * @return
    */
   public void setFileName(String fileName) {

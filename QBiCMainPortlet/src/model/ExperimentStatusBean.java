@@ -3,14 +3,14 @@ package model;
 import java.io.Serializable;
 
 public class ExperimentStatusBean implements Serializable {
- 
+
   String identifier;
   String code; 
   String description;
   String download;
   String runWorkflow;
   Double status;
-  
+
   public ExperimentStatusBean(String identifier, String code, String description, String download, String runWorkflow, Double status) {
     this.identifier = identifier;
     this.code = code;
@@ -38,7 +38,8 @@ public class ExperimentStatusBean implements Serializable {
   
   public ExperimentStatusBean() {
   }
-  
+
+
   public String getDescription() {
     return description;
   }
@@ -69,6 +70,6 @@ public class ExperimentStatusBean implements Serializable {
 
   public void setStatus(Double status) {
     this.status = status;
-  } 
-  
+  }
+
 }

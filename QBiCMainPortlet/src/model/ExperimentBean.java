@@ -42,9 +42,9 @@ public class ExperimentBean implements Serializable {
 
 
 
-  public ExperimentBean(String id, String code, String type, Image status, String registrator, 
-      Date registrationDate, BeanItemContainer<SampleBean> samples,
-      String lastChangedSample, Date lastChangedDataset, Map<String, String> properties,
+  public ExperimentBean(String id, String code, String type, Image status, String registrator,
+      Date registrationDate, BeanItemContainer<SampleBean> samples, String lastChangedSample,
+      Date lastChangedDataset, Map<String, String> properties,
       Map<String, List<String>> controlledVocabularies, Map<String, String> typeLabels) {
     super();
     this.id = id;
@@ -121,7 +121,7 @@ public class ExperimentBean implements Serializable {
     return registrator;
   }
 
-  
+
   public void setRegistrator(String registrator) {
     this.registrator = registrator;
   }
@@ -229,7 +229,7 @@ public class ExperimentBean implements Serializable {
       return false;
     return true;
   }
-  
+
   public String generatePropertiesFormattedString() {
     String propertiesHeader = "<ul>";
     String propertiesBottom = "";
@@ -244,10 +244,10 @@ public class ExperimentBean implements Serializable {
       } else {
         propertiesBottom +=
             "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
-        //propertiesBottom +=
-        //    "<li><b>"
-        //       + (pairs.getKey().toString() + ":</b> "
-        //            + pairs.getValue() + "</li>");
+        // propertiesBottom +=
+        // "<li><b>"
+        // + (pairs.getKey().toString() + ":</b> "
+        // + pairs.getValue() + "</li>");
       }
     }
     propertiesBottom += "</ul>";
