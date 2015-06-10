@@ -144,7 +144,6 @@ public class ProjectView extends VerticalLayout implements View {
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
-    // updateContentGraph();
   }
 
 
@@ -420,8 +419,8 @@ public class ProjectView extends VerticalLayout implements View {
   void resetGraph() {
     graphSectionContent.removeAllComponents();
     VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
-    graphSection.getComponent(0).setVisible(true);
-    graphSection.getComponent(0).setEnabled(true);
+    graphSection.getComponent(1).setVisible(true);
+    graphSection.getComponent(1).setEnabled(true);
   }
 
   /**
@@ -770,11 +769,10 @@ public class ProjectView extends VerticalLayout implements View {
     String currentValue = event.getParameters();
     // TODO updateContent only if currentProject is not equal to newProject
     this.table.unselect(this.table.getValue());
-    LOGGER.debug(currentValue);
     ProjectBean pbean = datahandler.getProject2(currentValue);
-    LOGGER.debug(pbean.getCode());
     // if the new project bean is different than reset the graph.
     if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
+      LOGGER.debug("reseting graph");
       resetGraph();
     }
     this.setContainerDataSource(pbean);

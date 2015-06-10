@@ -91,8 +91,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;// = ConfigurationManagerFactory.getInstance();
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "0.3.2";
-  private String revision = "502";
+  private String version = "0.3.4";
+  private String revision = "504";
   private String resUrl;
 
   @Override
@@ -284,7 +284,6 @@ public class QbicmainportletUI extends UI {
       // homeSpaceBean = prepareHomeSpaceBean(datahandler.getSpacesWithProjectInformation(), true);
       final MutableBoolean patientCreation = new MutableBoolean(false);
       homeSpaceBean = prepareHomeBean_fast(patientCreation);
-      LOGGER.debug(String.valueOf(patientCreation));
       long endTime = System.nanoTime();
       LOGGER.info(String.format("Took %f s", ((endTime - startTime) / 1000000000.0)));
       LOGGER.info(String.format("User %s has %d projects", userName, homeSpaceBean.getProjects()

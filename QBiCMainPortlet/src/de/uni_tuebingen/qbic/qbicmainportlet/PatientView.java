@@ -1,26 +1,24 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import model.DatasetBean;
 import model.ExperimentBean;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
 import model.SampleBean;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
+import com.liferay.portal.model.Company;
 import com.liferay.portal.model.User;
+import com.liferay.portal.service.CompanyLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
@@ -38,22 +36,26 @@ import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.ProgressBarRenderer;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class PatientView extends VerticalLayout implements View {
 
@@ -89,7 +91,7 @@ public class PatientView extends VerticalLayout implements View {
 
   private Label hlaTypeLabel;
 
-  private static Logger LOGGER = new Log4j2Logger(ProjectView.class);
+  private static Logger LOGGER = new Log4j2Logger(PatientView.class);
 
 
 
@@ -147,10 +149,22 @@ public class PatientView extends VerticalLayout implements View {
    */
   public void updateContent() {
     // updateContentMenuBar();
+    long startTime = System.nanoTime();
     updateHLALayout();
+    long endTime = System.nanoTime();
+    LOGGER.info(String.format("updateHLALayout took %f s", ((endTime - startTime) / 1000000000.0)));
+
+    startTime = System.nanoTime();
     updateContentDescription();
+    endTime = System.nanoTime();
+    LOGGER.info(String.format("updateContentDescription took %f s",
+        ((endTime - startTime) / 1000000000.0)));
+
+    startTime = System.nanoTime();
     updateProjectStatus();
-    updateContentGraph();
+    endTime = System.nanoTime();
+    LOGGER.info(String.format("updateProjectStatus took %f s",
+        ((endTime - startTime) / 1000000000.0)));
   }
 
   /**
@@ -215,15 +229,14 @@ public class PatientView extends VerticalLayout implements View {
     }
     String patientInfo = "";
     Boolean available = false;
-    for (Iterator i = currentBean.getExperiments().getItemIds().iterator(); i.hasNext();) {
+    for (Iterator<ExperimentBean> i = currentBean.getExperiments().getItemIds().iterator(); i
+        .hasNext();) {
       // Get the current item identifier, which is an integer.
-      ExperimentBean expBean = (ExperimentBean) i.next();
-      System.out.println(expBean.getType());
+      ExperimentBean expBean = i.next();
 
       if (expBean.getType().equalsIgnoreCase(model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name())) {
-        for (Iterator ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
-          SampleBean sampBean = (SampleBean) ii.next();
-          System.out.println(sampBean.getType());
+        for (Iterator<SampleBean> ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
+          SampleBean sampBean = ii.next();
           if (sampBean.getType().equals("Q_BIOLOGICAL_ENTITY")) {
             if (sampBean.getProperties().get("Q_ADDITIONAL_INFO") != null) {
               available = true;
@@ -238,22 +251,11 @@ public class PatientView extends VerticalLayout implements View {
         }
       }
     }
-
-    System.out.println(patientInfo);
     if (available) {
       patientInformation.setValue(patientInfo);
     }
-    // TODO use space information to check whether members really have to be recalculated.
-    // For users chances are high, that they click on a project from the same space -> no
-    // recalculation needed!
-    Component membersContent = getMembersComponent(currentBean.getMembers());
-
-    membersContent.setIcon(FontAwesome.USERS);
-    membersContent.setCaption("Members");
-    membersContent.setWidth("100%");
     membersSection.removeAllComponents();
-    membersSection.addComponent(membersContent);
-    // membersSection.setMargin(true);
+    membersSection.addComponent(getMembersComponent());
   }
 
   /**
@@ -290,12 +292,13 @@ public class PatientView extends VerticalLayout implements View {
 
     Boolean available = false;
 
-    for (Iterator i = currentBean.getExperiments().getItemIds().iterator(); i.hasNext();) {
+    for (Iterator<ExperimentBean> i = currentBean.getExperiments().getItemIds().iterator(); i
+        .hasNext();) {
       // Get the current item identifier, which is an integer.
       ExperimentBean expBean = (ExperimentBean) i.next();
 
       if (expBean.getType().equalsIgnoreCase(model.ExperimentType.Q_NGS_HLATYPING.name())) {
-        for (Iterator ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
+        for (Iterator<SampleBean> ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
           SampleBean sampBean = (SampleBean) ii.next();
           if (sampBean.getType().equalsIgnoreCase(model.ExperimentType.Q_NGS_HLATYPING.name())) {
             available = true;
@@ -344,7 +347,7 @@ public class PatientView extends VerticalLayout implements View {
     // Open DatasetView
     // this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
     downloadProject.addItem("Dataset Overview", null);
-    
+
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_higher.png"));
 
@@ -355,54 +358,124 @@ public class PatientView extends VerticalLayout implements View {
     return menubar;
   }
 
-  /**
-   * 
-   * @param list
-   * @return
-   */
-  private Component getMembersComponent(Set<String> list) {
-    HorizontalLayout membersLayout = new HorizontalLayout();
-    if (list != null) {
-      // membersLayout.addComponent(new Label("Members:"));
-      for (String member : list) {
-
-        // Cool idea, but let's do this when we have more portrait pictures in Liferay
-
-        try {
-          // companyId. We have presumable just one portal id, which equals the companyId.
-          User user = UserLocalServiceUtil.getUserByScreenName(1, member);
-          String fullname = user.getFullName();
-          String email = user.getEmailAddress();
 
 
-          // VaadinSession.getCurrent().getService();
-          // ThemeDisplay themedisplay =
-          // (ThemeDisplay) VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
-          // String url = user.getPortraitURL(themedisplay);
-          // ExternalResource er = new ExternalResource(url);
-          // com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(), er);
-          // image.setHeight(80, Unit.PIXELS);
-          // image.setWidth(65, Unit.PIXELS);
-          // membersLayout.addComponent(image);
-          String labelString =
-              new String("<a href=\"mailto:" + email
-                  + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
-          Label userLabel = new Label(labelString, ContentMode.HTML);
-          membersLayout.addComponent(userLabel);
+  private Component getMembersComponent() {
+    final HorizontalLayout membersLayout = new HorizontalLayout();
+    membersLayout.setIcon(FontAwesome.USERS);
+    membersLayout.setCaption("Members");
+    membersLayout.setWidth("100%");
 
-        } catch (com.liferay.portal.NoSuchUserException e) {
-          LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
-          membersLayout.addComponent(new Label(member));
-        } catch (PortalException | SystemException e) {
-          LOGGER.error(
-              "reading out openbis members and matching their names to liferay users failed",
-              e.getStackTrace());
-        }
+
+    final Button loadMembers = new Button("[+]");
+    membersLayout.addComponent(loadMembers);
+    loadMembers.setStyleName(ValoTheme.BUTTON_LINK);
+    loadMembers.addClickListener(new ClickListener() {
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        ProgressBar progress = new ProgressBar();
+        progress.setIndeterminate(true);
+        Label info =
+            new Label(
+                "Searching for members. Can take several seconds on big projects. Please be patient.");
+        info.setStyleName(ValoTheme.LABEL_SUCCESS);
+        membersLayout.addComponent(info);
+        membersLayout.addComponent(progress);
+        Worker worker = new Worker();
+        worker.start();
+        UI.getCurrent().setPollInterval(500);
+        loadMembers.setEnabled(false);
 
       }
-      membersLayout.setSpacing(true);
-      membersLayout.setMargin(true);
-    }
+
+      private StringBuilder memberString;
+
+      public void processed() {
+        Label label;
+        if (memberString == null || memberString.length() == 0) {
+          label = new Label("no members found.");
+        } else {
+          label = new Label(memberString.toString(), ContentMode.HTML);
+        }
+        membersLayout.removeAllComponents();
+        membersLayout.addComponent(label);
+        membersLayout.setSpacing(true);
+        membersLayout.setMargin(new MarginInfo(false, false, false, true));
+
+
+        UI.getCurrent().setPollInterval(-1);
+        loadMembers.setVisible(false);
+      }
+
+      class Worker extends Thread {
+
+        @Override
+        public void run() {
+          Company company = null;
+          long companyId = 1;
+          try {
+            String webId = PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
+            company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
+            companyId = company.getCompanyId();
+            LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
+                companyId));
+          } catch (PortalException | SystemException e) {
+            LOGGER.error(
+                "liferay error, could not retrieve companyId. Trying default companyId, which is "
+                    + companyId, e.getStackTrace());
+          }
+          Set<String> list =
+              datahandler.openBisClient.getSpaceMembers(currentBean.getId().split("/")[1]);
+          if (list != null) {
+            memberString = new StringBuilder();
+            for (String member : list) {
+              User user = null;
+              try {
+                user = UserLocalServiceUtil.getUserByScreenName(companyId, member);
+              } catch (PortalException | SystemException e) {
+              }
+
+              if (memberString.length() > 0) {
+                memberString.append(" , ");
+              }
+
+              if (user == null) {
+                LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
+                memberString.append(member);
+                // membersLayout.addComponent(new Label(member));
+              } else {
+                String fullname = user.getFullName();
+                String email = user.getEmailAddress();
+                // VaadinSession.getCurrent().getService();
+                // ThemeDisplay themedisplay =
+                // (ThemeDisplay)
+                // VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
+                // String url = user.getPortraitURL(themedisplay);
+                // ExternalResource er = new ExternalResource(url);
+                // com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(), er);
+                // image.setHeight(80, Unit.PIXELS);
+                // image.setWidth(65, Unit.PIXELS);
+                // membersLayout.addComponent(image);
+                // String labelString =
+                // new String("<a href=\"mailto:" + email
+                // + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
+                // Label userLabel = new Label(labelString, ContentMode.HTML);
+                // membersLayout.addComponent(userLabel);
+                memberString.append("<a href=\"mailto:");
+                memberString.append(email);
+                memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
+                memberString.append(fullname);
+                memberString.append("</a>");
+              }
+            }
+            synchronized (UI.getCurrent()) {
+              processed();
+            }
+          }
+        }
+      }
+    });
     return membersLayout;
   }
 
@@ -453,59 +526,57 @@ public class PatientView extends VerticalLayout implements View {
     experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.35f, Unit.PIXELS);
 
     experiments.getColumn("status").setRenderer(new ProgressBarRenderer());
-    experiments.setColumnOrder("started", "code", "description","status","download", "runWorkflow");
-    
+    experiments.setColumnOrder("started", "code", "description", "status", "download",
+        "runWorkflow");
+
     experiments.getColumn("download").setRenderer(new ButtonRenderer(new RendererClickListener() {
       @Override
-      public void click(RendererClickEvent event) {        
+      public void click(RendererClickEvent event) {
         ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
-          
-          if(esb.getDescription().equals("Barcode Generation")) {
-            new Notification("Download of Barcodes not available.",
-                "<br/>Please create barcodes by clicking 'Run'.",
-                Type.WARNING_MESSAGE, true)
-                .show(Page.getCurrent());
-          }
-          else {
+
+        if (esb.getDescription().equals("Barcode Generation")) {
+          new Notification("Download of Barcodes not available.",
+              "<br/>Please create barcodes by clicking 'Run'.", Type.WARNING_MESSAGE, true)
+              .show(Page.getCurrent());
+        } else {
           ArrayList<String> message = new ArrayList<String>();
           message.add("clicked");
           StringBuilder sb = new StringBuilder("type=");
           sb.append("experiment");
           sb.append("&");
           sb.append("id=");
-          //sb.append(currentBean.getId());
+          // sb.append(currentBean.getId());
           sb.append(esb.getIdentifier());
           message.add(sb.toString());
           message.add(DatasetView.navigateToLabel);
           System.out.println(message);
           state.notifyObservers(message);
-          }
-        }
-      
-  }));
-    
-    experiments.getColumn("runWorkflow").setRenderer(new ButtonRenderer(new RendererClickListener() {
-      @Override
-      public void click(RendererClickEvent event) {
-        ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
-        
-        //TODO idea get description of item to navigate to the correct workflow ?!
-        if(esb.getDescription().equals("Barcode Generation")) {
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          message.add(currentBean.getId());
-          message.add(BarcodeView.navigateToLabel);
-          state.notifyObservers(message);
-        }
-        else {
-          new Notification("Workflow for this experiment not yet available.",
-              "<br/>Please get in contact with your project manager.",
-              Type.WARNING_MESSAGE, true)
-              .show(Page.getCurrent());
         }
       }
-  }));
-  
+
+    }));
+
+    experiments.getColumn("runWorkflow").setRenderer(
+        new ButtonRenderer(new RendererClickListener() {
+          @Override
+          public void click(RendererClickEvent event) {
+            ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
+
+            // TODO idea get description of item to navigate to the correct workflow ?!
+            if (esb.getDescription().equals("Barcode Generation")) {
+              ArrayList<String> message = new ArrayList<String>();
+              message.add("clicked");
+              message.add(currentBean.getId());
+              message.add(BarcodeView.navigateToLabel);
+              state.notifyObservers(message);
+            } else {
+              new Notification("Workflow for this experiment not yet available.",
+                  "<br/>Please get in contact with your project manager.", Type.WARNING_MESSAGE,
+                  true).show(Page.getCurrent());
+            }
+          }
+        }));
+
     experiments.getColumn("started").setRenderer(new HtmlRenderer());
 
     ProgressBar progressBar = new ProgressBar();
@@ -528,10 +599,10 @@ public class PatientView extends VerticalLayout implements View {
     for (Iterator i = experimentBeans.getItemIds().iterator(); i.hasNext();) {
       ExperimentStatusBean statusBean = (ExperimentStatusBean) i.next();
 
-            
-      //HorizontalLayout experimentStatusRow = new HorizontalLayout();
-      //experimentStatusRow.setSpacing(true);
-      
+
+      // HorizontalLayout experimentStatusRow = new HorizontalLayout();
+      // experimentStatusRow.setSpacing(true);
+
       finishedExperiments += statusBean.getStatus();
 
       statusBean.setDownload("Download");
@@ -592,6 +663,13 @@ public class PatientView extends VerticalLayout implements View {
     return projectStatus;
   }
 
+  void resetGraph() {
+    graphSectionContent.removeAllComponents();
+    VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
+    graphSection.getComponent(1).setVisible(true);
+    graphSection.getComponent(1).setEnabled(true);
+  }
+
   /**
    * 
    * @return
@@ -603,12 +681,69 @@ public class PatientView extends VerticalLayout implements View {
     graphSectionContent.setCaption("Project Graph");
     graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
 
-    graphSectionContent.setMargin(true);
-    graphSection.setMargin(new MarginInfo(false, true, false, true));
+    graphSectionContent.setMargin(new MarginInfo(false, false, false, true));
+    graphSection.setMargin(new MarginInfo(false, false, false, true));
     graphSection.setWidth("100%");
     graphSectionContent.setWidth("100%");
+    final Button loadGraph = new Button("[+]");
+    loadGraph.setStyleName(ValoTheme.BUTTON_LINK);
+    loadGraph.addClickListener(new ClickListener() {
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        LOGGER.debug(String.valueOf(graphSectionContent.getComponentCount() == 0));
+        if (graphSectionContent.getComponentCount() > 0)
+          LOGGER.debug(String.valueOf(graphSectionContent.getComponent(0) instanceof Image));
+        if (graphSectionContent.getComponentCount() == 0
+            || !(graphSectionContent.getComponent(0) instanceof Image)) {
+          ProgressBar progress = new ProgressBar();
+          progress.setIndeterminate(true);
+          Label info =
+              new Label(
+                  "Computing the project graph can take several seconds on big projects. Please be patient.");
+          info.setStyleName(ValoTheme.LABEL_SUCCESS);
+          graphSectionContent.addComponent(info);
+          graphSectionContent.addComponent(progress);
+          Worker worker = new Worker(getCurrent());
+          worker.start();
+          UI.getCurrent().setPollInterval(500);
+          loadGraph.setEnabled(false);
+        }
+
+
+      }
+
+      public void processed() {
+        UI.getCurrent().setPollInterval(-1);
+        loadGraph.setVisible(false);
+      }
+
+      class Worker extends Thread {
+        private PatientView patientView;
+
+        public Worker(PatientView current) {
+          patientView = current;
+        }
+
+        @Override
+        public void run() {
+          patientView.updateContentGraph();
+          synchronized (UI.getCurrent()) {
+            processed();
+          }
+
+        }
+      }
+    });
+
+
     graphSection.addComponent(graphSectionContent);
+    graphSection.addComponent(loadGraph);
     return graphSection;
+  }
+
+  public PatientView getCurrent() {
+    return this;
   }
 
   void updateContentGraph() {
@@ -617,6 +752,12 @@ public class PatientView extends VerticalLayout implements View {
       graphSectionContent.removeAllComponents();
       Image graphImage = new Image("", resource);
       graphSectionContent.addComponent(graphImage);
+    } else {
+      Label error = new Label("Project Graph can not be computed at that time for this project.");
+      error.setStyleName(ValoTheme.LABEL_FAILURE);
+      graphSectionContent.removeAllComponents();
+      graphSectionContent.addComponent(error);
+      LOGGER.error(error.getValue());
     }
   }
 
@@ -629,7 +770,8 @@ public class PatientView extends VerticalLayout implements View {
   private Resource getGraphResource() {
     Resource resource = null;
     try {
-      GraphGenerator graphFrame = new GraphGenerator(currentBean, datahandler.openBisClient);
+      GraphGenerator graphFrame =
+          new GraphGenerator(datahandler.getProject(currentBean.getId()), datahandler.openBisClient);
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
@@ -640,7 +782,24 @@ public class PatientView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    this.setContainerDataSource(datahandler.getProject(currentValue));
+    long startTime = System.nanoTime();
+    ProjectBean pbean = datahandler.getProjectIvac(currentValue);
+    long endTime = System.nanoTime();
+    LOGGER.info(String.format("getProject took %f s", ((endTime - startTime) / 1000000000.0)));
+    // if the new project bean is different than reset the graph.
+    LOGGER.debug(String.valueOf(currentBean == null));
+    if (currentBean != null)
+      LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
+    if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
+
+      resetGraph();
+    }
+
+    startTime = System.nanoTime();
+    this.setContainerDataSource(pbean);
+    endTime = System.nanoTime();
+    LOGGER.info(String.format("setContainerDataSource took %f s",
+        ((endTime - startTime) / 1000000000.0)));
     updateContent();
   }
 
