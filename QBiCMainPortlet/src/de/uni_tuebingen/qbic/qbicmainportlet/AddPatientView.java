@@ -246,14 +246,14 @@ public class AddPatientView extends VerticalLayout implements View {
     // this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
     // Another top-level item
     manage.addItem("Create Barcodes", null, null);
-    MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_higher.png"));
-    workflows.setEnabled(false);
+    //MenuItem workflows = menubar.addItem("Run workflows", null, null);
+    //workflows.setIcon(new ThemeResource("dna_higher.png"));
+    //workflows.setEnabled(false);
 
     // Yet another top-level item
-    MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    analyze.setIcon(new ThemeResource("graph_higher.png"));
-    analyze.setEnabled(false);
+    //MenuItem analyze = menubar.addItem("Analyze your data", null, null);
+    //analyze.setIcon(new ThemeResource("graph_higher.png"));
+    //analyze.setEnabled(false);
     return menubar;
   }
 
