@@ -347,20 +347,21 @@ public class BarcodeView extends VerticalLayout implements View {
 
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
     downloadProject.setIcon(new ThemeResource("computer_higher.png"));
-
+    downloadProject.setEnabled(false);
+      
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_higher.png"));
     manage.setEnabled(false);
 
     // Another top-level item
-    MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    workflows.setIcon(new ThemeResource("dna_higher.png"));
-    workflows.setEnabled(false);
+    //MenuItem workflows = menubar.addItem("Run workflows", null, null);
+    //workflows.setIcon(new ThemeResource("dna_higher.png"));
+    //workflows.setEnabled(false);
 
     // Yet another top-level item
-    MenuItem analysis = menubar.addItem("Analyze your data", null, null);
-    analysis.setIcon(new ThemeResource("graph_higher.png"));
-    analysis.setEnabled(false);
+    //MenuItem analysis = menubar.addItem("Analyze your data", null, null);
+    //analysis.setIcon(new ThemeResource("graph_higher.png"));
+    //analysis.setEnabled(false);
 
 
     int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
