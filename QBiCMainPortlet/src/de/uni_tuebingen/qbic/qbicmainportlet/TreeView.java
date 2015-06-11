@@ -8,6 +8,7 @@ import java.util.Observer;
 import logging.Log4j2Logger;
 import main.OpenBisClient;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -42,16 +43,14 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
   private Navigator navigator;
   private OpenBisClient openbisClient;
 
-  public TreeView(State state, Navigator navigator) {
+  private String user = "";
+
+  public TreeView(State state, Navigator navigator, String user) {
     super();
+    this.user = user;
     this.state = state;
     this.navigator = navigator;
     this.init();
-  }
-
-  public TreeView(Container c, State state, Navigator navigator) {
-    this(state, navigator);
-    tree.setContainerDataSource(c);
   }
 
   public void setOpenbisClient(OpenBisClient openbisClient) {
@@ -68,7 +67,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     vl.setSpacing(true);
 
     MenuBar menubar = new MenuBar();
-    //MenuItem pseudoItem = menubar.addItem("", null);
+    // MenuItem pseudoItem = menubar.addItem("", null);
     // pseudoItem.setIcon(new ThemeResource("qbic_logo.png"));
     menubar.setWidth("100%");
     menubar.addStyleName("user-menu");
@@ -178,7 +177,6 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
   }
 
   public void setValue(Object itemId) {
-    LOGGER.debug("enterying setValue");
     // can not do anything with a non existant item
     if (itemId == null) {
       return;
@@ -243,14 +241,12 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
   public void addExperiments(Object itemId) {
     if (itemId instanceof String && tree.getContainerDataSource() instanceof HierarchicalContainer) {
-      
+
       String openbisId = (String) itemId;
       String projectId = projectId(openbisId);
-      
+
       HierarchicalContainer container = (HierarchicalContainer) tree.getContainerDataSource();
-      LOGGER.debug(String.format("adding experiments for project %s",projectId));
       List<Experiment> experiments = openbisClient.getExperimentsForProject2(projectId);
-      LOGGER.debug(String.format("# of experiments %d",experiments.size()));
       setExperiments(container, projectId, experiments);
     }
   }
@@ -261,7 +257,6 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
       String experimentIdentifier = experiment.getIdentifier();
       String experimentCode = experiment.getCode();
-      LOGGER.debug(String.format("add experiment %s if it does not exist", experimentIdentifier));
       // why bother?
       if (container.containsId(experimentIdentifier))
         continue;
@@ -284,30 +279,26 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     ((HierarchicalContainer) tree.getContainerDataSource()).removeAllContainerFilters();
     this.backButton.setVisible(false);
   }
-  
+
   private void addFilterBasedOnSelection(Object itemId) {
-    LOGGER.debug((String)itemId);
     if ("project".equals(this.getItemType(itemId)) && !(itemId.equals(tree.getValue()))) {
       this.backButton.setVisible(true);
       SimpleStringFilter filter = new SimpleStringFilter("project", (String) itemId, true, false);
       // Add the new filter
       ((HierarchicalContainer) tree.getContainerDataSource()).addContainerFilter(filter);
-    }
-    else if ("experiment".equals(this.getItemType(itemId)) && !(itemId.equals(tree.getValue()))) {
+    } else if ("experiment".equals(this.getItemType(itemId)) && !(itemId.equals(tree.getValue()))) {
       this.backButton.setVisible(true);
       String projectId = projectId((String) itemId);
-      LOGGER.debug("project is " + projectId);
       SimpleStringFilter filter = new SimpleStringFilter("project", projectId, true, false);
       // Add the new filter
       ((HierarchicalContainer) tree.getContainerDataSource()).addContainerFilter(filter);
     }
-    
+
   }
 
   private String getItemType(Object itemId) {
     Item item = tree.getItem(itemId);
-    LOGGER.debug(String.format("Item with itemId %s exists %s", (String)itemId, String.valueOf(item != null)));
-    return item == null?null: item.getItemProperty("type").getValue().toString();
+    return item == null ? null : item.getItemProperty("type").getValue().toString();
   }
 
   private String getItemIdentifier(Object itemId) {
@@ -326,7 +317,18 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
   public boolean beforeViewChange(ViewChangeEvent event) {
     String param = event.getParameters();
     try {
-      this.setValue(param);
+      if (param == "") {
+        try {
+          loadProjects();
+          backButton.setVisible(false);
+        } catch (Exception e) {
+          LOGGER.error(String.format("failed to load projects for user %s", user), e);
+          backButton.setVisible(false);
+        }
+
+      } else {
+        this.setValue(param);
+      }
     } catch (NullPointerException e) {
       // nothing to do here. It just means that treeView does not need any update
     }
@@ -348,5 +350,34 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     this.tree.setEnabled(enabled);
     this.backButton.setEnabled(enabled);
   }
+
+
+  public void loadProjects() {
+    // Initialization of Tree Container
+    HierarchicalContainer tc = new HierarchicalContainer();
+
+    tc.addContainerProperty("identifier", String.class, "N/A");
+    tc.addContainerProperty("type", String.class, "N/A");
+    tc.addContainerProperty("project", String.class, "N/A");
+    tc.addContainerProperty("caption", String.class, "N/A");
+
+    List<Project> projects =
+        openbisClient.getOpenbisInfoService().listProjectsOnBehalfOfUser(
+            openbisClient.getSessionToken(), user);
+    for (Project project : projects) {
+
+      String projectIdentifier = project.getIdentifier();
+      String projectCode = project.getCode();
+
+      tc.addItem(projectIdentifier);
+      tc.getContainerProperty(projectIdentifier, "type").setValue("project");
+      tc.getContainerProperty(projectIdentifier, "identifier").setValue(projectIdentifier);
+      tc.getContainerProperty(projectIdentifier, "project").setValue(projectIdentifier);
+      tc.getContainerProperty(projectIdentifier, "caption").setValue(projectCode);
+    }
+
+    tree.setContainerDataSource(tc);
+  }
+
 
 }

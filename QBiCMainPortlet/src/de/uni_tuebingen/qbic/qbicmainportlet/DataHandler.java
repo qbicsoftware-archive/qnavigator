@@ -425,8 +425,11 @@ public class DataHandler implements Serializable {
 
   }
 
+  
   public void addOpenbisDtoProject(Project project) {
-    this.dtoProjects.put(project.getIdentifier(), project);
+    if(project != null && !dtoProjects.containsKey(project.getIdentifier())){
+      this.dtoProjects.put(project.getIdentifier(), project);
+    }
   }
 
 
