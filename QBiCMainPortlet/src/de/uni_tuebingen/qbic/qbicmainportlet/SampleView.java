@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
 
+import logging.Log4j2Logger;
 import model.SampleBean;
 
 import org.tepi.filtertable.FilterTreeTable;
@@ -33,6 +34,9 @@ public class SampleView extends VerticalLayout implements View {
    * 
    */
   private static final long serialVersionUID = 377522772714840963L;
+  
+  private logging.Logger LOGGER = new Log4j2Logger(SampleView.class);
+  
   static String navigateToLabel = "sample";
   FilterTreeTable table;
   VerticalLayout vert;
@@ -319,8 +323,7 @@ public class SampleView extends VerticalLayout implements View {
       propertiesLabel.setValue(currentBean.generatePropertiesFormattedString());
       experimentalFactorLabel.setValue(currentBean.generateXMLPropertiesFormattedString());
     } catch (JAXBException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOGGER.error(String.format("failed to parse experimental factors for sample %s", currentBean.getId()),e);
     }
   }
 

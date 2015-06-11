@@ -320,8 +320,58 @@ public class DataHandler implements Serializable {
   }
   
   public ProjectBean getProjectIvac(String projectIdentifier){
-    
+    List<Experiment> experiments = this.openBisClient.getExperimentsForProject2(projectIdentifier);
+    float projectStatus = this.openBisClient.computeProjectStatus(experiments);
 
+    Project project = getOpenbisDtoProject(projectIdentifier);
+    if (project == null) {
+      project = openBisClient.getProjectByIdentifier(projectIdentifier);
+      addOpenbisDtoProject(project);
+    }
+    ProjectBean newProjectBean = new ProjectBean();
+
+    ProgressBar progressBar = new ProgressBar();
+    progressBar.setValue(projectStatus);
+
+    Date registrationDate = project.getRegistrationDetails().getRegistrationDate();
+
+    newProjectBean.setId(project.getIdentifier());
+    newProjectBean.setCode(project.getCode());
+    String desc = project.getDescription();
+    if (desc == null)
+      desc = "";
+    newProjectBean.setDescription(desc);
+    newProjectBean.setRegistrationDate(registrationDate);
+    newProjectBean.setProgress(progressBar);
+    newProjectBean.setRegistrator(project.getRegistrationDetails().getUserId());
+    newProjectBean.setContact(project.getRegistrationDetails().getUserEmail());
+
+    BeanItemContainer<ExperimentBean> experimentBeans =
+        new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
+
+    for (Experiment experiment : experiments) {
+      ExperimentBean newExperimentBean = new ExperimentBean();
+
+      Map<String, String> assignedProperties = experiment.getProperties();
+
+
+      newExperimentBean.setId(experiment.getIdentifier());
+      newExperimentBean.setCode(experiment.getCode());
+      newExperimentBean.setType(experiment.getExperimentTypeCode());
+      newExperimentBean.setProperties(assignedProperties);
+      newExperimentBean.setRegistrator(experiment.getRegistrationDetails().getUserId());
+      newExperimentBean.setRegistrationDate(experiment.getRegistrationDetails()
+          .getRegistrationDate());
+      experimentBeans.addBean(newExperimentBean);
+    }
+
+    newProjectBean.setContainsData(false);
+
+
+    newProjectBean.setExperiments(experimentBeans);
+    newProjectBean.setMembers(new HashSet<String>());
+    return newProjectBean;    
+/*
     Project project = getOpenbisDtoProject(projectIdentifier);
     if (project == null) {
       project = openBisClient.getProjectByIdentifier(projectIdentifier);
@@ -388,7 +438,7 @@ public class DataHandler implements Serializable {
       
       newExperimentBean.setProperties(properties);
       newExperimentBean.setControlledVocabularies(controlledVocabularies);
-      List<Sample> samples = openBisClient.getSamplesofExperiment(experiment.getIdentifier());
+      /*List<Sample> samples = openBisClient.getSamplesofExperiment(experiment.getIdentifier());
       BeanItemContainer<SampleBean> sampleBeans = new BeanItemContainer<SampleBean>(SampleBean.class);
       for(Sample sample: samples){
         SampleBean newSampleBean = new SampleBean();
@@ -401,7 +451,7 @@ public class DataHandler implements Serializable {
         newSampleBean.setProperties(sampleProperties);
         sampleBeans.addBean(newSampleBean);
       }
-      newExperimentBean.setSamples(sampleBeans);
+      newExperimentBean.setSamples(sampleBeans);/
       
       experimentBeans.addBean(newExperimentBean);
     }
@@ -413,7 +463,7 @@ public class DataHandler implements Serializable {
 
     newProjectBean.setExperiments(experimentBeans);
     newProjectBean.setMembers(new HashSet<String>());
-    return newProjectBean;    
+    return newProjectBean;*/
   }
 
 

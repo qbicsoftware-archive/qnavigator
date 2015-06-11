@@ -3,6 +3,7 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import logging.Log4j2Logger;
@@ -11,6 +12,11 @@ import model.ExperimentBean;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
 import model.SampleBean;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
+import ch.systemsx.cisd.openbis.generic.shared.basic.dto.Sample;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -229,6 +235,30 @@ public class PatientView extends VerticalLayout implements View {
     }
     String patientInfo = "";
     Boolean available = false;
+    
+    SearchCriteria sampleSc = new SearchCriteria();
+    sampleSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, "Q_BIOLOGICAL_ENTITY"));
+    SearchCriteria projectSc = new SearchCriteria();
+    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
+    sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
+    
+    SearchCriteria experimentSc = new SearchCriteria();
+    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name()));
+    sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.openBisClient.getFacade().searchForSamples(sampleSc);
+    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample: samples){
+      if (sample.getProperties().get("Q_ADDITIONAL_INFO") != null) {
+        available = true;
+        String[] splitted = sample.getProperties().get("Q_ADDITIONAL_INFO").split(";");
+        for (String s : splitted) {
+          String[] splitted2 = s.split(":");
+          patientInfo += String.format("<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
+        }
+      }
+    }
+    
+    
+    /*
     for (Iterator<ExperimentBean> i = currentBean.getExperiments().getItemIds().iterator(); i
         .hasNext();) {
       // Get the current item identifier, which is an integer.
@@ -250,7 +280,7 @@ public class PatientView extends VerticalLayout implements View {
           }
         }
       }
-    }
+    }*/
     if (available) {
       patientInformation.setValue(patientInfo);
     }
@@ -295,7 +325,35 @@ public class PatientView extends VerticalLayout implements View {
     String labelContent = "<head> <title></title> </head> <body> ";
 
     Boolean available = false;
+    
+    SearchCriteria sc = new SearchCriteria();
+    sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, model.ExperimentType.Q_NGS_HLATYPING.name()));
+    SearchCriteria projectSc = new SearchCriteria();
+    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
+    sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
+    
+    SearchCriteria experimentSc = new SearchCriteria();
+    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_NGS_HLATYPING.name()));
+    sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.openBisClient.getFacade().searchForSamples(sc);
+    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples){
+      available = true;
+      String classString = sample.getProperties().get("Q_HLA_CLASS");
+      String[] splitted = classString.split("_");
+      String lastOne = splitted[splitted.length - 1];
+      String addInformation = "";
 
+      if (!(sample.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
+        addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
+      }
+
+      labelContent +=
+          String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ",
+              lastOne, sample.getProperties().get("Q_HLA_TYPING"), addInformation);      
+    }
+    
+    
+    /*
     for (Iterator<ExperimentBean> i = currentBean.getExperiments().getItemIds().iterator(); i
         .hasNext();) {
       // Get the current item identifier, which is an integer.
@@ -322,7 +380,7 @@ public class PatientView extends VerticalLayout implements View {
           }
         }
       }
-    }
+    }*/
     labelContent += "</body>";
     if (available) {
       hlaTypeLabel.setValue(labelContent);
@@ -489,7 +547,7 @@ public class PatientView extends VerticalLayout implements View {
 
   void updateProjectStatus() {
 
-    BeanItemContainer<ExperimentStatusBean> experimentBeans =
+    BeanItemContainer<ExperimentStatusBean> experimentstatusBeans =
         datahandler.computIvacPatientStatus(currentBean);
 
     int finishedExperiments = 0;
@@ -498,7 +556,7 @@ public class PatientView extends VerticalLayout implements View {
 
 
     // Generate button caption column
-    final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(experimentBeans);
+    final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(experimentstatusBeans);
     gpc.addGeneratedProperty("started", new PropertyValueGenerator<String>() {
 
       @Override
@@ -604,7 +662,7 @@ public class PatientView extends VerticalLayout implements View {
      */
 
 
-    for (Iterator i = experimentBeans.getItemIds().iterator(); i.hasNext();) {
+    for (Iterator i = experimentstatusBeans.getItemIds().iterator(); i.hasNext();) {
       ExperimentStatusBean statusBean = (ExperimentStatusBean) i.next();
 
 
@@ -637,7 +695,7 @@ public class PatientView extends VerticalLayout implements View {
     }
 
 
-    progressBar.setValue((float) finishedExperiments / experimentBeans.size());
+    progressBar.setValue((float) finishedExperiments / experimentstatusBeans.size());
   }
 
 
