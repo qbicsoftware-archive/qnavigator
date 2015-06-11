@@ -10,6 +10,8 @@ public class spaceToProjectPrefixMap {
     Map<String, String> aMap = new HashMap<String, String>();
     aMap.put("IVAC_ALL", "QA");
     aMap.put("IVAC_CEGAT", "QC");
+    aMap.put("IVAC_TEST_SPACE", "QT");
+    aMap.put("IVAC_HEPA_VAC", "QH");
     myMap = Collections.unmodifiableMap(aMap);
   }
 }
