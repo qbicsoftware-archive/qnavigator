@@ -254,6 +254,10 @@ public class PatientView extends VerticalLayout implements View {
     if (available) {
       patientInformation.setValue(patientInfo);
     }
+    else {
+      patientInformation.setValue("No patient information provided.");
+    }
+    
     membersSection.removeAllComponents();
     membersSection.addComponent(getMembersComponent());
   }
@@ -322,6 +326,10 @@ public class PatientView extends VerticalLayout implements View {
     labelContent += "</body>";
     if (available) {
       hlaTypeLabel.setValue(labelContent);
+    }
+    
+    else {
+      hlaTypeLabel.setValue("Not available.");
     }
   }
 
