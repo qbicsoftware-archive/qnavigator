@@ -236,8 +236,11 @@ public class AddPatientView extends VerticalLayout implements View {
     // Open DatasetView
     // this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
     downloadProject.addItem("Dataset Overview", null);
+    downloadProject.setEnabled(false);
+    
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_higher.png"));
+    manage.setEnabled(false);
 
     // Another submenu item with a sub-submenu
     // this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);

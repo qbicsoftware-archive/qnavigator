@@ -1404,7 +1404,8 @@ public class DataHandler implements Serializable {
     // if (datasetMap.get(p.getIdentifier()) != null)
     // res.put("Data Registered", 1);
     // else
-    res.put("Data Registered", 0);
+    int dataregistered = projectBean.getContainsData() ? 1 : 0;
+    res.put("Data Registered", dataregistered);
     return res;
   }
 
