@@ -845,7 +845,7 @@ public class PatientView extends VerticalLayout implements View {
     Resource resource = null;
     try {
       GraphGenerator graphFrame =
-          new GraphGenerator(datahandler.getProject(currentBean.getId()), datahandler.openBisClient);
+          new GraphGenerator(datahandler.openBisClient.getSamplesOfProject(currentBean.getId()), datahandler.openBisClient.getSampleTypes(), datahandler.openBisClient, currentBean.getId());
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
