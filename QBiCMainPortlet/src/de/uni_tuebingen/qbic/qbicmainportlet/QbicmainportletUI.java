@@ -59,7 +59,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "0.3.4";
-  private String revision = "509";
+  private String revision = "513";
   private String resUrl;
   protected View currentView;
 
@@ -235,6 +235,7 @@ public class QbicmainportletUI extends UI {
 
     final TreeView tv = new TreeView(state, navigator, user);
     tv.setOpenbisClient(this.openBisConnection);
+    tv.loadProjects();
     state.addObserver(tv);
     navigator.addViewChangeListener(tv);
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();

@@ -548,7 +548,7 @@ public class PatientView extends VerticalLayout implements View {
   void updateProjectStatus() {
 
     BeanItemContainer<ExperimentStatusBean> experimentstatusBeans =
-        datahandler.computIvacPatientStatus(currentBean);
+        datahandler.computeIvacPatientStatus(currentBean);
 
     int finishedExperiments = 0;
     status.removeAllComponents();
@@ -595,7 +595,7 @@ public class PatientView extends VerticalLayout implements View {
     experiments.setColumnOrder("started", "code", "description", "status", "download",
         "runWorkflow");
 
-    experiments.getColumn("download").setRenderer(new ButtonRenderer(new RendererClickListener() {
+    ButtonRenderer downloadRenderer = new ButtonRenderer(new RendererClickListener() {
       @Override
       public void click(RendererClickEvent event) {
         ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
@@ -604,7 +604,12 @@ public class PatientView extends VerticalLayout implements View {
           new Notification("Download of Barcodes not available.",
               "<br/>Please create barcodes by clicking 'Run'.", Type.WARNING_MESSAGE, true)
               .show(Page.getCurrent());
-        } else {
+        }else if(esb.getStatus().equals(0.0)){
+          new Notification("No data available for download.",
+              "<br/>Please do the variant calling first, by clicking 'Run'.", Type.WARNING_MESSAGE, true)
+              .show(Page.getCurrent());
+        }
+        else {
           ArrayList<String> message = new ArrayList<String>();
           message.add("clicked");
           StringBuilder sb = new StringBuilder("type=");
@@ -615,12 +620,15 @@ public class PatientView extends VerticalLayout implements View {
           sb.append(esb.getIdentifier());
           message.add(sb.toString());
           message.add(DatasetView.navigateToLabel);
-          System.out.println(message);
           state.notifyObservers(message);
         }
+        
       }
 
-    }));
+    });
+    
+    
+    experiments.getColumn("download").setRenderer(downloadRenderer);
 
     experiments.getColumn("runWorkflow").setRenderer(
         new ButtonRenderer(new RendererClickListener() {

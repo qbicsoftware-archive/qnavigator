@@ -35,6 +35,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class TreeView extends Panel implements Observer, ViewChangeListener {
 
+  enum containerProperty {identifier, type, project, caption };
   private logging.Logger LOGGER = new Log4j2Logger(TreeView.class);
 
   private Tree tree = new Tree();
@@ -51,6 +52,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     this.state = state;
     this.navigator = navigator;
     this.init();
+    this.initTreeContainer();
   }
 
   public void setOpenbisClient(OpenBisClient openbisClient) {
@@ -232,6 +234,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
          */
       case 5:
         return String.format("/%s/%s", split[1], split[2]);
+        
         // what happens with datasets?
       default:
         LOGGER.debug(String.format("datasets of %s?", openbisId));
@@ -245,12 +248,16 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
       String openbisId = (String) itemId;
       String projectId = projectId(openbisId);
 
-      HierarchicalContainer container = (HierarchicalContainer) tree.getContainerDataSource();
       List<Experiment> experiments = openbisClient.getExperimentsForProject2(projectId);
-      setExperiments(container, projectId, experiments);
+      setExperiments((HierarchicalContainer)tree.getContainerDataSource(), projectId, experiments);
     }
   }
-
+  /**
+   * helper function for addExperiments
+   * @param container
+   * @param openbisId
+   * @param experiments
+   */
   void setExperiments(HierarchicalContainer container, String openbisId,
       List<Experiment> experiments) {
     for (Experiment experiment : experiments) {
@@ -305,6 +312,9 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     return tree.getItem(itemId).getItemProperty("identifier").getValue().toString();
   }
 
+  /**
+   * Observes what State is saying. Here it just looks whether any kind of 'click' in e.g. ProjectView has happened 
+   */
   @SuppressWarnings("unchecked")
   @Override
   public void update(Observable o, Object arg) {
@@ -327,6 +337,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
         }
 
       } else {
+        LOGGER.debug(param);
         this.setValue(param);
       }
     } catch (NullPointerException e) {
@@ -351,16 +362,16 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     this.backButton.setEnabled(enabled);
   }
 
-
+  /**
+   * retrieve projects from openbis and 
+   */
   public void loadProjects() {
     // Initialization of Tree Container
-    HierarchicalContainer tc = new HierarchicalContainer();
-
-    tc.addContainerProperty("identifier", String.class, "N/A");
-    tc.addContainerProperty("type", String.class, "N/A");
-    tc.addContainerProperty("project", String.class, "N/A");
-    tc.addContainerProperty("caption", String.class, "N/A");
-
+    HierarchicalContainer tc = getContainerDataSource();
+    if(tc == null){
+      tc = initTreeContainer();
+    }
+    tc.removeAllItems();
     List<Project> projects =
         openbisClient.getOpenbisInfoService().listProjectsOnBehalfOfUser(
             openbisClient.getSessionToken(), user);
@@ -376,8 +387,21 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
       tc.getContainerProperty(projectIdentifier, "caption").setValue(projectCode);
     }
 
-    tree.setContainerDataSource(tc);
   }
 
+  HierarchicalContainer getContainerDataSource() {
+    return (HierarchicalContainer) tree.getContainerDataSource();
+  }
+  
+  HierarchicalContainer initTreeContainer(){
+    HierarchicalContainer tc = new HierarchicalContainer();
+    
+    tc.addContainerProperty("identifier", String.class, "N/A");
+    tc.addContainerProperty("type", String.class, "N/A");
+    tc.addContainerProperty("project", String.class, "N/A");
+    tc.addContainerProperty("caption", String.class, "N/A");
+    tree.setContainerDataSource(tc);
+    return getContainerDataSource();
+  }
 
 }

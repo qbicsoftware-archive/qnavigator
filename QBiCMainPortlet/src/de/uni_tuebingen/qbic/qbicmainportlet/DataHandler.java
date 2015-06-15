@@ -19,6 +19,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import logging.Log4j2Logger;
 import main.OpenBisClient;
 import model.AggregationAdaptorBean;
 import model.DatasetBean;
@@ -59,7 +60,8 @@ public class DataHandler implements Serializable {
    * 
    */
   private static final long serialVersionUID = -4814000017404997233L;
-
+  private logging.Logger LOGGER = new Log4j2Logger(DataHandler.class);
+  
   // Map<String, SpaceInformation> spaces = new HashMap<String, SpaceInformation>();
   // Map<String, ProjectInformation> projectInformations = new HashMap<String,
   // ProjectInformation>();
@@ -1462,7 +1464,7 @@ public class DataHandler implements Serializable {
     return res;
   }
 
-  public BeanItemContainer<ExperimentStatusBean> computIvacPatientStatus(ProjectBean projectBean) {
+  public BeanItemContainer<ExperimentStatusBean> computeIvacPatientStatus(ProjectBean projectBean) {
 
     BeanItemContainer<ExperimentStatusBean> res =
         new BeanItemContainer<ExperimentStatusBean>(ExperimentStatusBean.class);
@@ -1489,36 +1491,34 @@ public class DataHandler implements Serializable {
 
     for (ExperimentBean bean : cont.getItemIds()) {
       String type = bean.getType();
-
+      Double experimentStatus = bean.getProperties().get("Q_CURRENT_STATUS") ==null?0.0:helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
+          .get("Q_CURRENT_STATUS").toString());
       if (type.equalsIgnoreCase(ExperimentType.Q_NGS_MEASUREMENT.name())) {
 
         ExperimentStatusBean ngsMeasure = new ExperimentStatusBean();
         ngsMeasure.setDescription("NGS Sequencing");
         ngsMeasure.setStatus(0.0);
-        ngsMeasure.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
-            .get("Q_CURRENT_STATUS").toString()));
+        ngsMeasure.setStatus(experimentStatus);
         ngsMeasure.setCode(bean.getCode());
         ngsMeasure.setIdentifier(bean.getId());
 
         res.addBean(ngsMeasure);
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_NGS_VARIANT_CALLING.name())) {
-
-        ngsCall.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
-            .get("Q_CURRENT_STATUS").toString()));
+        LOGGER.debug(bean.getCode());
+        LOGGER.debug(bean.getId());
+        LOGGER.debug(String.valueOf(experimentStatus));
+        ngsCall.setStatus(experimentStatus);
         ngsCall.setCode(bean.getCode());
         ngsCall.setIdentifier(bean.getId());
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_NGS_HLATYPING.name())) {
-        hlaType.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
-            .get("Q_CURRENT_STATUS").toString()));
+        hlaType.setStatus(experimentStatus);
         hlaType.setCode(bean.getCode());
         hlaType.setIdentifier(bean.getId());
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_EPITOPE_PREDICTION.name())) {
-
-        epitopePred.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
-            .get("Q_CURRENT_STATUS").toString()));
+        epitopePred.setStatus(experimentStatus);
         epitopePred.setCode(bean.getCode());
         epitopePred.setIdentifier(bean.getId());
       }
