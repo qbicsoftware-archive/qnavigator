@@ -604,9 +604,9 @@ public class PatientView extends VerticalLayout implements View {
           new Notification("Download of Barcodes not available.",
               "<br/>Please create barcodes by clicking 'Run'.", Type.WARNING_MESSAGE, true)
               .show(Page.getCurrent());
-        }else if(esb.getStatus().equals(0.0)){
+        }else if(esb.getIdentifier() == null || esb.getIdentifier().isEmpty()){
           new Notification("No data available for download.",
-              "<br/>Please do the variant calling first, by clicking 'Run'.", Type.WARNING_MESSAGE, true)
+              "<br/>Please do the variant calling clicking 'Run', first.", Type.WARNING_MESSAGE, true)
               .show(Page.getCurrent());
         }
         else {
