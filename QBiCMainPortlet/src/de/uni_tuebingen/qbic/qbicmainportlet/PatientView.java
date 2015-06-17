@@ -831,7 +831,7 @@ public class PatientView extends VerticalLayout implements View {
       error.setStyleName(ValoTheme.LABEL_FAILURE);
       graphSectionContent.removeAllComponents();
       graphSectionContent.addComponent(error);
-      LOGGER.error(error.getValue());
+      LOGGER.error(String.format("%s: %s",error.getValue(),currentBean.getId()));
     }
   }
 

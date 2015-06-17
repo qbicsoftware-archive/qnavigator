@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Observable;
 
+import logging.Log4j2Logger;
+
 import com.vaadin.ui.UI;
 
 public class State extends Observable implements Serializable {
@@ -14,22 +16,26 @@ public class State extends Observable implements Serializable {
    * 
    */
   private static final long serialVersionUID = -8448995433087062650L;
+  private logging.Logger LOGGER = new Log4j2Logger(State.class);
 
-	public void notifyObservers(ArrayList<String> message) {
-		// TODO Auto-generated method stub
-		this.setChanged();
-		
-		super.notifyObservers(message);
-		//TODO put ivac specifc views back in when properly tested
-		if(message.get(1).contains("IVAC") & !(message.get(2).equals("barcodeview")) & !(message.get(2).equals("datasetview"))) {
-		  System.out.println(message.get(1) + " " + message.get(2));
-	      UI.getCurrent().getNavigator().navigateTo(String.format("ivac%s/%s", message.get(2).toLowerCase(), message.get(1)));
-		}
-		else {
-	       UI.getCurrent().getNavigator().navigateTo(String.format("%s/%s", message.get(2).toLowerCase(), message.get(1)));
-		}
-		//UI.getCurrent().getNavigator().navigateTo(String.format("%s/%s", message.get(2).toLowerCase(), message.get(1)));
-	}
+  public void notifyObservers(ArrayList<String> message) {
+
+    try{
+      String message2 = message.get(2).toLowerCase();
+      if (message.get(1).contains("IVAC") && (message2.equals("project"))) {
+        LOGGER.debug("navigate to: " + message.get(1) + " " + message2);
+        UI.getCurrent().getNavigator()
+            .navigateTo(String.format("ivac%s/%s", message2, message.get(1)));
+      } else {
+        UI.getCurrent().getNavigator()
+            .navigateTo(String.format("%s/%s", message2, message.get(1)));
+      }
+      this.setChanged();
+      super.notifyObservers(message);     
+    }catch(IllegalArgumentException e){
+      LOGGER.error(String.format("message1: %s, message2: %s, current View: %s.",message.get(1),message.get(2),"not available"),e.getStackTrace() ); 
+    }
+  }
 
   public State() {
 

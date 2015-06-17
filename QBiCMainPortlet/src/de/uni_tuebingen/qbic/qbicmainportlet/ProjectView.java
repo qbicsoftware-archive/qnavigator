@@ -503,11 +503,11 @@ public class ProjectView extends VerticalLayout implements View {
       Image graphImage = new Image("", resource);
       graphSectionContent.addComponent(graphImage);
     } else {
-      Label error = new Label("Project Graph can not be computed at that time for this project.");
+      Label error = new Label("Project Graph can not be computed at that time for this project");
       error.setStyleName(ValoTheme.LABEL_FAILURE);
       graphSectionContent.removeAllComponents();
       graphSectionContent.addComponent(error);
-      LOGGER.error(error.getValue());
+      LOGGER.error(String.format("%s: %s",error.getValue(),currentBean.getId()));
     }
   }
 

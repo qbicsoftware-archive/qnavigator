@@ -367,11 +367,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
    */
   public void loadProjects() {
     // Initialization of Tree Container
-    HierarchicalContainer tc = getContainerDataSource();
-    if(tc == null){
-      tc = initTreeContainer();
-    }
-    tc.removeAllItems();
+    HierarchicalContainer tc = initTreeContainer();
     List<Project> projects =
         openbisClient.getOpenbisInfoService().listProjectsOnBehalfOfUser(
             openbisClient.getSessionToken(), user);

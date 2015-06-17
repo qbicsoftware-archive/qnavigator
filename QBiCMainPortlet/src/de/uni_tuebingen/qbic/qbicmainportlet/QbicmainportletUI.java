@@ -203,8 +203,8 @@ public class QbicmainportletUI extends UI {
     final SampleView sampleView = new SampleView(datahandler, state, resUrl);
     final ProjectView projectView = new ProjectView(datahandler, state, resUrl);
     BarcodeView barcodeView =
-        new BarcodeView(datahandler.openBisClient, manager.getScriptsFolder(),
-            manager.getPathVariable());
+        new BarcodeView(datahandler.openBisClient, manager.getBarcodeScriptsFolder(),
+            manager.getBarcodePathVariable());
     final ExperimentView experimentView = new ExperimentView(datahandler, state, resUrl);
     ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
