@@ -87,6 +87,8 @@ public class DatasetView extends VerticalLayout implements View {
   private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Project", "Sample",
       "File Name", "Dataset Type", "Registration Date", "File Size"};
 
+  private int numberOfDatasets;
+
   public DatasetView(DataHandler dh) {
 
     this.datahandler = dh;
@@ -170,7 +172,7 @@ public class DatasetView extends VerticalLayout implements View {
     HorizontalLayout statContent = new HorizontalLayout();
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
-    statContent.addComponent(new Label(String.format("%s dataset(s).", this.datasets.size())));
+    statContent.addComponent(new Label(String.format("%s registered dataset(s).", numberOfDatasets)));
     statContent.setMargin(true);
     statContent.setSpacing(true);
     statistics.addComponent(statContent);
@@ -578,8 +580,8 @@ public class DatasetView extends VerticalLayout implements View {
           break;
       }
       
-          
-          if (retrievedDatasets.size() == 0) {
+          numberOfDatasets = retrievedDatasets.size();
+          if (numberOfDatasets == 0) {
             new Notification("No datasets available.",
                 "<br/>Please contact the project manager.", Type.WARNING_MESSAGE, true).show(Page
                 .getCurrent());
