@@ -300,6 +300,7 @@ public class DataHandler implements Serializable {
       Image statusColor = new Image(status, this.setExperimentStatusColor(status));
       statusColor.setWidth("15px");
       statusColor.setHeight("15px");
+      statusColor.setCaption(status);
 
       newExperimentBean.setId(experiment.getIdentifier());
       newExperimentBean.setCode(experiment.getCode());

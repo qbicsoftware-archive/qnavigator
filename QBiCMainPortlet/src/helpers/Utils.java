@@ -4,8 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import model.DatasetBean;
+import model.SampleBean;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -160,11 +165,31 @@ public class Utils {
     String header = "";
     Collection<?> i = container.getItemIds();
     String rowString = "";
+    
+    List<String> exklusionList = new ArrayList<String>();
+    exklusionList.add("samples");
+    exklusionList.add("properties");
+    exklusionList.add("controlledVocabularies"); 
+    exklusionList.add("typeLabels");
+    exklusionList.add("containsData");
+    exklusionList.add("parents");
+    exklusionList.add("children");
+    exklusionList.add("datasets");
+    exklusionList.add("isSelected");
+    exklusionList.add("parent");
+    exklusionList.add("root");
+    exklusionList.add("children");
+    exklusionList.add("dssPath");
 
     Collection<?> propertyIDs = container.getContainerPropertyIds();
 
     for (Object o : propertyIDs) {
+      if (exklusionList.contains(o.toString())) {
+        continue;
+      }
+      else {
       header += o.toString() + "\t";
+      }
     }
 
     // for (int x = 1; x <= i.size(); x++) {
@@ -173,14 +198,20 @@ public class Utils {
 
       for (Object o : propertyIDs) {
         // Could be extended to an exclusion list if we don't want to show further columns
-        if (o.toString() == "dl_link") {
+        if (exklusionList.contains(o.toString())) {
           continue;
-        } else if (o.toString() == "Status") {
+        } else if (o.toString().equals("status")) {
           Image image = (Image) it.getItemProperty(o).getValue();
           rowString += image.getCaption() + "\t";
         } else {
           Property prop = it.getItemProperty(o);
-          rowString += prop.toString() + "\t";
+          
+          if(prop.getValue() == null) {
+            rowString += "-" + "\t";
+          }
+          else {
+            rowString += prop.toString() + "\t";
+          }
         }
       }
       rowString += "\n";

@@ -145,7 +145,7 @@ public class GraphGenerator {
         if (sample_count.containsKey("Q_BIOLOGICAL_SAMPLE")) {
           Object dummy_node_level2 =
               graph.insertVertex(parent, null, sample_count.get("Q_BIOLOGICAL_SAMPLE") + "\n"
-                  + "biological samples", 20, 20, width, height,
+                  + "biological samples", 20, 20, width + 50, height,
                   "NONE;strokeWidth=0;strokeColor=#FFFFFF;fillColor=#FFFFFF");
           graph.insertEdge(parent, null, "", dummy_node_level1, dummy_node_level2,
               "strokeWidth=0;strokeColor=#FFFFFF");
@@ -153,7 +153,7 @@ public class GraphGenerator {
           if (sample_count.containsKey("Q_TEST_SAMPLE")) {
             Object dummy_node_level3 =
                 graph.insertVertex(parent, null, sample_count.get("Q_TEST_SAMPLE") + "\n"
-                    + "test samples", 20, 20, width, height,
+                    + "test samples", 20, 20, width + 50, height,
                     "NONE;strokeWidth=0;strokeColor=#FFFFFF;fillColor=#FFFFFF");
             graph.insertEdge(parent, null, "", dummy_node_level2, dummy_node_level3,
                 "strokeWidth=0;strokeColor=#FFFFFF");
@@ -161,7 +161,7 @@ public class GraphGenerator {
             if (num_measurement_samples > 0) {
               Object dummy_node_level4 =
                   graph.insertVertex(parent, null, num_measurement_samples + "\n"
-                      + "measured samples", 20, 20, width, height,
+                      + "measured samples", 20, 20, width + 50, height,
                       "NONE;strokeWidth=0;strokeColor=#FFFFFF;fillColor=#FFFFFF");
 
               graph.insertEdge(parent, null, "", dummy_node_level3, dummy_node_level4,
@@ -217,6 +217,7 @@ public class GraphGenerator {
           if (c.getSampleTypeCode().equals("Q_BIOLOGICAL_SAMPLE")) {
 
             String primaryTissue = "";
+            String secondaryName = "";
             for (PropertyType pType : bioSampleProperties) {
               if (pType.getCode().equals("Q_PRIMARY_TISSUE")) {
                 primaryTissue =
@@ -224,12 +225,16 @@ public class GraphGenerator {
                         pType,
                         openBisClient.getSampleByIdentifier(c.getIdentifier()).getProperties()
                             .get("Q_PRIMARY_TISSUE"));
+                String secID = openBisClient.getSampleByIdentifier(c.getIdentifier()).getProperties().get("Q_SECONDARY_NAME");
+                if (secID != null) {
+                  secondaryName = secID.replace("nan", "");
+                }
               }
             }
 
             Object daughter_node =
                 graph.insertVertex(parent, c.getPermId(),
-                    String.format("%s\n%s", c.getCode(), primaryTissue), 20, 20, width, height,
+                    String.format("%s\n%s\n%s", c.getCode(), primaryTissue, secondaryName), 20, 20, width + 50, height + 20,
                     "ROUNDED;strokeColor=#ffffff;fillColor=#51A7F9");
             graph.insertEdge(parent, null, "", mother_node, daughter_node);
             // graph.groupCells(group_node, 1.0, new Object[] {daughter_node});
@@ -243,19 +248,24 @@ public class GraphGenerator {
               if (gc.getSampleTypeCode().equals("Q_TEST_SAMPLE")) {
 
                 String testSampleType = "";
+                String testSecID = "";
                 for (PropertyType pType : testSampleProperties) {
                   if (pType.getCode().equals("Q_SAMPLE_TYPE")) {
                     testSampleType =
                         openBisClient.openBIScodeToString(openBisClient.getCVLabelForProperty(
                             pType, openBisClient.getSampleByIdentifier(gc.getIdentifier())
                                 .getProperties().get("Q_SAMPLE_TYPE")));
+                    testSecID = openBisClient.getSampleByIdentifier(gc.getIdentifier()).getProperties().get("Q_SECONDARY_NAME");
+                    if (testSecID != null) {
+                      testSecID = testSecID.replace("nan", "");
+                    }
                   }
                 }
 
                 Object granddaughter_node =
                     graph.insertVertex(parent, gc.getPermId(),
-                        String.format("%s\n%s", gc.getCode(), testSampleType), 20, 20, width,
-                        height, "ROUNDED;strokeColor=#ffffff;fillColor=#70BF41");
+                        String.format("%s\n%s\n%s", gc.getCode(), testSampleType, testSecID), 20, 20,  width + 50, height + 20,
+                        "ROUNDED;strokeColor=#ffffff;fillColor=#70BF41");
                 graph.insertEdge(parent, null, "", daughter_node, granddaughter_node);
 
                 List<Sample> grandgrandchildren = new ArrayList<Sample>();
@@ -266,14 +276,18 @@ public class GraphGenerator {
 
                 for (Sample ggc : grandgrandchildren) {
 
-
+                  String measuredSecID = "";
+                  measuredSecID = openBisClient.getSampleByIdentifier(ggc.getIdentifier()).getProperties().get("Q_SECONDARY_NAME");
+                  if (measuredSecID != null) {
+                    measuredSecID = measuredSecID.replace("nan", "");
+                  }
                   Object grandgranddaughter_node =
                       graph.insertVertex(
                           parent,
                           ggc.getPermId(),
-                          String.format("%s\n%s", ggc.getCode(),
-                              openBisClient.openBIScodeToString(ggc.getSampleTypeCode())), 20, 20,
-                          width + 20.0, height, "ROUNDED;strokeColor=#ffffff;fillColor=#F39019");
+                          String.format("%s\n%s\n%s", ggc.getCode(),
+                              openBisClient.openBIScodeToString(ggc.getSampleTypeCode()), measuredSecID), 20, 20,
+                          width + 50, height + 20, "ROUNDED;strokeColor=#ffffff;fillColor=#F39019");
                   graph.insertEdge(parent, null, "", granddaughter_node, grandgranddaughter_node);
 
                 }
@@ -409,7 +423,7 @@ public class GraphGenerator {
         if (sample_count.containsKey("Q_BIOLOGICAL_SAMPLE")) {
           Object dummy_node_level2 =
               graph.insertVertex(parent, null, sample_count.get("Q_BIOLOGICAL_SAMPLE") + "\n"
-                  + "biological samples", 20, 20, width, height,
+                  + "biological samples", 20, 20, width + 75, height,
                   "NONE;strokeWidth=0;strokeColor=#FFFFFF;fillColor=#FFFFFF");
           graph.insertEdge(parent, null, "", dummy_node_level1, dummy_node_level2,
               "strokeWidth=0;strokeColor=#FFFFFF");
@@ -417,7 +431,7 @@ public class GraphGenerator {
           if (sample_count.containsKey("Q_TEST_SAMPLE")) {
             Object dummy_node_level3 =
                 graph.insertVertex(parent, null, sample_count.get("Q_TEST_SAMPLE") + "\n"
-                    + "test samples", 20, 20, width, height,
+                    + "test samples", 20, 20, width + 75, height,
                     "NONE;strokeWidth=0;strokeColor=#FFFFFF;fillColor=#FFFFFF");
             graph.insertEdge(parent, null, "", dummy_node_level2, dummy_node_level3,
                 "strokeWidth=0;strokeColor=#FFFFFF");
@@ -425,7 +439,7 @@ public class GraphGenerator {
             if (num_measurement_samples > 0) {
               Object dummy_node_level4 =
                   graph.insertVertex(parent, null, num_measurement_samples + "\n"
-                      + "measured samples", 20, 20, width, height,
+                      + "measured samples", 20, 20, width + 75, height,
                       "NONE;strokeWidth=0;strokeColor=#FFFFFF;fillColor=#FFFFFF");
 
               graph.insertEdge(parent, null, "", dummy_node_level3, dummy_node_level4,
@@ -484,6 +498,7 @@ public class GraphGenerator {
           if (c.getSampleTypeCode().equals("Q_BIOLOGICAL_SAMPLE")) {
 
             String primaryTissue = "";
+            String secondaryName = "";
             for (PropertyType pType : bioSampleProperties) {
               if (pType.getCode().equals("Q_PRIMARY_TISSUE")) {
                 primaryTissue =
@@ -493,10 +508,14 @@ public class GraphGenerator {
                             .get("Q_PRIMARY_TISSUE"));
               }
             }
-
+            
+            String secID = openBisClient.getSampleByIdentifier(c.getIdentifier()).getProperties().get("Q_SECONDARY_NAME");
+            if (secID != null) {
+              secondaryName = secID.replace("nan", "");
+            }
             Object daughter_node =
                 graph.insertVertex(parent, c.getPermId(),
-                    String.format("%s\n%s", c.getCode(), primaryTissue), 20, 20, width, height,
+                    String.format("%s\n%s\n%s", c.getCode(), primaryTissue,secondaryName), 20, 20, width + 75, height + 20,
                     "ROUNDED;strokeColor=#ffffff;fillColor=#51A7F9");
             graph.insertEdge(parent, null, "", mother_node, daughter_node);
             // graph.groupCells(group_node, 1.0, new Object[] {daughter_node});
@@ -510,6 +529,7 @@ public class GraphGenerator {
               if (gc.getSampleTypeCode().equals("Q_TEST_SAMPLE")) {
 
                 String testSampleType = "";
+                String testSecID = "";
                 for (PropertyType pType : testSampleProperties) {
                   if (pType.getCode().equals("Q_SAMPLE_TYPE")) {
                     testSampleType =
@@ -518,11 +538,14 @@ public class GraphGenerator {
                                 .getProperties().get("Q_SAMPLE_TYPE")));
                   }
                 }
-
+                testSecID = openBisClient.getSampleByIdentifier(gc.getIdentifier()).getProperties().get("Q_SECONDARY_NAME");
+                if (testSecID != null) {
+                  testSecID = testSecID.replace("nan", "");
+                }
                 Object granddaughter_node =
                     graph.insertVertex(parent, gc.getPermId(),
-                        String.format("%s\n%s", gc.getCode(), testSampleType), 20, 20, width,
-                        height, "ROUNDED;strokeColor=#ffffff;fillColor=#70BF41");
+                        String.format("%s\n%s\n%s", gc.getCode(), testSampleType, testSecID), 20, 20,width + 75, height + 20,
+                        "ROUNDED;strokeColor=#ffffff;fillColor=#70BF41");
                 graph.insertEdge(parent, null, "", daughter_node, granddaughter_node);
 
                 List<Sample> grandgrandchildren = new ArrayList<Sample>();
@@ -533,14 +556,18 @@ public class GraphGenerator {
 
                 for (Sample ggc : grandgrandchildren) {
 
-
+                  String measuredSecID = "";
+                  measuredSecID = openBisClient.getSampleByIdentifier(ggc.getIdentifier()).getProperties().get("Q_SECONDARY_NAME");
+                  if (measuredSecID != null) {
+                    measuredSecID = measuredSecID.replace("nan", "");
+                  }
                   Object grandgranddaughter_node =
                       graph.insertVertex(
                           parent,
                           ggc.getPermId(),
-                          String.format("%s\n%s", ggc.getCode(),
-                              OpenBisFunctions.openBIScodeToString(ggc.getSampleTypeCode())), 20, 20,
-                          width + 20.0, height, "ROUNDED;strokeColor=#ffffff;fillColor=#F39019");
+                          String.format("%s\n%s\n%s", ggc.getCode(),
+                              OpenBisFunctions.openBIScodeToString(ggc.getSampleTypeCode()),measuredSecID), 20, 20,
+                              width + 75, height + 20, "ROUNDED;strokeColor=#ffffff;fillColor=#F39019");
                   graph.insertEdge(parent, null, "", granddaughter_node, grandgranddaughter_node);
 
                 }

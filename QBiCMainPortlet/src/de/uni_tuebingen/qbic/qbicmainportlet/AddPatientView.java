@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.NewIvacSampleBean;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.google.gwt.validation.client.constraints.NotNullValidator;
 import com.vaadin.data.util.BeanItem;
@@ -42,6 +43,8 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 
 public class AddPatientView extends VerticalLayout implements View {
 
@@ -290,9 +293,9 @@ public class AddPatientView extends VerticalLayout implements View {
 
     List visibleSpaces = new ArrayList<String>();
 
-    for (String spaceCode : datahandler.openBisClient.listSpaces()) {
-      if (spaceCode.startsWith("IVAC")) {
-        visibleSpaces.add(spaceCode);
+    for (Project project : datahandler.openBisClient.getOpenbisInfoService().listProjectsOnBehalfOfUser(datahandler.openBisClient.getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
+      if (project.getSpaceCode().startsWith("IVAC")) {
+        visibleSpaces.add(project.getSpaceCode());
       }
     }
 
@@ -436,7 +439,7 @@ public class AddPatientView extends VerticalLayout implements View {
              
     
     if(numberPatients.equals(secondaryIDs.size()) & checkRegisteredSamplesTable() & hlaIvalid & hlaIIvalid) {
-      //datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects.getValue().toString(), description.getValue(), hlaTyping);
+      datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects.getValue().toString(), description.getValue(), hlaTyping);
       sucess.show(Page.getCurrent());
     }
     else {

@@ -158,9 +158,10 @@ public class ProjectView extends VerticalLayout implements View {
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayout.addComponent(this.export);
+    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
     buttonLayoutSection.addComponent(buttonLayout);
     buttonLayoutSection.setSpacing(true);
-    buttonLayoutSection.setMargin(new MarginInfo(true, false, false, false));
+    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, true));
 
     return buttonLayoutSection;
   }
@@ -284,18 +285,22 @@ public class ProjectView extends VerticalLayout implements View {
     projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
 
     projDescription.addComponent(projDescriptionContent);
+    projDescriptionContent.setSpacing(true);
     membersSection = new VerticalLayout();
     Component membersContent = new VerticalLayout();
 
     membersContent.setIcon(FontAwesome.USERS);
     membersContent.setCaption("Members");
     membersSection.addComponent(membersContent);
-    membersSection.setMargin(new MarginInfo(false, false, false, true));
-    projDescription.addComponent(membersSection);
+    //membersSection.setMargin(new MarginInfo(false, false, false, true));
     membersSection.setWidth("100%");
-
+    membersSection.setSpacing(true);
+    
+    projDescription.addComponent(membersSection);
     projDescription.setMargin(new MarginInfo(false, false, false, true));
     projDescription.setWidth("100%");
+    projDescription.setSpacing(true);
+    
     return projDescription;
   }
 
@@ -312,7 +317,7 @@ public class ProjectView extends VerticalLayout implements View {
 
     membersSection.removeAllComponents();
     membersSection.addComponent(getMembersComponent());
-    membersSection.setMargin(new MarginInfo(false, false, false, true));
+    //membersSection.setMargin(new MarginInfo(false, false, false, true));
   }
 
 
@@ -350,12 +355,15 @@ public class ProjectView extends VerticalLayout implements View {
 
     statistics.addComponent(statContent);
     statistics.setMargin(new MarginInfo(false, false, false, true));
+    statistics.setSpacing(true);
 
 
     // status bar section
 
     status = new VerticalLayout();
-    status.setMargin(new MarginInfo(false, false, false, true));
+    //status.setMargin(new MarginInfo(false, false, false, true));
+    status.setSpacing(true);
+    
     statistics.addComponent(status);
     return statistics;
   }
@@ -367,6 +375,7 @@ public class ProjectView extends VerticalLayout implements View {
     statContent.removeAllComponents();
     statContent.addComponent(new Label(String.format("%s experiment(s),", currentBean
         .getExperiments().size())));
+    statContent.setMargin(new MarginInfo(false, false, false, true));
 
     // TODO
     // statContent.addComponent(new Label(String.format("%s sample(s),", )));

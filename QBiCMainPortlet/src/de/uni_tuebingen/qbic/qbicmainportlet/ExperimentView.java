@@ -17,6 +17,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
@@ -116,10 +117,12 @@ public class ExperimentView extends VerticalLayout implements View {
     this.export = new Button("Export as TSV");
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
-
+    buttonLayoutSection.setSpacing(true);
     buttonLayoutSection.addComponent(buttonLayout);
+    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, true));
     buttonLayout.addComponent(this.export);
     return buttonLayout;
   }
@@ -225,12 +228,15 @@ public class ExperimentView extends VerticalLayout implements View {
     generalInfoContent.setCaption("General Information");
     generalInfoContent.setIcon(FontAwesome.INFO);
     generalInfoLabel = new Label("");
-
+    
+    generalInfo.setMargin(new MarginInfo(false, false, false, true));
     generalInfoContent.addComponent(generalInfoLabel);
-    generalInfoContent.setMargin(true);
-    generalInfo.setMargin(true);
+    generalInfoContent.setMargin(new MarginInfo(false, false, false, true));
+    //generalInfoContent.setMargin(true);
+    //generalInfo.setMargin(true);
 
     generalInfo.addComponent(generalInfoContent);
+    generalInfo.setSpacing(true);
 
 
 
@@ -259,9 +265,12 @@ public class ExperimentView extends VerticalLayout implements View {
     statContentLabel = new Label("");
 
     statContent.addComponent(statContentLabel);
+    statContent.setMargin(new MarginInfo(false, false, false, true));
+    
     // statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
-    statContent.setMargin(true);
-    statContent.setSpacing(true);
+    //statContent.setMargin(true);
+    //statContent.setMargin(new MarginInfo(false, false, false, true));
+    //statContent.setSpacing(true);
 
     /*
      * if (numberOfDatasets > 0) {
@@ -275,7 +284,7 @@ public class ExperimentView extends VerticalLayout implements View {
 
 
     statistics.addComponent(statContent);
-    statistics.setMargin(true);
+    //statistics.setMargin(true);
 
     // Properties of experiment
     VerticalLayout properties = new VerticalLayout();
@@ -285,8 +294,13 @@ public class ExperimentView extends VerticalLayout implements View {
     propertiesContentLabel = new Label("", ContentMode.HTML);
     propertiesContent.addComponent(propertiesContentLabel);
     properties.addComponent(propertiesContent);
-    properties.setMargin(true);
+    propertiesContent.setMargin(new MarginInfo(false, false, false, true));
+    
+    //properties.setMargin(true);
     statistics.addComponent(properties);
+    
+    statistics.setMargin(new MarginInfo(false, false, false, true));
+    statistics.setSpacing(true);
 
     return statistics;
   }
@@ -307,9 +321,12 @@ public class ExperimentView extends VerticalLayout implements View {
     tableSectionContent.setCaption("Registered Samples");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
+    tableSectionContent.setMargin(new MarginInfo(false, false, false, true));
 
-    tableSectionContent.setMargin(true);
-    tableSection.setMargin(true);
+    //tableSectionContent.setMargin(true);
+    //tableSection.setMargin(true);
+    tableSection.setMargin(new MarginInfo(false, false, false, true));
+    
     this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");

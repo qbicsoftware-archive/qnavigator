@@ -23,6 +23,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -199,7 +200,7 @@ public class HomeView extends VerticalLayout implements View {
     }
     statistics.addComponent(statContent);
 
-    statistics.setMargin(true);
+    statistics.setMargin(new MarginInfo(false,false,false,true));
     statistics.setWidth(100.0f, Unit.PERCENTAGE);
 
     homeViewDescription.addComponent(statistics);

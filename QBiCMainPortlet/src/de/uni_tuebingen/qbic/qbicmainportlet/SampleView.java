@@ -19,6 +19,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
@@ -125,8 +126,10 @@ public class SampleView extends VerticalLayout implements View {
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
-
+    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayoutSection.setSpacing(true);
     buttonLayoutSection.addComponent(buttonLayout);
+    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, true));
     buttonLayout.addComponent(this.export);
     return buttonLayout;
   }
@@ -234,15 +237,16 @@ public class SampleView extends VerticalLayout implements View {
   VerticalLayout initDescription() {
     VerticalLayout sampleDescription = new VerticalLayout();
     VerticalLayout sampleDescriptionContent = new VerticalLayout();
-    sampleDescriptionContent.setMargin(true);
+    //sampleDescriptionContent.setMargin(true);
     sampleDescriptionContent.setCaption("Description");
     sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
     sampleTypeLabel = new Label("");
     sampleDescriptionContent.addComponent(sampleTypeLabel);
     sampleParentLabel = new Label("", ContentMode.HTML);
     sampleDescriptionContent.addComponent(sampleParentLabel);
+    sampleDescriptionContent.setMargin(new MarginInfo(false, false, false, true));
     sampleDescription.addComponent(sampleDescriptionContent);
-    sampleDescription.setMargin(true);
+    sampleDescription.setMargin(new MarginInfo(false, false, false, true));
     return sampleDescription;
   }
 
@@ -267,11 +271,12 @@ public class SampleView extends VerticalLayout implements View {
     statContent.addComponent(numberOfDatasetsLabel);
     lastChangedDatasetLabel = new Label("");
     statContent.addComponent(lastChangedDatasetLabel);
-    statContent.setMargin(true);
-    statContent.setSpacing(true);
+    statContent.setMargin(new MarginInfo(false, false, false, true));
+    //statContent.setMargin(true);
+    //statContent.setSpacing(true);
 
     statistics.addComponent(statContent);
-    statistics.setMargin(true);
+    //statistics.setMargin(true);
 
 
     // Properties of sample
@@ -282,9 +287,10 @@ public class SampleView extends VerticalLayout implements View {
     propertiesLabel = new Label("", ContentMode.HTML);
 
     propertiesContent.addComponent(propertiesLabel);
+    propertiesContent.setMargin(new MarginInfo(false, false, false, true));
 
     properties.addComponent(propertiesContent);
-    properties.setMargin(true);
+    //properties.setMargin(true);
     statistics.addComponent(properties);
 
     // Experimental factors of sample
@@ -294,9 +300,12 @@ public class SampleView extends VerticalLayout implements View {
     experimentalFactorsContent.setIcon(FontAwesome.TH);
     experimentalFactorLabel = new Label("", ContentMode.HTML);
     experimentalFactorsContent.addComponent(experimentalFactorLabel);
+    experimentalFactorsContent.setMargin(new MarginInfo(false, false, false, true));
 
     experimentalFactors.addComponent(experimentalFactorsContent);
     statistics.addComponent(experimentalFactors);
+    statistics.setSpacing(true);
+    statistics.setMargin(new MarginInfo(false, false, false, true));
     return statistics;
   }
 
@@ -337,13 +346,14 @@ public class SampleView extends VerticalLayout implements View {
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
 
-    tableSectionContent.setMargin(true);
-    tableSection.setMargin(true);
+    tableSectionContent.setMargin(new MarginInfo(false, false, false, true));
+    //tableSection.setMargin(true);
     this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
 
     tableSection.addComponent(tableSectionContent);
+    tableSection.setMargin(new MarginInfo(false, false, false, true));
 
     return tableSection;
   }
