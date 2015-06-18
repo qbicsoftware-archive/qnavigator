@@ -34,7 +34,7 @@ public class ExperimentView extends VerticalLayout implements View {
    */
   private static final long serialVersionUID = -9156593640161721690L;
   static Logger LOGGER = new Log4j2Logger(ExperimentView.class);
-  static String navigateToLabel = "experiment";
+  public final static String navigateToLabel = "experiment";
   FilterTable table;
   VerticalLayout expview_content;
 
@@ -371,7 +371,7 @@ public class ExperimentView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table, "Sample"));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table, SampleView.navigateToLabel));
   }
 
   private FilterTable buildFilterTable() {

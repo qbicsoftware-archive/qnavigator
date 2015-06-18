@@ -38,7 +38,7 @@ public class SampleView extends VerticalLayout implements View {
   
   private logging.Logger LOGGER = new Log4j2Logger(SampleView.class);
   
-  static String navigateToLabel = "sample";
+  public final static String navigateToLabel = "sample";
   FilterTreeTable table;
   VerticalLayout vert;
   private HierarchicalContainer datasets;

@@ -58,8 +58,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "0.3.4";
-  private String revision = "518";
+  private String version = "0.3.5";
+  private String revision = "521";
   private String resUrl;
   protected View currentView;
 
@@ -224,7 +224,7 @@ public class QbicmainportletUI extends UI {
     navigator.addView(ExperimentView.navigateToLabel, experimentView);
     navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
 
-    navigator.addView(PatientView.navigateTolabel, patientView);
+    navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateTolabel, addPatientView);
 
 

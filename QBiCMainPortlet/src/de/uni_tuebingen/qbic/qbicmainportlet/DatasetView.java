@@ -79,7 +79,7 @@ public class DatasetView extends VerticalLayout implements View {
   VerticalLayout vert;
   private final String DOWNLOAD_BUTTON_CAPTION = "Download";
   private final String VISUALIZE_BUTTON_CAPTION = "Visualize";
-  static String navigateToLabel = "datasetview";
+  public final static String navigateToLabel = "datasetview";
   private DataHandler datahandler;
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
@@ -521,20 +521,8 @@ public class DatasetView extends VerticalLayout implements View {
     String parameters = event.getParameters();
     if (parameters == null || parameters.equals(""))
       return;
-    String[] params = parameters.split("&");
-    for(String s: params) {
-      System.out.println(s);
-    }
-    if (params == null || params.length != 2)
-      return;
-    HashMap<String, String> map = new HashMap<String, String>();
-    for (String p : params) {
-      String[] kv = p.split("=");
-      if (kv.length != 2)
-        return;
-      map.put(kv[0], kv[1]);
-    }
-    
+    Map<String, String> map = getMap(parameters);
+    if(map == null) return;
     try {      
           HierarchicalContainer datasetContainer = new HierarchicalContainer();
           datasetContainer.addContainerProperty("Select", CheckBox.class, null);
@@ -763,4 +751,28 @@ public class DatasetView extends VerticalLayout implements View {
       }
     }
   }
+  
+  /**
+   * The input should have the following form: type=openbis_type&id=openbis_id e.g. type=sample&id=/ABI_SYSBIO/QMARI117AV
+   * It is specifically designed to be used in the case of datasetView. In other cases there is no guarantee that it will work correctly.
+   * returns a map with two entries:
+   * "type": "openbistype"
+   * "id" : "openbisId"
+   * @param parameters
+   * @return
+   */
+  public static Map<String, String> getMap(String parameters){
+    String[] params = parameters.split("&");
+    if (params == null || params.length != 2)
+      return null;
+    HashMap<String, String> map = new HashMap<String, String>();
+    for (String p : params) {
+      String[] kv = p.split("=");
+      if (kv.length != 2)
+        return null;
+      map.put(kv[0], kv[1]);
+    }
+   return map;
+  }
+  
 }

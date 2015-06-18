@@ -53,7 +53,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class ProjectView extends VerticalLayout implements View {
 
-  static String navigateToLabel = "project";
+  public final static String navigateToLabel = "project";
 
   FilterTable table;
   VerticalLayout projectview_content;
@@ -573,7 +573,7 @@ public class ProjectView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table, "Experiment"));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table, ExperimentView.navigateToLabel));
   }
 
   /**

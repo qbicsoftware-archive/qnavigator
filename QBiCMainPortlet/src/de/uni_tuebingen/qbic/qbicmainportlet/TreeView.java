@@ -2,6 +2,7 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -17,6 +18,7 @@ import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
@@ -35,11 +37,11 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class TreeView extends Panel implements Observer, ViewChangeListener {
 
-  enum containerProperty {identifier, type, project, caption };
+  enum containerProperty {identifier, type, project, caption};
   private logging.Logger LOGGER = new Log4j2Logger(TreeView.class);
-
+  private final String backButtonCaption = "Show all projects";
   private Tree tree = new Tree();
-  private Button backButton = new Button("Show all projects");
+  private Button backButton = new Button(backButtonCaption);
   private State state;
   private Navigator navigator;
   private OpenBisClient openbisClient;
@@ -163,7 +165,9 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
       @Override
       public void nodeExpand(ExpandEvent event) {
         // State state = (State) UI.getCurrent().getSession().getAttribute("state");
-        expandNode(event.getItemId().toString());
+        String type = (String)getContainerDataSource().getItem(event.getItemId()).getItemProperty("type").getValue();
+        String projectId = projectId(type, event.getItemId().toString());
+        expandNode(type,event.getItemId().toString(),projectId);
         /*
          * ArrayList<String> message = new ArrayList<String>(); message.add("expanded");
          * message.add(event.getItemId().toString()); state.notifyObservers(message);
@@ -178,7 +182,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     tree.addExpandListener(e_listener);
   }
 
-  public void setValue(Object itemId) {
+  void setValue(String type, Object itemId) {
     // can not do anything with a non existant item
     if (itemId == null) {
       return;
@@ -191,28 +195,40 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     if (itemId == "") {
       unselect();
     } else {
-      this.expandNode(itemId);
-      addFilterBasedOnSelection(itemId);
+      LOGGER.debug("itemId: "+ (String)itemId + " type: " + type);
+      removeAllFiltersBasedOnSelection();
+      String projectId = projectId(type, (String)itemId);
+      this.expandNode(type,itemId, projectId);
+      setFilterBasedOnSelection(type,projectId);
       tree.setValue(itemId);
     }
   }
 
 
 
-  public void expandNode(Object itemId) {
+  public void expandNode(String type, Object itemId, String projectId) {
     // this.expandItemsRecursively(itemId);
-    addExperiments(itemId);
+    addExperiments(type,projectId);
+    Object id = itemId;
+    if(type == SampleView.navigateToLabel){
+      id = openbisClient.getSampleByIdentifier((String)itemId).getExperimentIdentifierOrNull();
+      if(id == null) id = itemId;
+    }
     int i = 0;
-    while (!tree.isRoot(itemId) && i < 20) {
-      tree.expandItem(itemId);
-      itemId = tree.getParent(itemId);
+    while (!tree.isRoot(id) && i < 20) {
+      tree.expandItem(id);
+      id = tree.getParent(id);
       i++;
     }
-    tree.expandItem(itemId);
+    tree.expandItem(id);
   }
 
-  String projectId(String openbisId) {
-    String[] split = openbisId.split("/");
+  /**
+   * this fall back method is used, when projectId can not be retrieved in the usual way
+   * @param openbisId
+   * @return
+   */
+  String projectIdFallback(String openbisId,String[] split) {
     switch (split.length) {
     /*
      * projectsplit:
@@ -226,13 +242,16 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
          * 
          * space project experiment
          */
+        
       case 4:
+        return String.format("/%s/%s", split[1], split[2]);
         /*
          * samplesplit:
          * 
-         * space project experiment sample
+         * space sample
          */
       case 5:
+        //TODO adapt. that does not work correctly
         return String.format("/%s/%s", split[1], split[2]);
         
         // what happens with datasets?
@@ -241,12 +260,35 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
         return null;
     }
   }
-
-  public void addExperiments(Object itemId) {
-    if (itemId instanceof String && tree.getContainerDataSource() instanceof HierarchicalContainer) {
-
-      String openbisId = (String) itemId;
-      String projectId = projectId(openbisId);
+  
+  public String projectId(String type, String openbisId){
+    String[] split = openbisId.split("/");
+    
+    if(split.length == 0) return null;
+    switch (type) {
+      case PatientView.navigateToLabel:
+      case ProjectView.navigateToLabel:
+        return openbisId;
+      case ExperimentView.navigateToLabel:
+        return projectIdFallback(openbisId, split);
+      case SampleView.navigateToLabel:
+        String expId = openbisClient.getSampleByIdentifier(String.format("%s/%s", split[1],split[2])).getExperimentIdentifierOrNull();
+        if(expId == null)
+          return null;
+        return projectId(ExperimentView.navigateToLabel,expId);
+      case DatasetView.navigateToLabel:
+        Map<String, String> map = DatasetView.getMap(openbisId);
+        if(map == null) return null;
+        return projectId(map.get("type"),map.get("id"));
+    default:
+      LOGGER.debug(String.format("Problem with id %s", openbisId));
+      return null;     
+    }
+  }
+  
+  
+  public void addExperiments(String type, String projectId) {
+    if (tree.getContainerDataSource() instanceof HierarchicalContainer) {
 
       List<Experiment> experiments = openbisClient.getExperimentsForProject2(projectId);
       setExperiments((HierarchicalContainer)tree.getContainerDataSource(), projectId, experiments);
@@ -287,20 +329,11 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     this.backButton.setVisible(false);
   }
 
-  private void addFilterBasedOnSelection(Object itemId) {
-    if ("project".equals(this.getItemType(itemId)) && !(itemId.equals(tree.getValue()))) {
+  private void setFilterBasedOnSelection(String type, String projectId) {
       this.backButton.setVisible(true);
-      SimpleStringFilter filter = new SimpleStringFilter("project", (String) itemId, true, false);
-      // Add the new filter
-      ((HierarchicalContainer) tree.getContainerDataSource()).addContainerFilter(filter);
-    } else if ("experiment".equals(this.getItemType(itemId)) && !(itemId.equals(tree.getValue()))) {
-      this.backButton.setVisible(true);
-      String projectId = projectId((String) itemId);
       SimpleStringFilter filter = new SimpleStringFilter("project", projectId, true, false);
       // Add the new filter
       ((HierarchicalContainer) tree.getContainerDataSource()).addContainerFilter(filter);
-    }
-
   }
 
   private String getItemType(Object itemId) {
@@ -319,7 +352,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
   @Override
   public void update(Observable o, Object arg) {
     if (((ArrayList<String>) arg).get(0).equals("clicked")) {
-      this.setValue(((ArrayList<String>) arg).get(1));
+      this.setValue(((ArrayList<String>) arg).get(2),((ArrayList<String>) arg).get(1));
     }
   }
 
@@ -338,13 +371,37 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
 
       } else {
         LOGGER.debug(param);
-        this.setValue(param);
+        String type = getType(event.getNewView());
+        this.setValue(type,param);
       }
     } catch (NullPointerException e) {
       // nothing to do here. It just means that treeView does not need any update
     }
 
     return true;
+  }
+
+  String getType(View newView) {
+    if(newView instanceof ProjectView){
+      return ProjectView.navigateToLabel;
+    }else if(newView instanceof PatientView){
+      return PatientView.navigateToLabel;
+    }
+else if(newView instanceof ExperimentView){
+  return ExperimentView.navigateToLabel;
+    }
+else if(newView instanceof SampleView){
+  return SampleView.navigateToLabel;
+}
+else if(newView instanceof DatasetView){
+  return DatasetView.navigateToLabel;
+}
+else if(newView instanceof BarcodeView){
+  return BarcodeView.navigateToLabel;
+}
+else{
+  return "";
+}
   }
 
   @Override

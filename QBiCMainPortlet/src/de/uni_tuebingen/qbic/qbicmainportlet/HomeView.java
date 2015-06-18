@@ -232,7 +232,7 @@ public class HomeView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table, "Project"));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
   }
 
 
