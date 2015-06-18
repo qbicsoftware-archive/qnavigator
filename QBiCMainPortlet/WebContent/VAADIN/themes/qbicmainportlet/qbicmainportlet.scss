@@ -36,7 +36,8 @@ $v-app-loading-text: "Loading...";
 .patientprogress .v-progressbar-indicator {
 	background-color: #00890a;
   	background-image: -webkit-linear-gradient(top, #00920a 2%, #007908 98%);
-  	background-image: linear-gradient(to bottom,#00920a 2%, #007908 98%);
+  	background-image: unquote("linear-gradient(to bottom,#00920a 2%, #007908 98%)");
+  	//background-image: linear-gradient(to bottom,#00920a 2%, #007908 98%);
 }
 
  .v-button-addpatient {
@@ -53,7 +54,8 @@ $v-app-loading-text: "Loading...";
 	border-bottom-color: #1e6b15;
 	background-color: #2c9720;
 	background-image: -webkit-linear-gradient(top, #2f9f22 2%, #26881b 98%);
-	background-image: linear-gradient(to bottom,#2f9f22 2%, #26881b 98%);
+	background-image: unquote("linear-gradient(to bottom,#2f9f22 2%, #26881b 98%)");
+	//background-image: linear-gradient(to bottom,#2f9f22 2%, #26881b 98%);
 	-webkit-box-shadow: inset 0 1px 0 #46b33a, inset 0 -1px 0 #26811b, 0 2px 3px rgba(0, 0, 0, 0.05);
 	box-shadow: inset 0 1px 0 #46b33a, inset 0 -1px 0 #26811b, 0 2px 3px rgba(0, 0, 0, 0.05);
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
