@@ -46,7 +46,7 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 public class QbicmainportletUI extends UI {
 
   @WebServlet(value = "/*", asyncSupported = true)
-  @VaadinServletConfiguration(productionMode = false, ui = QbicmainportletUI.class,
+  @VaadinServletConfiguration(productionMode = true, ui = QbicmainportletUI.class,
       widgetset = "de.uni_tuebingen.qbic.qbicmainportlet.QbicmainportletWidgetset")
   public static class Servlet extends VaadinServlet {
 
@@ -58,8 +58,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "0.3.5";
-  private String revision = "521";
+  private String version = "0.4.0";
+  private String revision = "523";
   private String resUrl;
   protected View currentView;
 
