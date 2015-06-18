@@ -67,7 +67,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 public class PatientView extends VerticalLayout implements View {
 
-  static String navigateTolabel = "ivacproject";
+  public final static String navigateToLabel = "ivacproject";
 
   private ProjectBean currentBean;
 
@@ -899,9 +899,8 @@ public class PatientView extends VerticalLayout implements View {
   Boolean containsData = currentBean.getContainsData();
   MenuItem downloadProject = this.downloadCompleteProjectMenuItem.getParent();
   
-  //TODO FIX 
-  //downloadProject.setEnabled(containsData);
-  downloadProject.setEnabled(true);
+ 
+  downloadProject.setEnabled(containsData);
 
   downloadCompleteProjectMenuItem
       .setText("<a href=\""

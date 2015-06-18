@@ -257,8 +257,7 @@ public class DataHandler implements Serializable {
    */
   public ProjectBean getProject2(String projectIdentifier) {
     List<Experiment> experiments = this.openBisClient.getExperimentsForProject2(projectIdentifier);
-    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> datasets =
-        this.openBisClient.getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
+
     float projectStatus = this.openBisClient.computeProjectStatus(experiments);
 
     Project project = getOpenbisDtoProject(projectIdentifier);
@@ -312,10 +311,8 @@ public class DataHandler implements Serializable {
       experimentBeans.addBean(newExperimentBean);
     }
 
-    newProjectBean.setContainsData(datasets.size() != 0);
-    // for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: datasets){
-    // TODO use the datasets information!
-    // }
+    newProjectBean.setContainsData(
+        this.openBisClient.getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier).size() != 0);
 
     newProjectBean.setExperiments(experimentBeans);
     newProjectBean.setMembers(new HashSet<String>());
@@ -368,105 +365,12 @@ public class DataHandler implements Serializable {
       experimentBeans.addBean(newExperimentBean);
     }
 
-    newProjectBean.setContainsData(false);
+    newProjectBean.setContainsData(this.openBisClient.getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier).size() >0);
 
 
     newProjectBean.setExperiments(experimentBeans);
     newProjectBean.setMembers(new HashSet<String>());
-    return newProjectBean;    
-/*
-    Project project = getOpenbisDtoProject(projectIdentifier);
-    if (project == null) {
-      project = openBisClient.getProjectByIdentifier(projectIdentifier);
-      addOpenbisDtoProject(project);
-    }
-    ProjectBean newProjectBean = new ProjectBean();
-
-    ProgressBar progressBar = new ProgressBar();
-    newProjectBean.setProgress(progressBar);
-    
-    Date registrationDate = project.getRegistrationDetails().getRegistrationDate();
-
-    newProjectBean.setId(project.getIdentifier());
-    newProjectBean.setCode(project.getCode());
-    String desc = project.getDescription();
-    if (desc == null)
-      desc = "";
-    newProjectBean.setDescription(desc);
-    newProjectBean.setRegistrationDate(registrationDate);
-    
-    newProjectBean.setRegistrator(project.getRegistrationDetails().getUserId());
-    newProjectBean.setContact(project.getRegistrationDetails().getUserEmail());
-
-    BeanItemContainer<ExperimentBean> experimentBeans =
-        new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
-    
-    List<Experiment> experiments = this.openBisClient.getExperimentsForProject2(projectIdentifier);
-    for (Experiment experiment : experiments) {
-      ExperimentBean newExperimentBean = new ExperimentBean();
-
-
-      newExperimentBean.setId(experiment.getIdentifier());
-      newExperimentBean.setCode(experiment.getCode());
-      newExperimentBean.setType(experiment.getExperimentTypeCode());
-
-      newExperimentBean.setRegistrator(experiment.getRegistrationDetails().getUserId());
-      newExperimentBean.setRegistrationDate(experiment.getRegistrationDetails()
-          .getRegistrationDate());
-      
-      
-      // Get all properties for metadata changing
-      List<PropertyType> completeProperties =
-          this.openBisClient.listPropertiesForType(this.openBisClient
-              .getExperimentTypeByString(experiment.getExperimentTypeCode()));
-
-      Map<String, String> properties = new HashMap<String, String>();
-      Map<String, String> assignedProperties = experiment.getProperties();
-      Map<String, List<String>> controlledVocabularies = new HashMap<String, List<String>>();
-
-      for (PropertyType p : completeProperties) {
-
-        // TODO no hardcoding
-
-        if (p instanceof ControlledVocabularyPropertyType) {
-          controlledVocabularies.put(p.getCode(), openBisClient.listVocabularyTermsForProperty(p));
-        }
-
-        if (assignedProperties.keySet().contains(p.getCode())) {
-          properties.put(p.getCode(), assignedProperties.get(p.getCode()));
-        } else {
-          properties.put(p.getCode(), "");
-        }
-      }
-      
-      newExperimentBean.setProperties(properties);
-      newExperimentBean.setControlledVocabularies(controlledVocabularies);
-      /*List<Sample> samples = openBisClient.getSamplesofExperiment(experiment.getIdentifier());
-      BeanItemContainer<SampleBean> sampleBeans = new BeanItemContainer<SampleBean>(SampleBean.class);
-      for(Sample sample: samples){
-        SampleBean newSampleBean = new SampleBean();
-
-        Map<String, String> sampleProperties = sample.getProperties();
-
-        newSampleBean.setId(sample.getIdentifier());
-        newSampleBean.setCode(sample.getCode());
-        newSampleBean.setType(sample.getSampleTypeCode());
-        newSampleBean.setProperties(sampleProperties);
-        sampleBeans.addBean(newSampleBean);
-      }
-      newExperimentBean.setSamples(sampleBeans);/
-      
-      experimentBeans.addBean(newExperimentBean);
-    }
-
-    newProjectBean.setContainsData(false);
-    // for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: datasets){
-    // TODO use the datasets information!
-    // }
-
-    newProjectBean.setExperiments(experimentBeans);
-    newProjectBean.setMembers(new HashSet<String>());
-    return newProjectBean;*/
+    return newProjectBean;
   }
 
 
