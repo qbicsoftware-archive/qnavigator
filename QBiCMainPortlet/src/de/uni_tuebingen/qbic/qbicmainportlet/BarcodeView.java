@@ -465,29 +465,26 @@ public class BarcodeView extends VerticalLayout implements View {
       if (barcodeExperiments.contains(type)) {
         String expID = e.getIdentifier();
         List<Sample> samples = openbis.getSamplesofExperiment(e.getIdentifier());
-        System.out.println(openbis.getSamplesofExperiment(e.getIdentifier()));
         int numOfSamples = samples.size();
+        System.out.println(numOfSamples);
         List<String> ids = new ArrayList<String>();
         for (Sample s : samples) {
           ids.add(s.getCode());
         }
+        if(samples.size() > 0) {
         String bioType = "unknown";
-        if (type.equals(barcodeExperiments.get(0))) {
-          System.out.println(samples.get(0).getCode());
-          System.out.println(samples.get(0).getProperties().get("Q_PRIMARY_TISSUE"));
+        if (type.equals(barcodeExperiments.get(0))) { 
           bioType = samples.get(0).getProperties().get("Q_PRIMARY_TISSUE");
         }
         if (type.equals(barcodeExperiments.get(1))) {
-          System.out.println(samples.get(0).getCode());
-          System.out.println(samples.get(0).getProperties().get("Q_SAMPLE_TYPE"));
           bioType = samples.get(0).getProperties().get("Q_SAMPLE_TYPE");
         }
         if (type.equals(barcodeExperiments.get(2))) {
-          System.out.println(samples.get(0).getCode());
           bioType = e.getProperties().get("Q_SEQUENCING_TYPE");
         }
         beans.add(new ExperimentBarcodeSummaryBean(BarcodeFunctions.getBarcodeRange(ids), bioType,
             Integer.toString(numOfSamples), expID));
+        }
       }
     }
     return beans;

@@ -31,6 +31,7 @@ import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
@@ -43,6 +44,7 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -507,9 +509,11 @@ public class ProjectView extends VerticalLayout implements View {
 
   void updateContentGraph() {
     Resource resource = getGraphResource();
+    
     if (resource != null) {
       graphSectionContent.removeAllComponents();
       Image graphImage = new Image("", resource);
+  
       graphSectionContent.addComponent(graphImage);
     } else {
       Label error = new Label("Project Graph can not be computed at that time for this project");

@@ -37,6 +37,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -50,6 +51,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
@@ -89,7 +91,10 @@ public class PatientView extends VerticalLayout implements View {
 
   private VerticalLayout buttonLayoutSection;
   private HorizontalLayout graphSectionContent;
+  
+  private MenuItem downloadCompleteProjectMenuItem;
 
+  private MenuItem datasetOverviewMenuItem;
 
   private MenuBar menubar;
 
@@ -146,7 +151,7 @@ public class PatientView extends VerticalLayout implements View {
     patientViewContent.addComponent(initHLALayout());
     patientViewContent.addComponent(initGraph());
 
-    patientViewContent.setWidth("100%");
+    //patientViewContent.setWidth("100%");
     this.addComponent(patientViewContent);
   }
 
@@ -154,7 +159,7 @@ public class PatientView extends VerticalLayout implements View {
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-    // updateContentMenuBar();
+    updateContentMenuBar();
     long startTime = System.nanoTime();
     updateHLALayout();
     long endTime = System.nanoTime();
@@ -403,16 +408,20 @@ public class PatientView extends VerticalLayout implements View {
     // set to true for the hack below
     menubar.setHtmlContentAllowed(true);
     MenuItem downloadProject = menubar.addItem("Download your data", null, null);
+    downloadProject.setEnabled(true);
+
     downloadProject.setIcon(new ThemeResource("computer_higher.png"));
     downloadProject.addSeparator();
-    /*
-     * this.downloadCompleteProjectMenuItem = downloadProject .addItem( "<a href=\"" + resourceUrl +
-     * "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>"
-     * , null);
-     */
+    this.downloadCompleteProjectMenuItem =
+        downloadProject
+            .addItem(
+                "<a href=\""
+                    + resourceUrl
+                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
+                null);
+
     // Open DatasetView
-    // this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
-    downloadProject.addItem("Dataset Overview", null);
+    this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
 
     MenuItem manage = menubar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_higher.png"));
@@ -606,7 +615,7 @@ public class PatientView extends VerticalLayout implements View {
               .show(Page.getCurrent());
         }else if(esb.getIdentifier() == null || esb.getIdentifier().isEmpty()){
           new Notification("No data available for download.",
-              "<br/>Please do the variant calling clicking 'Run', first.", Type.WARNING_MESSAGE, true)
+              "<br/>Please do the analysis by clicking 'Run' first.", Type.WARNING_MESSAGE, true)
               .show(Page.getCurrent());
         }
         else {
@@ -822,12 +831,14 @@ public class PatientView extends VerticalLayout implements View {
 
   void updateContentGraph() {
     Resource resource = getGraphResource();
+    
     if (resource != null) {
       graphSectionContent.removeAllComponents();
       Image graphImage = new Image("", resource);
+      
       graphSectionContent.addComponent(graphImage);
     } else {
-      Label error = new Label("Project Graph can not be computed at that time for this project.");
+      Label error = new Label("Project Graph can not be computed at that time for this project");
       error.setStyleName(ValoTheme.LABEL_FAILURE);
       graphSectionContent.removeAllComponents();
       graphSectionContent.addComponent(error);
@@ -879,6 +890,40 @@ public class PatientView extends VerticalLayout implements View {
 
   public ProjectBean getCurrentBean() {
     return currentBean;
+  }
+  
+  /**
+   * updates the menu bar based on the new content (currentbean was changed)
+   */
+  void updateContentMenuBar() {
+  Boolean containsData = currentBean.getContainsData();
+  MenuItem downloadProject = this.downloadCompleteProjectMenuItem.getParent();
+  
+  //TODO FIX 
+  //downloadProject.setEnabled(containsData);
+  downloadProject.setEnabled(true);
+
+  downloadCompleteProjectMenuItem
+      .setText("<a href=\""
+          + resourceUrl
+          + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>");
+
+  datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
+
+    @Override
+    public void menuSelected(MenuItem selectedItem) {
+      ArrayList<String> message = new ArrayList<String>();
+      message.add("clicked");
+      StringBuilder sb = new StringBuilder("type=");
+      sb.append("project");
+      sb.append("&");
+      sb.append("id=");
+      sb.append(currentBean.getId());
+      message.add(sb.toString());
+      message.add(DatasetView.navigateToLabel);
+      state.notifyObservers(message);
+    }
+  });
   }
 
 }
