@@ -378,6 +378,7 @@ public class ExperimentView extends VerticalLayout implements View {
       this.table.setVisible(true);
       this.table.setPageLength(Math.min(rowNumber, 10));
     }
+    
 
 
   }
