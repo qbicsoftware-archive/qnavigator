@@ -1,5 +1,7 @@
 package model;
 
+import helpers.UglyToPrettyNameMapper;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Iterator;
@@ -19,6 +21,7 @@ public class ExperimentBean implements Serializable {
   private String id;
   private String code;
   private String type;
+  private String prettyType;
   private Image status;
   private String registrator;
   private Date registrationDate;
@@ -30,6 +33,8 @@ public class ExperimentBean implements Serializable {
   private Map<String, String> typeLabels;
   private Boolean containsData;
 
+  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
+  
   public Map<String, String> getTypeLabels() {
     return typeLabels;
   }
@@ -50,6 +55,8 @@ public class ExperimentBean implements Serializable {
     this.id = id;
     this.code = code;
     this.type = type;
+    this.prettyType = prettyNameMapper.getPrettyName(type);
+    this.type = this.prettyType;
     this.status = status;
     this.registrator = registrator;
     this.registrationDate = registrationDate;
@@ -100,7 +107,8 @@ public class ExperimentBean implements Serializable {
 
 
   public void setType(String type) {
-    this.type = type;
+    this.type = prettyNameMapper.getPrettyName(type);
+   //this.type = type;
   }
 
 

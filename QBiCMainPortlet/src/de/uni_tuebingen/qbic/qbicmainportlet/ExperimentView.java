@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.UglyToPrettyNameMapper;
 import helpers.Utils;
 
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class ExperimentView extends VerticalLayout implements View {
   private Label statContentLabel;
   private Label propertiesContentLabel;
 
+  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
 
   public ExperimentView(DataHandler datahandler, State state, String resourceurl) {
     this(datahandler, state);
@@ -153,10 +155,10 @@ public class ExperimentView extends VerticalLayout implements View {
     downloadExperiment.setEnabled(false);
     this.downloadCompleteProjectMenuItem =
         downloadExperiment
-            .addItem(
-                "<a href=\""
-                    + resourceUrl
-                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete experiment</a>",
+        .addItem(
+            "<a href=\""
+                + resourceUrl
+                + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete experiment</a>",
                 null);
 
     // Open DatasetView
@@ -183,9 +185,9 @@ public class ExperimentView extends VerticalLayout implements View {
 
     downloadCompleteProjectMenuItem.getParent().setEnabled(currentBean.getContainsData());
     downloadCompleteProjectMenuItem
-        .setText("<a href=\""
-            + resourceUrl
-            + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete experiment</a>");
+    .setText("<a href=\""
+        + resourceUrl
+        + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete experiment</a>");
 
     datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
 
@@ -228,7 +230,7 @@ public class ExperimentView extends VerticalLayout implements View {
     generalInfoContent.setCaption("General Information");
     generalInfoContent.setIcon(FontAwesome.INFO);
     generalInfoLabel = new Label("");
-    
+
     generalInfo.setMargin(new MarginInfo(false, false, false, true));
     generalInfoContent.addComponent(generalInfoLabel);
     generalInfoContent.setMargin(new MarginInfo(false, false, false, true));
@@ -244,7 +246,7 @@ public class ExperimentView extends VerticalLayout implements View {
   }
 
   void updateContentDescription() {
-    generalInfoLabel.setValue(String.format("Kind:\t %s", currentBean.getType()));
+    generalInfoLabel.setValue(String.format("Stage:\t %s", prettyNameMapper.getPrettyName(currentBean.getType())));
 
   }
 
@@ -266,7 +268,7 @@ public class ExperimentView extends VerticalLayout implements View {
 
     statContent.addComponent(statContentLabel);
     statContent.setMargin(new MarginInfo(false, false, false, true));
-    
+
     // statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
     //statContent.setMargin(true);
     //statContent.setMargin(new MarginInfo(false, false, false, true));
@@ -295,10 +297,10 @@ public class ExperimentView extends VerticalLayout implements View {
     propertiesContent.addComponent(propertiesContentLabel);
     properties.addComponent(propertiesContent);
     propertiesContent.setMargin(new MarginInfo(false, false, false, true));
-    
+
     //properties.setMargin(true);
     statistics.addComponent(properties);
-    
+
     statistics.setMargin(new MarginInfo(false, false, false, true));
     statistics.setSpacing(true);
 
@@ -326,7 +328,7 @@ public class ExperimentView extends VerticalLayout implements View {
     //tableSectionContent.setMargin(true);
     //tableSection.setMargin(true);
     tableSection.setMargin(new MarginInfo(false, false, false, true));
-    
+
     this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
@@ -366,6 +368,18 @@ public class ExperimentView extends VerticalLayout implements View {
     LOGGER.debug(String.valueOf(experimentBean.getSamples().size()));
     this.table.setContainerDataSource(experimentBean.getSamples());
     this.table.setVisibleColumns(new Object[] {"code", "type"});
+
+    int rowNumber = this.table.size();
+
+    if (rowNumber == 0) {
+      this.table.setVisible(false);
+    }
+    else {
+      this.table.setVisible(true);
+      this.table.setPageLength(Math.min(rowNumber, 10));
+    }
+
+
   }
 
   private void tableClickChangeTreeView() {
@@ -392,8 +406,8 @@ public class ExperimentView extends VerticalLayout implements View {
 
     filterTable.setColumnReorderingAllowed(true);
 
-    filterTable.setColumnHeader("code", "Name");
-    filterTable.setColumnHeader("type", "Type");
+    filterTable.setColumnHeader("code", "QBiC ID");
+    filterTable.setColumnHeader("type", "Sample Type");
 
     return filterTable;
   }

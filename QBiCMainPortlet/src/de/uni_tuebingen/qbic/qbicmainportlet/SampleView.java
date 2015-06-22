@@ -315,7 +315,7 @@ public class SampleView extends VerticalLayout implements View {
    */
   void updateContentStatistics() {
     int numberOfDatasets = currentBean.getDatasets().size();
-    numberOfDatasetsLabel.setValue(String.format("%s dataset(s).", numberOfDatasets));
+    numberOfDatasetsLabel.setValue(String.format("%s dataset(s). ", numberOfDatasets));
     if (numberOfDatasets > 0) {
 
       String lastDataset = "No Datasets available!";
@@ -340,12 +340,17 @@ public class SampleView extends VerticalLayout implements View {
   VerticalLayout initTable() {
     this.table = this.buildFilterTable();
 
+    
+    
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
     tableSectionContent.setCaption("Registered Datasets");
     tableSectionContent.setIcon(FontAwesome.FLASK);
+    
+    
     tableSectionContent.addComponent(this.table);
-
+    
+      
     tableSectionContent.setMargin(new MarginInfo(false, false, false, true));
     //tableSection.setMargin(true);
     this.table.setWidth("100%");
@@ -381,6 +386,16 @@ public class SampleView extends VerticalLayout implements View {
 
     this.table.setContainerDataSource(sampleBean.getDatasets());
     this.table.setVisibleColumns(new Object[] {"name", "type", "registrationDate", "fileSize"});
+    
+    int rowNumber = this.table.size();
+    
+    if (rowNumber == 0) {
+      this.table.setVisible(false);
+    }
+    else {
+      this.table.setVisible(true);
+      this.table.setPageLength(Math.min(rowNumber, 10));
+    }
   }
 
   private FilterTreeTable buildFilterTable() {

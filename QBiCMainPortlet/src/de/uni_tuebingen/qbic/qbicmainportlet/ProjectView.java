@@ -548,6 +548,16 @@ public class ProjectView extends VerticalLayout implements View {
     this.table.setContainerDataSource(projectBean.getExperiments());
     table.setVisibleColumns(new Object[] {"code", "type", "registrationDate", "registrator",
         "status"});
+    
+    int rowNumber = this.table.size();
+    
+    if (rowNumber == 0) {
+      this.table.setVisible(false);
+    }
+    else {
+      this.table.setVisible(true);
+      this.table.setPageLength(Math.min(rowNumber, 10));
+    }
   }
 
 
