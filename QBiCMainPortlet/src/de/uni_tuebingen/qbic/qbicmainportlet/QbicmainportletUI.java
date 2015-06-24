@@ -8,6 +8,10 @@ import javax.portlet.PortletSession;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
+import submitter.Submitter;
+import submitter.WorkflowSubmitterFactory;
+import submitter.WorkflowSubmitterFactory.Type;
+import views.WorkflowView;
 import logging.Log4j2Logger;
 import main.OpenBisClient;
 
@@ -37,6 +41,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
@@ -58,8 +63,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "0.4.0";
-  private String revision = "523";
+  private String version = "0.4.2";
+  private String revision = "534";
   private String resUrl;
   protected View currentView;
 
@@ -210,7 +215,17 @@ public class QbicmainportletUI extends UI {
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
     final PatientView patientView = new PatientView(datahandler, state, resUrl);
-
+    
+    Submitter submitter = null;
+    try {
+      submitter = WorkflowSubmitterFactory.getSubmitter(Type.guseSubmitter, manager);
+    } catch (Exception e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    WorkflowViewController controller = new WorkflowViewController(submitter, datahandler.openBisClient, user);
+    final WorkflowView workflowView = new WorkflowView(controller);
+    
     VerticalLayout navigatorContent = new VerticalLayout();
 
     Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
@@ -226,7 +241,8 @@ public class QbicmainportletUI extends UI {
 
     navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateTolabel, addPatientView);
-
+    
+    navigator.addView(WorkflowView.navigateToLabel, workflowView);
 
     setNavigator(navigator);
 
@@ -263,6 +279,8 @@ public class QbicmainportletUI extends UI {
           projectView.updateView(height, width, browser);
         } else if (currentView instanceof ExperimentView) {
           experimentView.updateView(height, width, browser);
+        } else if (currentView instanceof WorkflowView){
+          workflowView.updateView(height, width, browser);
         }
       }
     });
@@ -289,6 +307,8 @@ public class QbicmainportletUI extends UI {
         }
         if (currentView instanceof SampleView) {
           sampleView.updateView(height, width, browser);
+        }else if (currentView instanceof WorkflowView){
+          workflowView.updateView(height, width, browser);
         }
         return true;
       }

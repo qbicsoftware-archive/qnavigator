@@ -72,13 +72,7 @@ public class ProjectView extends VerticalLayout implements View {
 
   private String resourceUrl;
 
-  private MenuItem downloadCompleteProjectMenuItem;
-
-  private MenuItem datasetOverviewMenuItem;
-
-  private MenuItem createBarcodesMenuItem;
-
-  private MenuBar menubar;
+  private ToolBar menubar;
 
   private Label contact;
 
@@ -183,40 +177,8 @@ public class ProjectView extends VerticalLayout implements View {
    * @return
    */
   MenuBar initMenuBar() {
-    menubar = new MenuBar();
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);
-    menubar.addStyleName("user-menu");
-
-    // set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setEnabled(false);
-
-    downloadProject.setIcon(new ThemeResource("computer_higher.png"));
-    downloadProject.addSeparator();
-    this.downloadCompleteProjectMenuItem =
-        downloadProject
-            .addItem(
-                "<a href=\""
-                    + resourceUrl
-                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
-                null);
-
-    // Open DatasetView
-    this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
-    MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_higher.png"));
-
-    // Another submenu item with a sub-submenu
-    this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
-
-    /*
-     * MenuItem workflows = menubar.addItem("Run workflows", null, null); workflows.setIcon(new
-     * ThemeResource("dna_higher.png")); workflows.setEnabled(false);
-     * 
-     * MenuItem analyze = menubar.addItem("Analyze your data", null, null); analyze.setIcon(new
-     * ThemeResource("graph_higher.png")); analyze.setEnabled(false);
-     */
+    menubar = new ToolBar(resourceUrl, state);
+    menubar.init();
     return menubar;
   }
 
@@ -224,41 +186,11 @@ public class ProjectView extends VerticalLayout implements View {
    * updates the menu bar based on the new content (currentbean was changed)
    */
   void updateContentMenuBar() {
+    
     Boolean containsData = currentBean.getContainsData();
-    MenuItem downloadProject = this.downloadCompleteProjectMenuItem.getParent();
-    downloadProject.setEnabled(containsData);
-
-    downloadCompleteProjectMenuItem
-        .setText("<a href=\""
-            + resourceUrl
-            + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>");
-
-    datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
-
-      @Override
-      public void menuSelected(MenuItem selectedItem) {
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        StringBuilder sb = new StringBuilder("type=");
-        sb.append(navigateToLabel);
-        sb.append("&");
-        sb.append("id=");
-        sb.append(currentBean.getId());
-        message.add(sb.toString());
-        message.add(DatasetView.navigateToLabel);
-        state.notifyObservers(message);
-      }
-    });
-    createBarcodesMenuItem.setCommand(new MenuBar.Command() {
-      public void menuSelected(MenuItem selectedItem) {
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        message.add(currentBean.getId());
-        message.add(BarcodeView.navigateToLabel);
-        state.notifyObservers(message);
-      }
-    });
-
+    menubar.setDownload(containsData);
+    menubar.setWorkflow(containsData);
+    menubar.update(navigateToLabel, currentBean.getId());
   }
 
   /**

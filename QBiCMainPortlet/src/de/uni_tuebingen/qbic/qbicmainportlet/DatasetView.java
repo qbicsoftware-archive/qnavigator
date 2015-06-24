@@ -19,22 +19,15 @@ import javax.portlet.PortletSession;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import logging.SysOutLogger;
 import model.DatasetBean;
-import model.ExperimentBean;
-import model.ProjectBean;
-import model.SampleBean;
 
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -61,7 +54,6 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -518,10 +510,7 @@ public class DatasetView extends VerticalLayout implements View {
   
   @Override
   public void enter(ViewChangeEvent event) {
-    String parameters = event.getParameters();
-    if (parameters == null || parameters.equals(""))
-      return;
-    Map<String, String> map = getMap(parameters);
+    Map<String, String> map = getMap(event.getParameters());
     if(map == null) return;
     try {      
           HierarchicalContainer datasetContainer = new HierarchicalContainer();
@@ -762,6 +751,7 @@ public class DatasetView extends VerticalLayout implements View {
    * @return
    */
   public static Map<String, String> getMap(String parameters){
+    if (parameters == null || parameters.equals("")) return null;
     String[] params = parameters.split("&");
     if (params == null || params.length != 2)
       return null;
