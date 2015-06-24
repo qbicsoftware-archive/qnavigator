@@ -23,8 +23,9 @@
     -->
     <!-- <set-configuration-property name="devModeRedirectEnabled" value="true" /> -->
 
-
-    <inherits name="org.vaadin.hene.popupbutton.widgetset.PopupbuttonWidgetset" />
-
     <inherits name="org.tepi.filtertable.gwt.FilterTableWidgetset" />
+
+     <!-- Filtering Table is using this. Thats why you can not throw it away. It will return magically after next recompilation
+     see here: https://github.com/tepi/FilteringTable/blob/master/src/org/tepi/filtertable/gwt/FilterTableWidgetset.gwt.xml -->
+    <inherits name="org.vaadin.hene.popupbutton.widgetset.PopupbuttonWidgetset" />
 </module>
