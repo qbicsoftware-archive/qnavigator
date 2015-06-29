@@ -20,6 +20,7 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_BIOLOGICAL_SAMPLE", "Extracted sample");
     namesMapping.put("Q_TEST_SAMPLE", "Prepared sample");
     
+    namesMapping.put("MSH_UNDEFINED_STATE", "Sample not initialized for MultiscaleHCC workflow");
     
   }
   

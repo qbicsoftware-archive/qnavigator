@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.UglyToPrettyNameMapper;
 import helpers.Utils;
 
 import java.util.ArrayList;
@@ -35,9 +36,9 @@ public class SampleView extends VerticalLayout implements View {
    * 
    */
   private static final long serialVersionUID = 377522772714840963L;
-  
+
   private logging.Logger LOGGER = new Log4j2Logger(SampleView.class);
-  
+
   public final static String navigateToLabel = "sample";
   FilterTreeTable table;
   VerticalLayout vert;
@@ -49,18 +50,27 @@ public class SampleView extends VerticalLayout implements View {
   private State state;
   private VerticalLayout sampview_content;
   private VerticalLayout buttonLayoutSection;
+  private VerticalLayout biologicalSampleStateSection;
+  private HorizontalLayout stateInjectLayout;
+  private VerticalLayout sampleStateSectionContent;
+
+  private MSHBiologicalSampleStateMachine stateMachine;
+  private UglyToPrettyNameMapper uglyToPretty = new UglyToPrettyNameMapper();
+
   private FileDownloader fileDownloader;
   private SampleBean currentBean;
   private MenuBar menubar;
   private MenuItem downloadCompleteProjectMenuItem;
   private MenuItem datasetOverviewMenuItem;
   private MenuItem createBarcodesMenuItem;
+  private Label sampleNameLabel;
   private Label sampleTypeLabel;
   private Label sampleParentLabel;
   private Label numberOfDatasetsLabel;
   private Label lastChangedDatasetLabel;
   private Label propertiesLabel;
   private Label experimentalFactorLabel;
+  private Label currentSampleStateName;
 
 
   public SampleView(DataHandler datahandler, State state, String resourceurl) {
@@ -74,6 +84,8 @@ public class SampleView extends VerticalLayout implements View {
     this.state = state;
     resourceUrl = "javascript;";
     initView();
+
+
   }
 
   /**
@@ -99,6 +111,8 @@ public class SampleView extends VerticalLayout implements View {
     sampview_content.addComponent(initTable());
     sampview_content.addComponent(initButtonLayout());
 
+    sampview_content.addComponent(initMSHBiologicalSampleStateSection());
+
     // use the component that is returned by initTable
     // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
     sampview_content.setWidth("100%");
@@ -114,6 +128,7 @@ public class SampleView extends VerticalLayout implements View {
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
+    updateMSHBiologicalSampleStateSection();
   }
 
   /**
@@ -236,8 +251,12 @@ public class SampleView extends VerticalLayout implements View {
    */
   VerticalLayout initDescription() {
     VerticalLayout sampleDescription = new VerticalLayout();
+    
+    sampleNameLabel = new Label("<font size=14></font>", ContentMode.HTML);
+    
+    
     VerticalLayout sampleDescriptionContent = new VerticalLayout();
-    //sampleDescriptionContent.setMargin(true);
+    // sampleDescriptionContent.setMargin(true);
     sampleDescriptionContent.setCaption("Description");
     sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
     sampleTypeLabel = new Label("");
@@ -251,7 +270,8 @@ public class SampleView extends VerticalLayout implements View {
   }
 
   void updateContentDescription() {
-    sampleTypeLabel.setValue(String.format("%s.", currentBean.getType()));
+    sampleNameLabel.setValue("<font size=14>" + currentBean.getCode() + "</font>");
+    sampleTypeLabel.setValue(String.format("%s.", uglyToPretty.getPrettyName(currentBean.getType())));
     sampleParentLabel.setValue(currentBean.getParentsFormattedString());
   }
 
@@ -272,11 +292,11 @@ public class SampleView extends VerticalLayout implements View {
     lastChangedDatasetLabel = new Label("");
     statContent.addComponent(lastChangedDatasetLabel);
     statContent.setMargin(new MarginInfo(false, false, false, true));
-    //statContent.setMargin(true);
-    //statContent.setSpacing(true);
+    // statContent.setMargin(true);
+    // statContent.setSpacing(true);
 
     statistics.addComponent(statContent);
-    //statistics.setMargin(true);
+    // statistics.setMargin(true);
 
 
     // Properties of sample
@@ -290,7 +310,7 @@ public class SampleView extends VerticalLayout implements View {
     propertiesContent.setMargin(new MarginInfo(false, false, false, true));
 
     properties.addComponent(propertiesContent);
-    //properties.setMargin(true);
+    // properties.setMargin(true);
     statistics.addComponent(properties);
 
     // Experimental factors of sample
@@ -306,6 +326,8 @@ public class SampleView extends VerticalLayout implements View {
     statistics.addComponent(experimentalFactors);
     statistics.setSpacing(true);
     statistics.setMargin(new MarginInfo(false, false, false, true));
+
+
     return statistics;
   }
 
@@ -332,27 +354,28 @@ public class SampleView extends VerticalLayout implements View {
       propertiesLabel.setValue(currentBean.generatePropertiesFormattedString());
       experimentalFactorLabel.setValue(currentBean.generateXMLPropertiesFormattedString());
     } catch (JAXBException e) {
-      LOGGER.error(String.format("failed to parse experimental factors for sample %s", currentBean.getId()),e);
+      LOGGER.error(
+          String.format("failed to parse experimental factors for sample %s", currentBean.getId()),
+          e);
     }
+
   }
 
 
   VerticalLayout initTable() {
     this.table = this.buildFilterTable();
 
-    
-    
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
     tableSectionContent.setCaption("Registered Datasets");
     tableSectionContent.setIcon(FontAwesome.FLASK);
-    
-    
+
+
     tableSectionContent.addComponent(this.table);
-    
-      
+
+
     tableSectionContent.setMargin(new MarginInfo(false, false, false, true));
-    //tableSection.setMargin(true);
+    // tableSection.setMargin(true);
     this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
@@ -386,13 +409,12 @@ public class SampleView extends VerticalLayout implements View {
 
     this.table.setContainerDataSource(sampleBean.getDatasets());
     this.table.setVisibleColumns(new Object[] {"name", "type", "registrationDate", "fileSize"});
-    
+
     int rowNumber = this.table.size();
-    
+
     if (rowNumber == 0) {
       this.table.setVisible(false);
-    }
-    else {
+    } else {
       this.table.setVisible(true);
       this.table.setPageLength(Math.min(rowNumber, 10));
     }
@@ -428,6 +450,66 @@ public class SampleView extends VerticalLayout implements View {
 
     return filterTable;
   }
+
+
+  private VerticalLayout initMSHBiologicalSampleStateSection() {
+    stateMachine = new MSHBiologicalSampleStateMachine(datahandler.openBisClient, this);
+
+    // initialize with wrong state (will be updated immediately)
+    stateMachine.setState("MSH_WRONG_STATE");
+    currentSampleStateName =
+        new Label("<b>Current sample process status:</b> <font color=\"green\">"
+            + uglyToPretty.getPrettyName(stateMachine.getState().name()) + "</font>",
+            ContentMode.HTML);
+
+    biologicalSampleStateSection = new VerticalLayout();
+    sampleStateSectionContent = new VerticalLayout();
+
+
+    sampleStateSectionContent.setCaption("MultiscaleHCC sample status");
+    sampleStateSectionContent.setIcon(FontAwesome.AMBULANCE);
+    sampleStateSectionContent.addComponent(currentSampleStateName);
+    // sampleStateSectionContent.setMargin(new MarginInfo(false, false, false, true));
+
+    stateInjectLayout = stateMachine.getCurrentInterface();
+
+
+
+    sampleStateSectionContent.addComponent(stateInjectLayout);
+
+    biologicalSampleStateSection.addComponent(sampleStateSectionContent);
+    biologicalSampleStateSection.setMargin(new MarginInfo(true, false, false, true));
+
+    return biologicalSampleStateSection;
+  }
+
+  private void updateMSHBiologicalSampleStateSection() {
+    String fullSampleIdentifier = currentBean.getId();
+    String sampleType = currentBean.getType();
+
+    // update the sampleID of the state machine before retrieving info from openBIS
+    stateMachine.setSampleID(fullSampleIdentifier);
+    String currentStateTmp = stateMachine.retrieveCurrentStateFromOpenBIS();
+    stateMachine.setState(currentStateTmp);
+    stateMachine.buildCurrentInterface();
+
+    // sampleStateSectionContent.removeAllComponents();
+    currentSampleStateName.setValue("<b>Current sample process status:</b> <font color=\"green\">"
+        + uglyToPretty.getPrettyName(stateMachine.getState().name()) + "</font>");
+
+    sampleStateSectionContent.removeComponent(stateInjectLayout);
+    stateInjectLayout = stateMachine.getCurrentInterface();
+    sampleStateSectionContent.addComponent(stateInjectLayout);
+
+
+    if (fullSampleIdentifier.startsWith("/MULTISCALEHCC/")
+        && sampleType.equals("Q_BIOLOGICAL_SAMPLE")) {
+      biologicalSampleStateSection.setVisible(true);
+    } else {
+      biologicalSampleStateSection.setVisible(false);
+    }
+  }
+
 
   @Override
   public void enter(ViewChangeEvent event) {

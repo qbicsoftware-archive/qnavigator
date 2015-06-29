@@ -945,7 +945,7 @@
  */
 
 .v-vaadin-version:after {
-	content: "7.4.2";
+	content: "7.4.8";
 }
 
 .v-widget {
@@ -1503,6 +1503,11 @@ div.v-layout.v-horizontal.v-widget {
 	vertical-align: top;
 }
 
+.v-label-patientview {
+	font-size: 24px;
+	line-height: normal;
+}
+
 .qbicmainportlet.v-app, .qbicmainportlet.v-app-loading {
 	font: 300 16px/1.55 "Open Sans", sans-serif;
 	color: #464646;
@@ -1529,6 +1534,17 @@ div.v-layout.v-horizontal.v-widget {
 	margin-left: -24px;
 	background: #fff url(../valo/shared/img/spinner.gif) no-repeat 50%;
 	border-radius: 4px;
+}
+
+.qbicmainportlet .v-app-loading:after {
+	position: fixed;
+	z-index: 100;
+	top: 45%;
+	padding-top: 47px;
+	text-align: center;
+	left: 0;
+	right: 0;
+	content: "Loading...";
 }
 
 .qbicmainportlet .v-loading-indicator {
@@ -4299,6 +4315,8 @@ div.v-layout.v-horizontal.v-widget {
 	left: 0;
 	right: 0;
 	border: 1px solid #d4d4d4;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
 	margin-top: -1px;
 	-webkit-box-shadow: 0 0 9px rgba(0, 0, 0, 0.2);
 	box-shadow: 0 0 9px rgba(0, 0, 0, 0.2);
@@ -8361,6 +8379,7 @@ div.v-layout.v-horizontal.v-widget {
 	position: relative;
 	background: #fafafa;
 	color: #464646;
+	overflow: hidden;
 }
 
 .qbicmainportlet .v-table-header table, .qbicmainportlet .v-table-footer table, .qbicmainportlet .v-table-table {
@@ -8498,10 +8517,16 @@ div.v-layout.v-horizontal.v-widget {
 
 .qbicmainportlet .v-table-row {
 	background-color: white;
+	cursor: pointer;
 }
 
 .qbicmainportlet .v-table-row-odd {
 	background-color: #f5f5f5;
+	cursor: pointer;
+}
+
+.qbicmainportlet .v-table-body-noselection .v-table-row, .qbicmainportlet .v-table-body-noselection .v-table-row-odd {
+	cursor: default;
 }
 
 .qbicmainportlet .v-table [class*="-row"].v-selected {
@@ -8579,7 +8604,7 @@ div.v-layout.v-horizontal.v-widget {
 .qbicmainportlet .v-table-focus-slot-right {
 	border-right: 3px solid #197de1;
 	right: -2px;
-	margin-left: -11px;
+	margin-left: -11px !important;
 }
 
 .qbicmainportlet .v-table-focus-slot-left {
@@ -8605,25 +8630,27 @@ div.v-layout.v-horizontal.v-widget {
 	background-color: #fafafa;
 	background-image: -webkit-linear-gradient(top, #fafafa 2%, #efefef 98%);
 	background-image: linear-gradient(to bottom,#fafafa 2%, #efefef 98%);
-	-webkit-box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7, 0 2px 3px rgba(0, 0, 0, 0.05);
-	box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7, 0 2px 3px rgba(0, 0, 0, 0.05);
+	-webkit-box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7;
+	box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7;
 	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
 	position: absolute;
 	z-index: 2;
-	top: -9px;
-	right: -9px;
+	top: 0;
+	right: 0;
+	width: 19px;
 	height: 19px;
 	line-height: 19px;
-	width: 19px;
 	padding: 0;
-	border-radius: 50%;
+	border-top-width: 0;
+	border-right-width: 0;
+	border-radius: 0 0 0 4px;
 	cursor: pointer;
 	text-align: center;
 	opacity: 0;
 	filter: alpha(opacity=0) ;
-	-webkit-transition: opacity 200ms 1s;
-	-moz-transition: opacity 200ms 1s;
-	transition: opacity 200ms 1s;
+	-webkit-transition: opacity 200ms 2s;
+	-moz-transition: opacity 200ms 2s;
+	transition: opacity 200ms 2s;
 }
 
 .qbicmainportlet .v-table-column-selector:after {
@@ -8651,11 +8678,11 @@ div.v-layout.v-horizontal.v-widget {
 .qbicmainportlet .v-table-column-selector:after {
 	content: "";
 	position: absolute;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-	border-radius: inherit;
+	border: none;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
 }
 
 .qbicmainportlet .v-table-column-selector:active:after {
@@ -8667,25 +8694,12 @@ div.v-layout.v-horizontal.v-widget {
 	content: "\f013";
 }
 
-.qbicmainportlet .v-scrollable > .v-table .v-table-column-selector {
-	right: 0;
-	top: 0;
-	border-top: none;
-	border-right: none;
-	border-radius: 0 0 0 50%;
-}
-
-.qbicmainportlet .v-scrollable > .v-table .v-table-column-selector:after {
-	top: 0;
-	right: 0;
-}
-
 .qbicmainportlet .v-table-header-wrap:hover .v-table-column-selector {
 	opacity: 1;
 	filter: none ;
-	-webkit-transition-delay: 100ms;
-	-moz-transition-delay: 100ms;
-	transition-delay: 100ms;
+	-webkit-transition-delay: 200ms;
+	-moz-transition-delay: 200ms;
+	transition-delay: 200ms;
 }
 
 .qbicmainportlet .v-on:before, .qbicmainportlet .v-off:before {
@@ -8739,6 +8753,10 @@ div.v-layout.v-horizontal.v-widget {
 	line-height: 37px;
 	margin: -19px 0 0 !important;
 	text-align: center;
+}
+
+.qbicmainportlet .v-table-drag {
+	overflow: visible;
 }
 
 .qbicmainportlet .v-table-drag .v-table-body {
@@ -10035,7 +10053,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .qbicmainportlet .v-colorpicker {
-	width: auto !important;
+	width: auto;
 }
 
 .qbicmainportlet .v-colorpicker-button-color {
@@ -12423,6 +12441,83 @@ div.v-layout.v-horizontal.v-widget {
 .qbicmainportlet .no-user-login .v-link .v-icon {
 	height: 100px;
 	width: 100px;
+}
+
+.qbicmainportlet .patientprogress .v-progressbar-wrapper {
+	height: 35px;
+}
+
+.qbicmainportlet .patientprogress .v-progressbar-indicator {
+	background-color: #00890a;
+	background-image: -webkit-linear-gradient(top, #00920a 2%, #007908 98%);
+	background-image: linear-gradient(to bottom,#00920a 2%, #007908 98%);
+}
+
+.qbicmainportlet .v-button-addpatient {
+	height: 59px;
+	padding: 0 26px;
+	color: #eaf4e9;
+	font-weight: 400;
+	font-size: 26px;
+	border-radius: 4px;
+	border: 1px solid #227719;
+	border-top-color: #257d1a;
+	border-bottom-color: #1e6b15;
+	background-color: #2c9720;
+	background-image: -webkit-linear-gradient(top, #2f9f22 2%, #26881b 98%);
+	background-image: linear-gradient(to bottom,#2f9f22 2%, #26881b 98%);
+	-webkit-box-shadow: inset 0 1px 0 #46b33a, inset 0 -1px 0 #26811b, 0 2px 3px rgba(0, 0, 0, 0.05);
+	box-shadow: inset 0 1px 0 #46b33a, inset 0 -1px 0 #26811b, 0 2px 3px rgba(0, 0, 0, 0.05);
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.qbicmainportlet .v-button-addpatient:after {
+	border: inherit;
+	top: -1px;
+	right: -1px;
+	bottom: -1px;
+	left: -1px;
+}
+
+.qbicmainportlet .v-button-addpatient:hover:after {
+	background-color: rgba(65, 211, 48, 0.1);
+}
+
+.qbicmainportlet .v-button-addpatient:focus:after {
+	border: inherit;
+	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
+	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
+}
+
+.qbicmainportlet .v-button-addpatient:active:after {
+	background-color: rgba(14, 86, 6, 0.2);
+}
+
+.qbicmainportlet .redicon .v-icon {
+	color: red;
+}
+
+.qbicmainportlet .greenicon .v-icon {
+	color: green;
+}
+
+.qbicmainportlet .v-label-info {
+	border-color: #0069aa;
+	border-style: solid;
+	border-width: 1px;
+	box-shadow: 2px 2px 0 rgba(0, 105, 170, 0.5), -2px -2px 0 rgba(0, 105, 170, 0.5), -2px 2px 0 rgba(0, 105, 170, 0.5), 2px -2px 0 rgba(0, 105, 170, 0.5);
+	border-radius: 8px;
+	padding: 8px;
+}
+
+.qbicmainportlet .v-table-row:hover {
+	background-color: #2ECCFA;
+	cursor: pointer;
+}
+
+.qbicmainportlet .v-table-row-odd:hover {
+	background-color: #2ECCFA;
+	cursor: pointer;
 }
 
 .qbicmainportlet .toolbar .v-button {
