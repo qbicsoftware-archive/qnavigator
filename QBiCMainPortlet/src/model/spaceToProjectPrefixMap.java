@@ -12,6 +12,7 @@ public class spaceToProjectPrefixMap {
     aMap.put("IVAC_CEGAT", "QC");
     aMap.put("IVAC_TEST_SPACE", "QT");
     aMap.put("IVAC_HEPA_VAC", "QH");
+    aMap.put("IVAC_INDIVIDUAL_LIVER", "QI");
     myMap = Collections.unmodifiableMap(aMap);
   }
 }
