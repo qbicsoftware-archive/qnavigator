@@ -15,6 +15,7 @@ public class CheckListPanel extends Panel {
    */
   private static final long serialVersionUID = 3082824690604972817L;
   VerticalLayout checkList;
+  String contentDescription;
   
 
   public CheckListPanel(String caption) {
@@ -22,12 +23,14 @@ public class CheckListPanel extends Panel {
     // TODO Auto-generated constructor stub
   }
 
-
- 
   
   public void buildCheckList(String[] checkListItems) {
     checkList = new VerticalLayout();
    
+    if (contentDescription != null) {
+      checkList.addComponent(new Label(contentDescription));
+    }
+    
     for (final String s : checkListItems) {
       final CheckBox check = new CheckBox(s);
       
@@ -49,6 +52,9 @@ public class CheckListPanel extends Panel {
     this.setContent(checkList);
   }
  
+  public void setContentDescription(String contentDesc) {
+    contentDescription = contentDesc;
+  }
   
   public boolean allChecked() {
     for (Component i : checkList) {

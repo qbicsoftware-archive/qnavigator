@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.UglyToPrettyNameMapper;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,11 +25,13 @@ public class MSHBiologicalSampleStateMachine  {
   MSHBiologicalSampleStates currentState;
 
   private HorizontalLayout injectLayout = new HorizontalLayout();
+  
+  private UglyToPrettyNameMapper uglytoPretty = new UglyToPrettyNameMapper();
 
   private OpenBisClient openbisClient;
-  
+
   private SampleView sampleViewRef;
-  
+
   private String sampleID;
 
   logging.Logger stateMachineLogging = new Log4j2Logger(MSHBiologicalSampleStates.class);
@@ -40,14 +44,14 @@ public class MSHBiologicalSampleStateMachine  {
   public void setSampleID(String sampleIdentifier) {
     sampleID = sampleIdentifier;
   }
-  
+
   public String retrieveCurrentStateFromOpenBIS() {
     Map<String,String> sampleProperties = openbisClient.getSampleByIdentifier(sampleID).getProperties();
 
     return sampleProperties.get("Q_CURRENT_PROCESS_STATE");
   }
-  
-  
+
+
 
 
   public void setState(String state) {
@@ -88,11 +92,16 @@ public class MSHBiologicalSampleStateMachine  {
   {
     return currentState;
   }
-  
+
   public void buildCurrentInterface() {
+    
+
+    // reset the layout for update
+    injectLayout.removeAllComponents();
+
     currentState.buildUserInterface();
     injectLayout = currentState.getUserInterface();
-    
+
     Button nextButton = new Button("Next State");
 
     nextButton.addClickListener(new Button.ClickListener() {
@@ -103,55 +112,65 @@ public class MSHBiologicalSampleStateMachine  {
     });
 
     injectLayout.addComponent(nextButton);
-    
+
   }
-  
+
   public HorizontalLayout getCurrentInterface() {
     return injectLayout;
   }
-  
+
   public boolean traverseToNextState(String sampleID) {
     // first, check if all conditions are met before traversing into next state
     if (currentState.checkConditions()) {
       String fromState = new String(currentState.name());
       String toState = new String(currentState.nextState().name());
-      
+
       stateMachineLogging.debug("traversing from " + fromState + " to " + toState);
-    
+
       // first check if OpenBIS is still in the currentState
       String mostRecentStateName = retrieveCurrentStateFromOpenBIS();
-      
+
       if (mostRecentStateName != null && !fromState.equals(mostRecentStateName)) {
-        System.out.println("STR: " + fromState + " " + mostRecentStateName);
         sampleViewRef.updateContent();
-        
+
         Notification errorStateMoved = new Notification("The sample's status has changed in the meantime!",
             "<i>Most likely, someone else in your group is working on the same data.</i>",
             Type.ERROR_MESSAGE, true);
-        
+
         errorStateMoved.setHtmlContentAllowed(true);
         errorStateMoved.show(Page.getCurrent());
         // this should redraw the current state
-        
+
         //this.setState(mostRecentStateName);
         //this.buildCurrentInterface();
-        
+
         return false;
       }
-      
+
       updateOpenBISCurrentProcessState(sampleID, toState);
-      sampleViewRef.updateContent();
+      sampleViewRef.updateMSHBiologicalSampleStateSection();
       
+      notifyUsersOfTransition(fromState, toState);
+
       return true;
     }
-    
+
     return false;
+  }
+
+  private void notifyUsersOfTransition(String fromState, String toState) {
+    Map<String, Object> emailData = new HashMap<String, Object>();
+    emailData.put("fromState", uglytoPretty.getPrettyName(fromState));
+    emailData.put("toState", uglytoPretty.getPrettyName(toState));
+    emailData.put("sampleCode", sampleViewRef.getCurrentBean().getCode());
+    
+    this.openbisClient.triggerIngestionService("msh-notify-service", emailData);
   }
 
   private void updateOpenBISCurrentProcessState(String sampleID, String toState) {
     Map<String, String> statusMap = new HashMap<String, String>(); 
     statusMap.put(sampleID, toState); 
-    
+
     Map<String, Object> params = new HashMap<String, Object>(); 
     List<String> ids = new ArrayList<String>(statusMap.keySet()); 
     List<String> types = new ArrayList<String>(Arrays.asList("Q_CURRENT_PROCESS_STATE")); 
@@ -160,5 +179,5 @@ public class MSHBiologicalSampleStateMachine  {
     openbisClient.ingest("DSS1", "update-sample-metadata", params);
   }
 
- 
+
 }

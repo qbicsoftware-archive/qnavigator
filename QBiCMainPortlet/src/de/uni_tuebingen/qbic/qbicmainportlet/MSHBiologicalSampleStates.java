@@ -17,22 +17,26 @@ import de.uni_tuebingen.qbic.main.Logger;
 public enum MSHBiologicalSampleStates implements SampleState {
   MSH_UNDEFINED_STATE {
 
-    private HorizontalLayout layoutToInject;
+    private HorizontalLayout layoutToInject = new HorizontalLayout();
     private boolean isChecked = true;
 
 
     @Override
     public boolean checkConditions() {
       // TODO Auto-generated method stub
-      sampleStatesLogging.warn("Conditions for MSH_UNDEFINED_STATE were checked!");
+      sampleStatesLogging.debug("Conditions for MSH_UNDEFINED_STATE were checked: " + isChecked);
       return isChecked;
     }
 
     @Override
     public void buildUserInterface() {
       // TODO Auto-generated method stub
-
-      layoutToInject = new HorizontalLayout();
+//      if (layoutToInject != null) {
+//
+//      }
+      
+      //layoutToInject = new HorizontalLayout();
+      layoutToInject.removeAllComponents();
       
       Panel textPanel = new Panel("Checklist");
       VerticalLayout panelContent = new VerticalLayout();
@@ -73,12 +77,13 @@ public enum MSHBiologicalSampleStates implements SampleState {
       CheckListPanel clp = new CheckListPanel("TEST");
       String[] strlist = {"eins", "zwei", "drei"};
       
+      clp.setContentDescription("Please check the following requirements before proceeding to the next state!");
       clp.buildCheckList(strlist);
 
       layoutToInject.addComponent(clp);
       
       layoutToInject.addComponent(new Label("Hallo hier ist Klaus!"));
-      layoutToInject.markAsDirtyRecursive();
+      layoutToInject.setSpacing(true);
     }
 
     @Override

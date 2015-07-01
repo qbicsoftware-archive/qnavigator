@@ -20,8 +20,10 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_BIOLOGICAL_SAMPLE", "Extracted sample");
     namesMapping.put("Q_TEST_SAMPLE", "Prepared sample");
     
-    namesMapping.put("MSH_UNDEFINED_STATE", "Sample not initialized for MultiscaleHCC workflow");
-    
+    namesMapping.put("MSH_UNDEFINED_STATE", "Sample not yet part of the MultiscaleHCC workflow");
+    namesMapping.put("MSH_SURGERY_SAMPLE_TAKEN", "Liver tumor biopsy finished");
+    namesMapping.put("MSH_SENT_TO_PATHOLOGY","Tumor sample sent to pathology");
+
   }
   
   public String getPrettyName(String uglyName) {

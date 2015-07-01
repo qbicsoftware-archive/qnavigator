@@ -106,6 +106,7 @@ public class SampleView extends VerticalLayout implements View {
   void initView() {
     sampview_content = new VerticalLayout();
     sampview_content.addComponent(initMenuBar());
+    sampview_content.addComponent(initHeadline());
     sampview_content.addComponent(initDescription());
     sampview_content.addComponent(initStatistics());
     sampview_content.addComponent(initTable());
@@ -124,6 +125,7 @@ public class SampleView extends VerticalLayout implements View {
    */
   public void updateContent() {
     updateContentMenuBar();
+    updateHeadline();
     updateContentDescription();
     updateContentStatistics();
     updateContentTable();
@@ -175,10 +177,10 @@ public class SampleView extends VerticalLayout implements View {
     downloadSample.setEnabled(false);
     this.downloadCompleteProjectMenuItem =
         downloadSample
-            .addItem(
-                "<a href=\""
-                    + resourceUrl
-                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete sample</a>",
+        .addItem(
+            "<a href=\""
+                + resourceUrl
+                + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete sample</a>",
                 null);
 
     // Open DatasetView
@@ -210,9 +212,9 @@ public class SampleView extends VerticalLayout implements View {
   void updateContentMenuBar() {
     downloadCompleteProjectMenuItem.getParent().setEnabled(containsDatasets());
     downloadCompleteProjectMenuItem
-        .setText("<a href=\""
-            + resourceUrl
-            + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete sample</a>");
+    .setText("<a href=\""
+        + resourceUrl
+        + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete sample</a>");
 
     datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
 
@@ -243,6 +245,24 @@ public class SampleView extends VerticalLayout implements View {
 
   }
 
+  
+  /**
+   * initializes the sampleview header (mainly name of sample)
+   * @return
+   */
+  HorizontalLayout initHeadline() {
+    HorizontalLayout headline = new HorizontalLayout();
+    
+    sampleNameLabel = new Label("<font size=14></font>", ContentMode.HTML);
+    headline.addComponent(sampleNameLabel);
+    headline.setMargin(true);
+    
+    return headline;
+  }
+  
+  void updateHeadline() {
+    sampleNameLabel.setValue("<font size=14>" + currentBean.getCode() + "</font>");
+  }
 
   /**
    * initializes the description layout
@@ -251,10 +271,9 @@ public class SampleView extends VerticalLayout implements View {
    */
   VerticalLayout initDescription() {
     VerticalLayout sampleDescription = new VerticalLayout();
+
     
-    sampleNameLabel = new Label("<font size=14></font>", ContentMode.HTML);
-    
-    
+
     VerticalLayout sampleDescriptionContent = new VerticalLayout();
     // sampleDescriptionContent.setMargin(true);
     sampleDescriptionContent.setCaption("Description");
@@ -270,8 +289,7 @@ public class SampleView extends VerticalLayout implements View {
   }
 
   void updateContentDescription() {
-    sampleNameLabel.setValue("<font size=14>" + currentBean.getCode() + "</font>");
-    sampleTypeLabel.setValue(String.format("%s.", uglyToPretty.getPrettyName(currentBean.getType())));
+    sampleTypeLabel.setValue(String.format("Sample type: %s.", uglyToPretty.getPrettyName(currentBean.getType())));
     sampleParentLabel.setValue(currentBean.getParentsFormattedString());
   }
 
@@ -452,7 +470,7 @@ public class SampleView extends VerticalLayout implements View {
   }
 
 
-  private VerticalLayout initMSHBiologicalSampleStateSection() {
+  VerticalLayout initMSHBiologicalSampleStateSection() {
     stateMachine = new MSHBiologicalSampleStateMachine(datahandler.openBisClient, this);
 
     // initialize with wrong state (will be updated immediately)
@@ -483,7 +501,7 @@ public class SampleView extends VerticalLayout implements View {
     return biologicalSampleStateSection;
   }
 
-  private void updateMSHBiologicalSampleStateSection() {
+  void updateMSHBiologicalSampleStateSection() {
     String fullSampleIdentifier = currentBean.getId();
     String sampleType = currentBean.getType();
 

@@ -167,7 +167,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
   }
 
   public String getParentsFormattedString() {
-    String parentsHeader = "This sample has been derived from the following samples: ";
+    String parentsHeader = "This sample has been derived from ";
     String parentsBottom = "<ul>";
 
     if (this.getParents() == null || this.getParents().isEmpty()) {
