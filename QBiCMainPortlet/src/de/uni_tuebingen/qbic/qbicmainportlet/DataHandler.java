@@ -149,7 +149,7 @@ public class DataHandler implements Serializable {
    */
   public List<DatasetBean> queryDatasetsForFolderStructure(
       List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> datasets) {
-    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, List<String>> params = new HashMap<String, List<String>>();
     List<String> dsCodes = new ArrayList<String>();
     Map<String, String> types = new HashMap<String, String>();
 
@@ -159,7 +159,7 @@ public class DataHandler implements Serializable {
     }
 
     params.put("codes", dsCodes);
-    QueryTableModel res = openBisClient.getAggregationService("query-files", params);
+    QueryTableModel res = openBisClient.queryFileInformation(params);
   
     List<List<AggregationAdaptorBean>> beans = new ArrayList<List<AggregationAdaptorBean>>();
     String curDS = (String) res.getRows().get(0)[0];

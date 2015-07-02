@@ -221,9 +221,9 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     for(DataSet dataset: datasets) {
       codes.add(dataset.getCode());
     }   
-    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, List<String>> params = new HashMap<String, List<String>>();
     params.put("codes", codes);
-    QueryTableModel res = openbisClient.getAggregationService("query-files", params);
+    QueryTableModel res = openbisClient.queryFileInformation(params);
     endTime = System.nanoTime();
     LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
     download(res, writer, response, openbisClient, bean.getCode());
@@ -243,9 +243,9 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: datasets) {
       codes.add(dataset.getCode());
     }   
-    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, List<String>> params = new HashMap<String, List<String>>();
     params.put("codes", codes);
-    QueryTableModel res = openbisClient.getAggregationService("query-files", params);
+    QueryTableModel res = openbisClient.queryFileInformation(params);
     endTime = System.nanoTime();
     LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
     
@@ -264,9 +264,9 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     for(DataSet dataset: datasets) {
       codes.add(dataset.getCode());
     }   
-    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, List<String>> params = new HashMap<String, List<String>>();
     params.put("codes", codes);
-    QueryTableModel res = openbisClient.getAggregationService("query-files", params);
+    QueryTableModel res = openbisClient.queryFileInformation(params);
     endTime = System.nanoTime();
     LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
     download(res, writer, response, openbisClient, bean.getCode());

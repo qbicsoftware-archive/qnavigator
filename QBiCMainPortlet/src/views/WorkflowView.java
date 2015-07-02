@@ -16,8 +16,8 @@ import org.springframework.remoting.RemoteAccessException;
 
 import submitter.SubmitFailedException;
 import submitter.Workflow;
-import vaadincomponents.InputFilesComponent;
-import vaadincomponents.ParameterComponent;
+import qbic.vaadincomponents.InputFilesComponent;
+import qbic.vaadincomponents.ParameterComponent;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
@@ -216,7 +216,7 @@ public class WorkflowView extends VerticalLayout implements View {
   }
 
   private void updateParameterView(Workflow workFlow, BeanItemContainer<DatasetBean> projectDatasets) {
-    this.inputFileComponent.buildLayout(workFlow, projectDatasets);
+    this.inputFileComponent.buildLayout(workFlow.getData().getData().entrySet(), projectDatasets);
     this.parameterComponent.buildLayout(workFlow);
   }
 
@@ -276,9 +276,9 @@ public class WorkflowView extends VerticalLayout implements View {
 
       @Override
       public void buttonClick(ClickEvent event) {
-        List<DatasetBean> selectedDatasets = inputFileComponent.writetInputList();
+        List<DatasetBean> selectedDatasets = inputFileComponent.getSelectedDatasets();
         Workflow submittedWf = parameterComponent.getWorkflow();
-        if (selectedDatasets == null || submittedWf == null) {
+        if (submittedWf == null || selectedDatasets.isEmpty() || !inputFileComponent.updateWorkflow(submittedWf,controller)) {
           return;
         }
         try {
@@ -310,7 +310,7 @@ public class WorkflowView extends VerticalLayout implements View {
                   "Workflow submission failed due to internal errors! Please try again later or contact your project manager.",
                   Type.TRAY_NOTIFICATION);
         } catch (Exception e) {
-          LOGGER.error("Internal error", e.getStackTrace());
+          LOGGER.error("Internal error: " + e.getMessage(), e.getStackTrace());
           Notification
               .show(
                   "Workflow submission failed due to internal errors! Please try again later or contact your project manager.",

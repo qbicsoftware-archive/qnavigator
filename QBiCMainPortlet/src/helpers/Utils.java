@@ -2,6 +2,7 @@ package helpers;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -223,6 +224,12 @@ public class Utils {
     for (Map.Entry<String, Object> entry : map.entrySet()) {
       System.out.println(entry.getKey() + ": " + entry.getValue());
     }
+  }
+  
+  public static String getTime() {
+    Date dNow = new Date();
+    SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZ");
+    return ft.format(dNow);
   }
 
 }

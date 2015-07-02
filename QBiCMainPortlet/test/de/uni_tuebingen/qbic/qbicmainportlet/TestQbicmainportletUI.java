@@ -163,10 +163,7 @@ public class TestQbicmainportletUI {
     HierarchicalContainer tc = new HierarchicalContainer();
     SpaceBean homeSpaceBean = null;
     String user = "iiswo01";
-
-    RunnableFillsContainer rfc =
-        ui.new RunnableFillsContainer(datahandler, tc, homeSpaceBean, user, null);
-    rfc.prepareHomeBean_fast();
+    fail();
   }
   
   @Test
@@ -299,7 +296,7 @@ public class TestQbicmainportletUI {
   }
 
   @Test
-  @PerfTest(invocations = 4, threads = 1)
+  @PerfTest(invocations = 25, threads = 1)
   public void listFilesOfDatasetsWithAggregtionService_QMARI(){
     List<String> codes = new ArrayList<String>();
     List<DataSet> datasets = openbisClient.getClientDatasetsOfProjectByIdentifierWithSearchCriteria("/ABI_SYSBIO/QMARI");
@@ -316,7 +313,23 @@ public class TestQbicmainportletUI {
     }
   }
   
-  
+  @Test
+  @PerfTest(invocations = 25, threads = 1)
+  public void listFilesOfDatasetsWithAggregtionService_wrapped_QMARI(){
+    List<String> codes = new ArrayList<String>();
+    List<DataSet> datasets = openbisClient.getClientDatasetsOfProjectByIdentifierWithSearchCriteria("/ABI_SYSBIO/QMARI");
+    for(DataSet dataset: datasets) {
+      codes.add(dataset.getCode());
+    }
+    Map<String, List<String>> params = new HashMap<String, List<String>>();
+    params.put("codes", codes);
+    QueryTableModel res = openbisClient.queryFileInformation(params);
+    for (Serializable[] ss : res.getRows()) {
+      System.out.println("next");
+      for(Object x : ss)
+        System.out.println(x.toString());
+    }
+  } 
   
   
   @Test
