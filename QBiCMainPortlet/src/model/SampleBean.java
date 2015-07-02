@@ -189,7 +189,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
     Iterator<Entry<String, String>> it = this.getProperties().entrySet().iterator();
     while (it.hasNext()) {
       Map.Entry pairs = (Map.Entry) it.next();
-      if (pairs.getKey().equals("Q_PROPERTIES")) {
+      if (pairs.getKey().equals("Q_PROPERTIES") || pairs.getKey().equals("Q_NOTES")) {
         continue;
       } else {
         propertiesBottom +=
@@ -220,7 +220,8 @@ public class SampleBean implements Comparable<Object>, Serializable {
 
           xmlPropertiesBottom +=
               "<li><b>"
-                  + (typeLabels.get(pairsProperties.getKey()) + ":</b> "
+                  //+ (typeLabels.get(pairsProperties.getKey()) + ":</b> "
+                  + (pairsProperties.getKey() + ":</b> "
                       + pairsProperties.getValue() + "</li>");
         }
         break;

@@ -41,6 +41,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import controllers.MultiscaleController;
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
@@ -202,10 +203,13 @@ public class QbicmainportletUI extends UI {
   public void buildMainLayout(DataHandler datahandler, VaadinRequest request, String user) {
 
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
+    
+    MultiscaleController multiscaleController = new MultiscaleController(datahandler.openBisClient, user);
+    System.out.println("This is the controller UI " + multiscaleController);
 
-    final HomeView homeView = new HomeView(datahandler, "Your Projects", user);
-    DatasetView datasetView = new DatasetView(datahandler);
-    final SampleView sampleView = new SampleView(datahandler, state, resUrl);
+    final HomeView homeView = new HomeView(datahandler, "Your Projects", user, state, resUrl);
+    DatasetView datasetView = new DatasetView(datahandler,state, resUrl);
+    final SampleView sampleView = new SampleView(datahandler, state, resUrl, multiscaleController);
     final ProjectView projectView = new ProjectView(datahandler, state, resUrl);
     BarcodeView barcodeView =
         new BarcodeView(datahandler.openBisClient, manager.getBarcodeScriptsFolder(),
@@ -216,6 +220,7 @@ public class QbicmainportletUI extends UI {
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
     final PatientView patientView = new PatientView(datahandler, state, resUrl);
     
+        
     Submitter submitter = null;
     try {
       submitter = WorkflowSubmitterFactory.getSubmitter(Type.guseSubmitter, manager);
@@ -240,7 +245,7 @@ public class QbicmainportletUI extends UI {
     navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
 
     navigator.addView(PatientView.navigateToLabel, patientView);
-    navigator.addView(AddPatientView.navigateTolabel, addPatientView);
+    navigator.addView(AddPatientView.navigateToLabel, addPatientView);
     
     navigator.addView(WorkflowView.navigateToLabel, workflowView);
 

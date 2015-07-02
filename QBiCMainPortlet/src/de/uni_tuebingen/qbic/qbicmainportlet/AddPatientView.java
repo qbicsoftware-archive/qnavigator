@@ -48,7 +48,7 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 
 public class AddPatientView extends VerticalLayout implements View {
 
-  static String navigateTolabel = "addivacproject";
+  static String navigateToLabel = "addivacproject";
 
   VerticalLayout addPatientViewContent;
 
@@ -71,7 +71,7 @@ public class AddPatientView extends VerticalLayout implements View {
   private TextArea hlaItypes = new TextArea();
   private TextArea hlaIItypes = new TextArea();
 
-  private MenuBar menubar;
+  private ToolBar toolbar;
 
   private BeanItemContainer sampleOptions = new BeanItemContainer<NewIvacSampleBean>(
       NewIvacSampleBean.class);
@@ -109,15 +109,14 @@ public class AddPatientView extends VerticalLayout implements View {
    */
   void initView() {
     addPatientViewContent = new VerticalLayout();
-    addPatientViewContent.addComponent(initMenuBar());
+    addPatientViewContent.addComponent(initToolBar());
 
     addPatientViewContent.addComponent(initExperimentalSetupLayout());
     addPatientViewContent.addComponent(initOptionLayout());
 
     addPatientViewContent.addComponent(hlaTypingLayout());
 
-    addPatientViewContent.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.6f,
-        Unit.PIXELS);
+    addPatientViewContent.setWidth("100%");
     addPatientViewContent.setMargin(true);
     this.addComponent(addPatientViewContent);
     this.addComponent(initButtonLayout());
@@ -221,43 +220,22 @@ public class AddPatientView extends VerticalLayout implements View {
    * 
    * @return
    */
-  MenuBar initMenuBar() {
-    menubar = new MenuBar();
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);
-    menubar.addStyleName("user-menu");
+  ToolBar initToolBar() {
+    SearchBarView searchBarView = new SearchBarView(datahandler);
+    toolbar = new ToolBar(resourceUrl, state, searchBarView);
+    toolbar.init();
+    return toolbar;
+  }
 
-    // set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setIcon(new ThemeResource("computer_higher.png"));
-    downloadProject.addSeparator();
-    /*
-     * this.downloadCompleteProjectMenuItem = downloadProject .addItem( "<a href=\"" + resourceUrl +
-     * "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>"
-     * , null);
-     */
-    // Open DatasetView
-    // this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
-    downloadProject.addItem("Dataset Overview", null);
-    downloadProject.setEnabled(false);
-    
-    MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_higher.png"));
-    manage.setEnabled(false);
+  /**
+   * updates the menu bar based on the new content (currentbean was changed)
+   */
+  void updateContentToolBar() {
 
-    // Another submenu item with a sub-submenu
-    // this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
-    // Another top-level item
-    manage.addItem("Create Barcodes", null, null);
-    //MenuItem workflows = menubar.addItem("Run workflows", null, null);
-    //workflows.setIcon(new ThemeResource("dna_higher.png"));
-    //workflows.setEnabled(false);
-
-    // Yet another top-level item
-    //MenuItem analyze = menubar.addItem("Analyze your data", null, null);
-    //analyze.setIcon(new ThemeResource("graph_higher.png"));
-    //analyze.setEnabled(false);
-    return menubar;
+    toolbar.setDownload(false);
+    toolbar.setWorkflow(false);
+    //TODO safe ?
+    toolbar.update(navigateToLabel, "");
   }
 
   /**
@@ -484,8 +462,6 @@ public class AddPatientView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-
-    System.out.println(currentValue);
     // this.setContainerDataSource(datahandler.getProject(currentValue));
     // updateContent();
 

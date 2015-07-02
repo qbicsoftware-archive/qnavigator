@@ -37,7 +37,6 @@ import com.vaadin.server.Page;
 import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
@@ -47,8 +46,6 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
@@ -73,6 +70,9 @@ public class DatasetView extends VerticalLayout implements View {
   private final String VISUALIZE_BUTTON_CAPTION = "Visualize";
   public final static String navigateToLabel = "datasetview";
   private DataHandler datahandler;
+  private ToolBar toolbar;
+  private State state;
+  private String resourceUrl;
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
@@ -81,9 +81,10 @@ public class DatasetView extends VerticalLayout implements View {
 
   private int numberOfDatasets;
 
-  public DatasetView(DataHandler dh) {
-
+  public DatasetView(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
+    this.resourceUrl = resourceurl;
+    this.state = state;
 
     this.vert = new VerticalLayout();
     this.table = buildFilterTable();
@@ -134,31 +135,6 @@ public class DatasetView extends VerticalLayout implements View {
     this.vert.setWidth("100%");
     this.setWidth(String.format("%spx", (browserWidth * 0.6)));
     // this.setHeight(String.format("%spx", (browserHeight * 0.8)));
-
-    MenuBar menubar = new MenuBar();
-    // A top-level menu item that opens a submenu
-
-    // set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-    this.vert.addComponent(menubar);
-
-    menubar.addStyleName("user-menu");
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);
-    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setIcon(new ThemeResource("computer_higher.png"));
-    downloadProject.setEnabled(false);
-
-    MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_higher.png"));
-    manage.setEnabled(false);
-
-    /*
-     * MenuItem workflows = menubar.addItem("Run workflows", null, null); workflows.setIcon(new
-     * ThemeResource("dna_higher.png")); workflows.setEnabled(false);
-     * 
-     * MenuItem analyze = menubar.addItem("Analyze your data", null, null); analyze.setIcon(new
-     * ThemeResource("graph_higher.png")); analyze.setEnabled(false);
-     */
 
     VerticalLayout statistics = new VerticalLayout();
     HorizontalLayout statContent = new HorizontalLayout();
@@ -763,6 +739,28 @@ public class DatasetView extends VerticalLayout implements View {
       map.put(kv[0], kv[1]);
     }
    return map;
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  ToolBar initToolBar() {
+    SearchBarView searchBarView = new SearchBarView(datahandler);
+    toolbar = new ToolBar(resourceUrl, state, searchBarView);
+    toolbar.init();
+    return toolbar;
+  }
+
+  /**
+   * updates the menu bar based on the new content (currentbean was changed)
+   */
+  void updateContentToolBar() {
+
+    //Boolean containsData = currentBean.getContainsData();
+    toolbar.setDownload(false);
+    toolbar.setWorkflow(false);
+    toolbar.update(navigateToLabel, "");
   }
   
 }

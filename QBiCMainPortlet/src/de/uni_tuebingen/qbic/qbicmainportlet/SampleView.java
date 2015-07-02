@@ -3,8 +3,6 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import helpers.UglyToPrettyNameMapper;
 import helpers.Utils;
 
-import java.util.ArrayList;
-
 import javax.xml.bind.JAXBException;
 
 import logging.Log4j2Logger;
@@ -18,7 +16,6 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -26,9 +23,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.VerticalLayout;
+
+import controllers.MultiscaleController;
 
 public class SampleView extends VerticalLayout implements View {
 
@@ -59,7 +57,7 @@ public class SampleView extends VerticalLayout implements View {
 
   private FileDownloader fileDownloader;
   private SampleBean currentBean;
-  private MenuBar menubar;
+  private ToolBar toolbar;
   private MenuItem downloadCompleteProjectMenuItem;
   private MenuItem datasetOverviewMenuItem;
   private MenuItem createBarcodesMenuItem;
@@ -71,21 +69,23 @@ public class SampleView extends VerticalLayout implements View {
   private Label propertiesLabel;
   private Label experimentalFactorLabel;
   private Label currentSampleStateName;
+  private VerticalLayout notesContent;
+  private MultiscaleController controller;
+  private MultiscaleComponent noteComponent;
 
 
-  public SampleView(DataHandler datahandler, State state, String resourceurl) {
-    this(datahandler, state);
+  public SampleView(DataHandler datahandler, State state, String resourceurl, MultiscaleController controller) {
+    this(datahandler, state, controller);
     this.resourceUrl = resourceurl;
   }
 
 
-  public SampleView(DataHandler datahandler, State state) {
+  public SampleView(DataHandler datahandler, State state, MultiscaleController controller) {
+    this.controller = controller;
     this.datahandler = datahandler;
     this.state = state;
     resourceUrl = "javascript;";
     initView();
-
-
   }
 
   /**
@@ -105,13 +105,13 @@ public class SampleView extends VerticalLayout implements View {
    */
   void initView() {
     sampview_content = new VerticalLayout();
-    sampview_content.addComponent(initMenuBar());
+    sampview_content.addComponent(initToolBar());
     sampview_content.addComponent(initHeadline());
+    sampview_content.addComponent(initNoteComponent());
     sampview_content.addComponent(initDescription());
     sampview_content.addComponent(initStatistics());
     sampview_content.addComponent(initTable());
     sampview_content.addComponent(initButtonLayout());
-
     sampview_content.addComponent(initMSHBiologicalSampleStateSection());
 
     // use the component that is returned by initTable
@@ -124,13 +124,14 @@ public class SampleView extends VerticalLayout implements View {
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-    updateContentMenuBar();
+    updateContentToolBar();
     updateHeadline();
     updateContentDescription();
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
     updateMSHBiologicalSampleStateSection();
+    updateNoteComponent();
   }
 
   /**
@@ -144,9 +145,11 @@ public class SampleView extends VerticalLayout implements View {
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayout.setMargin(new MarginInfo(false, false, false, true));
+    
     buttonLayoutSection.setSpacing(true);
     buttonLayoutSection.addComponent(buttonLayout);
     buttonLayoutSection.setMargin(new MarginInfo(false, false, false, true));
+    
     buttonLayout.addComponent(this.export);
     return buttonLayout;
   }
@@ -164,87 +167,26 @@ public class SampleView extends VerticalLayout implements View {
    * 
    * @return
    */
-  MenuBar initMenuBar() {
-    menubar = new MenuBar();
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);
-    menubar.addStyleName("user-menu");
+  ToolBar initToolBar() {
+    SearchBarView searchBarView = new SearchBarView(datahandler);
+    toolbar = new ToolBar(resourceUrl, state, searchBarView);
+    toolbar.init();
+    return toolbar;
+  }
 
-    // set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-    MenuItem downloadSample = menubar.addItem("Download your data", null, null);
-    downloadSample.setIcon(new ThemeResource("computer_higher.png"));
-    downloadSample.addSeparator();
-    downloadSample.setEnabled(false);
-    this.downloadCompleteProjectMenuItem =
-        downloadSample
-        .addItem(
-            "<a href=\""
-                + resourceUrl
-                + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete sample</a>",
-                null);
-
-    // Open DatasetView
-    this.datasetOverviewMenuItem = downloadSample.addItem("Dataset Overview", null);
-    MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_higher.png"));
-
-    this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
-
-    /*
-     * MenuItem workflows = menubar.addItem("Run workflows", null, null); workflows.setIcon(new
-     * ThemeResource("dna_higher.png")); workflows.setEnabled(false);
-     * 
-     * MenuItem analyze = menubar.addItem("Analyze your data", null, null); analyze.setIcon(new
-     * ThemeResource("graph_higher.png")); analyze.setEnabled(false);
-     */
-
-    return menubar;
+  /**
+   * updates the menu bar based on the new content (currentbean was changed)
+   */
+  void updateContentToolBar() {
+    Boolean containsData = containsDatasets();
+    toolbar.setDownload(containsData);
+    toolbar.setWorkflow(containsData);
+    toolbar.update(navigateToLabel, currentBean.getId());
   }
 
   boolean containsDatasets() {
     return currentBean.getDatasets() != null && currentBean.getDatasets().size() > 0;
   }
-
-
-  /**
-   * updates the menu bar based on the new content (currentbean was changed)
-   */
-  void updateContentMenuBar() {
-    downloadCompleteProjectMenuItem.getParent().setEnabled(containsDatasets());
-    downloadCompleteProjectMenuItem
-    .setText("<a href=\""
-        + resourceUrl
-        + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete sample</a>");
-
-    datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
-
-      @Override
-      public void menuSelected(MenuItem selectedItem) {
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        StringBuilder sb = new StringBuilder("type=");
-        sb.append(navigateToLabel);
-        sb.append("&");
-        sb.append("id=");
-        sb.append(currentBean.getId());
-        message.add(sb.toString());
-        message.add(DatasetView.navigateToLabel);
-        state.notifyObservers(message);
-      }
-    });
-    createBarcodesMenuItem.setCommand(new MenuBar.Command() {
-
-      public void menuSelected(MenuItem selectedItem) {
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        message.add(currentBean.getId());
-        message.add(BarcodeView.navigateToLabel);
-        state.notifyObservers(message);
-      }
-    });
-
-  }
-
   
   /**
    * initializes the sampleview header (mainly name of sample)
@@ -263,6 +205,28 @@ public class SampleView extends VerticalLayout implements View {
   void updateHeadline() {
     sampleNameLabel.setValue("<font size=14>" + currentBean.getCode() + "</font>");
   }
+  
+  VerticalLayout initNoteComponent() {
+    VerticalLayout notesLayout = new VerticalLayout();
+    
+    notesContent = new VerticalLayout();
+    notesContent.setIcon(FontAwesome.NAVICON);
+    notesContent.setCaption("Notes");
+   
+    noteComponent = new MultiscaleComponent(controller);
+    notesContent.addComponent(noteComponent);
+    notesContent.setMargin(new MarginInfo(true, false, false, true));
+    notesLayout.addComponent(notesContent);
+    notesLayout.setMargin(new MarginInfo(false, false, false, true));
+    
+    return notesContent;
+  }
+  
+  void updateNoteComponent() {
+    noteComponent.updateUI(currentBean.getCode());
+    notesContent.removeAllComponents();
+    notesContent.addComponent(noteComponent);
+  }
 
   /**
    * initializes the description layout
@@ -271,9 +235,6 @@ public class SampleView extends VerticalLayout implements View {
    */
   VerticalLayout initDescription() {
     VerticalLayout sampleDescription = new VerticalLayout();
-
-    
-
     VerticalLayout sampleDescriptionContent = new VerticalLayout();
     // sampleDescriptionContent.setMargin(true);
     sampleDescriptionContent.setCaption("Description");
@@ -284,7 +245,7 @@ public class SampleView extends VerticalLayout implements View {
     sampleDescriptionContent.addComponent(sampleParentLabel);
     sampleDescriptionContent.setMargin(new MarginInfo(false, false, false, true));
     sampleDescription.addComponent(sampleDescriptionContent);
-    sampleDescription.setMargin(new MarginInfo(false, false, false, true));
+    sampleDescription.setMargin(new MarginInfo(true, false, false, true));
     return sampleDescription;
   }
 
@@ -400,6 +361,10 @@ public class SampleView extends VerticalLayout implements View {
 
     tableSection.addComponent(tableSectionContent);
     tableSection.setMargin(new MarginInfo(false, false, false, true));
+    
+    if (this.datasets == null || this.datasets.size() == 0) {
+      tableSectionContent.addComponent(new Label("No datasets registered."));
+    }
 
     return tableSection;
   }
@@ -432,6 +397,7 @@ public class SampleView extends VerticalLayout implements View {
 
     if (rowNumber == 0) {
       this.table.setVisible(false);
+      this.export.setVisible(false);
     } else {
       this.table.setVisible(true);
       this.table.setPageLength(Math.min(rowNumber, 10));
@@ -461,6 +427,7 @@ public class SampleView extends VerticalLayout implements View {
     if (this.datasets != null) {
       filterTable.setContainerDataSource(this.datasets);
     }
+
     filterTable.setColumnHeader("name", "Name");
     filterTable.setColumnHeader("type", "Type");
     filterTable.setColumnHeader("registrationDate", "Registration Date");
@@ -537,7 +504,6 @@ public class SampleView extends VerticalLayout implements View {
     this.setContainerDataSource(datahandler.getSample(currentValue));
 
     updateContent();
-
   }
 
   public SampleBean getCurrentBean() {
@@ -555,7 +521,7 @@ public class SampleView extends VerticalLayout implements View {
     this.table.setEnabled(enabled);
     // this.createBarcodesMenuItem.getParent().setEnabled(false);
     // this.downloadCompleteProjectMenuItem.getParent().setEnabled(false);
-    this.menubar.setEnabled(enabled);
+    this.toolbar.setEnabled(enabled);
   }
 
 }

@@ -72,7 +72,7 @@ public class ProjectView extends VerticalLayout implements View {
 
   private String resourceUrl;
 
-  private ToolBar menubar;
+  private ToolBar toolbar;
 
   private Label contact;
 
@@ -135,7 +135,7 @@ public class ProjectView extends VerticalLayout implements View {
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-    updateContentMenuBar();
+    updateContentToolBar();
     updateContentDescription();
     updateContentStatistics();
     updateContentTable();
@@ -176,21 +176,22 @@ public class ProjectView extends VerticalLayout implements View {
    * 
    * @return
    */
-  MenuBar initMenuBar() {
-    menubar = new ToolBar(resourceUrl, state);
-    menubar.init();
-    return menubar;
+  ToolBar initMenuBar() {
+    SearchBarView searchBarView = new SearchBarView(datahandler);
+    toolbar = new ToolBar(resourceUrl, state, searchBarView);
+    toolbar.init();
+    return toolbar;
   }
 
   /**
    * updates the menu bar based on the new content (currentbean was changed)
    */
-  void updateContentMenuBar() {
+  void updateContentToolBar() {
     
     Boolean containsData = currentBean.getContainsData();
-    menubar.setDownload(containsData);
-    menubar.setWorkflow(containsData);
-    menubar.update(navigateToLabel, currentBean.getId());
+    toolbar.setDownload(containsData);
+    toolbar.setWorkflow(containsData);
+    toolbar.update(navigateToLabel, currentBean.getId());
   }
 
   /**
@@ -750,7 +751,7 @@ public class ProjectView extends VerticalLayout implements View {
     this.table.setEnabled(enabled);
     // this.createBarcodesMenuItem.getParent().setEnabled(false);
     // this.downloadCompleteProjectMenuItem.getParent().setEnabled(false);
-    this.menubar.setEnabled(enabled);
+    this.toolbar.setEnabled(enabled);
   }
 
 

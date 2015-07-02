@@ -53,6 +53,9 @@ public class HomeView extends VerticalLayout implements View {
   VerticalLayout buttonLayoutSection = new VerticalLayout();
   SpaceBean currentBean;
   Boolean includePatientCreation = false;
+  ToolBar toolBar;
+  State state;
+  String resourceUrl;
 
   DataHandler datahandler;
 
@@ -62,10 +65,12 @@ public class HomeView extends VerticalLayout implements View {
 
   private String user;
 
-  public HomeView(DataHandler datahandler, String caption, String user) {
+  public HomeView(DataHandler datahandler, String caption, String user, State state, String resUrl) {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
     this.datahandler = datahandler;
+    this.state = state;
+    this.resourceUrl = resUrl;
 
     this.user = user;
     tableClickChangeTreeView();
@@ -75,7 +80,7 @@ public class HomeView extends VerticalLayout implements View {
    * execute the above constructor with default settings, in order to have the same settings
    */
   public HomeView(DataHandler datahandler) {
-    this(datahandler, "You seem to have no registered projects. Please contact QBiC.", "");
+    this(datahandler, "You seem to have no registered projects. Please contact QBiC.", "", new State(), "");
   }
 
   public void setSizeFull() {
@@ -135,24 +140,27 @@ public class HomeView extends VerticalLayout implements View {
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
     setWidth((browserWidth * 0.6f), Unit.PIXELS);
   }
-
-  MenuBar initMenuBar() {
-    MenuBar menubar = new MenuBar();
-    menubar.addStyleName("user-menu");
-
-    // set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-
-    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setIcon(new ThemeResource("computer_higher.png"));
-    downloadProject.setEnabled(false);
-
-    MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_higher.png"));
-    manage.setEnabled(false);
-    return menubar;
+  
+  /**
+   * 
+   * @return
+   */
+  ToolBar initToolBar() {
+    SearchBarView searchBarView = new SearchBarView(datahandler);
+    toolBar = new ToolBar(resourceUrl, state, searchBarView);
+    toolBar.init();
+    return toolBar;
   }
 
+  /**
+   * updates the menu bar based on the new content (currentbean was changed)
+   */
+  void updateContentToolBar() {
+    toolBar.setDownload(false);
+    toolBar.setWorkflow(false);
+    toolBar.update("", "");
+  }
+  
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
 
     this.setMargin(false);
@@ -161,7 +169,7 @@ public class HomeView extends VerticalLayout implements View {
     homeview_content.setWidth("100%");
 
     // menubar
-    homeview_content.addComponent(initMenuBar());
+    homeview_content.addComponent(initToolBar());
 
     updateView(browserWidth, browserWidth, browser);
 
@@ -179,7 +187,7 @@ public class HomeView extends VerticalLayout implements View {
       addPatient.addClickListener(new ClickListener() {
         @Override
         public void buttonClick(ClickEvent event) {
-          UI.getCurrent().getNavigator().navigateTo(String.format(AddPatientView.navigateTolabel));
+          UI.getCurrent().getNavigator().navigateTo(String.format(AddPatientView.navigateToLabel));
         }
       });
       statistics.addComponent(addPatient);

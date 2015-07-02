@@ -3,10 +3,14 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.util.ArrayList;
 
 import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.MenuItem;
+
 import views.WorkflowView;
 
-public class ToolBar extends MenuBar {
+public class ToolBar extends HorizontalLayout {
 
 
 
@@ -15,6 +19,7 @@ public class ToolBar extends MenuBar {
    */
   private static final long serialVersionUID = -3673630619072584036L;
   
+  private SearchBarView searchBarView;
   private MenuItem downloadwhole;
   private MenuItem datasetoverview;
   private MenuItem manage;
@@ -29,7 +34,8 @@ public class ToolBar extends MenuBar {
     resourceUrl = "javascript";
   }
 
-  public ToolBar(String resourceUrl, State state) {
+  public ToolBar(String resourceUrl, State state, SearchBarView searchBarView) {
+    this.searchBarView = searchBarView;
     this.resourceUrl = resourceUrl;
     this.state = state;
   }
@@ -76,9 +82,13 @@ public class ToolBar extends MenuBar {
 
   void init() {
     setWidth(100.0f, Unit.PERCENTAGE);
-    addStyleName("user-menu");
-    setHtmlContentAllowed(true);
-    download = addItem("Download your data", null, null);
+    //addStyleName("user-menu");
+    
+    MenuBar menuBar = new MenuBar();
+    menuBar.addStyleName("user-menu");
+    
+    menuBar.setHtmlContentAllowed(true);
+    download = menuBar.addItem("Download your data", null, null);
     download.setEnabled(false);
 
     download.setIcon(new ThemeResource("computer_higher.png"));
@@ -88,22 +98,26 @@ public class ToolBar extends MenuBar {
             .addItem(
                 "<a href=\""
                     + resourceUrl
-                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
+                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download everything belonging to this entity.</a>",
                 null);
     this.downloadwhole.setEnabled(false);
     // Open DatasetView
     this.datasetoverview = download.addItem("Dataset Overview", null);
     this.datasetoverview.setEnabled(false);
-    manage = addItem("Manage your data", null, null);
+    manage = menuBar.addItem("Manage your data", null, null);
     manage.setIcon(new ThemeResource("barcode_higher.png"));
     manage.setEnabled(false);
     // Another submenu item with a sub-submenu
     this.createBarcodes = manage.addItem("Create Barcodes", null, null);
     createBarcodes.setEnabled(false);
 
-    workflows = addItem("Run workflows", null, null);
+    workflows = menuBar.addItem("Run workflows", null, null);
     workflows.setIcon(new ThemeResource("dna_higher.png"));
     workflows.setEnabled(false);
+    
+    addComponent(menuBar);
+    addComponent(searchBarView);
+    setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
   }
 
   void update(final String type, final String id) {

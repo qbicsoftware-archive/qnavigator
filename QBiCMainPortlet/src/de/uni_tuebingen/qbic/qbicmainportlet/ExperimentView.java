@@ -46,7 +46,7 @@ public class ExperimentView extends VerticalLayout implements View {
   private VerticalLayout buttonLayoutSection;
   private FileDownloader fileDownloader;
   private ExperimentBean currentBean;
-  private MenuBar menubar;
+  private ToolBar toolbar;
   private MenuItem downloadCompleteProjectMenuItem;
   private MenuItem datasetOverviewMenuItem;
   private MenuItem createBarcodesMenuItem;
@@ -88,7 +88,7 @@ public class ExperimentView extends VerticalLayout implements View {
   void initView() {
 
     expview_content = new VerticalLayout();
-    expview_content.addComponent(initMenuBar());
+    expview_content.addComponent(initToolBar());
     expview_content.addComponent(initDescription());
     expview_content.addComponent(initStatistics());
     expview_content.addComponent(initTable());
@@ -104,7 +104,7 @@ public class ExperimentView extends VerticalLayout implements View {
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-    updateContentMenuBar();
+    updateContentToolBar();
     updateContentDescription();
     updateContentStatistics();
     updateContentTable();
@@ -142,80 +142,22 @@ public class ExperimentView extends VerticalLayout implements View {
    * 
    * @return
    */
-  MenuBar initMenuBar() {
-    menubar = new MenuBar();
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);
-    menubar.addStyleName("user-menu");
-
-    // set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-    MenuItem downloadExperiment = menubar.addItem("Download your data", null, null);
-    downloadExperiment.setIcon(new ThemeResource("computer_higher.png"));
-    downloadExperiment.addSeparator();
-    downloadExperiment.setEnabled(false);
-    this.downloadCompleteProjectMenuItem =
-        downloadExperiment
-        .addItem(
-            "<a href=\""
-                + resourceUrl
-                + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete experiment</a>",
-                null);
-
-    // Open DatasetView
-    this.datasetOverviewMenuItem = downloadExperiment.addItem("Dataset Overview", null);
-    MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_higher.png"));
-
-    this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
-
-    /*
-     * MenuItem workflows = menubar.addItem("Run workflows", null, null); workflows.setIcon(new
-     * ThemeResource("dna_higher.png")); workflows.setEnabled(false);
-     * 
-     * MenuItem analyze = menubar.addItem("Analyze your data", null, null); analyze.setIcon(new
-     * ThemeResource("graph_higher.png")); analyze.setEnabled(false);
-     */
-    return menubar;
+  ToolBar initToolBar() {
+    SearchBarView searchBarView = new SearchBarView(datahandler);
+    toolbar = new ToolBar(resourceUrl, state, searchBarView);
+    toolbar.init();
+    return toolbar;
   }
 
   /**
    * updates the menu bar based on the new content (currentbean was changed)
    */
-  void updateContentMenuBar() {
+  void updateContentToolBar() {
 
-    downloadCompleteProjectMenuItem.getParent().setEnabled(currentBean.getContainsData());
-    downloadCompleteProjectMenuItem
-    .setText("<a href=\""
-        + resourceUrl
-        + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete experiment</a>");
-
-    datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
-
-      @Override
-      public void menuSelected(MenuItem selectedItem) {
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        StringBuilder sb = new StringBuilder("type=");
-        sb.append(navigateToLabel);
-        sb.append("&");
-        sb.append("id=");
-        sb.append(currentBean.getId());
-        message.add(sb.toString());
-        message.add(DatasetView.navigateToLabel);
-        state.notifyObservers(message);
-      }
-    });
-    createBarcodesMenuItem.setCommand(new MenuBar.Command() {
-
-      public void menuSelected(MenuItem selectedItem) {
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        message.add(currentBean.getId());
-        message.add(BarcodeView.navigateToLabel);
-        state.notifyObservers(message);
-      }
-    });
-
+    Boolean containsData = currentBean.getContainsData();
+    toolbar.setDownload(containsData);
+    toolbar.setWorkflow(containsData);
+    toolbar.update(navigateToLabel, currentBean.getId());
   }
 
 
@@ -238,9 +180,6 @@ public class ExperimentView extends VerticalLayout implements View {
     //generalInfo.setMargin(true);
 
     generalInfo.addComponent(generalInfoContent);
-    generalInfo.setSpacing(true);
-
-
 
     return generalInfo;
   }
@@ -440,7 +379,7 @@ public class ExperimentView extends VerticalLayout implements View {
     this.table.setEnabled(enabled);
     // this.createBarcodesMenuItem.getParent().setEnabled(false);
     // this.downloadCompleteProjectMenuItem.getParent().setEnabled(false);
-    this.menubar.setEnabled(enabled);
+    this.toolbar.setEnabled(enabled);
   }
 
 

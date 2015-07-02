@@ -8,15 +8,12 @@ import java.util.Set;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import model.ExperimentBean;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
-import model.SampleBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
-import ch.systemsx.cisd.openbis.generic.shared.basic.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -35,9 +32,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -50,8 +45,6 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
@@ -96,7 +89,7 @@ public class PatientView extends VerticalLayout implements View {
 
   private MenuItem datasetOverviewMenuItem;
 
-  private MenuBar menubar;
+  private ToolBar toolbar;
 
   private VerticalLayout membersSection;
 
@@ -145,7 +138,7 @@ public class PatientView extends VerticalLayout implements View {
    */
   void initView() {
     patientViewContent = new VerticalLayout();
-    patientViewContent.addComponent(initMenuBar());
+    patientViewContent.addComponent(initToolBar());
     patientViewContent.addComponent(initProjectStatus());
     patientViewContent.addComponent(initDescription());
     patientViewContent.addComponent(initHLALayout());
@@ -159,7 +152,7 @@ public class PatientView extends VerticalLayout implements View {
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-    updateContentMenuBar();
+    updateContentToolBar();
     long startTime = System.nanoTime();
     updateHLALayout();
     long endTime = System.nanoTime();
@@ -400,37 +393,23 @@ public class PatientView extends VerticalLayout implements View {
    * 
    * @return
    */
-  MenuBar initMenuBar() {
-    menubar = new MenuBar();
-    menubar.setWidth(100.0f, Unit.PERCENTAGE);
-    menubar.addStyleName("user-menu");
+  ToolBar initToolBar() {
+    SearchBarView searchBarView = new SearchBarView(datahandler);
+    toolbar = new ToolBar(resourceUrl, state, searchBarView);
+    toolbar.init();
+    toolbar.setSizeFull();
+    return toolbar;
+  }
 
-    // set to true for the hack below
-    menubar.setHtmlContentAllowed(true);
-    MenuItem downloadProject = menubar.addItem("Download your data", null, null);
-    downloadProject.setEnabled(true);
+  /**
+   * updates the menu bar based on the new content (currentbean was changed)
+   */
+  void updateContentToolBar() {
 
-    downloadProject.setIcon(new ThemeResource("computer_higher.png"));
-    downloadProject.addSeparator();
-    this.downloadCompleteProjectMenuItem =
-        downloadProject
-            .addItem(
-                "<a href=\""
-                    + resourceUrl
-                    + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>",
-                null);
-
-    // Open DatasetView
-    this.datasetOverviewMenuItem = downloadProject.addItem("Dataset Overview", null);
-
-    MenuItem manage = menubar.addItem("Manage your data", null, null);
-    manage.setIcon(new ThemeResource("barcode_higher.png"));
-
-    // Another submenu item with a sub-submenu
-    // this.createBarcodesMenuItem = manage.addItem("Create Barcodes", null, null);
-    // Another top-level item
-    manage.addItem("Create Barcodes", null, null);
-    return menubar;
+    Boolean containsData = currentBean.getContainsData();
+    toolbar.setDownload(containsData);
+    toolbar.setWorkflow(containsData);
+    toolbar.update(navigateToLabel, currentBean.getId());
   }
 
 
@@ -598,7 +577,7 @@ public class PatientView extends VerticalLayout implements View {
     experiments.setHeaderVisible(false);
     experiments.setHeightMode(HeightMode.ROW);
     experiments.setHeightByRows(gpc.size());
-    experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.35f, Unit.PIXELS);
+    //experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.35f, Unit.PIXELS);
 
     experiments.getColumn("status").setRenderer(new ProgressBarRenderer());
     experiments.setColumnOrder("started", "code", "description", "status", "download",
@@ -727,6 +706,7 @@ public class PatientView extends VerticalLayout implements View {
     status.setSpacing(true);
     status.setCaption("Project Status");
     status.setIcon(FontAwesome.CHECK_SQUARE);
+    status.setSizeFull();
 
     VerticalLayout projectStatus = new VerticalLayout();
     projectStatus.setMargin(new MarginInfo(true, false, false, true));
@@ -734,7 +714,7 @@ public class PatientView extends VerticalLayout implements View {
 
     experiments = new Grid();
     experiments.setReadOnly(true);
-    experiments.setWidth("100%");
+    experiments.setWidth(100.0f, Unit.PERCENTAGE);
     status.addComponent(experiments);
 
     ProgressBar progressBar = new ProgressBar();
@@ -892,37 +872,4 @@ public class PatientView extends VerticalLayout implements View {
     return currentBean;
   }
   
-  /**
-   * updates the menu bar based on the new content (currentbean was changed)
-   */
-  void updateContentMenuBar() {
-  Boolean containsData = currentBean.getContainsData();
-  MenuItem downloadProject = this.downloadCompleteProjectMenuItem.getParent();
-  
- 
-  downloadProject.setEnabled(containsData);
-
-  downloadCompleteProjectMenuItem
-      .setText("<a href=\""
-          + resourceUrl
-          + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>");
-
-  datasetOverviewMenuItem.setCommand(new MenuBar.Command() {
-
-    @Override
-    public void menuSelected(MenuItem selectedItem) {
-      ArrayList<String> message = new ArrayList<String>();
-      message.add("clicked");
-      StringBuilder sb = new StringBuilder("type=");
-      sb.append("project");
-      sb.append("&");
-      sb.append("id=");
-      sb.append(currentBean.getId());
-      message.add(sb.toString());
-      message.add(DatasetView.navigateToLabel);
-      state.notifyObservers(message);
-    }
-  });
-  }
-
 }

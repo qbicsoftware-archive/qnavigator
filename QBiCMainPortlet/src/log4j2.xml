@@ -9,7 +9,7 @@
     <Logger name="de.uni_tuebingen.qbic.qbicmainportlet" level="trace" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Root level="error">
+    <Root level="all">
       <AppenderRef ref="Console"/>
     </Root>
   </Loggers>

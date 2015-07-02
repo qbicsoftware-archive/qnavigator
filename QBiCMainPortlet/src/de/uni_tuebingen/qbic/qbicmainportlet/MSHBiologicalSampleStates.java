@@ -2,17 +2,10 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import logging.Log4j2Logger;
 
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
-
-import de.uni_tuebingen.qbic.main.Logger;
 
 public enum MSHBiologicalSampleStates implements SampleState {
   MSH_UNDEFINED_STATE {
