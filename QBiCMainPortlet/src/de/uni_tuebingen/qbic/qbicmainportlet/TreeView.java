@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import views.WorkflowView;
 import logging.Log4j2Logger;
 import main.OpenBisClient;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
@@ -277,6 +278,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
           return null;
         return projectId(ExperimentView.navigateToLabel,expId);
       case DatasetView.navigateToLabel:
+      case WorkflowView.navigateToLabel:
         Map<String, String> map = DatasetView.getMap(openbisId);
         if(map == null) return null;
         return projectId(map.get("type"),map.get("id"));
