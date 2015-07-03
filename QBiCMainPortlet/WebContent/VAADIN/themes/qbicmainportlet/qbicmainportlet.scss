@@ -103,5 +103,15 @@ $v-app-loading-text: "Loading...";
 	font-size: 24px;	
 	line-height: normal;
 }
+
+.v-textfield-barcode-preview {
+    font-family: monospace;
+    font-size: 75% !important;
+    background-color: transparent !important;
+    border-top-style: none !important;
+    border-right-style: none !important;
+    border-bottom-style: none !important;
+    border-left-style: none !important;
+}
    
 }

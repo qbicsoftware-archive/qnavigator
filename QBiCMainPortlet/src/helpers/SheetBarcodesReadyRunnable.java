@@ -17,34 +17,29 @@ import de.uni_tuebingen.qbic.qbicmainportlet.WizardBarcodeView;
  * @author Andreas Friedrich
  * 
  */
-public class BarcodesReadyRunnable implements Runnable {
+public class SheetBarcodesReadyRunnable implements Runnable {
 
   private WizardBarcodeView view;
   private List<IBarcodeBean> barcodeBeans;
   BarcodeCreator creator;
 
-  public BarcodesReadyRunnable(WizardBarcodeView view, BarcodeCreator creator,
-      List<IBarcodeBean> barcodeBeans2) {
+  public SheetBarcodesReadyRunnable(WizardBarcodeView view, BarcodeCreator creator,
+      List<IBarcodeBean> barcodeBeans) {
     this.view = view;
-    this.barcodeBeans = barcodeBeans2;
+    this.barcodeBeans = barcodeBeans;
     this.creator = creator;
   }
 
-  private void attachDownloadsToButtons() {
+  private void attachDownloadToButton() {
     FileResource sheetSource = creator.createAndDLSheet(barcodeBeans, view.getSorter());
     FileDownloader sheetDL = new FileDownloader(sheetSource);
     sheetDL.extend(view.getButtonSheet());
-
-    FileResource pdfSource = creator.zipAndDownloadBarcodes(barcodeBeans);
-    FileDownloader pdfDL = new FileDownloader(pdfSource);
-    pdfDL.extend(view.getButtonTube());
   }
 
   @Override
   public void run() {
-    attachDownloadsToButtons();
+    attachDownloadToButton();
     view.creationDone();
     view.sheetReady();
-    view.tubesReady();
   }
 }
