@@ -23,14 +23,8 @@ public enum MSHBiologicalSampleStates implements SampleState {
 
     @Override
     public void buildUserInterface() {
-      // TODO Auto-generated method stub
-//      if (layoutToInject != null) {
-//
-//      }
-      
-      //layoutToInject = new HorizontalLayout();
       layoutToInject.removeAllComponents();
-      
+
       Panel textPanel = new Panel("Checklist");
       VerticalLayout panelContent = new VerticalLayout();
       Label initText = new Label("This sample has not been added to the Multiscale HCC workflow yet. Please click 'Next' to do so!");
@@ -53,29 +47,30 @@ public enum MSHBiologicalSampleStates implements SampleState {
 
   }, MSH_SURGERY_SAMPLE_TAKEN {
 
-    private HorizontalLayout layoutToInject;
+    private HorizontalLayout layoutToInject = new HorizontalLayout();
+    private boolean isChecked = false;
+    CheckListPanel clp = new CheckListPanel("Checklist");
 
     @Override
     public boolean checkConditions() {
       // TODO Auto-generated method stub
-      System.out.println("This is the MSH_SURGERY_SAMPLE_TAKEN");
-      return false;
+      isChecked = clp.allChecked();
+      sampleStatesLogging.debug("Conditions for MSH_SURGERY_SAMPLE_TAKEN were checked: " + isChecked);
+      return isChecked;
     }
 
     @Override
     public void buildUserInterface() {
       // TODO Auto-generated method stub
-      layoutToInject = new HorizontalLayout();
+      //layoutToInject = new HorizontalLayout();
+      layoutToInject.removeAllComponents();
+      String[] strlist = {"Tumor punctions finished.", "Tumor sample is on dry ice, ready for transport."};
 
-      CheckListPanel clp = new CheckListPanel("TEST");
-      String[] strlist = {"eins", "zwei", "drei"};
-      
       clp.setContentDescription("Please check the following requirements before proceeding to the next state!");
       clp.buildCheckList(strlist);
 
       layoutToInject.addComponent(clp);
-      
-      layoutToInject.addComponent(new Label("Hallo hier ist Klaus!"));
+
       layoutToInject.setSpacing(true);
     }
 
@@ -86,19 +81,31 @@ public enum MSHBiologicalSampleStates implements SampleState {
     }
 
   }, MSH_SENT_TO_PATHOLOGY {
-    private HorizontalLayout layoutToInject;
+    private HorizontalLayout layoutToInject = new HorizontalLayout();
+    private boolean isChecked = false;
+    CheckListPanel clp = new CheckListPanel("Checklist");
 
     @Override
     public boolean checkConditions() {
       // TODO Auto-generated method stub
-      System.out.println("This is the MSH_SENT_TO_PATHOLOGY");
-      return false;
+      isChecked = clp.allChecked();
+      sampleStatesLogging.debug("Conditions for MSH_SENT_TO_PATHOLOGY were checked: " + isChecked);
+      
+      return isChecked;
     }
 
     @Override
     public void buildUserInterface() {
       // TODO Auto-generated method stub
+      layoutToInject.removeAllComponents();
+      String[] strlist = {"Tumor sample arrived at pathology.", "Tumor sample is prepared and ready for pathological review."};
 
+      clp.setContentDescription("Please check the following requirements before proceeding to the next state!");
+      clp.buildCheckList(strlist);
+
+      layoutToInject.addComponent(clp);
+      
+      layoutToInject.setSpacing(true);
     }
 
     @Override
@@ -108,21 +115,95 @@ public enum MSHBiologicalSampleStates implements SampleState {
     }
 
   }, MSH_PATHOLOGY_REVIEW_STARTED {
-    private HorizontalLayout layoutToInject;
+    private HorizontalLayout layoutToInject = new HorizontalLayout();
+    private boolean isChecked = false;
+    CheckListPanel clp = new CheckListPanel("Checklist");
+    
+    @Override
+    public boolean checkConditions() {
+      isChecked = clp.allChecked();
+      sampleStatesLogging.debug("Conditions for MSH_PATHOLOGY_REVIEW_STARTED were checked: " + isChecked);
+      
+      return isChecked;
+    }
+
+    @Override
+    public void buildUserInterface() {
+      layoutToInject.removeAllComponents();
+      String[] strlist = {"Tumor sample cut performed.", "Pathological review written."};
+
+      clp.setContentDescription("Please check the following requirements before proceeding to the next state!");
+      clp.buildCheckList(strlist);
+
+      layoutToInject.addComponent(clp);
+      
+      layoutToInject.setSpacing(true);
+    }
+
+    @Override
+    public HorizontalLayout getUserInterface() {
+      // TODO Auto-generated method stub
+      return layoutToInject;
+    }
+
+  }, MSH_PATHOLOGY_REVIEW_FINISHED {
+    private HorizontalLayout layoutToInject = new HorizontalLayout();
+    private boolean isChecked = false;
+    CheckListPanel clp = new CheckListPanel("Checklist");
 
     @Override
     public boolean checkConditions() {
-      System.out.println("This is the MSH_PATHOLOGY_UNDER_REVIEW");
-      // TODO Auto-generated method stub
-      return false;
+      isChecked = clp.allChecked();
+      sampleStatesLogging.debug("Conditions for MSH_PATHOLOGY_REVIEW_FINISHED were checked: " + isChecked);
+      
+      return isChecked;
     }
 
     @Override
     public void buildUserInterface() {
       // TODO Auto-generated method stub
-      this.layoutToInject = new HorizontalLayout();
+      layoutToInject.removeAllComponents();
+      String[] strlist = {"Tumor sample is on dry ice, ready for transport."};
+
+      clp.setContentDescription("Please check the following requirements before proceeding to the next state!");
+      clp.buildCheckList(strlist);
+
+      layoutToInject.addComponent(clp);
       
-      this.layoutToInject.addComponent(new Label("the new stuff"));
+      layoutToInject.setSpacing(true);
+    }
+
+    @Override
+    public HorizontalLayout getUserInterface() {
+      // TODO Auto-generated method stub
+      return layoutToInject;
+    }
+
+  }, MSH_SENT_TO_HUMAN_GENETICS {
+    private HorizontalLayout layoutToInject = new HorizontalLayout();
+    private boolean isChecked = false;
+    CheckListPanel clp = new CheckListPanel("Checklist");
+    
+    @Override
+    public boolean checkConditions() {
+      isChecked = clp.allChecked();
+      sampleStatesLogging.debug("Conditions for MSH_SENT_TO_HUMAN_GENETICS were checked: " + isChecked);
+      
+      return isChecked;
+    }
+
+    @Override
+    public void buildUserInterface() {
+      // TODO Auto-generated method stub
+      layoutToInject.removeAllComponents();
+
+      clp.setContentDescription("Happy End!");
+      String[] emptyList = { };
+      clp.buildCheckList(emptyList);
+
+      layoutToInject.addComponent(clp);
+      
+      layoutToInject.setSpacing(true);
     }
 
     @Override
@@ -134,16 +215,16 @@ public enum MSHBiologicalSampleStates implements SampleState {
   };
 
   private static MSHBiologicalSampleStates[] enumValues = values();
-  
+
   public MSHBiologicalSampleStates nextState() {
     int stateIndex = this.ordinal();
-    
-    if (stateIndex >= 0 && stateIndex < enumValues.length) {
+
+    if (stateIndex >= 0 && stateIndex < (enumValues.length - 1)) {
       stateIndex += 1;
     }
-    
+
     return enumValues[stateIndex];
   }
-  
+
   private static logging.Logger sampleStatesLogging = new Log4j2Logger(MSHBiologicalSampleStates.class);
 }

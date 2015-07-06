@@ -66,6 +66,14 @@ public class MSHBiologicalSampleStateMachine  {
 
   }
 
+  public void resetStateMachine(String sampleID) {
+    String toState = "MSH_UNDEFINED_STATE";
+    updateOpenBISCurrentProcessState(sampleID, toState);
+    //setState(retrieveCurrentStateFromOpenBIS());
+    sampleViewRef.updateContent();
+  }
+  
+  
   //  public void setState(String state) {
   //    switch(state) {
   //      case "MSH_UNDEFINED_STATE":
@@ -107,8 +115,19 @@ public class MSHBiologicalSampleStateMachine  {
 
       }
     });
+    
+    Button resetButton = new Button("RESET BUTTON");
+
+    resetButton.addClickListener(new Button.ClickListener() {
+      public void buttonClick(ClickEvent event) {
+        resetStateMachine(sampleID);
+
+      }
+    });
+    
 
     injectLayout.addComponent(nextButton);
+    injectLayout.addComponent(resetButton);
 
   }
 
@@ -118,9 +137,25 @@ public class MSHBiologicalSampleStateMachine  {
 
   public boolean traverseToNextState(String sampleID) {
     // first, check if all conditions are met before traversing into next state
+    String fromState = new String(currentState.name());
+    String toState = new String(currentState.nextState().name());
+    
+    if (fromState.equals(toState)) {
+      // nothing to do... however, we should notify the user
+      
+      Notification errorEndStateReached = new Notification("The current process seems to have reached it's end state.",
+          "<i>Skipping this transition with no changes performed...</i>",
+          Type.WARNING_MESSAGE, true);
+
+      errorEndStateReached.setHtmlContentAllowed(true);
+      errorEndStateReached.show(Page.getCurrent());
+      
+      return false;
+    }
+    
+    
     if (currentState.checkConditions()) {
-      String fromState = new String(currentState.name());
-      String toState = new String(currentState.nextState().name());
+      
 
       stateMachineLogging.debug("traversing from " + fromState + " to " + toState);
 
@@ -145,7 +180,7 @@ public class MSHBiologicalSampleStateMachine  {
       }
 
       updateOpenBISCurrentProcessState(sampleID, toState);
-      sampleViewRef.updateMSHBiologicalSampleStateSection();
+      sampleViewRef.updateContent();
       
       notifyUsersOfTransition(fromState, toState);
 
