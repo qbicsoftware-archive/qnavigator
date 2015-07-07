@@ -117,7 +117,7 @@ public class WizardBarcodeView extends VerticalLayout {
     dlBox.setSpacing(true);
     addComponent(dlBox);
   }
-  
+
   public WizardBarcodeView() {
     experimentTable = new Table("Experiments");
     experimentTable.setStyleName(ValoTheme.TABLE_SMALL);
@@ -165,8 +165,10 @@ public class WizardBarcodeView extends VerticalLayout {
 
   public void creationPressed() {
     enableExperiments(false);
-    spaceBox.setEnabled(false);
-    projectBox.setEnabled(false);
+    if (spaceBox != null)
+      spaceBox.setEnabled(false);
+    if (projectBox != null)
+      projectBox.setEnabled(false);
     prepareButton.setEnabled(false);
     prepSelect.setEnabled(false);
   }
@@ -174,8 +176,10 @@ public class WizardBarcodeView extends VerticalLayout {
   public void reset() {
     sheetDownloadButton.setEnabled(false);
     pdfDownloadButton.setEnabled(false);
-    spaceBox.setEnabled(true);
-    projectBox.setEnabled(true);
+    if (spaceBox != null)
+      spaceBox.setEnabled(true);
+    if (projectBox != null)
+      projectBox.setEnabled(true);
     prepSelect.setEnabled(true);
   }
 
