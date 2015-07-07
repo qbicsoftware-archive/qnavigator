@@ -183,7 +183,9 @@ public class BarcodeController {
 
   public void reactToProjectSelection(String project) {
     List<ExperimentBarcodeSummaryBean> beans = new ArrayList<ExperimentBarcodeSummaryBean>();
+    System.out.println("openbis.getExperimentsOfProjectByCode("+project+"):");
     for (Experiment e : openbis.getExperimentsOfProjectByCode(project)) {
+      System.out.println(e);
       String type = e.getExperimentTypeCode();
       List<Sample> samples = openbis.getSamplesofExperiment(e.getIdentifier());
       if (barcodeExperiments.contains(type) && samples.size() > 0) {
