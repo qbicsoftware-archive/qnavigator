@@ -183,6 +183,8 @@ public class BarcodePreviewComponent extends VerticalLayout {
       case "Secondary Name":
         res = map.get("Q_SECONDARY_NAME");
     }
+    if (res == null)
+      return "";
     return res.substring(0, Math.min(res.length(), 22));
   }
 
