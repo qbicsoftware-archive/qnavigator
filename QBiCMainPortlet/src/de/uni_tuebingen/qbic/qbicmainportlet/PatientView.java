@@ -397,6 +397,8 @@ public class PatientView extends VerticalLayout implements View {
     SearchBarView searchBarView = new SearchBarView(datahandler);
     toolbar = new ToolBar(resourceUrl, state, searchBarView);
     toolbar.init();
+    toolbar.visibleBarcode(false);
+    toolbar.visibleWorkflow(false);
     toolbar.setSizeFull();
     return toolbar;
   }
@@ -409,7 +411,6 @@ public class PatientView extends VerticalLayout implements View {
     Boolean containsData = currentBean.getContainsData();
     toolbar.setDownload(containsData);
     toolbar.setWorkflow(containsData);
-    toolbar.setBarcode(currentBean.getExperiments().size() > 0);
     toolbar.update(navigateToLabel, currentBean.getId());
   }
 
