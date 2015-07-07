@@ -223,7 +223,7 @@ public class BarcodeController {
     List<Sample> samples =
         openbis.getSamplesofExperiment(view.getExperiments().iterator().next().fetchExperimentID());
     int i = 0;
-    String code = "";
+    String code = samples.get(i).getCode();
     while (!BarcodeFunctions.isQbicBarcode(code)) {
       code = samples.get(i).getCode();
       i++;
