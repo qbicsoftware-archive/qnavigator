@@ -1543,8 +1543,8 @@ public class DataHandler implements Serializable {
       int numberOfRegisteredExperiments = 1;
       int numberOfRegisteredSamples = 1;
 
-      // register new patient (project)
-      String newProjectCode = projectPrefix + Utils.createCountString(numberOfProject, 3);
+      // register new patient (project), project prefixes differ in length
+      String newProjectCode = projectPrefix + Utils.createCountString(numberOfProject, 5 - projectPrefix.length());
 
       projectMap.put("code", newProjectCode);
       projectMap.put("space", space);
