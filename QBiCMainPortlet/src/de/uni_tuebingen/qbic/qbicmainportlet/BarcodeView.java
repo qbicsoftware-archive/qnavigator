@@ -25,7 +25,7 @@ public class BarcodeView extends VerticalLayout implements View {
    */
   private static final long serialVersionUID = 8921847321758727061L;
 
-  static String navigateToLabel = "barcodeview";
+  public final static String navigateToLabel = "barcodeview";
   static Logger LOGGER = new Log4j2Logger(BarcodeView.class);
   // FilterTable table;
   // VerticalLayout projectview_content;
@@ -166,9 +166,10 @@ public class BarcodeView extends VerticalLayout implements View {
     // System.out.println("navigateToLabel: " + navigateToLabel);
     try {
       System.out.println(openbis.loggedin());
-      wizardWrapper.setSummaryBeans(currentValue);
+      LOGGER.debug("code "+ currentValue.split("/")[2]);
+      wizardWrapper.setSummaryBeans(currentValue.split("/")[2]);
     } catch (Exception e) {
-      LOGGER.error("setting container datasource from bean failed", e.getStackTrace());
+      LOGGER.error("setting container datasource from bean failed " + e.getMessage(), e.getStackTrace());
     }
   }
 }

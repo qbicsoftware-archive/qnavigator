@@ -3,7 +3,6 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import helpers.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,9 +28,7 @@ import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
@@ -42,9 +39,6 @@ import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -191,7 +185,7 @@ public class ProjectView extends VerticalLayout implements View {
     Boolean containsData = currentBean.getContainsData();
     toolbar.setDownload(containsData);
     toolbar.setWorkflow(containsData);
-    toolbar.setWorkflow(containsData);
+    toolbar.setBarcode(currentBean.getExperiments().size() >0);
     toolbar.update(navigateToLabel, currentBean.getId());
   }
 

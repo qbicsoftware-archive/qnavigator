@@ -409,6 +409,7 @@ public class PatientView extends VerticalLayout implements View {
     Boolean containsData = currentBean.getContainsData();
     toolbar.setDownload(containsData);
     toolbar.setWorkflow(containsData);
+    toolbar.setBarcode(currentBean.getExperiments().size() > 0);
     toolbar.update(navigateToLabel, currentBean.getId());
   }
 

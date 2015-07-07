@@ -269,6 +269,7 @@ public class TreeView extends Panel implements Observer, ViewChangeListener {
     switch (type) {
       case PatientView.navigateToLabel:
       case ProjectView.navigateToLabel:
+      case BarcodeView.navigateToLabel:
         return openbisId;
       case ExperimentView.navigateToLabel:
         return projectIdFallback(openbisId, split);
