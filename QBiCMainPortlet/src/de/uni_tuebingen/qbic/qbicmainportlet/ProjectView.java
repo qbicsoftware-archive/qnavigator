@@ -191,6 +191,7 @@ public class ProjectView extends VerticalLayout implements View {
     Boolean containsData = currentBean.getContainsData();
     toolbar.setDownload(containsData);
     toolbar.setWorkflow(containsData);
+    toolbar.setWorkflow(containsData);
     toolbar.update(navigateToLabel, currentBean.getId());
   }
 
@@ -749,7 +750,7 @@ public class ProjectView extends VerticalLayout implements View {
   public void setEnabled(boolean enabled) {
     this.export.setEnabled(enabled);
     this.table.setEnabled(enabled);
-    // this.createBarcodesMenuItem.getParent().setEnabled(false);
+//     this.createBarcodesMenuItem.getParent().setEnabled(false);
     // this.downloadCompleteProjectMenuItem.getParent().setEnabled(false);
     this.toolbar.setEnabled(enabled);
   }
