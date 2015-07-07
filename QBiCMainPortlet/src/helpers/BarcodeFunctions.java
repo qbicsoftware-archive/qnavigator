@@ -60,7 +60,7 @@ public class BarcodeFunctions {
    * @return true if String is a QBiC barcode, false if not
    */
   public static boolean isQbicBarcode(String code) {
-    String pattern = "Q[A-Z]{4}[0-9]{3}[A-Z0-9]{2}";
+    String pattern = "Q[A-Z0-9]{4}[0-9]{3}[A-Z0-9]{2}";
     return code.matches(pattern);
   }
 }
