@@ -304,7 +304,7 @@ public class WorkflowView extends VerticalLayout implements View {
             VaadinService.getCurrentResponse().setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
           }
         } catch (RemoteAccessException e) {
-          LOGGER.error("Submission failed, probably openbis.", e.getStackTrace());
+          LOGGER.error("Submission failed, probably openbis. error message: " + e.getMessage(), e.getStackTrace());
           Notification
               .show(
                   "Workflow submission failed due to internal errors! Please try again later or contact your project manager.",
