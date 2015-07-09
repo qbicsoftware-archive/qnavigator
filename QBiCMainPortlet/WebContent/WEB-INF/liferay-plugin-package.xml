@@ -3,7 +3,7 @@
                                                                                                                                                                                                 
 <plugin-package>                                                                                                                                                                                
         <name><![CDATA[QNavigator]]></name>                                                                                                                                               
-        <module-id>qbic/qnavigator/0.5/war</module-id>                                                                                                                             
+        <module-id>qbic/qnavigator/0.51/war</module-id>                                                                                                                             
         <recommended-deployment-context>qnavigator</recommended-deployment-context>                                                                                                       
         <required-deployment-contexts></required-deployment-contexts>                                                                                                                           
         <types>                                                                                                                                                                                 
