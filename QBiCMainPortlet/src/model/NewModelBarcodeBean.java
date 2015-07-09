@@ -15,8 +15,10 @@ public class NewModelBarcodeBean implements IBarcodeBean {
   private String info2;
   private List<String> parents;
   private String type;
+  private String treatment;
 
-  public NewModelBarcodeBean(String code, String codedString, String info1, String info2, String type, List<String> parents) {
+  public NewModelBarcodeBean(String code, String codedString, String info1, String info2, String type, List<String> parents, String treatment) {
+    this.treatment = treatment;
     this.code = code;
     this.codedString = codedString;
     this.info1 = info1;
@@ -62,6 +64,11 @@ public class NewModelBarcodeBean implements IBarcodeBean {
   @Override
   public String getCodedString() {
     return codedString;
+  }
+
+  @Override
+  public String getSheetTreatment() {
+    return treatment;
   }
 
 }

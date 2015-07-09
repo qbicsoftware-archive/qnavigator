@@ -183,7 +183,7 @@ public class BarcodeController {
 
   public void reactToProjectSelection(String project) {
     List<ExperimentBarcodeSummaryBean> beans = new ArrayList<ExperimentBarcodeSummaryBean>();
-    System.out.println("openbis.getExperimentsOfProjectByCode("+project+"):");
+    System.out.println("openbis.getExperimentsOfProjectByCode(" + project + "):");
     for (Experiment e : openbis.getExperimentsOfProjectByCode(project)) {
       System.out.println(e);
       String type = e.getExperimentTypeCode();
@@ -264,8 +264,10 @@ public class BarcodeController {
         bioType = s.getProperties().get("Q_SAMPLE_TYPE");
       }
       if (types.contains(type))
-        samples.add(new NewModelBarcodeBean(s.getCode(), view.getCodedString(s), view.getInfo1(s),
-            view.getInfo2(s), bioType, parentMap.get(s)));
+        samples
+            .add(new NewModelBarcodeBean(s.getCode(), view.getCodedString(s), view.getInfo1(s),
+                view.getInfo2(s), bioType, parentMap.get(s), s.getProperties().get(
+                    "Q_SECONDARY_NAME")));
     }
     return samples;
   }
