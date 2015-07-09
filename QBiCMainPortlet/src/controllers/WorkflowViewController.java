@@ -133,7 +133,7 @@ public class WorkflowViewController {
     properties.put(wf_version, wfVersion);
     properties.put(wf_executer, userID);
     properties.put(wf_started, Utils.getTime());
-    properties.put(wf_status, workflow_statuses.RUNNING);
+    properties.put(wf_status, workflow_statuses.RUNNING.toString());
     params.put("properties", properties);
     openbis.ingest(openbis_dss, "register-exp", params);
     return code;
