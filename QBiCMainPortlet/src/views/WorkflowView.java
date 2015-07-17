@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import model.ExperimentStatusBean;
 
 import org.springframework.remoting.RemoteAccessException;
 
@@ -145,20 +146,61 @@ public class WorkflowView extends VerticalLayout implements View {
 
   @Override
   public void enter(ViewChangeEvent event) {
+    
     Map<String, String> map = DatasetView.getMap(event.getParameters());
     if (map == null)
       return;
     // TODO In background thread?
     type = map.get("type");
     id = map.get("id");
-    datasetBeans = controller.getcontainer(map.get("id"));
-    List<String> datasetTypesInProject = new ArrayList<String>();
+    
+    switch (type) {
+      case "project":
+        datasetBeans = controller.getcontainer(type, id);
+        List<String> datasetTypesInProject = new ArrayList<String>();
 
-    for (Iterator<DatasetBean> i = datasetBeans.getItemIds().iterator(); i.hasNext();) {
-      DatasetBean dsBean = (DatasetBean) i.next();
-      datasetTypesInProject.add(dsBean.getFileType());
+        for (Iterator<DatasetBean> i = datasetBeans.getItemIds().iterator(); i.hasNext();) {
+          DatasetBean dsBean = (DatasetBean) i.next();
+          datasetTypesInProject.add(dsBean.getFileType());
+        }
+        updateWorkflowSelection(datasetTypesInProject);
+        break;
+        
+      case "experiment":
+        break;
+        
+      case "sample":
+        break;
+        
+      case "workflowExperimentType":
+        String projectID = map.get("project");
+        
+        BeanItemContainer<Workflow> suitableWorkflows = controller.suitableWorkflowsByExperimentType(id);
+        BeanItemContainer<DatasetBean> suitableDatasets = new BeanItemContainer<DatasetBean>(DatasetBean.class);
+        
+        List<String> workflowDatasetTypes = new ArrayList<String>();
+        for (Iterator i = suitableWorkflows.getItemIds().iterator(); i.hasNext();) {
+          Workflow workflowBean = (Workflow) i.next();
+          
+          workflowDatasetTypes.addAll(workflowBean.getFileTypes());
+        }
+        
+        for (Iterator i = controller.getcontainer("project",id).getItemIds().iterator(); i.hasNext();) {
+          DatasetBean datasetBean = (DatasetBean) i.next();
+          
+          if(workflowDatasetTypes.contains(datasetBean.getFileType())) {
+            suitableDatasets.addBean(datasetBean);
+          }
+        }
+          
+        datasetBeans = suitableDatasets;
+        updateSelection(suitableWorkflows);
+        break;
+        
+      default:
+        updateSelection(new BeanItemContainer<Workflow>(Workflow.class));
+        break;
     }
-    updateWorkflowSelection(datasetTypesInProject);
   }
 
 
@@ -168,6 +210,10 @@ public class WorkflowView extends VerticalLayout implements View {
 
   protected void updateWorkflowSelection(List<String> datasetTypes) {
     updateSelection(controller.suitableWorkflows(datasetTypes));
+  }
+  
+  protected void updateWorkflowSelection(String experimentType) {
+    updateSelection(controller.suitableWorkflowsByExperimentType(experimentType));
   }
 
   /**

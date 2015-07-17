@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import logging.Log4j2Logger;
 import main.OpenBisClient;
@@ -122,12 +123,22 @@ public class WorkflowViewController {
       }
       last = Math.max(num, last);
     }
+    
+    LOGGER.debug("Space: " + space);
+    LOGGER.debug("Project: " + project);
+    LOGGER.debug("StringBuilder: " + new StringBuilder("/")
+        .append(space).append("/").append(project).toString());
+    
     String code = project + "E" + Integer.toString(last + 1);
+    
+    LOGGER.debug("Code: " + code);
+    
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("code", code);
     params.put("type", typecode);
     params.put("project", project);
     params.put("space", space);
+    
     Map<String, Object> properties = new HashMap<String, Object>();
     properties.put(wf_name, wfName);
     properties.put(wf_version, wfVersion);
@@ -135,7 +146,8 @@ public class WorkflowViewController {
     properties.put(wf_started, Utils.getTime());
     properties.put(wf_status, workflow_statuses.RUNNING.toString());
     params.put("properties", properties);
-    openbis.ingest(openbis_dss, "register-exp", params);
+    
+    openbis.ingest(openbis_dss, "register-exp", params);   
     return code;
   }
 
@@ -232,10 +244,42 @@ public class WorkflowViewController {
       return new BeanItemContainer<Workflow>(Workflow.class);
     }
   }
+  
+  /**
+   * returns all known workflows, that can be executed with one of the given filetypes
+   * 
+   * @param fileType
+   * @return
+   */
+  public BeanItemContainer<Workflow> suitableWorkflowsByExperimentType(String experimentType) {
+    try {
+      return submitter.getWorkflowsByExperimentType(experimentType);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return new BeanItemContainer<Workflow>(Workflow.class);
+    }
+  }
+  
 
-  public BeanItemContainer<DatasetBean> getcontainer(String id) {
-    List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> datasets =
-        openbis.getClientDatasetsOfProjectByIdentifierWithSearchCriteria(id);
+  public BeanItemContainer<DatasetBean> getcontainer(String type, String id) {
+    List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> datasets = new ArrayList<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
+    
+    switch (type){
+      case "project":
+        datasets = openbis.getClientDatasetsOfProjectByIdentifierWithSearchCriteria(id);
+        break;
+      
+      case "experiment":
+        //TODO
+          break;
+      
+      case "sample":
+        //TODO
+          break;
+        
+      default:
+        break;
+    }
     return (BeanItemContainer<DatasetBean>) fillTable(datasets);
   }
 

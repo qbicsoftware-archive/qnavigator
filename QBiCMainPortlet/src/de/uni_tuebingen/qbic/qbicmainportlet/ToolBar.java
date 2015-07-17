@@ -3,10 +3,12 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.util.ArrayList;
 
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.UI;
 
 import views.WorkflowView;
 
@@ -81,8 +83,9 @@ public class ToolBar extends HorizontalLayout {
 
 
   void init() {
-    setWidth(100.0f, Unit.PERCENTAGE);
+    //setWidth(100.0f, Unit.PERCENTAGE);
     //addStyleName("user-menu");
+    setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.6f), Unit.PIXELS);
     
     MenuBar menuBar = new MenuBar();
     menuBar.addStyleName("user-menu");
@@ -116,8 +119,13 @@ public class ToolBar extends HorizontalLayout {
     workflows.setEnabled(false);
     
     addComponent(menuBar);
+    menuBar.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f), Unit.PIXELS);
+    searchBarView.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.2f), Unit.PIXELS);
+
     addComponent(searchBarView);
     setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
+    setExpandRatio(menuBar, 0.7f);
+    setExpandRatio(searchBarView, 0.3f);
   }
 
   void update(final String type, final String id) {

@@ -729,7 +729,9 @@ public class DatasetView extends VerticalLayout implements View {
   public static Map<String, String> getMap(String parameters){
     if (parameters == null || parameters.equals("")) return null;
     String[] params = parameters.split("&");
-    if (params == null || params.length != 2)
+    //TODO check for length == 2 needed ?
+    //if (params == null || params.length != 2)
+    if (params == null || params.length > 3)
       return null;
     HashMap<String, String> map = new HashMap<String, String>();
     for (String p : params) {

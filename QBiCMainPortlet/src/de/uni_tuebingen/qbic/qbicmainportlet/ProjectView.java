@@ -40,6 +40,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -80,6 +81,8 @@ public class ProjectView extends VerticalLayout implements View {
 
   private VerticalLayout membersSection;
 
+  private TabSheet projectview_tab;
+
   private static Logger LOGGER = new Log4j2Logger(ProjectView.class);
 
 
@@ -112,11 +115,22 @@ public class ProjectView extends VerticalLayout implements View {
    */
   void initView() {
     projectview_content = new VerticalLayout();
+    projectview_tab = new TabSheet();
+    projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
+    projectview_tab.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
+    
+    projectview_tab.addTab(initDescription(), "General Information").setIcon(FontAwesome.FILE_TEXT_O);
+    projectview_tab.addTab(initMemberSection(), "Members").setIcon(FontAwesome.USERS);
+    projectview_tab.addTab(initStatistics(), "Status").setIcon(FontAwesome.CLOCK_O);
+    projectview_tab.addTab(initTable(), "Experiments").setIcon(FontAwesome.FLASK);
+    
     projectview_content.addComponent(initMenuBar());
-    projectview_content.addComponent(initDescription());
-    projectview_content.addComponent(initStatistics());
-    projectview_content.addComponent(initTable());
-    projectview_content.addComponent(initButtonLayout());
+    projectview_content.addComponent(projectview_tab);
+    //projectview_content.addComponent(initDescription());
+    //projectview_content.addComponent(initStatistics());
+    //projectview_content.addComponent(initTable());
+    //projectview_content.addComponent(initButtonLayout());
+    
     projectview_content.addComponent(initGraph());
 
     // use the component that is returned by initTable
@@ -131,6 +145,7 @@ public class ProjectView extends VerticalLayout implements View {
   public void updateContent() {
     updateContentToolBar();
     updateContentDescription();
+    updateContentMemberSection();
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
@@ -210,28 +225,40 @@ public class ProjectView extends VerticalLayout implements View {
     contact = new Label("", ContentMode.HTML);
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
-    projDescriptionContent.setMargin(new MarginInfo(false, false, false, true));
-    projDescriptionContent.setCaption("Description");
-    projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
+    projDescriptionContent.setMargin(new MarginInfo(true, false, false, true));
+    //projDescriptionContent.setCaption("Description");
+    //projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
 
     projDescription.addComponent(projDescriptionContent);
     projDescriptionContent.setSpacing(true);
+    projDescription.setMargin(new MarginInfo(true, false, false, true));
+    projDescription.setWidth("100%");
+    projDescription.setSpacing(true);
+    
+    return projDescription;
+  }
+  
+  VerticalLayout initMemberSection() {
+    VerticalLayout projMembers = new VerticalLayout();
+    
     membersSection = new VerticalLayout();
     Component membersContent = new VerticalLayout();
 
-    membersContent.setIcon(FontAwesome.USERS);
-    membersContent.setCaption("Members");
+    //membersContent.setIcon(FontAwesome.USERS);
+    //membersContent.setCaption("Members");
     membersSection.addComponent(membersContent);
     //membersSection.setMargin(new MarginInfo(false, false, false, true));
     membersSection.setWidth("100%");
     membersSection.setSpacing(true);
     
-    projDescription.addComponent(membersSection);
-    projDescription.setMargin(new MarginInfo(false, false, false, true));
-    projDescription.setWidth("100%");
-    projDescription.setSpacing(true);
+    membersSection.setMargin(new MarginInfo(true, false, false, true));
+    projMembers.addComponent(membersSection);
     
-    return projDescription;
+    projMembers.setMargin(new MarginInfo(true, false, false, true));
+    projMembers.setWidth("100%");
+    projMembers.setSpacing(true);
+    
+    return projMembers; 
   }
 
   void updateContentDescription() {
@@ -245,9 +272,14 @@ public class ProjectView extends VerticalLayout implements View {
       descContent.setValue(desc);
     }
 
+    //membersSection.removeAllComponents();
+   // membersSection.addComponent(getMembersComponent());
+    //membersSection.setMargin(new MarginInfo(false, false, false, true));
+  }
+  
+  void updateContentMemberSection() {
     membersSection.removeAllComponents();
     membersSection.addComponent(getMembersComponent());
-    //membersSection.setMargin(new MarginInfo(false, false, false, true));
   }
 
 
@@ -260,8 +292,8 @@ public class ProjectView extends VerticalLayout implements View {
     VerticalLayout statistics = new VerticalLayout();
 
     statContent = new HorizontalLayout();
-    statContent.setCaption("Statistics");
-    statContent.setIcon(FontAwesome.BAR_CHART_O);
+    //statContent.setCaption("Statistics");
+    //statContent.setIcon(FontAwesome.BAR_CHART_O);
     statContent.addComponent(new Label(""));
 
     // TODO
@@ -269,7 +301,7 @@ public class ProjectView extends VerticalLayout implements View {
     // int numOfDatasets = datahandler.datasetMap.get(project.getId()).size();
     // statContent.addComponent(new Label(String.format("%s dataset(s).", numOfDatasets)));
 
-    statContent.setMargin(new MarginInfo(false, false, false, true));
+    statContent.setMargin(new MarginInfo(true, false, false, true));
     statContent.setSpacing(true);
 
     /*
@@ -284,7 +316,7 @@ public class ProjectView extends VerticalLayout implements View {
      */
 
     statistics.addComponent(statContent);
-    statistics.setMargin(new MarginInfo(false, false, false, true));
+    statistics.setMargin(new MarginInfo(true, false, false, true));
     statistics.setSpacing(true);
 
 
@@ -305,7 +337,7 @@ public class ProjectView extends VerticalLayout implements View {
     statContent.removeAllComponents();
     statContent.addComponent(new Label(String.format("%s experiment(s),", currentBean
         .getExperiments().size())));
-    statContent.setMargin(new MarginInfo(false, false, false, true));
+    statContent.setMargin(new MarginInfo(true, false, false, true));
 
     // TODO
     // statContent.addComponent(new Label(String.format("%s sample(s),", )));
@@ -315,13 +347,13 @@ public class ProjectView extends VerticalLayout implements View {
     status.removeAllComponents();
     VerticalLayout statusContent =
         this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
-    statusContent.setCaption("Status");
-    statusContent.setIcon(FontAwesome.CLOCK_O);
+    //statusContent.setCaption("Status");
+    //statusContent.setIcon(FontAwesome.CLOCK_O);
 
     // TODO
     // statusContent.addComponent(new Label(projectInformation.statusMessage));
     statusContent.setSpacing(true);
-    statusContent.setMargin(new MarginInfo(false, false, false, true));
+    statusContent.setMargin(new MarginInfo(true, false, false, true));
 
     status.addComponent(statusContent);
   }
@@ -334,12 +366,12 @@ public class ProjectView extends VerticalLayout implements View {
     VerticalLayout tableSection = new VerticalLayout();
     VerticalLayout tableSectionContent = new VerticalLayout();
 
-    tableSectionContent.setCaption("Registered Experiments");
-    tableSectionContent.setIcon(FontAwesome.FLASK);
+    //tableSectionContent.setCaption("Registered Experiments");
+    //tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
 
-    tableSectionContent.setMargin(new MarginInfo(false, false, false, true));
-    tableSection.setMargin(new MarginInfo(false, false, false, true));
+    tableSectionContent.setMargin(new MarginInfo(true, false, false, true));
+    tableSection.setMargin(new MarginInfo(true, false, false, true));
     this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
@@ -374,7 +406,7 @@ public class ProjectView extends VerticalLayout implements View {
     graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
 
     graphSectionContent.setMargin(new MarginInfo(false, false, false, true));
-    graphSection.setMargin(new MarginInfo(false, false, false, true));
+    graphSection.setMargin(new MarginInfo(true, false, false, true));
     graphSection.setWidth("100%");
     graphSectionContent.setWidth("100%");
     final Button loadGraph = new Button("[+]");
@@ -554,8 +586,8 @@ public class ProjectView extends VerticalLayout implements View {
    */
   private Component getMembersComponent() {
     final HorizontalLayout membersLayout = new HorizontalLayout();
-    membersLayout.setIcon(FontAwesome.USERS);
-    membersLayout.setCaption("Members");
+    //membersLayout.setIcon(FontAwesome.USERS);
+    //membersLayout.setCaption("Members");
     membersLayout.setWidth("100%");
 
 

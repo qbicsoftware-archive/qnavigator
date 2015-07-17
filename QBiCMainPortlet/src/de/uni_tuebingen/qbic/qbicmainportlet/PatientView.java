@@ -2,10 +2,13 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import views.WorkflowView;
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.ExperimentStatusBean;
@@ -579,7 +582,9 @@ public class PatientView extends VerticalLayout implements View {
     experiments.setHeaderVisible(false);
     experiments.setHeightMode(HeightMode.ROW);
     experiments.setHeightByRows(gpc.size());
-    //experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.35f, Unit.PIXELS);
+    experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.4f, Unit.PIXELS);
+    
+    
 
     experiments.getColumn("status").setRenderer(new ProgressBarRenderer());
     experiments.setColumnOrder("started", "code", "description", "status", "download",
@@ -634,9 +639,19 @@ public class PatientView extends VerticalLayout implements View {
               message.add(BarcodeView.navigateToLabel);
               state.notifyObservers(message);
             } else {
-              new Notification("Workflow for this experiment not yet available.",
-                  "<br/>Please get in contact with your project manager.", Type.WARNING_MESSAGE,
-                  true).show(Page.getCurrent());
+              ArrayList<String> message = new ArrayList<String>();
+              message.add("clicked");
+              StringBuilder sb = new StringBuilder("type=");
+              sb.append("workflowExperimentType");
+              sb.append("&");
+              sb.append("id=");
+              sb.append("Q_WF_MS_PEPTIDEID");
+              sb.append("&");
+              sb.append("project=");
+              sb.append(currentBean.getId());
+              message.add(sb.toString());
+              message.add(WorkflowView.navigateToLabel);
+              state.notifyObservers(message);
             }
           }
         }));
@@ -649,6 +664,7 @@ public class PatientView extends VerticalLayout implements View {
 
     status.addComponent(progressBar);
     status.addComponent(experiments);
+    status.setComponentAlignment(progressBar, Alignment.MIDDLE_CENTER);
     status.setComponentAlignment(experiments, Alignment.MIDDLE_CENTER);
 
 
