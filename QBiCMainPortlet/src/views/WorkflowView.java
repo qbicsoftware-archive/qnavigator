@@ -11,19 +11,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import model.ExperimentStatusBean;
 
 import org.springframework.remoting.RemoteAccessException;
 
-import submitter.SubmitFailedException;
-import submitter.Workflow;
 import qbic.vaadincomponents.InputFilesComponent;
 import qbic.vaadincomponents.ParameterComponent;
+import submitter.SubmitFailedException;
+import submitter.Workflow;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.event.SelectionEvent;
-import com.vaadin.event.SelectionEvent.SelectionListener;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -32,11 +31,17 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.DetailsGenerator;
+import com.vaadin.ui.Grid.RowReference;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.VerticalLayout;
@@ -53,6 +58,9 @@ public class WorkflowView extends VerticalLayout implements View {
   private static final long serialVersionUID = -1461508641666415578L;
   private static Logger LOGGER = new Log4j2Logger(WorkflowView.class);
   public final static String navigateToLabel = "workflow";
+  private static final String WORKFKLOW_GRID_DESCRIPTION =
+      "If you want to execute a workflow, click on one of the rows in the table. Then select the parameters, input files database/reference files and click on submit.";
+  private static final String SUBMISSION_CAPTION = "Submission";
 
   // Controller
   private WorkflowViewController controller;
@@ -109,6 +117,7 @@ public class WorkflowView extends VerticalLayout implements View {
     submission.setMargin(new MarginInfo(false, true, true, true));
 
     availableWorkflows.setSizeFull();
+    availableWorkflows.setDescription(WORKFKLOW_GRID_DESCRIPTION);
     submissionContent.setSpacing(true);
     submissionContent.addComponent(inputFileComponent);
     submissionContent.addComponent(parameterComponent);
@@ -117,7 +126,7 @@ public class WorkflowView extends VerticalLayout implements View {
     buttonContent.addComponent(resetParameters);
     buttonContent.addComponent(submitWorkflow);
 
-    submission.setCaption("Submission");
+    submission.setCaption(SUBMISSION_CAPTION);
     submission.setIcon(FontAwesome.PLAY);
     submission.addComponent(submissionContent);
     submission.setWidth(100.0f, Unit.PERCENTAGE);
@@ -146,14 +155,14 @@ public class WorkflowView extends VerticalLayout implements View {
 
   @Override
   public void enter(ViewChangeEvent event) {
-    
+
     Map<String, String> map = DatasetView.getMap(event.getParameters());
     if (map == null)
       return;
     // TODO In background thread?
     type = map.get("type");
     id = map.get("id");
-    
+
     switch (type) {
       case "project":
         datasetBeans = controller.getcontainer(type, id);
@@ -165,38 +174,41 @@ public class WorkflowView extends VerticalLayout implements View {
         }
         updateWorkflowSelection(datasetTypesInProject);
         break;
-        
+
       case "experiment":
         break;
-        
+
       case "sample":
         break;
-        
+
       case "workflowExperimentType":
         String projectID = map.get("project");
-        
-        BeanItemContainer<Workflow> suitableWorkflows = controller.suitableWorkflowsByExperimentType(id);
-        BeanItemContainer<DatasetBean> suitableDatasets = new BeanItemContainer<DatasetBean>(DatasetBean.class);
-        
+
+        BeanItemContainer<Workflow> suitableWorkflows =
+            controller.suitableWorkflowsByExperimentType(id);
+        BeanItemContainer<DatasetBean> suitableDatasets =
+            new BeanItemContainer<DatasetBean>(DatasetBean.class);
+
         List<String> workflowDatasetTypes = new ArrayList<String>();
         for (Iterator i = suitableWorkflows.getItemIds().iterator(); i.hasNext();) {
           Workflow workflowBean = (Workflow) i.next();
-          
+
           workflowDatasetTypes.addAll(workflowBean.getFileTypes());
         }
-        
-        for (Iterator i = controller.getcontainer("project",id).getItemIds().iterator(); i.hasNext();) {
+
+        for (Iterator i = controller.getcontainer("project", id).getItemIds().iterator(); i
+            .hasNext();) {
           DatasetBean datasetBean = (DatasetBean) i.next();
-          
-          if(workflowDatasetTypes.contains(datasetBean.getFileType())) {
+
+          if (workflowDatasetTypes.contains(datasetBean.getFileType())) {
             suitableDatasets.addBean(datasetBean);
           }
         }
-          
+
         datasetBeans = suitableDatasets;
         updateSelection(suitableWorkflows);
         break;
-        
+
       default:
         updateSelection(new BeanItemContainer<Workflow>(Workflow.class));
         break;
@@ -211,7 +223,7 @@ public class WorkflowView extends VerticalLayout implements View {
   protected void updateWorkflowSelection(List<String> datasetTypes) {
     updateSelection(controller.suitableWorkflows(datasetTypes));
   }
-  
+
   protected void updateWorkflowSelection(String experimentType) {
     updateSelection(controller.suitableWorkflowsByExperimentType(experimentType));
   }
@@ -236,7 +248,7 @@ public class WorkflowView extends VerticalLayout implements View {
     }
 
     availableWorkflows.setContainerDataSource(filtergpcontainer(suitableWorkflows));
-    availableWorkflows.setColumnOrder("name", "description", "version", "fileTypes");
+    availableWorkflows.setColumnOrder("name", "version", "fileTypes");
     workflows.setVisible(true);
   }
 
@@ -258,10 +270,12 @@ public class WorkflowView extends VerticalLayout implements View {
     gpcontainer.removeContainerProperty("parameterToNodesMapping");
     gpcontainer.removeContainerProperty("parameters");
     gpcontainer.removeContainerProperty("sampleType");
+    gpcontainer.removeContainerProperty("description");
     return gpcontainer;
   }
 
   private void updateParameterView(Workflow workFlow, BeanItemContainer<DatasetBean> projectDatasets) {
+    this.submission.setCaption(SUBMISSION_CAPTION + ": " + workFlow.getName());
     this.inputFileComponent.buildLayout(workFlow.getData().getData().entrySet(), projectDatasets);
     this.parameterComponent.buildLayout(workFlow);
   }
@@ -269,6 +283,43 @@ public class WorkflowView extends VerticalLayout implements View {
 
 
   private void addComponentListeners() {
+
+    availableWorkflows.setDetailsGenerator(new DetailsGenerator() {
+      private static final long serialVersionUID = 6123522348935657638L;
+
+      @Override
+      public Component getDetails(RowReference rowReference) {
+        FormLayout main = new FormLayout();
+        Workflow w = (Workflow) rowReference.getItemId();
+        Label description = new Label(w.getDescription(), ContentMode.HTML);
+        description.setCaption("Description");
+        main.addComponent(description);
+        return main;
+      }
+    });
+
+    availableWorkflows.addItemClickListener(new ItemClickListener() {
+      private static final long serialVersionUID = 3786125825391677177L;
+
+      @Override
+      public void itemClick(ItemClickEvent event) {
+        // TODO get path of datasetBean and set it as input ?!
+        Workflow selectedWorkflow = (Workflow) event.getItemId();
+        if (selectedWorkflow != null) {
+          updateParameterView(selectedWorkflow, datasetBeans);
+          resetParameters.setVisible(true);
+          submission.setVisible(true);
+          availableWorkflows.setDetailsVisible(selectedWorkflow,
+              !availableWorkflows.isDetailsVisible(selectedWorkflow));
+        } else {
+          LOGGER.warn("selected Workflow is null?");
+        }
+
+      }
+    });
+    availableWorkflows.setEditorEnabled(false);
+
+
 
     /*
      * this.availableDatasets.addSelectionListener(new SelectionListener() { private static final
@@ -283,29 +334,6 @@ public class WorkflowView extends VerticalLayout implements View {
      * Notification.show("Selected item is not a valid dataset. Please contact your project manager."
      * , Type.ERROR_MESSAGE); } } } );
      */
-    this.availableWorkflows.addSelectionListener(new SelectionListener() {
-
-      /**
-       * 
-       */
-      private static final long serialVersionUID = 2628561841420694483L;
-
-      @Override
-      public void select(SelectionEvent event) {
-
-        // TODO get path of datasetBean and set it as input ?!
-        Workflow selectedWorkflow = (Workflow) availableWorkflows.getSelectedRow();
-
-        if (selectedWorkflow != null) {
-          updateParameterView(selectedWorkflow, datasetBeans);
-
-          resetParameters.setVisible(true);
-          submission.setVisible(true);
-        } else {
-          LOGGER.debug("selected Workflow is null?");
-        }
-      }
-    });
 
     this.resetParameters.addClickListener(new ClickListener() {
       private static final long serialVersionUID = 1L;
@@ -324,7 +352,8 @@ public class WorkflowView extends VerticalLayout implements View {
       public void buttonClick(ClickEvent event) {
         List<DatasetBean> selectedDatasets = inputFileComponent.getSelectedDatasets();
         Workflow submittedWf = parameterComponent.getWorkflow();
-        if (submittedWf == null || selectedDatasets.isEmpty() || !inputFileComponent.updateWorkflow(submittedWf,controller)) {
+        if (submittedWf == null || selectedDatasets.isEmpty()
+            || !inputFileComponent.updateWorkflow(submittedWf, controller)) {
           return;
         }
         try {
@@ -350,7 +379,8 @@ public class WorkflowView extends VerticalLayout implements View {
             VaadinService.getCurrentResponse().setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
           }
         } catch (RemoteAccessException e) {
-          LOGGER.error("Submission failed, probably openbis. error message: " + e.getMessage(), e.getStackTrace());
+          LOGGER.error("Submission failed, probably openbis. error message: " + e.getMessage(),
+              e.getStackTrace());
           Notification
               .show(
                   "Workflow submission failed due to internal errors! Please try again later or contact your project manager.",
