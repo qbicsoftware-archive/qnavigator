@@ -3,7 +3,7 @@
                                                                                                                                                                                                 
 <plugin-package>                                                                                                                                                                                
         <name><![CDATA[QNavigator]]></name>                                                                                                                                               
-        <module-id>qbic/qnavigator/0.51/war</module-id>                                                                                                                             
+        <module-id>qbic/qnavigator/0.5.1/war</module-id>                                                                                                                             
         <recommended-deployment-context>qnavigator</recommended-deployment-context>                                                                                                       
         <required-deployment-contexts></required-deployment-contexts>                                                                                                                           
         <types>                                                                                                                                                                                 
@@ -13,7 +13,7 @@
                 <tag>qbic navigation</tag>
         </tags>
         <short-description><![CDATA[]]></short-description>
-        <long-description><![CDATA[TODO]]></long-description>
+        <long-description><![CDATA[Allows users to browse their openbis work spaces and projects.]]></long-description>
         <change-log><![CDATA[]]></change-log>
         <page-url>http://www.qbic.com</page-url>
         <author><![CDATA[QBiC, uni tuebingen]]></author>
