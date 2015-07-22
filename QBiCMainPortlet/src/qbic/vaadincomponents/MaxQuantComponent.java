@@ -1,0 +1,409 @@
+package qbic.vaadincomponents;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import logging.Log4j2Logger;
+import logging.Logger;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import qbic.model.maxquant.Group;
+import qbic.model.maxquant.MaxQuantModel;
+import qbic.model.maxquant.RawFilesBean;
+import qbic.utils.JsonHelper;
+import submitter.Workflow;
+
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.ObjectProperty;
+import com.vaadin.data.util.PropertysetItem;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
+import com.vaadin.ui.TwinColSelect;
+import com.vaadin.ui.VerticalLayout;
+
+import de.uni_tuebingen.qbic.beans.DatasetBean;
+import de.uni_tuebingen.qbic.qbicmainportlet.PatientView;
+import fasta.FastaBean;
+import guse.workflowrepresentation.GuseNode;
+import guse.workflowrepresentation.GuseWorkflowRepresentation;
+import guse.workflowrepresentation.InputPort;
+import guse.workflowrepresentation.InputPort.Type;
+
+public class MaxQuantComponent extends CustomComponent {
+  private static final long serialVersionUID = 5876981463933993626L;
+  private static Logger LOGGER = new Log4j2Logger(MaxQuantComponent.class);
+  private static final String INITNODE_CAPTION = "Initialization";
+
+  private final String SELECTED_FILES_CAPTION = "Selected files for analysis";
+  private final String RAW_FILES_INFO =
+      "Select files for analysis. You can edit fraction and group parameters for each selected files by double clicking a selected file in the right table";
+  private final String BUTTON_START_CAPTION = "start";
+  private final String RAW_FILES_CAPTION = "Raw files";
+  private final String AVAILABLE_FILES_CAPTION = "Avaliable files";
+  private String FASTA_FILES_INFO = "Select fasta files for analysis.";
+  private String AVAILABLE_FASTAS_CAPTION = "Fasta files";
+  private String SELECTED_FASTAS_CAPTION = "Selected";
+  private final MaxQuantModel model;
+
+  private Button start;
+  private TabSheet tabs;
+
+  private GroupSpecificParameterComponent groupSpecificParameterComponent;
+
+  private SelectFileComponent rawFiles;
+  private SelectFileComponent fastaFiles;
+
+  private TwinColSelect fixedModifications;
+  private CheckBox reQuantify;
+  private CheckBox matchBetweenRuns;
+
+  private PropertysetItem globalParameters;
+
+  private Workflow guseWorkflow;
+
+
+
+  public MaxQuantComponent(final MaxQuantModel model) {
+    // model
+    this.model = model;
+
+    // view
+    VerticalLayout mainLayout = new VerticalLayout();
+    mainLayout.setSpacing(true);
+    tabs = new TabSheet();
+
+    // http://141.61.102.17/maxquant_doku/doku.php?id=maxquant:manual:beginner
+    rawFiles =
+        new SelectFileComponent(RAW_FILES_CAPTION, RAW_FILES_INFO, AVAILABLE_FILES_CAPTION,
+            SELECTED_FILES_CAPTION, model.getDatasetBeans(), model.getRawFilesBeans());
+    rawFiles.getDestination().setEditorEnabled(true);
+    rawFiles.getDestination().getColumn("experiment").setEditable(false);
+    rawFiles.getDestination().getColumn("file").setEditable(false);
+    rawFiles.getDestination().setImmediate(true);
+
+    tabs.addTab(rawFiles);
+    groupSpecificParameterComponent = new GroupSpecificParameterComponent();
+    tabs.addTab(groupSpecificParameterComponent);
+    tabs.addTab(globalParameters());
+    mainLayout.addComponent(tabs);
+    start = new Button(BUTTON_START_CAPTION);
+    mainLayout.addComponent(start);
+    this.setCompositionRoot(mainLayout);
+
+    // controller
+    setLogic();
+    bindGlobalParameters();
+  }
+
+  /**
+   * checks how many groups currently are present in raw files, and updates them
+   */
+  public void updateGroups() {
+    if (model.getRawFilesBeans().size() == 0) {
+      model.getGroups().clear();
+      return;
+    } else {
+      HashMap<Integer, List<RawFilesBean>> rawFilesSorted =
+          new HashMap<Integer, List<RawFilesBean>>();
+      for (RawFilesBean bean : model.getRawFilesBeans().getItemIds()) {
+        if (rawFilesSorted.containsKey(bean.getParameterGroup())) {
+          rawFilesSorted.get(bean.getParameterGroup()).add(bean);
+        } else {
+          ArrayList<RawFilesBean> beans = new ArrayList<RawFilesBean>();
+          beans.add(bean);
+          rawFilesSorted.put(bean.getParameterGroup(), beans);
+        }
+
+      }
+      // remove old groups that are not used anymore
+      for (Integer key : model.getGroups().keySet()) {
+        if (!rawFilesSorted.containsKey(key)) {
+          model.getGroups().remove(key);
+        }
+      }
+      // updated groups
+      for (Integer key : rawFilesSorted.keySet()) {
+        if (model.getGroups().containsKey(key)) {
+          model.getGroups().get(key).removeFiles();
+          model.getGroups().get(key).setFiles(rawFilesSorted.get(key));
+        } else {
+          Group group = new Group();
+          group.setFiles(rawFilesSorted.get(key));
+          model.getGroups().put(key, group);
+        }
+
+      }
+    }
+    //add new groups
+    HashMap<Integer, Group> groups = new HashMap<Integer, Group>();
+    for (RawFilesBean bean : model.getRawFilesBeans().getItemIds()) {
+      if (!groups.containsKey(bean.getParameterGroup())) {
+        Group group = new Group();
+        group.addFile(bean);
+        groups.put(bean.getParameterGroup(), group);
+      }
+    }
+
+  }
+  
+  /**
+   * creates the global parameter component
+   * @return
+   */
+  private Component globalParameters() {
+    FormLayout globalparameters = new FormLayout();
+    globalparameters.setCaption("Global parameters");
+    fastaFiles =
+        new SelectFileComponent("", FASTA_FILES_INFO, AVAILABLE_FASTAS_CAPTION,
+            SELECTED_FASTAS_CAPTION, model.getFastaBeans(), model.getSelectedFastaBeans());
+    globalparameters.addComponent(fastaFiles);
+    // fixed modifications
+    fixedModifications = new TwinColSelect("fixed modifications");
+
+    fixedModifications.addItems("Acetyl (L)", "Oxidation (M)", "Ala->Arg");
+    globalparameters.addComponent(fixedModifications);
+    reQuantify = new CheckBox("Requantify");
+    globalparameters.addComponent(reQuantify);
+    matchBetweenRuns = new CheckBox("Match between runs");
+    globalparameters.addComponent(matchBetweenRuns);
+    return globalparameters;
+  }
+
+  void bindGlobalParameters() {
+    globalParameters = new PropertysetItem();
+    globalParameters.addItemProperty("fixedMods",
+        new ObjectProperty<LinkedHashSet<String>>(model.getFixedMods()));
+    globalParameters.addItemProperty("matchBetweenRuns",
+        new ObjectProperty<Boolean>(model.getMatchBetweenRuns()));
+    globalParameters.addItemProperty("reQuantify",
+        new ObjectProperty<Boolean>(model.getReQuantify()));
+    FieldGroup fieldGroup = new FieldGroup(globalParameters);
+    fieldGroup.bind(fixedModifications, "fixedMods");
+    fieldGroup.bind(matchBetweenRuns, "matchBetweenRuns");
+    fieldGroup.bind(reQuantify, "reQuantify");
+    fieldGroup.setBuffered(false);
+  }
+
+  void setLogic() {
+    // update groups for group specific paramter tab according to how many groups are currently
+    // created
+    tabs.addSelectedTabChangeListener(new SelectedTabChangeListener() {
+      private static final long serialVersionUID = -8616030904807506084L;
+
+      @Override
+      public void selectedTabChange(SelectedTabChangeEvent event) {
+        if (event.getTabSheet().getSelectedTab().getCaption()
+            .equals(GroupSpecificParameterComponent.CAPTION)) {
+          updateGroups();
+          //update component with new groups
+          groupSpecificParameterComponent.update(model.getGroups());
+        }
+      }
+    });
+
+    // button to move files from datasets to selected raw files
+    rawFiles.getToRightButton().addClickListener(new ClickListener() {
+      private static final long serialVersionUID = -3673780036437094193L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        Collection<Object> available = rawFiles.getSource().getSelectedRows();
+        if (available == null || available.isEmpty())
+          return;
+
+        for (Object o : available) {
+          rawFiles.getSource().deselect(o);
+        }
+        model.selectRawFiles(available);
+      }
+    });
+    // opposite of toRight
+    rawFiles.getToLeftButton().addClickListener(new ClickListener() {
+      private static final long serialVersionUID = 2728686539720595641L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        Collection<Object> available = rawFiles.getDestination().getSelectedRows();
+        if (available == null || available.isEmpty())
+          return;
+
+        for (Object o : available) {
+          rawFiles.getDestination().deselect(o);
+        }
+        model.unselectRawFiles(available);
+      }
+    });
+
+
+    // button to move files from datasets to selected raw files
+    fastaFiles.getToRightButton().addClickListener(new ClickListener() {
+      private static final long serialVersionUID = -3673780036437094193L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        Collection<Object> available = fastaFiles.getSource().getSelectedRows();
+        if (available == null || available.isEmpty())
+          return;
+
+        for (Object o : available) {
+          fastaFiles.getSource().deselect(o);
+        }
+        model.selectFastaFiles(available);
+      }
+    });
+    // opposite of toRight
+    fastaFiles.getToLeftButton().addClickListener(new ClickListener() {
+      private static final long serialVersionUID = 2728686539720595641L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        Collection<Object> available = fastaFiles.getDestination().getSelectedRows();
+        if (available == null || available.isEmpty())
+          return;
+
+        for (Object o : available) {
+          fastaFiles.getDestination().deselect(o);
+        }
+        model.unselectFastaFiles(available);
+      }
+    });
+
+
+
+    // start workflow
+    start.addClickListener(new ClickListener() {
+      private static final long serialVersionUID = 2728686539720595641L;
+      @Override
+      public void buttonClick(ClickEvent event) {
+        updateGroups();
+        writeToFile("/tmp/test.json");
+      }
+    });
+  }
+
+  /**
+   * write the content the model to file
+   * @param filePath
+   */
+  void writeToFile(String filePath) {
+    try {
+      FileWriter newConfigFile = new FileWriter(filePath);
+      // WATCH OUT! Somehow if indentFactor=2, information gets lost
+      newConfigFile.write(toJson().toString(3));
+      newConfigFile.flush();
+      newConfigFile.close();
+    } catch (JSONException | IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+  }
+
+  /**
+   * creates a json object of this component. Be sure to be up to date. Otherwise, you might not get
+   * all actual groups. To be up to date execute {@link MaxQuantComponent.updateGroups}
+   * 
+   * @return
+   * @throws JSONException
+   */
+  public JSONObject toJson() throws JSONException {
+
+    Set<Entry<Integer, Group>> entryset = model.getGroups().entrySet();
+    Iterator<Entry<Integer, Group>> iter = entryset.iterator();
+    JSONArray rawFilesArray = new JSONArray();
+    while (iter.hasNext()) {
+      Entry<Integer, Group> entry = iter.next();
+      rawFilesArray.put(entry.getValue().toJson());
+    }
+    JSONObject params = new JSONObject();
+    params.put("rawFiles", rawFilesArray);
+    params.put("fastaFiles", fastaToJson());
+    params.put("globalParams", globalParamsToJson());
+    return params;
+  }
+
+  /**
+   * writes all fasta related information into a JSONObject. See
+   * https://github.com/qbicsoftware/mqrun/blob/master/examples/simple.json
+   * http://mqrun.readthedocs.org/en/latest/param_format.html and
+   * https://github.com/qbicsoftware/mqrun/tree/master/mqrun/data for more information
+   * 
+   * @return
+   * @throws JSONException
+   */
+  JSONObject fastaToJson() throws JSONException {
+    JSONArray fastafiles = new JSONArray();
+    BeanItemContainer<FastaBean> selected = model.getSelectedFastaBeans();
+    for (FastaBean bean : selected.getItemIds()) {
+      fastafiles.put(bean.getName());
+    }
+    JSONObject ret = new JSONObject();
+    ret.put("fileNames", fastafiles);
+    ret.put("firstSearch", new JSONArray());
+    return ret;
+  }
+
+  JSONObject globalParamsToJson() throws JSONException {
+    JSONObject glparams = new JSONObject();
+    for (Object id : globalParameters.getItemPropertyIds()) {
+      Object value = globalParameters.getItemProperty(id).getValue();
+      System.out.println(globalParameters.getItemProperty(id).getType());
+      System.out.println(globalParameters.getItemProperty(id).getClass().getGenericSuperclass());
+      glparams.put((String) id,
+          (value instanceof LinkedHashSet) ? JsonHelper.fromSet((LinkedHashSet<String>) value)
+              : value);
+    }
+    return glparams;
+  }
+
+  public void addSubmissionListener(ClickListener maxQuantSubmissionListener) {
+    start.addClickListener(maxQuantSubmissionListener);
+  }
+
+  public void setWorkflow(Workflow workFlow) {
+    guseWorkflow = workFlow;
+  }
+  public Workflow getWorkflow(){
+    return guseWorkflow;
+  }
+
+  public Collection<DatasetBean> getSelectedDatasets() {
+    return model.selectedDatasets();
+  }
+
+  /**
+   * write json to correct workflow parameter!
+   * @throws JSONException 
+   * @throws IllegalArgumentException 
+   */
+  public void writeParametersToWorkflow() throws IllegalArgumentException, JSONException {
+    if(guseWorkflow instanceof GuseWorkflowRepresentation){
+      GuseWorkflowRepresentation w = (GuseWorkflowRepresentation) guseWorkflow;
+      
+      GuseNode node = w.getNode(INITNODE_CAPTION);
+      InputPort port = node.getPort("PARAM-TXT");
+      port.getParams().get("txt").setValue(toJson().toString(3));
+    }
+    
+  }
+}

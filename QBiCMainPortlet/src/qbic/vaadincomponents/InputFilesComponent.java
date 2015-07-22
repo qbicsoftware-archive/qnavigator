@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang.NotImplementedException;
+
 import logging.Log4j2Logger;
-import main.OpenBisClient;
 import submitter.Workflow;
 import submitter.parameters.FileListParameter;
 import submitter.parameters.FileParameter;
 import submitter.parameters.InputList;
 import submitter.parameters.Parameter;
 import submitter.parameters.ParameterSet;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
@@ -48,19 +48,22 @@ public class InputFilesComponent extends WorkflowParameterComponent {
    */
   private static final long serialVersionUID = -675703070595329585L;
   private TabSheet inputFileForm = new TabSheet();
-  private FieldGroup inputFileFieldGroup;
-  
+
   private logging.Logger LOGGER = new Log4j2Logger(InputFilesComponent.class);
-  private Set<Entry<String, Parameter>> wfparameters;
-  private HashMap<String, Parameter> wfmap = new HashMap<String, Parameter>();;
-  
-  
-  public InputFilesComponent(Set<Entry<String, Parameter>> wfparameters) {
-    this.wfparameters = wfparameters;
-    setCompositionRoot(inputFileForm);
+  private Map<String, Parameter> wfmap = new HashMap<String, Parameter>();;
+
+
+  public InputFilesComponent(Map<String, Parameter> parameters) {
+    super();
+    wfmap = parameters;
   }
 
   public InputFilesComponent() {
+    this.setCaption(String.format("<font color=#FF0000>  Select input file(s) </font>"));
+    this.setCaptionAsHtml(true);
+    inputFileForm.setHeight(100.0f, Unit.PERCENTAGE);
+    inputFileForm.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    inputFileForm.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
     setCompositionRoot(inputFileForm);
   }
 
@@ -81,23 +84,117 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     // TODO Auto-generated method stub
   }
 
+  /**
+   * DAVID
+   * @param wfparameters
+   * @param datasets
+   */
+  public void buildLayout(Map<String,Parameter> wfparameters, BeanItemContainer<DatasetBean> datasets){
+    wfmap = wfparameters;
+    for(Map.Entry<String, Parameter> entry : wfmap.entrySet()){ 
+      GeneratedPropertyContainer gpcontainer = null;
+      Grid newGrid = new Grid(gpcontainer);
+      if (entry.getValue() instanceof FileParameter || entry.getValue() instanceof FileListParameter) {
+        List<String> range = getRange(entry.getValue());
+        if (range.contains("fasta") || range.contains("gtf")) {
+          gpcontainer = fastaContainer();
+        }
+        else{
+          gpcontainer = filter(datasets, range);
+        }
+        newGrid.setContainerDataSource(gpcontainer);
+        newGrid.setSelectionMode(getSelectionMode(entry.getValue()));
+      }
+      else {
+        showError(String.format("Invalid Inputfile Parameter!", entry.getKey()));
+      }
+      HorizontalLayout layout = new HorizontalLayout();
+      layout.setMargin(new MarginInfo(true, true, true, true));
+      layout.setSizeFull();
 
-  public void buildLayout(Set<Entry<String, Parameter>> wfparameters, BeanItemContainer<DatasetBean> datasets) {
-    this.wfparameters = wfparameters;
-    this.setCaption(String.format("<font color=#FF0000>  Select input file(s) </font>"));
-    this.setCaptionAsHtml(true);
-    buildForm(wfparameters, datasets);
+      newGrid.setWidth("100%");
+      layout.addComponent(newGrid);
+
+      if (newGrid.getContainerDataSource().size() == 0) {
+        Notification.show(
+            String.format("No dataset of type %s available in this project!", entry.getKey()),
+            Type.WARNING_MESSAGE);
+        layout.addComponent(newGrid);
+      }
+      inputFileForm.addTab(layout, entry.getKey());
+    }
+  }
+  
+  private SelectionMode getSelectionMode(Parameter param) {
+    if (param instanceof FileParameter){
+      return SelectionMode.SINGLE;
+    }
+    else if(param instanceof FileListParameter) {
+      return SelectionMode.MULTI;
+    }
+    else{
+      return SelectionMode.NONE;
+    }
   }
 
-  public void buildForm(Set<Entry<String, Parameter>> wfparameters, BeanItemContainer<DatasetBean> datasets) {
+  private List<String> getRange(Parameter param) {
+    if (param instanceof FileParameter){
+      return ((FileParameter)param).getRange();
+    }
+    else if(param instanceof FileListParameter) {
+      return ((FileListParameter)param).getRange();
+    }
+    else{
+      return new ArrayList<String>();
+    }
+   
+  }
 
-    inputFileForm.setHeight(100.0f, Unit.PERCENTAGE);
-    inputFileForm.addStyleName(ValoTheme.TABSHEET_FRAMED);
-    inputFileForm.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
+  public GeneratedPropertyContainer fastaContainer(){
+    BeanItemContainer<FastaBean> subContainer =
+        new BeanItemContainer<FastaBean>(FastaBean.class);
+    FastaDB db = new FastaDB();
+    subContainer.addAll(db.getAll());
+    GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
+    gpcontainer.removeContainerProperty("path");
+    return gpcontainer;
+  }
+  
+  /**
+   * filters all DataSetBeans which are NOT in the filter and returns a new Container
+   * @param datasets
+   * @param filter
+   * @return
+   */
+  public GeneratedPropertyContainer filter(BeanItemContainer<DatasetBean> datasets, List<String> filter){
+    BeanItemContainer<DatasetBean> subContainer =
+        new BeanItemContainer<DatasetBean>(DatasetBean.class);
+    for (java.util.Iterator<DatasetBean> i = datasets.getItemIds().iterator(); i.hasNext();) {
+      DatasetBean dataset = i.next();
+      if (filter.contains(dataset.getFileType().toLowerCase())) {
+        subContainer.addBean(dataset);
+      }
+    }
+    GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
+    gpcontainer.removeContainerProperty("fullPath");
+    gpcontainer.removeContainerProperty("openbisCode");
+    
+    
+    return gpcontainer;
+  }
+  
+
+/*  public void buildLayout(Set<Entry<String, Parameter>> wfparameters,
+      BeanItemContainer<DatasetBean> datasets) {
+    this.wfparameters = wfparameters;
+    buildForm(wfparameters, datasets);
+  }
+*/
+  public void buildForm(Set<Entry<String, Parameter>> wfparameters,
+      BeanItemContainer<DatasetBean> datasets) {
 
     inputFileForm.removeAllComponents();
     inputFileForm.setSizeFull();
-    inputFileFieldGroup = new FieldGroup();
 
     wfmap.clear();
     for (Map.Entry<String, Parameter> entry : wfparameters) {
@@ -190,54 +287,75 @@ public class InputFilesComponent extends WorkflowParameterComponent {
 
   // TODO
   public void resetInputList() {
-    Collection<Field<?>> registeredFields = inputFileFieldGroup.getFields();
+    throw new NotImplementedException();
+  /*  Collection<Field<?>> registeredFields = inputFileFieldGroup.getFields();
 
     for (Field<?> field : registeredFields) {
       TextField fieldToReset = (TextField) field;
       fieldToReset.setValue(wfmap.get(field.getCaption()).getValue().toString());
-    }
+    }*/
   }
 
   /**
-   * returns the currently selected datasets by the user. If no datasets are selected, the list is simply empty
-   * Note that no db selections are returned.
+   * returns the currently selected datasets by the user. If no datasets are selected, the list is
+   * simply empty Note that no db selections are returned.
+   * 
    * @return
    */
   public List<DatasetBean> getSelectedDatasets() {
     List<DatasetBean> selectedDatasets = new ArrayList<DatasetBean>();
-    
+
     java.util.Iterator<Component> tabs = inputFileForm.iterator();
     while (tabs.hasNext()) {
       Tab tab = inputFileForm.getTab(tabs.next());
       HorizontalLayout current = (HorizontalLayout) tab.getComponent();
       java.util.Iterator<Component> grids = current.iterator();
-      while(grids.hasNext()){
+      while (grids.hasNext()) {
         Grid currentGrid = (Grid) grids.next();
-        //returns one (in single-selection mode) or all (in multi-selection mode) selected items
+        // returns one (in single-selection mode) or all (in multi-selection mode) selected items
         Collection<Object> selected = currentGrid.getSelectedRows();
         for (Object o : selected) {
-          if(o instanceof DatasetBean){
+          if (o instanceof DatasetBean) {
             DatasetBean selectedBean = (DatasetBean) o;
             selectedDatasets.add(selectedBean);
           }
-        }      
+        }
       }
     }
-    if(selectedDatasets.size() == 0){
-      showError("Please selected some datasets");
+    if (selectedDatasets.size() == 0) {
+      showError("Please select at least one dataset.");
     }
     return selectedDatasets;
   }
-  
   /**
-   * updates workflow parameters with the currently selected datasets and databases.
-   * Be aware that it is not checked, whether the correct workflow is given as parameter
+   * returns true if at least one dataset was selected for each tab
+   * @return
+   */
+  boolean hasDastasetSelected(){
+    java.util.Iterator<Component> tabs = inputFileForm.iterator();
+    while (tabs.hasNext()) {
+      Tab tab = inputFileForm.getTab(tabs.next());
+      HorizontalLayout current = (HorizontalLayout) tab.getComponent();
+      java.util.Iterator<Component> grids = current.iterator();
+      while (grids.hasNext()) {
+        Grid currentGrid = (Grid) grids.next();
+        // getSelectedRows returns one (in single-selection mode) or all (in multi-selection mode) selected items
+        if(currentGrid.getSelectedRows().size() == 0) return false;
+      }
+    }
+    return true;  
+  }
+  /**
+   * updates workflow parameters with the currently selected datasets and databases. Be aware that
+   * it is not checked, whether the correct workflow is given as parameter
    * 
    * @param wf
    * @return false if nothing is selected for some tabs or wf is null or wf is empty
    */
-  public boolean updateWorkflow(Workflow wf, WorkflowViewController controller){
-    if(wf == null || wf.getData() == null || wf.getData().getData() == null || wf.getData().getData().isEmpty()) return false;
+  public boolean updateWorkflow(Workflow wf, WorkflowViewController controller) {
+    if (wf == null || wf.getData() == null || wf.getData().getData() == null
+        || wf.getData().getData().isEmpty())
+      return false;
     
     java.util.Iterator<Component> i = inputFileForm.iterator();
     InputList inpList = wf.getData();
@@ -262,10 +380,11 @@ public class InputFilesComponent extends WorkflowParameterComponent {
             inpList.getData().get(caption).setValue(selectedBean.getPath());
           } else {
             DatasetBean selectedBean = (DatasetBean) selectionSingle;
-            try{
+            try {
               inpList.getData().get(caption).setValue(controller.getDatasetsNfsPath(selectedBean));
-            }catch(Exception e){
-              LOGGER.error("could not retrieve nfs path. Using datasetbeans getfullpath instead. "+ e.getMessage(),e.getStackTrace());
+            } catch (Exception e) {
+              LOGGER.error("could not retrieve nfs path. Using datasetbeans getfullpath instead. "
+                  + e.getMessage(), e.getStackTrace());
               inpList.getData().get(caption).setValue(selectedBean.getFullPath());
             }
           }
@@ -280,10 +399,11 @@ public class InputFilesComponent extends WorkflowParameterComponent {
 
           for (Object o : selectionMulti) {
             DatasetBean selectedBean = (DatasetBean) o;
-            try{
+            try {
               selectedPaths.add(controller.getDatasetsNfsPath(selectedBean));
-            }catch(Exception e){
-              LOGGER.error("could not retrieve nfs path. Using datasetbeans getfullpath instead. "+ e.getMessage(),e.getStackTrace());
+            } catch (Exception e) {
+              LOGGER.error("could not retrieve nfs path. Using datasetbeans getfullpath instead. "
+                  + e.getMessage(), e.getStackTrace());
               selectedPaths.add(selectedBean.getFullPath());
             }
           }
@@ -293,15 +413,25 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     }
     return true;
   }
+  
+  
+  
+  /**
+   * returns the number of file parameters
+   * @return
+   */
+  public int size(){
+    return this.wfmap.size();
+  }
 
   @Override
   public void buildLayout() {
     // TODO Auto-generated method stub
 
   }
-  
-  
-  public void showError(String message){
+
+
+  public void showError(String message) {
     LOGGER.warn(message);
     Notification.show(message, Type.WARNING_MESSAGE);
   }
@@ -309,6 +439,6 @@ public class InputFilesComponent extends WorkflowParameterComponent {
   @Override
   public void buildLayout(Workflow wf) {
     // TODO Auto-generated method stub
-    
+
   }
 }

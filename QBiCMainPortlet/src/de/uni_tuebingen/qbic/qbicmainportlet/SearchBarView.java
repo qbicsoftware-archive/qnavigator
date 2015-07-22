@@ -97,7 +97,7 @@ public class SearchBarView extends CustomComponent {
         }
       }
     });
-    searchfield.addItems(this.getSearchResults("Q"));
+    //searchfield.addItems(this.getSearchResults("Q"));
     searchfield.setDescription(infotext);
     searchfield.addValidator(new NullValidator("Field must not be empty", false));
     searchfield.setValidationVisible(false);

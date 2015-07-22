@@ -3,6 +3,7 @@ package views;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,11 @@ import logging.Logger;
 
 import org.springframework.remoting.RemoteAccessException;
 
-import qbic.vaadincomponents.InputFilesComponent;
-import qbic.vaadincomponents.ParameterComponent;
+import qbic.model.maxquant.MaxQuantModel;
+import qbic.model.maxquant.MaxquantConverterFactory;
+import qbic.model.maxquant.RawFilesBean;
+import qbic.vaadincomponents.MaxQuantComponent;
+import qbic.vaadincomponents.StandardWorkflowComponent;
 import submitter.SubmitFailedException;
 import submitter.Workflow;
 
@@ -28,11 +32,11 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
@@ -40,7 +44,6 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.DetailsGenerator;
 import com.vaadin.ui.Grid.RowReference;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
@@ -49,6 +52,8 @@ import com.vaadin.ui.VerticalLayout;
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.beans.DatasetBean;
 import de.uni_tuebingen.qbic.qbicmainportlet.DatasetView;
+import fasta.FastaBean;
+import fasta.FastaDB;
 
 public class WorkflowView extends VerticalLayout implements View {
 
@@ -61,6 +66,8 @@ public class WorkflowView extends VerticalLayout implements View {
   private static final String WORKFKLOW_GRID_DESCRIPTION =
       "If you want to execute a workflow, click on one of the rows in the table. Then select the parameters, input files database/reference files and click on submit.";
   private static final String SUBMISSION_CAPTION = "Submission";
+  protected static final String SUBMISSION_FAILED_MESSAGE =
+      "Workflow submission failed due to internal errors! Please try again later or contact your project manager.";
 
   // Controller
   private WorkflowViewController controller;
@@ -68,12 +75,6 @@ public class WorkflowView extends VerticalLayout implements View {
   // View
   private VerticalLayout viewContent = new VerticalLayout();
   private Grid availableWorkflows = new Grid();
-
-  private Button submitWorkflow = new Button("Submit");
-  private Button resetParameters = new Button("Reset Parameters");
-
-  private ParameterComponent parameterComponent = new ParameterComponent();
-  private InputFilesComponent inputFileComponent = new InputFilesComponent();
 
   private VerticalLayout submission;
 
@@ -102,6 +103,8 @@ public class WorkflowView extends VerticalLayout implements View {
     workflows.setMargin(new MarginInfo(false, true, true, true));
 
     workflowsContent.addComponent(availableWorkflows);
+    availableWorkflows.setSizeFull();
+    availableWorkflows.setDescription(WORKFKLOW_GRID_DESCRIPTION);
     // availableWorkflows.setWidth("100%");
     workflows.setVisible(false);
 
@@ -112,23 +115,11 @@ public class WorkflowView extends VerticalLayout implements View {
 
     // submission
     submission = new VerticalLayout();
-    VerticalLayout submissionContent = new VerticalLayout();
-    HorizontalLayout buttonContent = new HorizontalLayout();
     submission.setMargin(new MarginInfo(false, true, true, true));
 
-    availableWorkflows.setSizeFull();
-    availableWorkflows.setDescription(WORKFKLOW_GRID_DESCRIPTION);
-    submissionContent.setSpacing(true);
-    submissionContent.addComponent(inputFileComponent);
-    submissionContent.addComponent(parameterComponent);
-    submissionContent.addComponent(buttonContent);
-
-    buttonContent.addComponent(resetParameters);
-    buttonContent.addComponent(submitWorkflow);
 
     submission.setCaption(SUBMISSION_CAPTION);
     submission.setIcon(FontAwesome.PLAY);
-    submission.addComponent(submissionContent);
     submission.setWidth(100.0f, Unit.PERCENTAGE);
     submission.setVisible(false);
 
@@ -235,21 +226,22 @@ public class WorkflowView extends VerticalLayout implements View {
    */
   void updateSelection(BeanItemContainer<Workflow> suitableWorkflows) {
     if (!(suitableWorkflows.size() > 0)) {
-      Notification notif =
-          new Notification("No suitable workflows found. Pleace contact your project manager.",
-              Type.TRAY_NOTIFICATION);
-
-      // Customize it
-      notif.setDelayMsec(60000);
-      notif.setPosition(Position.MIDDLE_CENTER);
-
-      // Show it in the page
-      notif.show(Page.getCurrent());
+      showNotification("No suitable workflows found. Pleace contact your project manager.");
     }
 
     availableWorkflows.setContainerDataSource(filtergpcontainer(suitableWorkflows));
     availableWorkflows.setColumnOrder("name", "version", "fileTypes");
     workflows.setVisible(true);
+  }
+
+  void showNotification(String message) {
+    Notification notif = new Notification(message, Type.TRAY_NOTIFICATION);
+    // Customize it
+    notif.setDelayMsec(60000);
+    notif.setPosition(Position.MIDDLE_CENTER);
+    // Show it in the page
+    notif.show(Page.getCurrent());
+
   }
 
   /**
@@ -276,8 +268,32 @@ public class WorkflowView extends VerticalLayout implements View {
 
   private void updateParameterView(Workflow workFlow, BeanItemContainer<DatasetBean> projectDatasets) {
     this.submission.setCaption(SUBMISSION_CAPTION + ": " + workFlow.getName());
-    this.inputFileComponent.buildLayout(workFlow.getData().getData().entrySet(), projectDatasets);
-    this.parameterComponent.buildLayout(workFlow);
+    this.submission.removeAllComponents();
+    if (workFlow.getName().equals("MaxQuant")) {
+      BeanItemContainer<RawFilesBean> rawFilesBeans =
+          new BeanItemContainer<RawFilesBean>(RawFilesBean.class);
+      BeanItemContainer<FastaBean> selectedfastas =
+          new BeanItemContainer<FastaBean>(FastaBean.class);
+      BeanItemContainer<FastaBean> fastas = new BeanItemContainer<FastaBean>(FastaBean.class);
+      FastaDB db = new FastaDB();
+      fastas.addAll(db.getAll());
+
+      MaxQuantModel model =
+          new MaxQuantModel(rawFilesBeans, projectDatasets, selectedfastas, fastas);
+      VaadinSession.getCurrent().setConverterFactory(new MaxquantConverterFactory());
+      MaxQuantComponent maxquantComponent = new MaxQuantComponent(model);
+      maxquantComponent.setWorkflow(workFlow);
+      maxquantComponent.addSubmissionListener(new MaxQuantSubmissionListener(maxquantComponent));
+
+      this.submission.addComponent(maxquantComponent);
+    } else {
+      StandardWorkflowComponent standardComponent = new StandardWorkflowComponent(controller);
+      standardComponent.update(workFlow, projectDatasets);
+      standardComponent.addResetListener(new ResetListener(standardComponent));
+      standardComponent.addSubmissionListener(new StandardSubmissionListener(standardComponent));
+      this.submission.addComponent(standardComponent);
+    }
+
   }
 
 
@@ -307,93 +323,130 @@ public class WorkflowView extends VerticalLayout implements View {
         Workflow selectedWorkflow = (Workflow) event.getItemId();
         if (selectedWorkflow != null) {
           updateParameterView(selectedWorkflow, datasetBeans);
-          resetParameters.setVisible(true);
           submission.setVisible(true);
+
+          // detailed Description should be visible
           availableWorkflows.setDetailsVisible(selectedWorkflow,
               !availableWorkflows.isDetailsVisible(selectedWorkflow));
         } else {
           LOGGER.warn("selected Workflow is null?");
+          submission.setVisible(false);
         }
 
       }
     });
     availableWorkflows.setEditorEnabled(false);
+  }
 
+  private class ResetListener implements ClickListener {
+    private static final long serialVersionUID = 6800369140265363672L;
+    private StandardWorkflowComponent swc;
 
+    public ResetListener(StandardWorkflowComponent standardWorkflowComponent) {
+      swc = standardWorkflowComponent;
+    }
 
-    /*
-     * this.availableDatasets.addSelectionListener(new SelectionListener() { private static final
-     * long serialVersionUID = 4033655694590766143L;
-     * 
-     * @Override public void select(SelectionEvent event) { Object selectedDataset =
-     * availableDatasets.getSelectedRow(); submission.setVisible(false);
-     * workflows.setVisible(false); //Object selectedDataset =
-     * datasetContainer.getItem(availableDatasets.getSelectedRow()); if (selectedDataset == null)
-     * return; if (selectedDataset instanceof DatasetBean) { DatasetBean dataset = (DatasetBean)
-     * selectedDataset; updateWorkflowSelection(dataset); } else {
-     * Notification.show("Selected item is not a valid dataset. Please contact your project manager."
-     * , Type.ERROR_MESSAGE); } } } );
-     */
+    @Override
+    public void buttonClick(ClickEvent event) {
+      swc.resetParameters();
+    }
+  }
+  
+  /**
+   * listenes to clicks on submit button. Executes standard workflow.
+   * @author wojnar
+   *
+   */
+  private class StandardSubmissionListener implements ClickListener {
+    private static final long serialVersionUID = 243869502031843198L;
+    private StandardWorkflowComponent swc;
 
-    this.resetParameters.addClickListener(new ClickListener() {
-      private static final long serialVersionUID = 1L;
+    public StandardSubmissionListener(StandardWorkflowComponent standardWorkflowComponent) {
+      swc = standardWorkflowComponent;
+    }
 
-      @Override
-      public void buttonClick(ClickEvent event) {
-        // TODO reset InputList
-        parameterComponent.resetParameters();
+    @Override
+    public void buttonClick(ClickEvent event) {
+      try {
+        List<DatasetBean> selectedDatasets = swc.getSelectedDatasets();
+        Workflow submittedWf = swc.getWorkflow();
+        submit(submittedWf, new ArrayList<DatasetBean>(selectedDatasets));
+      } catch (Exception e) {
+        handleException(e);
       }
-    });
+    }
+  }
+ /**
+  * listenes to clicks on submit button. Executes maxquant workflow.
+  * @author wojnar
+  *
+  */
+  private class MaxQuantSubmissionListener implements ClickListener {
+    private static final long serialVersionUID = 1888557742642278371L;
+    private MaxQuantComponent maxQuantComponent;
 
-    this.submitWorkflow.addClickListener(new ClickListener() {
-      private static final long serialVersionUID = 1L;
+    public MaxQuantSubmissionListener(MaxQuantComponent mqc) {
+      maxQuantComponent = mqc;
+    }
 
-      @Override
-      public void buttonClick(ClickEvent event) {
-        List<DatasetBean> selectedDatasets = inputFileComponent.getSelectedDatasets();
-        Workflow submittedWf = parameterComponent.getWorkflow();
-        if (submittedWf == null || selectedDatasets.isEmpty()
-            || !inputFileComponent.updateWorkflow(submittedWf, controller)) {
-          return;
-        }
-        try {
-          // THIS IS THE IMPORTANT LINE IN THAT MESS
-          String openbisId =
-              controller.submitAndRegisterWf(type, id, submittedWf, selectedDatasets);
+    @Override
+    public void buttonClick(ClickEvent event) {
 
-          Notification.show("Workflow submitted and saved under" + openbisId, Type.WARNING_MESSAGE);
-        } catch (ConnectException | IllegalArgumentException | SubmitFailedException e) {
-          LOGGER.error("Submission failed, probably gUSE. " + e.getMessage(), e.getStackTrace());
-          Notification
-              .show(
-                  "Workflow submission failed due to internal errors! Please try again later or contact your project manager.",
-                  Type.WARNING_MESSAGE);
-          try {
-            VaadinService
-                .getCurrentResponse()
-                .sendError(
-                    HttpServletResponse.SC_GATEWAY_TIMEOUT,
-                    "An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
-          } catch (IOException | IllegalArgumentException e1) {
-            // TODO Auto-generated catch block
-            VaadinService.getCurrentResponse().setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
-          }
-        } catch (RemoteAccessException e) {
-          LOGGER.error("Submission failed, probably openbis. error message: " + e.getMessage(),
-              e.getStackTrace());
-          Notification
-              .show(
-                  "Workflow submission failed due to internal errors! Please try again later or contact your project manager.",
-                  Type.TRAY_NOTIFICATION);
-        } catch (Exception e) {
-          LOGGER.error("Internal error: " + e.getMessage(), e.getStackTrace());
-          Notification
-              .show(
-                  "Workflow submission failed due to internal errors! Please try again later or contact your project manager.",
-                  Type.TRAY_NOTIFICATION);
-        }
+      try {
+        maxQuantComponent.updateGroups();
+        maxQuantComponent.writeParametersToWorkflow();
+        Workflow submittedWf = maxQuantComponent.getWorkflow();
+        Collection<DatasetBean> selectedDatasets = maxQuantComponent.getSelectedDatasets();
+        submit(submittedWf, new ArrayList<DatasetBean>(selectedDatasets));
+      } catch (Exception e) {
+        handleException(e);
       }
-    });
+    }
 
+  }
+  /**
+   * submits workflow with given datasets
+   * @throws SubmitFailedException 
+   * @throws IllegalArgumentException 
+   * @throws ConnectException 
+   */
+  void submit(Workflow submittedWf, List<DatasetBean> selectedDatasets) throws ConnectException, IllegalArgumentException, SubmitFailedException{
+    if (submittedWf == null || selectedDatasets.isEmpty()) {
+      return;
+    }
+    // THIS IS THE IMPORTANT LINE IN THAT MESS
+    String openbisId =
+        controller.submitAndRegisterWf(type, id, submittedWf, selectedDatasets );
+    showNotification("Workflow submitted and saved under " + openbisId);
+  }
+  
+  /**
+   * logs error and shows user that submission failed. Different exceptions yield different error messages
+   * 
+   * @param e
+   */
+  public void handleException(Exception e) {
+    if (e instanceof ConnectException || e instanceof IllegalArgumentException
+        || e instanceof SubmitFailedException) {
+      LOGGER.error("Submission failed, probably gUSE. " + e.getMessage(), e.getStackTrace());
+      showNotification(SUBMISSION_FAILED_MESSAGE);
+      try {
+        VaadinService
+            .getCurrentResponse()
+            .sendError(
+                HttpServletResponse.SC_GATEWAY_TIMEOUT,
+                "An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
+      } catch (IOException | IllegalArgumentException e1) {
+        // TODO Auto-generated catch block
+        VaadinService.getCurrentResponse().setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
+      }
+    } else if (e instanceof RemoteAccessException) {
+      LOGGER.error("Submission failed, probably openbis. error message: " + e.getMessage(),
+          e.getStackTrace());
+      showNotification(SUBMISSION_FAILED_MESSAGE);
+    } else {
+      LOGGER.error("Internal error: " + e.getMessage(), e.getStackTrace());
+      showNotification(SUBMISSION_FAILED_MESSAGE);
+    }
   }
 }
