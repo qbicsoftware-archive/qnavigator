@@ -71,7 +71,7 @@ public class SearchBarView extends CustomComponent {
     searchbar.addComponent(searchfield);
     Button searchOk = new Button("GoTo");
     searchOk.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-    searchOk.setIcon(FontAwesome.REPLY);
+    searchOk.setIcon(FontAwesome.SEARCH);
     searchOk.addClickListener(new ClickListener() {
 
       @Override
@@ -85,7 +85,7 @@ public class SearchBarView extends CustomComponent {
         else {
         String entity = (String) searchfield.getValue().toString();
 
-        Sample foundSample = datahandler.openBisClient.getSampleByIdentifier(entity);
+        Sample foundSample = datahandler.getOpenBisClient().getSampleByIdentifier(entity);
         String identifier = foundSample.getIdentifier();
         
         State state = (State) UI.getCurrent().getSession().getAttribute("state");
@@ -103,7 +103,7 @@ public class SearchBarView extends CustomComponent {
     searchfield.setValidationVisible(false);
     
     searchbar.addComponent(searchOk);
-    searchbar.setMargin(new MarginInfo(true, false, true, false));
+    //searchbar.setMargin(new MarginInfo(true, false, true, false));
     mainlayout.addComponent(searchbar);
     mainlayout.setComponentAlignment(searchbar, Alignment.MIDDLE_RIGHT);
     //mainlayout.setWidth(100, Unit.PERCENTAGE);
@@ -114,7 +114,7 @@ public class SearchBarView extends CustomComponent {
     java.util.EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
     SearchCriteria sc = new SearchCriteria();
     sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, samplecode + "*"));
-    List<Sample> samples = datahandler.openBisClient.getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.openBisClient.getSessionToken(), sc, fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
+    List<Sample> samples = datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc, fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
     List<String> ret = new ArrayList<String>(samples.size());
     for(Sample sample : samples){
       ret.add(sample.getCode());

@@ -156,13 +156,17 @@ public class WorkflowView extends VerticalLayout implements View {
 
     switch (type) {
       case "project":
+        LOGGER.debug(type);
+        LOGGER.debug(id);
         datasetBeans = controller.getcontainer(type, id);
         List<String> datasetTypesInProject = new ArrayList<String>();
 
         for (Iterator<DatasetBean> i = datasetBeans.getItemIds().iterator(); i.hasNext();) {
           DatasetBean dsBean = (DatasetBean) i.next();
           datasetTypesInProject.add(dsBean.getFileType());
+          LOGGER.debug(dsBean.getFileType());
         }
+        LOGGER.debug(datasetTypesInProject.toString());
         updateWorkflowSelection(datasetTypesInProject);
         break;
 
@@ -212,6 +216,7 @@ public class WorkflowView extends VerticalLayout implements View {
   }
 
   protected void updateWorkflowSelection(List<String> datasetTypes) {
+    LOGGER.debug(datasetTypes.toString());
     updateSelection(controller.suitableWorkflows(datasetTypes));
   }
 

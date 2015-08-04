@@ -80,7 +80,7 @@ public class ChangePropertiesView extends Panel implements View {
         parameters.put("identifier", experimentBean.getId());
         parameters.put("properties", properties);
 
-        dh.openBisClient.triggerIngestionService("notify-user", parameters);
+        dh.getOpenBisClient().triggerIngestionService("notify-user", parameters);
         Notification.show("Changes committed!", Type.TRAY_NOTIFICATION);
       }
     });

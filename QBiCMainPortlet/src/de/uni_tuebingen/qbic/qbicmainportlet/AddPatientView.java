@@ -100,7 +100,7 @@ public class AddPatientView extends VerticalLayout implements View {
    * @param browser
    */
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-    setWidth((browserWidth * 0.6f), Unit.PIXELS);
+    setWidth((browserWidth * 1.0f), Unit.PIXELS);
   }
 
   /**
@@ -167,8 +167,8 @@ public class AddPatientView extends VerticalLayout implements View {
     optionLayout.addComponent(addSample);
 
     final GridEditForm form =
-        new GridEditForm(datahandler.openBisClient.getVocabCodesForVocab("Q_PRIMARY_TISSUES"),
-            datahandler.openBisClient.getVocabCodesForVocab("Q_SEQUENCER_DEVICES"));
+        new GridEditForm(datahandler.getOpenBisClient().getVocabCodesForVocab("Q_PRIMARY_TISSUES"),
+            datahandler.getOpenBisClient().getVocabCodesForVocab("Q_SEQUENCER_DEVICES"));
 
     optionLayout.addComponent(form);
     form.setVisible(false);
@@ -271,7 +271,7 @@ public class AddPatientView extends VerticalLayout implements View {
 
     List visibleSpaces = new ArrayList<String>();
 
-    for (Project project : datahandler.openBisClient.getOpenbisInfoService().listProjectsOnBehalfOfUser(datahandler.openBisClient.getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
+    for (Project project : datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
       if (project.getSpaceCode().startsWith("IVAC")) {
         visibleSpaces.add(project.getSpaceCode());
       }
@@ -354,7 +354,7 @@ public class AddPatientView extends VerticalLayout implements View {
     hlalayout.addComponent(hlaIItypes);
     hlalayout.setSpacing(true);
 
-    typingMethod.addItems(datahandler.openBisClient.getVocabCodesForVocab("Q_HLA_TYPING_METHODS"));
+    typingMethod.addItems(datahandler.getOpenBisClient().getVocabCodesForVocab("Q_HLA_TYPING_METHODS"));
     typingLayout.addComponent(typingMethod);
     typingLayout.addComponent(hlalayout);
 

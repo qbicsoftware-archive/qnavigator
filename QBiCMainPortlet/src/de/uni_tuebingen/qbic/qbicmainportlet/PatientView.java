@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.tepi.filtertable.FilterTable;
+
 import views.WorkflowView;
 import logging.Log4j2Logger;
 import logging.Logger;
@@ -36,22 +38,28 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
@@ -61,11 +69,15 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.ProgressBarRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
+import de.uni_tuebingen.qbic.qbicmainportlet.ProjectView.MemberWorker;
+
 public class PatientView extends VerticalLayout implements View {
 
   public final static String navigateToLabel = "ivacproject";
 
   private ProjectBean currentBean;
+  
+  FilterTable registeredExperiments;
 
   VerticalLayout patientViewContent;
 
@@ -76,6 +88,8 @@ public class PatientView extends VerticalLayout implements View {
   private Label contact;
 
   private Label descContent;
+  
+  private Button export;
 
   private Label patientInformation;
 
@@ -97,6 +111,26 @@ public class PatientView extends VerticalLayout implements View {
   private VerticalLayout membersSection;
 
   private Label hlaTypeLabel;
+
+  private TabSheet patientViewTab;
+
+  private HorizontalLayout membersLayout;
+
+  private StringBuilder memberString;
+
+  private VerticalLayout labelContent;
+
+  private Label headerLabel;
+
+  private DatasetComponent datasetComponent;
+
+  private BiologicalSamplesComponent biologicalSamplesComponent;
+
+  private LevelComponent measuredSamplesComponent;
+
+  private LevelComponent resultsComponent;
+
+  private AbstractOrderedLayout projMembers;
 
   private static Logger LOGGER = new Log4j2Logger(PatientView.class);
 
@@ -122,6 +156,22 @@ public class PatientView extends VerticalLayout implements View {
    */
   public void setContainerDataSource(ProjectBean projectBean) {
     this.currentBean = projectBean;
+    
+    registeredExperiments.setContainerDataSource(projectBean.getExperiments());
+    registeredExperiments.setVisibleColumns(new Object[] {"code", "type", "registrationDate", "registrator",
+       "status"});
+    
+    int rowNumber = projectBean.getExperiments().size();
+    
+    experiments.setHeightMode(HeightMode.ROW);
+    
+    if (rowNumber == 0) {
+      registeredExperiments.setVisible(false);
+    }
+    else {
+      registeredExperiments.setVisible(true);
+      registeredExperiments.setPageLength(Math.min(rowNumber, 10));
+    }
   }
 
   /**
@@ -132,7 +182,8 @@ public class PatientView extends VerticalLayout implements View {
    * @param browser
    */
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-    setWidth((browserWidth * 0.6f), Unit.PIXELS);
+    setWidth((browserWidth * 0.85f), Unit.PIXELS);
+    setHeight((browserHeight * 2.0f), Unit.PIXELS);
   }
 
   /**
@@ -141,13 +192,64 @@ public class PatientView extends VerticalLayout implements View {
    */
   void initView() {
     patientViewContent = new VerticalLayout();
-    patientViewContent.addComponent(initToolBar());
-    patientViewContent.addComponent(initProjectStatus());
-    patientViewContent.addComponent(initDescription());
-    patientViewContent.addComponent(initHLALayout());
-    patientViewContent.addComponent(initGraph());
+    patientViewContent.setMargin(new MarginInfo(true, false, false, false));
+    
+    labelContent = new VerticalLayout();
+    labelContent.setMargin(new MarginInfo(true, false, true, false));
+    headerLabel = new Label("<font size=14></font>", ContentMode.HTML);
+    
+    labelContent.addComponent(headerLabel);
+    patientViewContent.addComponent(labelContent);
+    
+    patientViewTab = new TabSheet();
+    patientViewTab.setWidth("100%");
+    patientViewTab.setHeight("100%");
+    
+    datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
+    biologicalSamplesComponent = new BiologicalSamplesComponent(datahandler, state, resourceUrl, "Biological Samples");
+    measuredSamplesComponent = new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
+    resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");    
+    
+    //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
+    patientViewTab.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    
+    patientViewTab.addTab(initDescription()).setIcon(FontAwesome.FILE_TEXT_O);
+    patientViewTab.addTab(initProjectStatus()).setIcon(FontAwesome.CHECK_SQUARE);
+    patientViewTab.addTab(initGraph()).setIcon(FontAwesome.SHARE_SQUARE_O);
+    patientViewTab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
+    patientViewTab.addTab(initHLALayout()).setIcon(FontAwesome.BARCODE);
+    patientViewTab.addTab(initTable()).setIcon(FontAwesome.FLASK);
+    patientViewTab.addTab(datasetComponent).setIcon(FontAwesome.DOWNLOAD);
+    patientViewTab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.FLASK);
+    patientViewTab.addTab(measuredSamplesComponent).setIcon(FontAwesome.FLASK);
+    patientViewTab.addTab(resultsComponent).setIcon(FontAwesome.BAR_CHART_O);
+    
+    patientViewTab.setImmediate(true);
 
-    //patientViewContent.setWidth("100%");
+    
+    patientViewTab.addSelectedTabChangeListener(new SelectedTabChangeListener() {
+      
+      @Override
+      public void selectedTabChange(SelectedTabChangeEvent event) {
+        if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
+          loadGraph();
+        }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
+          datasetComponent.updateUI("project", getCurrentBean().getId());
+        }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Measured Samples")) {
+          measuredSamplesComponent.updateUI("project", getCurrentBean().getId(), "measured");
+        }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Biological Samples")) {
+          biologicalSamplesComponent.updateUI(getCurrentBean().getId());
+        }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Results")) {
+          resultsComponent.updateUI("project", getCurrentBean().getId(), "results");
+        }
+      }
+    });
+
+    patientViewContent.addComponent(patientViewTab);
     this.addComponent(patientViewContent);
   }
 
@@ -155,7 +257,9 @@ public class PatientView extends VerticalLayout implements View {
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-    updateContentToolBar();
+    headerLabel.setValue("<font size=14>" + "Patient " + getCurrentBean().getCode() + "</font>");
+
+    //updateContentToolBar();
     long startTime = System.nanoTime();
     updateHLALayout();
     long endTime = System.nanoTime();
@@ -172,6 +276,7 @@ public class PatientView extends VerticalLayout implements View {
     endTime = System.nanoTime();
     LOGGER.info(String.format("updateProjectStatus took %f s",
         ((endTime - startTime) / 1000000000.0)));
+    updateContentMemberSection();
   }
 
   /**
@@ -182,16 +287,11 @@ public class PatientView extends VerticalLayout implements View {
   VerticalLayout initDescription() {
     VerticalLayout projDescription = new VerticalLayout();
     VerticalLayout projDescriptionContent = new VerticalLayout();
-
-    // String desc = currentBean.getDescription();
-    // if (!desc.isEmpty()) {
-    // descContent.setValue(desc);
-    // }
+    
+    projDescription.setCaption("General Information");
+    projDescription.setIcon(FontAwesome.FILE_TEXT_O);
+    
     descContent = new Label("");
-    // contact.setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
-    // + currentBean.getId()
-    // + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
-    // + currentBean.getId() + "</a>");
     contact = new Label("", ContentMode.HTML);
 
     patientInformation = new Label("No patient information provided.", ContentMode.HTML);
@@ -199,9 +299,8 @@ public class PatientView extends VerticalLayout implements View {
     projDescriptionContent.addComponent(patientInformation);
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
-    projDescriptionContent.setMargin(true);
-    projDescriptionContent.setCaption("General Information");
-    projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
+    projDescriptionContent.setMargin(new MarginInfo(true, false, false, true));
+    projDescriptionContent.setSpacing(true);
 
     projDescription.addComponent(projDescriptionContent);
 
@@ -209,18 +308,10 @@ public class PatientView extends VerticalLayout implements View {
     contact.setStyleName("patientview");
     patientInformation.setStyleName("patientview");
 
-    membersSection = new VerticalLayout();
-    Component membersContent = new VerticalLayout();
-
-    membersContent.setIcon(FontAwesome.USERS);
-    membersContent.setCaption("Members");
-    membersSection.addComponent(membersContent);
-    // membersSection.setMargin(true);
-    projDescription.addComponent(membersSection);
-    membersSection.setWidth("100%");
-
-    projDescription.setMargin(new MarginInfo(false, true, false, true));
+    projDescription.setMargin(new MarginInfo(true, false, false, true));
+    projDescription.setSpacing(true);
     projDescription.setWidth("100%");
+    
     return projDescription;
   }
 
@@ -246,7 +337,7 @@ public class PatientView extends VerticalLayout implements View {
     SearchCriteria experimentSc = new SearchCriteria();
     experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name()));
     sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
-    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.openBisClient.getFacade().searchForSamples(sampleSc);
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.getOpenBisClient().getFacade().searchForSamples(sampleSc);
     for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample: samples){
       if (sample.getProperties().get("Q_ADDITIONAL_INFO") != null) {
         available = true;
@@ -258,7 +349,7 @@ public class PatientView extends VerticalLayout implements View {
       }
     }
     
-    
+   
     /*
     for (Iterator<ExperimentBean> i = currentBean.getExperiments().getItemIds().iterator(); i
         .hasNext();) {
@@ -289,8 +380,44 @@ public class PatientView extends VerticalLayout implements View {
       patientInformation.setValue("No patient information provided.");
     }
     
+   // membersSection.removeAllComponents();
+   // membersSection.addComponent(getMembersComponent());
+  }
+  
+  
+  VerticalLayout initMemberSection() {
+    VerticalLayout projMembers = new VerticalLayout();
+    projMembers.setCaption("Members");
+    
+    membersSection = new VerticalLayout();
+    Component membersContent = new VerticalLayout();
+
+    //membersContent.setIcon(FontAwesome.USERS);
+    //membersContent.setCaption("Members");
+    membersSection.addComponent(membersContent);
+    //membersSection.setMargin(new MarginInfo(false, false, false, true));
+    membersSection.setWidth("100%");
+    membersSection.setSpacing(true);
+    
+    membersSection.setMargin(new MarginInfo(true, false, false, true));
+    projMembers.addComponent(membersSection);
+    
+    projMembers.setMargin(new MarginInfo(true, false, false, true));
+    projMembers.setWidth("100%");
+    projMembers.setSpacing(true);
+    
+    return projMembers; 
+  }
+  
+  void updateContentMemberSection() {
     membersSection.removeAllComponents();
-    membersSection.addComponent(getMembersComponent());
+    
+    Component memberComponent = getMembersComponent();
+    
+    membersSection.addComponent(new Label("The following people are members of this project. If you would like to contact them, click on their name.", Label.CONTENT_PREFORMATTED));
+    
+    membersSection.addComponent(memberComponent);
+    membersSection.setComponentAlignment(memberComponent, Alignment.MIDDLE_CENTER);
   }
 
   /**
@@ -301,6 +428,8 @@ public class PatientView extends VerticalLayout implements View {
   VerticalLayout initHLALayout() {
     VerticalLayout hlaTyping = new VerticalLayout();
     VerticalLayout hlaTypingContent = new VerticalLayout();
+    
+    hlaTyping.setCaption("HLA Typing");
 
     // String desc = currentBean.getDescription();
     // if (!desc.isEmpty()) {
@@ -309,14 +438,16 @@ public class PatientView extends VerticalLayout implements View {
     hlaTypeLabel = new Label("Not available.", ContentMode.HTML);
     hlaTypeLabel.setStyleName("patientview");
 
-    hlaTypingContent.setMargin(true);
-    hlaTypingContent.setCaption("HLA Typing");
-    hlaTypingContent.setIcon(FontAwesome.BARCODE);
+    hlaTypingContent.setMargin(new MarginInfo(true, false, false, true));
+    hlaTypingContent.setSpacing(true);
+    //hlaTypingContent.setCaption("HLA Typing");
+    //hlaTypingContent.setIcon(FontAwesome.BARCODE);
     hlaTypingContent.addComponent(hlaTypeLabel);
 
     hlaTyping.addComponent(hlaTypingContent);
 
-    hlaTyping.setMargin(new MarginInfo(false, true, false, true));
+    hlaTyping.setMargin(new MarginInfo(true, false, false, true));
+    hlaTyping.setSpacing(true);
     hlaTyping.setWidth("100%");
     return hlaTyping;
   }
@@ -336,7 +467,7 @@ public class PatientView extends VerticalLayout implements View {
     SearchCriteria experimentSc = new SearchCriteria();
     experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_NGS_HLATYPING.name()));
     sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
-    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.openBisClient.getFacade().searchForSamples(sc);
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.getOpenBisClient().getFacade().searchForSamples(sc);
     for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples){
       available = true;
       String classString = sample.getProperties().get("Q_HLA_CLASS");
@@ -391,6 +522,42 @@ public class PatientView extends VerticalLayout implements View {
       hlaTypeLabel.setValue("Not available.");
     }
   }
+  
+  VerticalLayout initTable() {
+    registeredExperiments = this.buildFilterTable();
+    this.tableClickChangeTreeView();
+    VerticalLayout tableSection = new VerticalLayout();
+    VerticalLayout tableSectionContent = new VerticalLayout();
+    
+    tableSection.setCaption("Experiments");
+
+    //tableSectionContent.setCaption("Registered Experiments");
+    //tableSectionContent.setIcon(FontAwesome.FLASK);
+    tableSectionContent.addComponent(registeredExperiments);
+
+    tableSectionContent.setMargin(new MarginInfo(true, false, false, true));
+    tableSection.setMargin(new MarginInfo(true, false, false, true));
+    registeredExperiments.setWidth("100%");
+    tableSection.setWidth("100%");
+    tableSectionContent.setWidth("100%");
+
+    tableSection.addComponent(tableSectionContent);
+    
+    this.export = new Button("Export as TSV");
+    buttonLayoutSection = new VerticalLayout();
+    HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setHeight(null);
+    buttonLayout.setWidth("100%");
+    buttonLayout.addComponent(this.export);
+    buttonLayout.setMargin(new MarginInfo(false, false, false, false));
+    buttonLayoutSection.addComponent(buttonLayout);
+    buttonLayoutSection.setSpacing(true);
+    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, true));
+
+    tableSection.addComponent(buttonLayoutSection);
+
+    return tableSection;
+  }
 
   /**
    * 
@@ -401,7 +568,7 @@ public class PatientView extends VerticalLayout implements View {
     toolbar = new ToolBar(resourceUrl, state, searchBarView);
     toolbar.init();
     toolbar.visibleBarcode(false);
-    toolbar.visibleWorkflow(false);
+    toolbar.visibleWorkflow(true);
     toolbar.setSizeFull();
     return toolbar;
   }
@@ -414,25 +581,83 @@ public class PatientView extends VerticalLayout implements View {
     Boolean containsData = currentBean.getContainsData();
     toolbar.setDownload(containsData);
     toolbar.setWorkflow(containsData);
-    toolbar.update(navigateToLabel, currentBean.getId());
+    toolbar.update("project", currentBean.getId());
+  }
+ 
+
+  class MemberWorker extends Thread {
+
+    @Override
+    public void run() {
+      Company company = null;
+      long companyId = 1;
+      try {
+        String webId = PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
+        company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
+        companyId = company.getCompanyId();
+        LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
+            companyId));
+      } catch (PortalException | SystemException e) {
+        LOGGER.error(
+            "liferay error, could not retrieve companyId. Trying default companyId, which is "
+                + companyId, e.getStackTrace());
+      }
+      Set<String> list =
+          datahandler.getOpenBisClient().getSpaceMembers(currentBean.getId().split("/")[1]);
+      if (list != null) {
+        memberString = new StringBuilder();
+        for (String member : list) {
+          User user = null;
+          try {
+            user = UserLocalServiceUtil.getUserByScreenName(companyId, member);
+          } catch (PortalException | SystemException e) {
+          }
+
+          if (memberString.length() > 0) {
+            memberString.append(" , ");
+          }
+
+          if (user == null) {
+            LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
+            memberString.append(member);
+            // membersLayout.addComponent(new Label(member));
+          } else {
+            String fullname = user.getFullName();
+            String email = user.getEmailAddress();
+           
+            memberString.append("<a href=\"mailto:");
+            memberString.append(email);
+            memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
+            memberString.append(fullname);
+            memberString.append("</a>");
+          }
+        }
+        synchronized (UI.getCurrent()) {
+          processedMember();
+        }
+      }
+    }
   }
 
-
-
+  /**
+   * 
+   * @param list
+   * @return
+   */
   private Component getMembersComponent() {
-    final HorizontalLayout membersLayout = new HorizontalLayout();
-    membersLayout.setIcon(FontAwesome.USERS);
-    membersLayout.setCaption("Members");
+    membersLayout = new HorizontalLayout();
+    //membersLayout.setIcon(FontAwesome.USERS);
+    //membersLayout.setCaption("Members");
     membersLayout.setWidth("100%");
 
 
-    final Button loadMembers = new Button("[+]");
-    membersLayout.addComponent(loadMembers);
-    loadMembers.setStyleName(ValoTheme.BUTTON_LINK);
-    loadMembers.addClickListener(new ClickListener() {
+    //final Button loadMembers = new Button("[+]");
+    //membersLayout.addComponent(loadMembers);
+    //loadMembers.setStyleName(ValoTheme.BUTTON_LINK);
+    //loadMembers.addClickListener(new ClickListener() {
 
-      @Override
-      public void buttonClick(ClickEvent event) {
+      //@Override
+      //public void buttonClick(ClickEvent event) {
         ProgressBar progress = new ProgressBar();
         progress.setIndeterminate(true);
         Label info =
@@ -441,16 +666,16 @@ public class PatientView extends VerticalLayout implements View {
         info.setStyleName(ValoTheme.LABEL_SUCCESS);
         membersLayout.addComponent(info);
         membersLayout.addComponent(progress);
-        Worker worker = new Worker();
+        MemberWorker worker = new MemberWorker();
         worker.start();
         UI.getCurrent().setPollInterval(500);
-        loadMembers.setEnabled(false);
+       // loadMembers.setEnabled(false);
+        
+        return membersLayout;
+  }
 
-      }
 
-      private StringBuilder memberString;
-
-      public void processed() {
+      public void processedMember() {
         Label label;
         if (memberString == null || memberString.length() == 0) {
           label = new Label("no members found.");
@@ -464,79 +689,7 @@ public class PatientView extends VerticalLayout implements View {
 
 
         UI.getCurrent().setPollInterval(-1);
-        loadMembers.setVisible(false);
       }
-
-      class Worker extends Thread {
-
-        @Override
-        public void run() {
-          Company company = null;
-          long companyId = 1;
-          try {
-            String webId = PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
-            company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
-            companyId = company.getCompanyId();
-            LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
-                companyId));
-          } catch (PortalException | SystemException e) {
-            LOGGER.error(
-                "liferay error, could not retrieve companyId. Trying default companyId, which is "
-                    + companyId, e.getStackTrace());
-          }
-          Set<String> list =
-              datahandler.openBisClient.getSpaceMembers(currentBean.getId().split("/")[1]);
-          if (list != null) {
-            memberString = new StringBuilder();
-            for (String member : list) {
-              User user = null;
-              try {
-                user = UserLocalServiceUtil.getUserByScreenName(companyId, member);
-              } catch (PortalException | SystemException e) {
-              }
-
-              if (memberString.length() > 0) {
-                memberString.append(" , ");
-              }
-
-              if (user == null) {
-                LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
-                memberString.append(member);
-                // membersLayout.addComponent(new Label(member));
-              } else {
-                String fullname = user.getFullName();
-                String email = user.getEmailAddress();
-                // VaadinSession.getCurrent().getService();
-                // ThemeDisplay themedisplay =
-                // (ThemeDisplay)
-                // VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
-                // String url = user.getPortraitURL(themedisplay);
-                // ExternalResource er = new ExternalResource(url);
-                // com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(), er);
-                // image.setHeight(80, Unit.PIXELS);
-                // image.setWidth(65, Unit.PIXELS);
-                // membersLayout.addComponent(image);
-                // String labelString =
-                // new String("<a href=\"mailto:" + email
-                // + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
-                // Label userLabel = new Label(labelString, ContentMode.HTML);
-                // membersLayout.addComponent(userLabel);
-                memberString.append("<a href=\"mailto:");
-                memberString.append(email);
-                memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
-                memberString.append(fullname);
-                memberString.append("</a>");
-              }
-            }
-            synchronized (UI.getCurrent()) {
-              processed();
-            }
-          }
-        }
-      }
-    });
-    return membersLayout;
-  }
 
   void updateProjectStatus() {
 
@@ -579,10 +732,10 @@ public class PatientView extends VerticalLayout implements View {
     gpc.removeContainerProperty("identifier");
 
     experiments.setContainerDataSource(gpc);
-    experiments.setHeaderVisible(false);
+    //experiments.setHeaderVisible(false);
     experiments.setHeightMode(HeightMode.ROW);
     experiments.setHeightByRows(gpc.size());
-    experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.4f, Unit.PIXELS);
+    experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.6f, Unit.PIXELS);
     
     
 
@@ -659,7 +812,8 @@ public class PatientView extends VerticalLayout implements View {
     experiments.getColumn("started").setRenderer(new HtmlRenderer());
 
     ProgressBar progressBar = new ProgressBar();
-    progressBar.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.4f, Unit.PIXELS);
+    progressBar.setCaption("Overall Progress");
+    progressBar.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.6f, Unit.PIXELS);
     progressBar.setStyleName("patientprogress");
 
     status.addComponent(progressBar);
@@ -720,13 +874,16 @@ public class PatientView extends VerticalLayout implements View {
    */
   public VerticalLayout initProjectStatus() {
     status = new VerticalLayout();
-    status.setMargin(true);
+    status.setWidth(100.0f, Unit.PERCENTAGE);
+    
+    status.setMargin(new MarginInfo(true, false, false, true));
     status.setSpacing(true);
-    status.setCaption("Project Status");
-    status.setIcon(FontAwesome.CHECK_SQUARE);
+    //status.setCaption("Project Status");
+    //status.setIcon(FontAwesome.CHECK_SQUARE);
     status.setSizeFull();
 
     VerticalLayout projectStatus = new VerticalLayout();
+    projectStatus.setCaption("Status");
     projectStatus.setMargin(new MarginInfo(true, false, false, true));
     projectStatus.setSpacing(true);
 
@@ -758,69 +915,97 @@ public class PatientView extends VerticalLayout implements View {
   VerticalLayout initGraph() {
     VerticalLayout graphSection = new VerticalLayout();
     graphSectionContent = new HorizontalLayout();
-
-    graphSectionContent.setCaption("Project Graph");
-    graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
+    
+    graphSection.setCaption("Project Graph");
 
     graphSectionContent.setMargin(new MarginInfo(false, false, false, true));
     graphSection.setMargin(new MarginInfo(false, false, false, true));
     graphSection.setWidth("100%");
     graphSectionContent.setWidth("100%");
-    final Button loadGraph = new Button("[+]");
-    loadGraph.setStyleName(ValoTheme.BUTTON_LINK);
-    loadGraph.addClickListener(new ClickListener() {
-
-      @Override
-      public void buttonClick(ClickEvent event) {
-        LOGGER.debug(String.valueOf(graphSectionContent.getComponentCount() == 0));
-        if (graphSectionContent.getComponentCount() > 0)
-          LOGGER.debug(String.valueOf(graphSectionContent.getComponent(0) instanceof Image));
-        if (graphSectionContent.getComponentCount() == 0
-            || !(graphSectionContent.getComponent(0) instanceof Image)) {
-          ProgressBar progress = new ProgressBar();
-          progress.setIndeterminate(true);
-          Label info =
-              new Label(
-                  "Computing the project graph can take several seconds on big projects. Please be patient.");
-          info.setStyleName(ValoTheme.LABEL_SUCCESS);
-          graphSectionContent.addComponent(info);
-          graphSectionContent.addComponent(progress);
-          Worker worker = new Worker(getCurrent());
-          worker.start();
-          UI.getCurrent().setPollInterval(500);
-          loadGraph.setEnabled(false);
-        }
-
-
-      }
-
-      public void processed() {
-        UI.getCurrent().setPollInterval(-1);
-        loadGraph.setVisible(false);
-      }
-
-      class Worker extends Thread {
-        private PatientView patientView;
-
-        public Worker(PatientView current) {
-          patientView = current;
-        }
-
-        @Override
-        public void run() {
-          patientView.updateContentGraph();
-          synchronized (UI.getCurrent()) {
-            processed();
-          }
-
-        }
-      }
-    });
-
 
     graphSection.addComponent(graphSectionContent);
-    graphSection.addComponent(loadGraph);
     return graphSection;
+  }
+  
+  public void processed() {
+    UI.getCurrent().setPollInterval(-1);
+  }
+
+  class Worker extends Thread {
+    private PatientView patientView;
+
+    public Worker(PatientView current) {
+      patientView = current;
+    }
+
+    @Override
+    public void run() {
+      patientView.updateContentGraph();
+      synchronized (UI.getCurrent()) {
+        processed();
+      }
+
+    }
+  }
+  
+  public void loadGraph() {
+    LOGGER.debug(String.valueOf(graphSectionContent.getComponentCount() == 0));
+    if (graphSectionContent.getComponentCount() > 0)
+      LOGGER.debug(String.valueOf(graphSectionContent.getComponent(0) instanceof Image));
+    if (graphSectionContent.getComponentCount() == 0
+        || !(graphSectionContent.getComponent(0) instanceof Image)) {
+      ProgressBar progress = new ProgressBar();
+      progress.setIndeterminate(true);
+      Label info =
+          new Label(
+              "Computing the project graph can take several seconds on big projects. Please be patient.");
+      info.setStyleName(ValoTheme.LABEL_SUCCESS);
+      graphSectionContent.addComponent(info);
+      graphSectionContent.addComponent(progress);
+      graphSectionContent.setComponentAlignment(info, Alignment.MIDDLE_CENTER);
+      graphSectionContent.setComponentAlignment(progress, Alignment.MIDDLE_CENTER);
+
+      Worker worker = new Worker(getCurrent());
+      worker.start();
+      UI.getCurrent().setPollInterval(500);
+    }
+  }
+  
+  private void tableClickChangeTreeView() {
+    registeredExperiments.setSelectable(true);
+    registeredExperiments.setImmediate(true);
+    registeredExperiments.addValueChangeListener(new ViewTablesClickListener(registeredExperiments, ExperimentView.navigateToLabel));
+  }
+
+  /**
+   * initializes and builds a filtering table for this view
+   * 
+   * @return
+   */
+  private FilterTable buildFilterTable() {
+    FilterTable filterTable = new FilterTable();
+
+    filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
+    filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
+
+    filterTable.setFilterBarVisible(true);
+
+    filterTable.setSelectable(true);
+    filterTable.setImmediate(true);
+
+    filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
+
+    filterTable.setColumnCollapsingAllowed(true);
+
+    filterTable.setColumnReorderingAllowed(true);
+
+    filterTable.setColumnHeader("code", "Name");
+    filterTable.setColumnHeader("type", "Type");
+    filterTable.setColumnHeader("registrationDate", "Registration Date");
+    filterTable.setColumnHeader("registrator", "Registered By");
+    filterTable.setColumnHeader("status", "Status");
+
+    return filterTable;
   }
 
   public PatientView getCurrent() {
@@ -835,11 +1020,15 @@ public class PatientView extends VerticalLayout implements View {
       Image graphImage = new Image("", resource);
       
       graphSectionContent.addComponent(graphImage);
+      graphSectionContent.setComponentAlignment(graphImage, Alignment.MIDDLE_CENTER);
+
     } else {
       Label error = new Label("Project Graph can not be computed at that time for this project");
       error.setStyleName(ValoTheme.LABEL_FAILURE);
       graphSectionContent.removeAllComponents();
       graphSectionContent.addComponent(error);
+      graphSectionContent.setComponentAlignment(error, Alignment.MIDDLE_CENTER);
+
       LOGGER.error(String.format("%s: %s",error.getValue(),currentBean.getId()));
     }
   }
@@ -854,7 +1043,7 @@ public class PatientView extends VerticalLayout implements View {
     Resource resource = null;
     try {
       GraphGenerator graphFrame =
-          new GraphGenerator(datahandler.openBisClient.getSamplesOfProject(currentBean.getId()), datahandler.openBisClient.getSampleTypes(), datahandler.openBisClient, currentBean.getId());
+          new GraphGenerator(datahandler.getOpenBisClient().getSamplesOfProject(currentBean.getId()), datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(), currentBean.getId());
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
@@ -868,22 +1057,28 @@ public class PatientView extends VerticalLayout implements View {
     long startTime = System.nanoTime();
     ProjectBean pbean = datahandler.getProjectIvac(currentValue);
     long endTime = System.nanoTime();
+    registeredExperiments.unselect(registeredExperiments.getValue());
     LOGGER.info(String.format("getProject took %f s", ((endTime - startTime) / 1000000000.0)));
     // if the new project bean is different than reset the graph.
     LOGGER.debug(String.valueOf(currentBean == null));
-    if (currentBean != null)
-      LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
-    if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
-
-      resetGraph();
-    }
+    
+    //if (currentBean != null)
+    //  LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
+    //if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
+//
+  //    resetGraph();
+   // }
 
     startTime = System.nanoTime();
     this.setContainerDataSource(pbean);
     endTime = System.nanoTime();
     LOGGER.info(String.format("setContainerDataSource took %f s",
         ((endTime - startTime) / 1000000000.0)));
+    
     updateContent();
+    
+    patientViewTab.setSelectedTab(0);
+
   }
 
   public ProjectBean getCurrentBean() {

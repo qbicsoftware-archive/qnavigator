@@ -92,7 +92,7 @@ public class DatasetViewFilterDecorator implements FilterDecorator, Serializable
 
   @Override
   public String getAllItemsVisibleString() {
-    return "Show all";
+    return "Search";
   }
 
   @Override

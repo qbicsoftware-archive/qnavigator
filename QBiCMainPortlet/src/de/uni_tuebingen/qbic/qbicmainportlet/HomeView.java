@@ -23,6 +23,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -138,7 +139,7 @@ public class HomeView extends VerticalLayout implements View {
    * @param browser
    */
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-    setWidth((browserWidth * 0.6f), Unit.PIXELS);
+    setWidth((browserWidth * 0.85f), Unit.PIXELS);
   }
   
   /**
@@ -169,7 +170,7 @@ public class HomeView extends VerticalLayout implements View {
     homeview_content.setWidth("100%");
 
     // menubar
-    homeview_content.addComponent(initToolBar());
+    //homeview_content.addComponent(initToolBar());
 
     updateView(browserWidth, browserWidth, browser);
 
@@ -221,7 +222,7 @@ public class HomeView extends VerticalLayout implements View {
     VerticalLayout tableSection = new VerticalLayout();
     VerticalLayout tableSectionContent = new VerticalLayout();
 
-    tableSectionContent.setCaption("Registered Projects");
+    tableSectionContent.setCaption("Projects");
     tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
 
@@ -304,8 +305,8 @@ public class HomeView extends VerticalLayout implements View {
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
     List<Project> projects =
-        datahandler.openBisClient.getOpenbisInfoService().listProjectsOnBehalfOfUser(
-            datahandler.openBisClient.getSessionToken(), user);
+        datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(
+            datahandler.getOpenBisClient().getSessionToken(), user);
     for (Project project : projects) {
       if (project.getSpaceCode().contains("IVAC")) {
         this.includePatientCreation = true;

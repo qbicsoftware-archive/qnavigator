@@ -288,7 +288,7 @@ public class DatasetView extends VerticalLayout implements View {
           message.add(datasetType);
           String project = (String) table.getItem(next).getItemProperty("Project").getValue();
 
-          String space = datahandler.openBisClient.getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
+          String space = datahandler.getOpenBisClient().getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
           message.add(project);
           message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
           //message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
@@ -329,10 +329,10 @@ public class DatasetView extends VerticalLayout implements View {
             String parentDatasetFileName =
                 (String) table.getItem(parent).getItemProperty("File Name").getValue();
             url =
-                datahandler.openBisClient.getUrlForDataset(datasetCode, parentDatasetFileName + "/"
+                datahandler.getOpenBisClient().getUrlForDataset(datasetCode, parentDatasetFileName + "/"
                     + datasetFileName);
           } else {
-            url = datahandler.openBisClient.getUrlForDataset(datasetCode, datasetFileName);
+            url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
 
           Window subWindow =
@@ -510,21 +510,21 @@ public class DatasetView extends VerticalLayout implements View {
         case "project":
           String projectIdentifier = map.get("id");
           retrievedDatasets =
-              datahandler.openBisClient
+              datahandler.getOpenBisClient()
                   .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
           break;
 
         case "experiment":
           String experimentIdentifier = map.get("id");
           retrievedDatasets =
-              datahandler.openBisClient
+              datahandler.getOpenBisClient()
                   .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
           break;
 
         case "sample":
           String sampleIdentifier = map.get("id");
           String sampleCode = sampleIdentifier.split("/")[2];
-          retrievedDatasets = datahandler.openBisClient.getDataSetsOfSample(sampleCode);
+          retrievedDatasets = datahandler.getOpenBisClient().getDataSetsOfSample(sampleCode);
           break;
 
         default:

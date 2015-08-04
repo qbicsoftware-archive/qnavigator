@@ -126,7 +126,7 @@ public class TestQbicmainportletUI {
 
     Boolean patientCreation = false;
     List<SpaceWithProjectsAndRoleAssignments> spaceList =
-        datahandler.openBisClient.getFacade().getSpacesWithProjects();
+        datahandler.getOpenBisClient().getFacade().getSpacesWithProjects();
     for (SpaceWithProjectsAndRoleAssignments s : spaceList) {
       if (s.getUsers().contains(userName)) {
         rfc.setContainers(s, patientCreation, project_identifiers_tmp, projectContainer,
@@ -180,7 +180,7 @@ public class TestQbicmainportletUI {
   @Test
   @PerfTest(invocations = 1, threads = 1)
   public void datahandler_createProject(){
-    List<Project> projects = datahandler.openBisClient.listProjects();
+    List<Project> projects = datahandler.getOpenBisClient().listProjects();
     for(Project p: projects){
       ProjectBean pbean =datahandler.createProjectBean(p);
       System.out.println(pbean.getId());
@@ -190,7 +190,7 @@ public class TestQbicmainportletUI {
   @Test
   @PerfTest(invocations = 1, threads = 1)
   public void datahandler_createExperimentBean(){
-    List<Project> projects = datahandler.openBisClient.listProjects();
+    List<Project> projects = datahandler.getOpenBisClient().listProjects();
     for(Project p: projects){
       for(Experiment exp: openbisClient.getExperimentsForProject(p)){
         ExperimentBean ebean = datahandler.createExperimentBean(exp);
@@ -202,7 +202,7 @@ public class TestQbicmainportletUI {
   @Test
   @PerfTest(invocations = 25, threads = 1)
   public void datahandler_openBisClient_getProjectByIdentifier(){
-    Project project = datahandler.openBisClient.getProjectByIdentifier("/ABI_SYSBIO/QMARI");
+    Project project = datahandler.getOpenBisClient().getProjectByIdentifier("/ABI_SYSBIO/QMARI");
     project.getId();
   }
   
@@ -253,7 +253,7 @@ public class TestQbicmainportletUI {
   @PerfTest(invocations = 1, threads = 1)
   public void customVaadinPortlet_addDatasetFiles(){
     CustomVaadinPortlet cvp = new CustomVaadinPortlet();
-    DataSet dataset = datahandler.openBisClient.getFacade().getDataSet("20150224174804803-6961");
+    DataSet dataset = datahandler.getOpenBisClient().getFacade().getDataSet("20150224174804803-6961");
     Map<String, SimpleEntry<String, Long>> entries = new HashMap<String, SimpleEntry<String, Long>>();
     FileInfoDssDTO[] filelist = dataset.listFiles("original", true);
     String folderPath = filelist[0].getPathInDataSet();
@@ -263,7 +263,7 @@ public class TestQbicmainportletUI {
   @Test
   public void customVaadinPortlet_addDatasetFiles_(){
     CustomVaadinPortlet cvp = new CustomVaadinPortlet();
-    DataSet dataset = datahandler.openBisClient.getFacade().getDataSet("20150224174804803-6961");
+    DataSet dataset = datahandler.getOpenBisClient().getFacade().getDataSet("20150224174804803-6961");
     Map<String, SimpleEntry<String, Long>> entries = new HashMap<String, SimpleEntry<String, Long>>();
     FileInfoDssDTO[] filelist = dataset.listFiles("original", true);
     String folderPath = filelist[0].getPathInDataSet();

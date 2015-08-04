@@ -266,6 +266,7 @@ public class WorkflowViewController {
     switch (type){
       case "project":
         datasets = openbis.getClientDatasetsOfProjectByIdentifierWithSearchCriteria(id);
+        LOGGER.debug("datasets" + datasets);
         break;
       
       case "experiment":

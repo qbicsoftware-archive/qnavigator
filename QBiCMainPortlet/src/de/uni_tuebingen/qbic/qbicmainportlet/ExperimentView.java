@@ -26,6 +26,8 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 
 public class ExperimentView extends VerticalLayout implements View {
@@ -55,6 +57,7 @@ public class ExperimentView extends VerticalLayout implements View {
   private Label propertiesContentLabel;
 
   private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
+  private TabSheet expview_tab;
 
   public ExperimentView(DataHandler datahandler, State state, String resourceurl) {
     this(datahandler, state);
@@ -88,11 +91,22 @@ public class ExperimentView extends VerticalLayout implements View {
   void initView() {
 
     expview_content = new VerticalLayout();
+    expview_tab = new TabSheet();
+    expview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
+    expview_tab.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
+    
     expview_content.addComponent(initToolBar());
-    expview_content.addComponent(initDescription());
-    expview_content.addComponent(initStatistics());
-    expview_content.addComponent(initTable());
-    expview_content.addComponent(initButtonLayout());
+    expview_content.addComponent(expview_tab);
+    
+    expview_tab.addTab(initDescription(), "General Information").setIcon(FontAwesome.INFO);;
+    expview_tab.addTab(initStatistics(), "Statistics").setIcon(FontAwesome.BAR_CHART_O);
+    expview_tab.addTab(initProperties(), "Metadata").setIcon(FontAwesome.LIST_UL);
+    expview_tab.addTab(initTable(), "Samples").setIcon(FontAwesome.FLASK);;
+
+    //expview_content.addComponent(initDescription());
+    //expview_content.addComponent(initStatistics());
+    //expview_content.addComponent(initTable());
+    //expview_content.addComponent(initButtonLayout());
 
     // use the component that is returned by initTable
     // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
@@ -107,6 +121,7 @@ public class ExperimentView extends VerticalLayout implements View {
     updateContentToolBar();
     updateContentDescription();
     updateContentStatistics();
+    updateContentProperties();
     updateContentTable();
     updateContentButtonLayout();
   }
@@ -169,13 +184,13 @@ public class ExperimentView extends VerticalLayout implements View {
   VerticalLayout initDescription() {
     VerticalLayout generalInfo = new VerticalLayout();
     VerticalLayout generalInfoContent = new VerticalLayout();
-    generalInfoContent.setCaption("General Information");
-    generalInfoContent.setIcon(FontAwesome.INFO);
+    //generalInfoContent.setCaption("General Information");
+    //generalInfoContent.setIcon(FontAwesome.INFO);
     generalInfoLabel = new Label("");
 
-    generalInfo.setMargin(new MarginInfo(false, false, false, true));
+    generalInfo.setMargin(new MarginInfo(true, false, false, true));
     generalInfoContent.addComponent(generalInfoLabel);
-    generalInfoContent.setMargin(new MarginInfo(false, false, false, true));
+    generalInfoContent.setMargin(new MarginInfo(true, false, false, true));
     //generalInfoContent.setMargin(true);
     //generalInfo.setMargin(true);
 
@@ -198,15 +213,15 @@ public class ExperimentView extends VerticalLayout implements View {
     VerticalLayout statistics = new VerticalLayout();
 
     HorizontalLayout statContent = new HorizontalLayout();
-    statContent.setCaption("Statistics");
-    statContent.setIcon(FontAwesome.BAR_CHART_O);
+    //statContent.setCaption("Statistics");
+    //statContent.setIcon(FontAwesome.BAR_CHART_O);
 
 
     // int numberOfDatasets = dh.datasetMap.get(experimentBean.getId()).size();
     statContentLabel = new Label("");
 
     statContent.addComponent(statContentLabel);
-    statContent.setMargin(new MarginInfo(false, false, false, true));
+    statContent.setMargin(new MarginInfo(true, false, false, true));
 
     // statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
     //statContent.setMargin(true);
@@ -228,51 +243,81 @@ public class ExperimentView extends VerticalLayout implements View {
     //statistics.setMargin(true);
 
     // Properties of experiment
-    VerticalLayout properties = new VerticalLayout();
-    VerticalLayout propertiesContent = new VerticalLayout();
-    propertiesContent.setCaption("Properties");
-    propertiesContent.setIcon(FontAwesome.LIST_UL);
-    propertiesContentLabel = new Label("", ContentMode.HTML);
-    propertiesContent.addComponent(propertiesContentLabel);
-    properties.addComponent(propertiesContent);
-    propertiesContent.setMargin(new MarginInfo(false, false, false, true));
+    //VerticalLayout properties = new VerticalLayout();
+    //VerticalLayout propertiesContent = new VerticalLayout();
+    //propertiesContent.setCaption("Properties");
+    //propertiesContent.setIcon(FontAwesome.LIST_UL);
+    //propertiesContentLabel = new Label("", ContentMode.HTML);
+    //propertiesContent.addComponent(propertiesContentLabel);
+    //properties.addComponent(propertiesContent);
+    //propertiesContent.setMargin(new MarginInfo(true, false, false, true));
 
     //properties.setMargin(true);
-    statistics.addComponent(properties);
+    //statistics.addComponent(properties);
 
-    statistics.setMargin(new MarginInfo(false, false, false, true));
+    statistics.setMargin(new MarginInfo(true, false, false, true));
     statistics.setSpacing(true);
 
     return statistics;
   }
-
+  
   /**
    * 
    */
   void updateContentStatistics() {
     statContentLabel.setValue(String.format("%s sample(s),", currentBean.getSamples().size()));
-    propertiesContentLabel.setValue(currentBean.generatePropertiesFormattedString());
   }
+  
+  VerticalLayout initProperties() {
+    // Properties of experiment
+    VerticalLayout properties = new VerticalLayout();
+    VerticalLayout propertiesContent = new VerticalLayout();
+    //propertiesContent.setCaption("Properties");
+    //propertiesContent.setIcon(FontAwesome.LIST_UL);
+    propertiesContentLabel = new Label("", ContentMode.HTML);
+    propertiesContent.addComponent(propertiesContentLabel);
+    properties.addComponent(propertiesContent);
+    propertiesContent.setMargin(new MarginInfo(true, false, false, true));
+    
+    return properties;
+  }
+
+   void updateContentProperties() {
+     propertiesContentLabel.setValue(currentBean.generatePropertiesFormattedString());
+   }
 
   VerticalLayout initTable() {
     this.table = this.buildFilterTable();
     this.tableClickChangeTreeView();
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
-    tableSectionContent.setCaption("Registered Samples");
-    tableSectionContent.setIcon(FontAwesome.FLASK);
+    //tableSectionContent.setCaption("Registered Samples");
+    //tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
-    tableSectionContent.setMargin(new MarginInfo(false, false, false, true));
+    tableSectionContent.setMargin(new MarginInfo(true, false, false, true));
 
     //tableSectionContent.setMargin(true);
     //tableSection.setMargin(true);
-    tableSection.setMargin(new MarginInfo(false, false, false, true));
+    tableSection.setMargin(new MarginInfo(true, false, false, true));
 
     this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
 
     tableSection.addComponent(tableSectionContent);
+    
+    this.export = new Button("Export as TSV");
+    buttonLayoutSection = new VerticalLayout();
+    HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayout.setHeight(null);
+    buttonLayout.setWidth("100%");
+    buttonLayoutSection.setSpacing(true);
+    buttonLayoutSection.addComponent(buttonLayout);
+    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, false));
+    buttonLayout.addComponent(this.export);
+    
+    tableSection.addComponent(buttonLayoutSection);
 
     return tableSection;
   }
