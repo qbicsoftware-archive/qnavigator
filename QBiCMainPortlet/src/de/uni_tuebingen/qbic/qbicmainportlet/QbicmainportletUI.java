@@ -390,8 +390,11 @@ public class QbicmainportletUI extends UI {
         } else if (currentView instanceof ExperimentView) {
           currentBean = experimentView.getCurrentBean();
         } else if (currentView instanceof SampleView) {
-          currentBean = sampleView.getCurrentBean();
+          //TODO refactoring
+          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
         } else if (currentView instanceof DatasetView) {
+          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+        } else if (currentView instanceof PatientView) {
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
         }
         try {

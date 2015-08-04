@@ -641,6 +641,7 @@ public class DatasetComponent extends CustomComponent{
     public void valueChange(ValueChangeEvent event) {
 
       PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+      
       Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
           (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
               "qbic_download", PortletSession.APPLICATION_SCOPE);
@@ -680,7 +681,7 @@ public class DatasetComponent extends CustomComponent{
      */
     private void valueChange(Object itemId, boolean itemSelected,
         Map<String, SimpleEntry<String, Long>> entries, String fileName) {
-
+      
       ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
           .setValue(itemSelected);
       fileName =
@@ -694,8 +695,10 @@ public class DatasetComponent extends CustomComponent{
         }
       } else if (itemSelected) {
         String datasetCode = (String) table.getItem(itemId).getItemProperty("CODE").getValue();
+        
         Long datasetFileSize =
             (Long) table.getItem(itemId).getItemProperty("file_size_bytes").getValue();
+
         entries.put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode,
             datasetFileSize));
       } else {
