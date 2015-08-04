@@ -14,14 +14,20 @@ import model.SortBy;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.PopupView;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.PopupView.Content;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -46,6 +52,9 @@ public class WizardBarcodeView extends VerticalLayout {
   private Button sheetDownloadButton;
   private Button pdfDownloadButton;
   private OptionGroup prepSelect;
+  private CheckBox overwrite;
+  
+  public static String boxTheme = ValoTheme.COMBOBOX_SMALL;
 
   // private OptionGroup comparators;
 
@@ -59,33 +68,44 @@ public class WizardBarcodeView extends VerticalLayout {
     setMargin(true);
 
     spaceBox = new ComboBox("Project", spaces);
-    spaceBox.setStyleName(ValoTheme.COMBOBOX_SMALL);
+    spaceBox.setStyleName(boxTheme);
     spaceBox.setNullSelectionAllowed(false);
     spaceBox.setImmediate(true);
 
     projectBox = new ComboBox("Sub-Project");
-    projectBox.setStyleName(ValoTheme.COMBOBOX_SMALL);
+    projectBox.setStyleName(boxTheme);
     projectBox.setEnabled(false);
     projectBox.setImmediate(true);
     projectBox.setNullSelectionAllowed(false);
 
-    addComponent(spaceBox);
-    addComponent(projectBox);
+    addComponent(questionize(spaceBox, "Name of the project", "Project Name"));
+    addComponent(questionize(projectBox, "QBiC 5 letter project code",
+        "Sub-Project"));
 
-    experimentTable = new Table("Experiments");
+    experimentTable = new Table("Sample Overview");
     experimentTable.setStyleName(ValoTheme.TABLE_SMALL);
     experimentTable.setPageLength(1);
     experimentTable.setContainerDataSource(new BeanItemContainer<ExperimentBean>(
         ExperimentBean.class));
     experimentTable.setSelectable(true);
     experimentTable.setMultiSelect(true);
-    addComponent(experimentTable);
+    addComponent(questionize(experimentTable,
+        "This table gives an overview of tissue samples and extracted materials"
+            + " for which barcodes can be printed. You can select one or multiple rows.",
+        "Sample Overview"));
 
     prepSelect = new OptionGroup("Prepare");
     prepSelect.setStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
     prepSelect.addItems(Arrays.asList("Sample Sheet Barcodes", "Sample Tube Barcodes"));
     prepSelect.setMultiSelect(true);
-    addComponent(prepSelect);
+    addComponent(questionize(prepSelect,
+        "Prepare barcodes for the A4 sample sheet and/or qr codes for sample tubes.",
+        "Barcode Preparation"));
+
+    overwrite = new CheckBox("Overwrite existing Tube Barcode Files");
+    addComponent(questionize(overwrite,
+        "Overwrites existing files of barcode stickers. This is useful when "
+            + "the design was changed after creating them.", "Overwrite Sticker Files"));
 
     preview = new BarcodePreviewComponent();
     addComponent(preview);
@@ -134,6 +154,11 @@ public class WizardBarcodeView extends VerticalLayout {
     prepSelect.setMultiSelect(true);
     addComponent(prepSelect);
 
+    overwrite = new CheckBox("Overwrite existing Tube Barcode Files");
+    addComponent(questionize(overwrite,
+        "Overwrites existing files of barcode stickers. This is useful when "
+            + "the design was changed after creating them.", "Overwrite Sticker Files"));
+
     preview = new BarcodePreviewComponent();
     addComponent(preview);
 
@@ -159,16 +184,18 @@ public class WizardBarcodeView extends VerticalLayout {
     addComponent(dlBox);
   }
 
+  public boolean getOverwrite() {
+    return overwrite.getValue();
+  }
+
   public void enableExperiments(boolean enable) {
     experimentTable.setEnabled(enable);
   }
 
   public void creationPressed() {
     enableExperiments(false);
-    if (spaceBox != null)
-      spaceBox.setEnabled(false);
-    if (projectBox != null)
-      projectBox.setEnabled(false);
+    spaceBox.setEnabled(false);
+    projectBox.setEnabled(false);
     prepareButton.setEnabled(false);
     prepSelect.setEnabled(false);
   }
@@ -176,10 +203,8 @@ public class WizardBarcodeView extends VerticalLayout {
   public void reset() {
     sheetDownloadButton.setEnabled(false);
     pdfDownloadButton.setEnabled(false);
-    if (spaceBox != null)
-      spaceBox.setEnabled(true);
-    if (projectBox != null)
-      projectBox.setEnabled(true);
+    spaceBox.setEnabled(true);
+    projectBox.setEnabled(true);
     prepSelect.setEnabled(true);
   }
 
@@ -209,6 +234,39 @@ public class WizardBarcodeView extends VerticalLayout {
     return spaceBox;
   }
 
+  public static HorizontalLayout questionize(Component c, final String info, final String header) {
+    final HorizontalLayout res = new HorizontalLayout();
+    res.setSpacing(true);
+
+    res.setVisible(c.isVisible());
+    res.setCaption(c.getCaption());
+    c.setCaption(null);
+    res.addComponent(c);
+
+    PopupView pv = new PopupView(new Content() {
+
+      @Override
+      public Component getPopupComponent() {
+        Label l = new Label(info, ContentMode.HTML);
+        l.setCaption(header);
+        l.setIcon(FontAwesome.INFO);
+        l.setWidth("250px");
+        l.addStyleName("info");
+        return new VerticalLayout(l);
+      }
+
+      @Override
+      public String getMinimizedValueAsHTML() {
+        return "[?]";
+      }
+    });
+    pv.setHideOnMouseOut(false);
+
+    res.addComponent(pv);
+
+    return res;
+  }
+  
   public ComboBox getProjectBox() {
     return projectBox;
   }

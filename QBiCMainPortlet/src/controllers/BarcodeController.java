@@ -11,12 +11,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import logging.Log4j2Logger;
 import main.BarcodeCreator;
 import main.OpenBisClient;
 import model.ExperimentBarcodeSummaryBean;
 import model.IBarcodeBean;
 import model.NewModelBarcodeBean;
-import model.NewSampleModelBean;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
@@ -46,8 +46,9 @@ public class BarcodeController {
   private BarcodeCreator creator;
 
   List<IBarcodeBean> barcodeBeans;
-  String hi;
 
+  logging.Logger logger = new Log4j2Logger(BarcodeController.class);
+  
   private List<String> barcodeExperiments = new ArrayList<String>(Arrays.asList(
       "Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION", "Q_NGS_MEASUREMENT"));
 
@@ -85,14 +86,20 @@ public class BarcodeController {
           if (it.hasNext())
             view.getButtonTube().removeExtension(it.next());
           barcodeBeans = getSamplesFromExperimentSummaries(view.getExperiments());
+          boolean overwrite = view.getOverwrite();
           Collection<String> options = (Collection<String>) view.getPrepOptionGroup().getValue();
           if (options.size() == 2) {
+            logger.info("Preparing barcodes (sheet and tubes)");
             creator.findOrCreateBarcodesWithProgress(barcodeBeans, view.getProgressBar(),
-                view.getProgressInfo(), new BarcodesReadyRunnable(view, creator, barcodeBeans));
+                view.getProgressInfo(), new BarcodesReadyRunnable(view, creator, barcodeBeans),
+                overwrite);
           } else if (options.contains("Sample Tube Barcodes")) {
+            logger.info("Preparing barcodes (tubes) for project");
             creator.findOrCreateTubeBarcodesWithProgress(barcodeBeans, view.getProgressBar(),
-                view.getProgressInfo(), new TubeBarcodesReadyRunnable(view, creator, barcodeBeans));
+                view.getProgressInfo(), new TubeBarcodesReadyRunnable(view, creator, barcodeBeans),
+                overwrite);
           } else if (options.contains("Sample Sheet Barcodes")) {
+            logger.info("Preparing barcodes (sheet) for project");
             creator
                 .findOrCreateSheetBarcodesWithProgress(barcodeBeans, view.getProgressBar(), view
                     .getProgressInfo(), new SheetBarcodesReadyRunnable(view, creator, barcodeBeans));

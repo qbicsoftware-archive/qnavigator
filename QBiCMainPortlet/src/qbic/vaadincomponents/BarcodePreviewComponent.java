@@ -54,7 +54,6 @@ public class BarcodePreviewComponent extends VerticalLayout {
 
     codedName = new OptionGroup("Add IDs to code & files");
     codedName.addItems(Arrays.asList("QBiC ID", "Lab ID", "2nd Name"));
-    codedName.setMultiSelect(true);
     codedName.setImmediate(true);
     codedName.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
     codedName.select("QBiC ID");
@@ -81,15 +80,17 @@ public class BarcodePreviewComponent extends VerticalLayout {
     grid.addComponent(qr2, 2, 2, 2, 4);
     grid.addComponent(code, 0, 0, 2, 0);
     grid.addComponent(box, 1, 1, 1, 4);
+    grid.setColumnExpandRatio(0, 1);
+    grid.setColumnExpandRatio(2, 1);
     setFieldsReadOnly(true);
     select1 =
         new ComboBox("First Info", new ArrayList<String>(Arrays.asList("Tissue/Extr. Material",
-            "Secondary Name")));
+            "Secondary Name", "QBiC ID")));
     select1.setImmediate(true);
     select1.select("Tissue/Extr. Material");
     select2 =
         new ComboBox("Second Info", new ArrayList<String>(Arrays.asList("Tissue/Extr. Material",
-            "Secondary Name")));
+            "Secondary Name", "QBiC ID")));
     select2.select("Secondary Name");
     select2.setImmediate(true);
 
@@ -182,32 +183,34 @@ public class BarcodePreviewComponent extends VerticalLayout {
         break;
       case "Secondary Name":
         res = map.get("Q_SECONDARY_NAME");
+        break;
+      case "QBiC ID":
+        res = s.getCode();
     }
-    if (res == null)
-      return "";
     return res.substring(0, Math.min(res.length(), 22));
   }
 
   public String getCodeString(Sample sample) {
     Map<String, String> map = sample.getProperties();
     String res = "";
-    @SuppressWarnings("unchecked")
-    Set<String> selection = (Set<String>) codedName.getValue();
-    for (String s : selection) {
-      if (!res.isEmpty())
-        res += "_";
-      switch (s) {
-        case "QBiC ID":
-          res += sample.getCode();
-          break;
-        case "2nd Name":
-          res += map.get("Q_SECONDARY_NAME");
-          break;
-        case "Lab ID":
-          res += map.get("Q_EXTERNALDB_ID");
-          break;
-      }
+    // @SuppressWarnings("unchecked")
+    // Set<String> selection = (Set<String>) codedName.getValue();
+    // for (String s : selection) {
+    String s = (String) codedName.getValue();
+    if (!res.isEmpty())
+      res += "_";
+    switch (s) {
+      case "QBiC ID":
+        res += sample.getCode();
+        break;
+      case "2nd Name":
+        res += map.get("Q_SECONDARY_NAME");
+        break;
+      case "Lab ID":
+        res += map.get("Q_EXTERNALDB_ID");
+        break;
     }
+    // }
     res = fixFileName(res);
     return res;
   }
