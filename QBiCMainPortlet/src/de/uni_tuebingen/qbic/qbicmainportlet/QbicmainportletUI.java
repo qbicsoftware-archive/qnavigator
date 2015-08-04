@@ -68,8 +68,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "0.5.1";
-  private String revision = "567";
+  private String version = "0.5.4";
+  private String revision = "587";
   private String resUrl;
   protected View currentView;
 
@@ -207,8 +207,8 @@ public class QbicmainportletUI extends UI {
   public void buildMainLayout(DataHandler datahandler, VaadinRequest request, String user) {
 
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
-
     MultiscaleController multiscaleController = new MultiscaleController(datahandler.getOpenBisClient(), user);
+
 
     final HomeView homeView = new HomeView(datahandler, "Your Projects", user, state, resUrl);
     DatasetView datasetView = new DatasetView(datahandler,state, resUrl);

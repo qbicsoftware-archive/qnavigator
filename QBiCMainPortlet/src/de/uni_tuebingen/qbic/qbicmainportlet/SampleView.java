@@ -19,12 +19,14 @@ import com.vaadin.server.StreamResource;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractComponentContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.MultiscaleController;
 
@@ -52,7 +54,7 @@ public class SampleView extends VerticalLayout implements View {
   private HorizontalLayout stateInjectLayout;
   private VerticalLayout sampleStateSectionContent;
 
-  private MSHBiologicalSampleStateMachine stateMachine;
+  //private MSHBiologicalSampleStateMachine stateMachine;
   private UglyToPrettyNameMapper uglyToPretty = new UglyToPrettyNameMapper();
 
   private FileDownloader fileDownloader;
@@ -72,6 +74,10 @@ public class SampleView extends VerticalLayout implements View {
   private VerticalLayout notesContent;
   private MultiscaleController controller;
   private MultiscaleComponent noteComponent;
+
+private HorizontalLayout tableSectionContent;
+
+private Label sampleExtId;
 
 
   public SampleView(DataHandler datahandler, State state, String resourceurl, MultiscaleController controller) {
@@ -112,7 +118,7 @@ public class SampleView extends VerticalLayout implements View {
     sampview_content.addComponent(initStatistics());
     sampview_content.addComponent(initTable());
     sampview_content.addComponent(initButtonLayout());
-    sampview_content.addComponent(initMSHBiologicalSampleStateSection());
+    //sampview_content.addComponent(initMSHBiologicalSampleStateSection());
 
     // use the component that is returned by initTable
     // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
@@ -130,7 +136,7 @@ public class SampleView extends VerticalLayout implements View {
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
-    updateMSHBiologicalSampleStateSection();
+    //updateMSHBiologicalSampleStateSection();
     updateNoteComponent();
   }
 
@@ -192,10 +198,15 @@ public class SampleView extends VerticalLayout implements View {
    * initializes the sampleview header (mainly name of sample)
    * @return
    */
-  HorizontalLayout initHeadline() {
-    HorizontalLayout headline = new HorizontalLayout();
+  VerticalLayout initHeadline() {
+    VerticalLayout headline = new VerticalLayout();
     
-    sampleNameLabel = new Label("<font size=14></font>", ContentMode.HTML);
+    sampleNameLabel = new Label("");
+    sampleExtId = new Label("");
+    sampleExtId.addStyleName("qlabel-huge");
+    sampleNameLabel.addStyleName("qlabel-large");
+    
+    headline.addComponent(sampleExtId);
     headline.addComponent(sampleNameLabel);
     headline.setMargin(true);
     
@@ -203,7 +214,14 @@ public class SampleView extends VerticalLayout implements View {
   }
   
   void updateHeadline() {
-    sampleNameLabel.setValue("<font size=14>" + currentBean.getCode() + "</font>");
+	if(currentBean.getProperties().containsKey("Q_EXTERNALDB_ID") && !"".equals(currentBean.getProperties().get("Q_EXTERNALDB_ID"))){
+		sampleExtId.setValue(currentBean.getProperties().get("Q_EXTERNALDB_ID"));
+		sampleNameLabel.setValue(currentBean.getCode());
+		sampleExtId.setVisible(true);
+	}else{
+		sampleNameLabel.setValue(currentBean.getCode());
+		sampleExtId.setVisible(false);		
+	}
   }
   
   VerticalLayout initNoteComponent() {
@@ -319,7 +337,7 @@ public class SampleView extends VerticalLayout implements View {
     numberOfDatasetsLabel.setValue(String.format("%s dataset(s). ", numberOfDatasets));
     if (numberOfDatasets > 0) {
 
-      String lastDataset = "No Datasets available!";
+      String lastDataset = "";//"No Datasets available!";
       if (currentBean.getLastChangedDataset() != null) {
         lastDataset = currentBean.getLastChangedDataset().toString();
         lastChangedDatasetLabel.setValue(String.format("Last Change: %s",
@@ -345,7 +363,7 @@ public class SampleView extends VerticalLayout implements View {
     this.table = this.buildFilterTable();
 
     VerticalLayout tableSection = new VerticalLayout();
-    HorizontalLayout tableSectionContent = new HorizontalLayout();
+    tableSectionContent = new HorizontalLayout();
     tableSectionContent.setCaption("Registered Datasets");
     tableSectionContent.setIcon(FontAwesome.FLASK);
 
@@ -361,11 +379,13 @@ public class SampleView extends VerticalLayout implements View {
 
     tableSection.addComponent(tableSectionContent);
     tableSection.setMargin(new MarginInfo(false, false, false, true));
-    
-    if (this.datasets == null || this.datasets.size() == 0) {
-      tableSectionContent.addComponent(new Label("No datasets registered."));
+ 
+    //this is done in setContainerDataSource. No need to do it twice
+  /*  if (this.datasets == null || this.datasets.size() == 0) {
+        tableSectionContent.removeAllComponents();
+    	tableSectionContent.addComponent(new Label("No datasets registered."));
     }
-
+*/
     return tableSection;
   }
 
@@ -398,9 +418,14 @@ public class SampleView extends VerticalLayout implements View {
     if (rowNumber == 0) {
       this.table.setVisible(false);
       this.export.setVisible(false);
+      tableSectionContent.removeAllComponents();
+      tableSectionContent.addComponent(new Label("No datasets registered."));
     } else {
+      tableSectionContent.removeAllComponents();
+      tableSectionContent.addComponent(table);
       this.table.setVisible(true);
-      this.table.setPageLength(Math.min(rowNumber, 10));
+      this.export.setVisible(true);
+      this.table.setPageLength(Math.min(rowNumber+1, 10));
     }
   }
 
@@ -436,7 +461,7 @@ public class SampleView extends VerticalLayout implements View {
     return filterTable;
   }
 
-
+  /*
   VerticalLayout initMSHBiologicalSampleStateSection() {
     stateMachine = new MSHBiologicalSampleStateMachine(datahandler.openBisClient, this);
 
@@ -467,7 +492,8 @@ public class SampleView extends VerticalLayout implements View {
 
     return biologicalSampleStateSection;
   }
-
+*/
+  /*
   void updateMSHBiologicalSampleStateSection() {
     String fullSampleIdentifier = currentBean.getId();
     String sampleType = currentBean.getType();
@@ -494,7 +520,7 @@ public class SampleView extends VerticalLayout implements View {
       biologicalSampleStateSection.setVisible(false);
     }
   }
-
+*/
 
   @Override
   public void enter(ViewChangeEvent event) {
