@@ -53,7 +53,7 @@ public class BarcodePreviewComponent extends VerticalLayout {
     tel = new TextField("", "QBiC: +4970712972163");
 
     codedName = new OptionGroup("Add IDs to code & files");
-    codedName.addItems(Arrays.asList("QBiC ID", "Lab ID", "2nd Name"));
+    codedName.addItems(Arrays.asList("QBiC ID", "Lab ID", "Secondary Name"));
     codedName.setImmediate(true);
     codedName.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
     codedName.select("QBiC ID");
@@ -203,7 +203,7 @@ public class BarcodePreviewComponent extends VerticalLayout {
       case "QBiC ID":
         res += sample.getCode();
         break;
-      case "2nd Name":
+      case "Secondary Name":
         res += map.get("Q_SECONDARY_NAME");
         break;
       case "Lab ID":
