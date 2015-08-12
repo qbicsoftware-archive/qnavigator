@@ -96,6 +96,7 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       Grid newGrid = new Grid(gpcontainer);
       if (entry.getValue() instanceof FileParameter || entry.getValue() instanceof FileListParameter) {
         List<String> range = getRange(entry.getValue());
+        
         if (range.contains("fasta") || range.contains("gtf")) {
           gpcontainer = fastaContainer();
         }
@@ -169,9 +170,11 @@ public class InputFilesComponent extends WorkflowParameterComponent {
   public GeneratedPropertyContainer filter(BeanItemContainer<DatasetBean> datasets, List<String> filter){
     BeanItemContainer<DatasetBean> subContainer =
         new BeanItemContainer<DatasetBean>(DatasetBean.class);
+    
     for (java.util.Iterator<DatasetBean> i = datasets.getItemIds().iterator(); i.hasNext();) {
       DatasetBean dataset = i.next();
-      if (filter.contains(dataset.getFileType().toLowerCase())) {
+
+      if (filter.contains(dataset.getFileType().toLowerCase()) | filter.contains(dataset.getFileType())) {
         subContainer.addBean(dataset);
       }
     }

@@ -73,6 +73,7 @@ public class WorkflowViewController {
     List<String> dsCodes = new ArrayList<String>();
 
     for (ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet ds : datasets) {
+      //TODO determine if folder or not
       dsCodes.add(ds.getCode());
       dataMap.put(ds.getCode(), ds);
     }

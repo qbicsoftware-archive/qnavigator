@@ -22,6 +22,7 @@ public class GridEditForm extends GridLayout {
 
   private TextField type = new TextField("Type");
   private TextField amount = new TextField("Amount");
+  private TextField secondaryName = new TextField("Secondary Name");
   private CheckBox dnaSeq = new CheckBox("DNA Seq");
   private CheckBox rnaSeq = new CheckBox("RNA Seq");
   private CheckBox deepSeq = new CheckBox("Deep Seq");
@@ -29,14 +30,15 @@ public class GridEditForm extends GridLayout {
   private ComboBox seqDevice = new ComboBox("Sequencing Device");
 
   public GridEditForm(List<String> tissueOptions, List<String> sequenceOptions) {
-    super(4, 3);
+    super(5, 3);
     setSpacing(true);
     fieldGroup.buildAndBindMemberFields(this);
 
     addComponent(type, 0, 0);
-    addComponent(amount, 1, 0);
-    addComponent(tissue, 2, 0);
-    addComponent(seqDevice, 3, 0);
+    addComponent(secondaryName,1,0);
+    addComponent(amount, 2, 0);
+    addComponent(tissue, 3, 0);
+    addComponent(seqDevice, 4, 0);
     addComponent(dnaSeq, 0, 1);
     addComponent(rnaSeq, 1, 1);
     addComponent(deepSeq, 2, 1);

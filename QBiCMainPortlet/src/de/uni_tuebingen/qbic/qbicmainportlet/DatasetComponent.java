@@ -228,7 +228,7 @@ public class DatasetComponent extends CustomComponent{
     //tableSectionContent.setCaption("Datasets");
     //tableSectionContent.setIcon(FontAwesome.FLASK);
     //tableSection.addComponent(new Label(String.format("This project contains %s dataset(s).", numberOfDatasets)));
-    tableSectionContent.setMargin(new MarginInfo(true, false, false, false));
+    tableSectionContent.setMargin(new MarginInfo(true, false, true, false));
     tableSection.addComponent(new Label(String.format("This view shows all datasets associated with this project. There are %s registered datasets.", numberOfDatasets), Label.CONTENT_PREFORMATTED));
     tableSectionContent.addComponent(this.table);
 
@@ -246,7 +246,7 @@ public class DatasetComponent extends CustomComponent{
     // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, true));
     buttonLayout.setHeight(null);
     //buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);

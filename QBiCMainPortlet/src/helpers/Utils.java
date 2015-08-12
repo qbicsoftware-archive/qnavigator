@@ -17,8 +17,19 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.PopupView;
+import com.vaadin.ui.PopupView.Content;
+import com.vaadin.ui.VerticalLayout;
+
+import de.uni_tuebingen.qbic.qbicmainportlet.CustomVisibilityComponent;
+import de.uni_tuebingen.qbic.qbicmainportlet.VisibilityChangeListener;
 
 public class Utils {
 
@@ -231,5 +242,50 @@ public class Utils {
     SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZ");
     return ft.format(dNow);
   }
+  
+  public static HorizontalLayout questionize(Component c, final String info, final String header) {
+    final HorizontalLayout res = new HorizontalLayout();
+    res.setSpacing(true);
+    if (c instanceof CustomVisibilityComponent) {
+      CustomVisibilityComponent custom = (CustomVisibilityComponent) c;
+      c = custom.getInnerComponent();
+      custom.addListener(new VisibilityChangeListener() {
+
+        @Override
+        public void setVisible(boolean b) {
+          res.setVisible(b);
+        }
+      });
+    }
+
+    res.setVisible(c.isVisible());
+    res.setCaption(c.getCaption());
+    c.setCaption(null);
+    res.addComponent(c);
+
+    PopupView pv = new PopupView(new Content() {
+
+      @Override
+      public Component getPopupComponent() {
+        Label l = new Label(info, ContentMode.HTML);
+        l.setCaption(header);
+        l.setIcon(FontAwesome.INFO);
+        l.setWidth("250px");
+        l.addStyleName("info");
+        return new VerticalLayout(l);
+      }
+
+      @Override
+      public String getMinimizedValueAsHTML() {
+        return "[?]";
+      }
+    });
+    pv.setHideOnMouseOut(false);
+
+    res.addComponent(pv);
+
+    return res;
+  }
+
 
 }

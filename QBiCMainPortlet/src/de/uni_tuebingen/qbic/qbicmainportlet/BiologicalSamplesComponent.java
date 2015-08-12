@@ -7,6 +7,7 @@ import logging.Log4j2Logger;
 import logging.Logger;
 import model.BiologicalEntitySampleBean;
 import model.BiologicalSampleBean;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.Item;
@@ -15,9 +16,11 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.server.Page;
+import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
@@ -25,6 +28,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 
@@ -96,7 +100,6 @@ public class BiologicalSamplesComponent extends CustomComponent{
         }
         
       });
-    
       
       mainLayout = new VerticalLayout(vert);
       
@@ -148,8 +151,21 @@ public class BiologicalSamplesComponent extends CustomComponent{
                   newEntityBean.setAdditionalInfo(sampleProperties.get("Q_ADDIIONAL_INFO"));
                   newEntityBean.setExternalDB(sampleProperties.get("Q_EXTERNALDB_ID"));
                   newEntityBean.setSecondaryName(sampleProperties.get("Q_SECONDARY_NAME"));
-                  newEntityBean.setOrganism(sampleProperties.get("Q_NCBI_ORGANISM"));
+                  
+                  String organismID = sampleProperties.get("Q_NCBI_ORGANISM");
+                  newEntityBean.setOrganism(organismID);
+                  
+                  List<PropertyType> bioSampleProperties =
+                      datahandler.getOpenBisClient().listPropertiesForType(datahandler.getOpenBisClient()
+                          .getSampleTypeByString(sampleTypes.Q_BIOLOGICAL_ENTITY.toString()));
+                  
+                  for (PropertyType pType : bioSampleProperties) {
+                    if (pType.getCode().equals("Q_NCBI_ORGANISM")) {
+                      newEntityBean.setOrganismName(datahandler.getOpenBisClient().getCVLabelForProperty(pType,organismID));
+                    }
+                  }
                   newEntityBean.setProperties(sampleProperties);
+                  newEntityBean.setGender(sampleProperties.get("Q_GENDER"));
                   
                   samplesEntityContainer.addBean(newEntityBean);
                   
@@ -190,12 +206,13 @@ public class BiologicalSamplesComponent extends CustomComponent{
               final GeneratedPropertyContainer gpcEntity = new GeneratedPropertyContainer(samplesEntity);
               gpcEntity.removeContainerProperty("id");
               gpcEntity.removeContainerProperty("type");
+              gpcEntity.removeContainerProperty("organismName");
+
 
               sampleEntityGrid.setContainerDataSource(gpcEntity);
               sampleEntityGrid.setColumnReorderingAllowed(true);
-              sampleEntityGrid.setColumnOrder("code", "organism","secondaryName");
               
-              gpcEntity.addGeneratedProperty("Organism Reference", new PropertyValueGenerator<String>() {
+              gpcEntity.addGeneratedProperty("Organism", new PropertyValueGenerator<String>() {
 
                 @Override
                 public Class<String> getType() {
@@ -204,21 +221,23 @@ public class BiologicalSamplesComponent extends CustomComponent{
 
                 @Override
                 public String getValue(Item item, Object itemId, Object propertyId) {
-                  String ncbi = String.format("http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&name=%s&lvl=0&srchmode=1&keep=1&unlock' target='_blank'>%s</a>", item.getItemProperty("organism").getValue(),item.getItemProperty("organism").getValue());
+                  String ncbi = String.format("http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&name=%s&lvl=0&srchmode=1&keep=1&unlock' target='_blank'>%s</a>", item.getItemProperty("organism").getValue(),item.getItemProperty("organismName").getValue());
                   String link = String.format("<a href='%s", ncbi);
    
                   return link;
                 }
               });
-              sampleEntityGrid.getColumn("Organism Reference").setRenderer(new HtmlRenderer());
               
+              sampleEntityGrid.getColumn("Organism").setRenderer(new HtmlRenderer());
+              sampleEntityGrid.setColumnOrder("secondaryName","code", "Organism");
+
               final GeneratedPropertyContainer gpcBio = new GeneratedPropertyContainer(samplesBio);
               gpcBio.removeContainerProperty("id");
               gpcBio.removeContainerProperty("type");
 
               sampleBioGrid.setContainerDataSource(gpcBio);
               sampleBioGrid.setColumnReorderingAllowed(true);
-              sampleBioGrid.setColumnOrder("code", "secondaryName");
+              sampleBioGrid.setColumnOrder("secondaryName", "code");
               
               helpers.GridFunctions.addColumnFilters(sampleBioGrid, gpcBio);
               helpers.GridFunctions.addColumnFilters(sampleEntityGrid, gpcEntity);
@@ -244,14 +263,14 @@ public class BiologicalSamplesComponent extends CustomComponent{
       
       //tableSectionContent.setCaption("Datasets");
       //tableSectionContent.setIcon(FontAwesome.FLASK);
-      tableSection.addComponent(new Label(String.format("This view shows the biological entities (e.g., human, mouse) to be studied and the corresponding biological samples. With biological entities, information specific to the subject (e.g., age or BMI in the case of patient data) can be stored. The biological sample is a sample which has been extracted from the corresponding biological entity. This is the raw sample material that can be later prepared for specific analytical methods such as MS or NGS. "
-          + "\n\n There are %s biological samples coming from %s distinct biological entities in this study.", numberOfBioSamples, numberOfEntitySamples), Label.CONTENT_PREFORMATTED));
+      tableSection.addComponent(new Label(String.format("This view shows the sample sources (e.g., human, mouse) to be studied and the corresponding extracted samples. With sample sources, information specific to the subject (e.g., age or BMI in the case of patient data) can be stored. The extracted sample is a sample which has been extracted from the corresponding sample source. This is the raw sample material that can be later prepared for specific analytical methods such as MS or NGS. "
+          + "\n\n There are %s extracted  samples coming from %s distinct sample sources in this study.", numberOfBioSamples, numberOfEntitySamples), Label.CONTENT_PREFORMATTED));
       
       tableSectionContent.addComponent(sampleBioGrid);
       sampletableSectionContent.addComponent(sampleEntityGrid);
       
-      sampleEntityGrid.setCaption("Biological Entities");
-      sampleBioGrid.setCaption("Biological Samples");
+      sampleEntityGrid.setCaption("Sample Sources");
+      sampleBioGrid.setCaption("Extracted Samples");
       
       tableSection.setMargin(new MarginInfo(true, false, false, true));
       tableSection.setSpacing(true);

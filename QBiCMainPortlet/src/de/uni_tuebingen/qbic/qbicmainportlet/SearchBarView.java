@@ -3,6 +3,8 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import logging.Log4j2Logger;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
@@ -24,6 +26,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -63,7 +66,10 @@ public class SearchBarView extends CustomComponent {
     // *----------- search text field .... search button-----------*
     HorizontalLayout searchbar = new HorizontalLayout();
     searchbar.setSpacing(true);
-    final ComboBox searchfield = new ComboBox();
+    final TextField searchfield = new TextField();
+    searchfield.setHeight("44px");
+    searchfield.setImmediate(true);
+    
     searchfield.setInputPrompt("search for sample");
     // TODO would be nice to have a autofill or something similar
     searchbar.addComponent(searchfield);
@@ -74,25 +80,56 @@ public class SearchBarView extends CustomComponent {
 		private static final long serialVersionUID = -2409450448301908214L;
 
 	@Override
-      public void buttonClick(ClickEvent event) {    
-        
+      public void buttonClick(ClickEvent event) {
+	  //TODO how to deal with entities
+	    Pattern pattern = Pattern.compile("Q[A-Z0-9]{4}[0-9]{3}[A-Z0-9]{2}");
+	    Pattern pattern2 = Pattern.compile("Q[A-Z0-9]{4}ENTITY-[0-9]+");
+	    
         LOGGER.info("searching for sample: " + (String)searchfield.getValue());
+        
         if (searchfield.getValue() == null || searchfield.getValue().toString().equals("")) {
-          Notification.show("Please provide a valid Sample ID.", Type.WARNING_MESSAGE);
+          Notification.show("Please provide a Barcode before clicking GoTo.", Type.WARNING_MESSAGE);
         }
         
         else {
         String entity = (String) searchfield.getValue().toString();
-
-        Sample foundSample = datahandler.getOpenBisClient().getSampleByIdentifier(entity);
-        String identifier = foundSample.getIdentifier();
         
-        State state = (State) UI.getCurrent().getSession().getAttribute("state");
-        ArrayList<String> message = new ArrayList<String>();
-        message.add("clicked");
-        message.add(identifier);
-        message.add("sample");
-        state.notifyObservers(message);
+        Matcher matcher = pattern.matcher(entity);
+        Matcher matcher2 = pattern2.matcher(entity);
+       
+        LOGGER.debug(entity);
+        Boolean patternFound1 = matcher.find();
+        Boolean patternFound2 = matcher2.find();
+        
+        LOGGER.debug(patternFound1.toString());
+        LOGGER.debug(patternFound2.toString());
+        
+        if (patternFound1) {
+          Sample foundSample = datahandler.getOpenBisClient().getSampleByIdentifier(matcher.group(0).toString());
+          String identifier = foundSample.getIdentifier();
+          
+          State state = (State) UI.getCurrent().getSession().getAttribute("state");
+          ArrayList<String> message = new ArrayList<String>();
+          message.add("clicked");
+          message.add(identifier);
+          message.add("sample");
+          state.notifyObservers(message);
+        }
+        
+        else if (patternFound2) {
+          Sample foundSample = datahandler.getOpenBisClient().getSampleByIdentifier(matcher2.group(0).toString());
+          String identifier = foundSample.getIdentifier();
+          
+          State state = (State) UI.getCurrent().getSession().getAttribute("state");
+          ArrayList<String> message = new ArrayList<String>();
+          message.add("clicked");
+          message.add(identifier);
+          message.add("sample");
+          state.notifyObservers(message);
+        }
+        else {
+          Notification.show("Please provide a valid Sample Barcode.", Type.WARNING_MESSAGE);
+        }
         }
       }
     });
@@ -100,7 +137,7 @@ public class SearchBarView extends CustomComponent {
     // setClickShortcut() would add global shortcut, instead we
     // 'scope' the shortcut to the panel:
     mainlayout.addAction(new com.vaadin.ui.Button.ClickShortcut(searchOk, KeyCode.ENTER));
-    searchfield.addItems(this.getSearchResults("Q"));
+    //searchfield.addItems(this.getSearchResults("Q"));
     searchfield.setDescription(infotext);
     searchfield.addValidator(new NullValidator("Field must not be empty", false));
     searchfield.setValidationVisible(false);

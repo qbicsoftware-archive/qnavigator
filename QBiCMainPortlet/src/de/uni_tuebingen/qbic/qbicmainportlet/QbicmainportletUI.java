@@ -3,6 +3,7 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.portlet.PortletSession;
 import javax.servlet.annotation.WebServlet;
@@ -14,6 +15,7 @@ import submitter.WorkflowSubmitterFactory.Type;
 import views.WorkflowView;
 import logging.Log4j2Logger;
 import main.OpenBisClient;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -26,6 +28,7 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
@@ -43,6 +46,7 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.MultiscaleController;
@@ -267,15 +271,23 @@ public class QbicmainportletUI extends UI {
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
     HorizontalLayout headerView = new HorizontalLayout();
     
+    headerView.setWidth((getPage().getBrowserWindowHeight() * 0.85f), Unit.PIXELS);
+    headerView.setSpacing(false);
+    
+    HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setSpacing(true);
+    
+    final HorizontalLayout labelLayout = new HorizontalLayout();
+    headerView.addComponent(buttonLayout);    
+    headerView.addComponent(labelLayout);
+
     //treeViewAndLevelView.addComponent(tv);
     
     VerticalLayout versionLayout = new VerticalLayout();
 
     Button homeButton = new Button("Home");
     homeButton.setIcon(FontAwesome.HOME);
-    //homeButton.addStyleName(ValoTheme.BUTTON_QUIET);
     homeButton.setStyleName(ValoTheme.BUTTON_LARGE);
-    
     homeButton.addClickListener(new Button.ClickListener() {
 
       @Override
@@ -285,13 +297,50 @@ public class QbicmainportletUI extends UI {
 
     });
     
+    buttonLayout.addComponent(homeButton);
+    Boolean includePatientCreation = false;
+    
+    List<Project> projects =
+        datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(
+            datahandler.getOpenBisClient().getSessionToken(), user);
+    int numberOfProjects = 0;
+    for (Project project : projects) {
+      if (project.getSpaceCode().contains("IVAC")) {
+        includePatientCreation = true;
+      }
+      numberOfProjects += 1;
+    }
+    
+    
+    // add patient button
+    if (includePatientCreation) {
+      Button addPatient = new Button("Add Patient");
+      addPatient.setIcon(FontAwesome.PLUS);
+      addPatient.setStyleName("addpatient");
+
+      addPatient.addClickListener(new ClickListener() {
+        @Override
+        public void buttonClick(ClickEvent event) {
+          UI.getCurrent().getNavigator().navigateTo(String.format(AddPatientView.navigateToLabel));
+        }
+      });
+
+      buttonLayout.addComponent(addPatient);
+    }
+    
+    Button header = new Button(String.format("Total number of projects: %s", numberOfProjects));
+    header.setIcon(FontAwesome.HAND_O_RIGHT);
+    header.setStyleName(ValoTheme.BUTTON_LARGE);
+    header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+    
+    labelLayout.addComponent(header);
+    
     SearchBarView searchBarView = new SearchBarView(datahandler);
 
     headerView.setWidth("100%");
-    headerView.addComponent(homeButton);
     headerView.addComponent(searchBarView);    
     headerView.setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
-    headerView.setComponentAlignment(homeButton, Alignment.TOP_LEFT);
+    //headerView.setComponentAlignment(homeButton, Alignment.TOP_LEFT);
 
     treeViewAndLevelView.addComponent(navigatorContent);
     mainLayout.addComponent(headerView);
@@ -386,16 +435,60 @@ public class QbicmainportletUI extends UI {
         if (currentView instanceof ProjectView) {
           //TODO refactoring
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+          
+          labelLayout.removeAllComponents();        
+          Button header = new Button(projectView.getHeaderLabel());
+          header.setStyleName(ValoTheme.BUTTON_LARGE);
+          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+          header.setIcon(FontAwesome.HAND_O_RIGHT);
+
+          labelLayout.addComponent(header);
+        } else if (currentView instanceof HomeView) {
+          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+          
+          labelLayout.removeAllComponents();        
+          Button header = new Button(homeView.getHeader());
+          header.setStyleName(ValoTheme.BUTTON_LARGE);
+          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+          header.setIcon(FontAwesome.HAND_O_RIGHT);
+
+          labelLayout.addComponent(header);
           //currentBean = projectView.getCurrentBean();
         } else if (currentView instanceof ExperimentView) {
           currentBean = experimentView.getCurrentBean();
+          
         } else if (currentView instanceof SampleView) {
           //TODO refactoring
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+          
+          labelLayout.removeAllComponents();        
+          Button header = new Button(sampleView.getHeader());
+          header.setStyleName(ValoTheme.BUTTON_LARGE);
+          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+          header.setIcon(FontAwesome.HAND_O_RIGHT);
+
+          labelLayout.addComponent(header);
+          
         } else if (currentView instanceof DatasetView) {
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
         } else if (currentView instanceof PatientView) {
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+          
+          labelLayout.removeAllComponents();        
+          Button header = new Button(patientView.getHeaderLabel());
+          header.setStyleName(ValoTheme.BUTTON_LARGE);
+          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+          header.setIcon(FontAwesome.HAND_O_RIGHT);
+          labelLayout.addComponent(header);
+        } else if (currentView instanceof AddPatientView) {
+          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+          
+          labelLayout.removeAllComponents();        
+          Button header = new Button(addPatientView.getHeader());
+          header.setStyleName(ValoTheme.BUTTON_LARGE);
+          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+          header.setIcon(FontAwesome.HAND_O_RIGHT);
+          labelLayout.addComponent(header);
         }
         try {
           PortletSession portletSession = QbicmainportletUI.getCurrent().getPortletSession();

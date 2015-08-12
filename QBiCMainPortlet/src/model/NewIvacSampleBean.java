@@ -8,12 +8,13 @@ public class NewIvacSampleBean implements Serializable {
   Integer amount;
   String tissue;
   String seqDevice;
+  String secondaryName;
   Boolean dnaSeq;
   Boolean rnaSeq;
   Boolean deepSeq;
 
   public NewIvacSampleBean(String type, Integer amount, String tissue, Boolean dnaSeq,
-      Boolean rnaSeq, Boolean deepSeq, String seqDevice) {
+      Boolean rnaSeq, Boolean deepSeq, String seqDevice, String secondaryName) {
     this.type = type;
     this.amount = amount;
     this.tissue = tissue;
@@ -21,10 +22,19 @@ public class NewIvacSampleBean implements Serializable {
     this.rnaSeq = rnaSeq;
     this.deepSeq = deepSeq;
     this.seqDevice = seqDevice;
+    this.secondaryName = secondaryName;
   }
 
   public NewIvacSampleBean() {
 
+  }
+  
+  public String getSecondaryName() {
+    return secondaryName;
+  }
+
+  public void setSecondaryName(String secondaryName) {
+    this.secondaryName = secondaryName;
   }
 
   public String getType() {

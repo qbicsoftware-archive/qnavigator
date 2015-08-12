@@ -557,9 +557,9 @@ public class GraphGenerator {
                 for (Sample ggc : grandgrandchildren) {
 
                   String measuredSecID = "";
-                  measuredSecID = openBisClient.getSampleByIdentifier(ggc.getIdentifier()).getProperties().get("Q_SECONDARY_NAME");
-                  if (measuredSecID != null) {
-                    measuredSecID = measuredSecID.replace("nan", "");
+                  String openbisSecID = openBisClient.getSampleByIdentifier(ggc.getIdentifier()).getProperties().get("Q_SECONDARY_NAME");
+                  if (openbisSecID != null) {
+                    measuredSecID = openbisSecID.replace("nan", "");
                   }
                   Object grandgranddaughter_node =
                       graph.insertVertex(

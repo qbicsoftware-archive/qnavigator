@@ -78,6 +78,18 @@ public class SampleView extends VerticalLayout implements View {
   private Label propertiesLabel;
   private Label experimentalFactorLabel;
   private Label currentSampleStateName;
+  
+  private String header;
+  public String getHeader() {
+    return header;
+  }
+
+
+  public void setHeader(String header) {
+    this.header = header;
+  }
+
+
   private VerticalLayout notesContent;
   private MultiscaleController controller;
   private MultiscaleComponent noteComponent;
@@ -126,11 +138,13 @@ private DatasetComponent datasetComponent;
     sampview_tab = new TabSheet();
     sampview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
     
+    header = "";
+    
     datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
     
-    sampview_tab.addTab(initDescription()).setIcon(FontAwesome.FILE_TEXT_O);
-    sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.TH);
-    sampview_tab.addTab(datasetComponent).setIcon(FontAwesome.FLASK);
+    sampview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+    sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.BAR_CHART_O);
+    sampview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     sampview_tab.addTab(initNoteComponent()).setIcon(FontAwesome.PENCIL);
 
     sampview_tab.setImmediate(true);
@@ -148,7 +162,7 @@ private DatasetComponent datasetComponent;
       
     
     //sampview_content.addComponent(initToolBar());
-    sampview_content.addComponent(initHeadline());
+    //sampview_content.addComponent(initHeadline());
     sampview_content.addComponent(sampview_tab);
     //sampview_content.addComponent(initDescription());
     //sampview_content.addComponent(initStatistics());
@@ -251,12 +265,14 @@ private DatasetComponent datasetComponent;
   
   void updateHeadline() {
 	if(currentBean.getProperties().containsKey("Q_EXTERNALDB_ID") && !"".equals(currentBean.getProperties().get("Q_EXTERNALDB_ID"))){
-		sampleExtId.setValue(currentBean.getProperties().get("Q_EXTERNALDB_ID"));
-		sampleNameLabel.setValue(currentBean.getCode());
-		sampleExtId.setVisible(true);
+	  header = String.format("%s\n%s",currentBean.getProperties().get("Q_EXTERNALDB_ID"), currentBean.getCode());
+		//sampleExtId.setValue(currentBean.getProperties().get("Q_EXTERNALDB_ID"));
+		//sampleNameLabel.setValue(currentBean.getCode());
+		//sampleExtId.setVisible(true);
 	}else{
-		sampleNameLabel.setValue(currentBean.getCode());
-		sampleExtId.setVisible(false);		
+	  header = String.format("%s", currentBean.getCode());
+		//sampleNameLabel.setValue(currentBean.getCode());
+		//sampleExtId.setVisible(false);		
 	}
   }
   
@@ -298,7 +314,7 @@ private DatasetComponent datasetComponent;
     
     
     // sampleDescriptionContent.setMargin(true);
-    sampleDescription.setCaption("General Description");
+    sampleDescription.setCaption("");
     
     //sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
     sampleTypeLabel = new Label("");

@@ -643,18 +643,20 @@ public class DataHandler implements Serializable {
    * @param users a set of all space users or members
    * @return a new set which exculdes qbic staff and functional members
    */
-  private Set<String> removeQBiCStaffFromMemberSet(Set<String> users) {
+  public Set<String> removeQBiCStaffFromMemberSet(Set<String> users) {
     // TODO there is probably a method to get users of the QBIC group out of openBIS
     Set<String> ret = new LinkedHashSet<String>(users);
-    ret.remove("iiswo01"); // QBiC Staff
-    ret.remove("iisfr01"); // QBiC Staff
-    ret.remove("kxmsn01"); // QBiC Staff
-    ret.remove("zxmbf02"); // QBiC Staff
-    ret.remove("qeana10"); // functional user
+    //ret.remove("iiswo01"); // QBiC Staff
+    //ret.remove("iisfr01"); // QBiC Staff
+    //ret.remove("kxmsn01"); // QBiC Staff
+    //ret.remove("zxmbf02"); // QBiC Staff
+    //ret.remove("qeana10"); // functional user
     ret.remove("etlserver"); // OpenBIS user
     ret.remove("admin"); // OpenBIS user
     ret.remove("QBIC"); // OpenBIS user
     ret.remove("sauron");
+    ret.remove("regtestuser");
+    ret.remove("student");
     // ret.remove("babysauron");
     return ret;
   }
@@ -1646,7 +1648,13 @@ public class DataHandler implements Serializable {
           secondLevel.put("lvl", "2");
           secondLevel.put("sampleExtraction", newSampleExtractionIDs);
           secondLevel.put("biologicalSamples", newBiologicalSampleIDs);
-          secondLevel.put("secondaryNames", secondaryNames.get(i));
+          
+          if(sampleBean.getSecondaryName() == null) {
+            secondLevel.put("secondaryNames", "");
+          }
+          else {
+          secondLevel.put("secondaryNames", sampleBean.getSecondaryName());
+          }
           secondLevel.put("parent", newBiologicalEntitiyID);
           secondLevel.put("primaryTissue", primaryTissues);
           secondLevel.put("detailedTissue", detailedTissue);

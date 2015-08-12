@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.Utils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,11 +13,17 @@ import model.NewIvacSampleBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.google.gwt.validation.client.constraints.NotNullValidator;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerValidator;
 import com.vaadin.data.validator.NullValidator;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.navigator.View;
@@ -24,13 +32,16 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -38,6 +49,7 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -60,21 +72,30 @@ public class AddPatientView extends VerticalLayout implements View {
 
   private VerticalLayout buttonLayoutSection;
 
-  private ComboBox projects = new ComboBox();
+  private CustomVisibilityComponent projects;
   private ComboBox typingMethod = new ComboBox("Typing Method");
-  private TextField numberOfPatients = new TextField();
-  private TextField secondaryNames = new TextField();
-  private TextField description = new TextField();
+  private CustomVisibilityComponent numberOfPatients;
+  private CustomVisibilityComponent secondaryNames;
+  private CustomVisibilityComponent description;
   private CheckBox registerHLAI = new CheckBox("MHC Class I");
   private CheckBox registerHLAII = new CheckBox("MHC Class II");
+  private VerticalLayout hlaTypingSection;
 
   private TextArea hlaItypes = new TextArea();
   private TextArea hlaIItypes = new TextArea();
 
-  private ToolBar toolbar;
+  private String header;
+
 
   private BeanItemContainer sampleOptions = new BeanItemContainer<NewIvacSampleBean>(
       NewIvacSampleBean.class);
+
+  private VerticalLayout optionLayoutSection;
+
+  private CustomVisibilityComponent hlaInfo;
+
+  private CustomVisibilityComponent gridInfo;
+
 
 
   public AddPatientView(DataHandler datahandler, State state, String resourceurl) {
@@ -86,10 +107,18 @@ public class AddPatientView extends VerticalLayout implements View {
     this.datahandler = datahandler;
     this.state = state;
     resourceUrl = "javascript;";
-    sampleOptions.addBean(new NewIvacSampleBean("Normal", 1, "", false, false, false, ""));
-    sampleOptions.addBean(new NewIvacSampleBean("Tumor", 1, "", false, false, false, ""));
+    sampleOptions.addBean(new NewIvacSampleBean("Normal", 1, "", false, false, false, "", ""));
+    sampleOptions.addBean(new NewIvacSampleBean("Tumor", 1, "", false, false, false, "", ""));
 
     initView();
+  }
+  
+  public String getHeader() {
+    return header;
+  }
+
+  public void setHeader(String header) {
+    this.header = header;
   }
 
   /**
@@ -100,16 +129,17 @@ public class AddPatientView extends VerticalLayout implements View {
    * @param browser
    */
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-    setWidth((browserWidth * 1.0f), Unit.PIXELS);
+    setWidth((browserWidth * 0.85f), Unit.PIXELS);
   }
 
   /**
    * init this view. builds the layout skeleton Menubar Description and others Statisitcs Experiment
    * Table Graph
    */
-  void initView() {
+  void initView() { 
+    header= "";
+    
     addPatientViewContent = new VerticalLayout();
-    addPatientViewContent.addComponent(initToolBar());
 
     addPatientViewContent.addComponent(initExperimentalSetupLayout());
     addPatientViewContent.addComponent(initOptionLayout());
@@ -127,8 +157,9 @@ public class AddPatientView extends VerticalLayout implements View {
    * @return
    */
   VerticalLayout initOptionLayout() {
-    VerticalLayout optionLayoutSection = new VerticalLayout();
+    optionLayoutSection = new VerticalLayout();
     optionLayoutSection.setWidth("100%");
+    optionLayoutSection.setVisible(false);
 
     VerticalLayout optionLayout = new VerticalLayout();
 
@@ -137,32 +168,36 @@ public class AddPatientView extends VerticalLayout implements View {
 
       @Override
       public void buttonClick(ClickEvent event) {
-        sampleOptions.addBean(new NewIvacSampleBean("", 0, "", false, false, false, ""));
+        sampleOptions.addBean(new NewIvacSampleBean("", 0, "", false, false, false, "", ""));
       }
     });
 
-    optionLayout.setMargin(new MarginInfo(true, false, false, true));
+    optionLayout.setMargin(new MarginInfo(true, false, false, false));
     optionLayout.setHeight(null);
     optionLayout.setWidth("100%");
     optionLayout.setSpacing(true);
 
 
     final Grid optionGrid = new Grid();
+    optionGrid.setWidth("80%");
     // optionGrid.setCaption("Which biological samples are available for the patient(s) and which experiments will be performed?");
-    Label gridInfo =
-        new Label(
-            "Which biological samples are available for the patient(s) and which experiments will be performed?");
-    gridInfo.setStyleName("info");
-    gridInfo.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
+    
+    gridInfo = new CustomVisibilityComponent(new Label(""));
+    ((Label) gridInfo.getInnerComponent()).addStyleName(ValoTheme.LABEL_LARGE);
 
+    Component gridInfoContent =
+        Utils.questionize(
+            gridInfo,
+                "Which biological samples are available for the patient(s) and which experiments will be performed?",
+                "Extracted Samples");
+    
     // optionGrid.setSelectionMode(SelectionMode.MULTI);
     optionGrid.setEditorEnabled(true);
-    optionGrid.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
 
     optionGrid.setContainerDataSource(sampleOptions);
-    optionGrid.setColumnOrder("type", "tissue", "amount", "dnaSeq", "rnaSeq", "deepSeq");
-
-    optionLayout.addComponent(gridInfo);
+    optionGrid.setColumnOrder("type", "secondaryName", "tissue", "amount", "dnaSeq", "rnaSeq", "deepSeq");
+    
+    optionLayout.addComponent(gridInfoContent);
     optionLayout.addComponent(optionGrid);
     optionLayout.addComponent(addSample);
 
@@ -193,8 +228,9 @@ public class AddPatientView extends VerticalLayout implements View {
    */
   VerticalLayout initButtonLayout() {
     registerPatients = new Button("Register Patients");
-    registerPatients.setWidth("100%");
+    //registerPatients.setWidth("100%");
     registerPatients.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+    registerPatients.setVisible(false);
 
     registerPatients.addClickListener(new ClickListener() {
 
@@ -206,37 +242,18 @@ public class AddPatientView extends VerticalLayout implements View {
 
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, true));
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayoutSection.setWidth("100%");
 
     buttonLayoutSection.addComponent(buttonLayout);
-    buttonLayout.addComponent(this.registerPatients);
+    buttonLayout.addComponent(registerPatients);
+    
     return buttonLayoutSection;
   }
-
-  /**
-   * 
-   * @return
-   */
-  ToolBar initToolBar() {
-    SearchBarView searchBarView = new SearchBarView(datahandler);
-    toolbar = new ToolBar(resourceUrl, state, searchBarView);
-    toolbar.init();
-    return toolbar;
-  }
-
-  /**
-   * updates the menu bar based on the new content (currentbean was changed)
-   */
-  void updateContentToolBar() {
-
-    toolbar.setDownload(false);
-    toolbar.setWorkflow(false);
-    //TODO safe ?
-    toolbar.update(navigateToLabel, "");
-  }
+  
+  
 
   /**
    * initializes the description layout
@@ -244,83 +261,101 @@ public class AddPatientView extends VerticalLayout implements View {
    * @return
    */
   VerticalLayout initExperimentalSetupLayout() {
-    VerticalLayout projDescription = new VerticalLayout();
     VerticalLayout projDescriptionContent = new VerticalLayout();
 
-    projDescription.setWidth("100%");
     projDescriptionContent.setWidth("100%");
 
     projDescriptionContent.setSpacing(true);
-    projDescriptionContent.setMargin(new MarginInfo(true, false, false, true));
+    projDescriptionContent.setMargin(new MarginInfo(true, false, false, false));
 
-    Label projectInfo = new Label("Add Patient(s) to the following project");
-    projectInfo.setStyleName("info");
-    projectInfo.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-    Label numberInfo = new Label("How many patients with the same setup should be registered?");
-    numberInfo.setStyleName("info");
-    numberInfo.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-    Label namesInfo = new Label("Please provide a list of comma separated IDs");
-    namesInfo.setStyleName("info");
-    namesInfo.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-    Label descInfo = new Label("Please provide a general description for the new patient cases");
-    descInfo.setStyleName("info");
-    descInfo.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-
-    projDescriptionContent.addComponent(projectInfo);
-    projDescriptionContent.addComponent(projects);
-
-    List visibleSpaces = new ArrayList<String>();
+    List<String> visibleSpaces = new ArrayList<String>();
 
     for (Project project : datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
       if (project.getSpaceCode().startsWith("IVAC")) {
         visibleSpaces.add(project.getSpaceCode());
       }
     }
-
-    projects.addItems(visibleSpaces);
-    projects.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-    projects.setRequired(true);
-    projects.setRequiredError("Please choose one project.");
-    projects.setImmediate(true);
     
-    projDescriptionContent.addComponent(numberInfo);
-    projDescriptionContent.addComponent(numberOfPatients);
-    numberOfPatients
-        .setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-
-    //numberOfPatients.setValue(null);
-    numberOfPatients.setRequired(true);
-    //numberOfPatients.addValidator(new NullValidator("Please provide the number of patients.", false));
-    //numberOfPatients.addValidator(new IntegerValidator("Only integer values are allowed."));
-    //numberOfPatients.setValidationVisible(true);
-    numberOfPatients.setImmediate(true);
-    numberOfPatients.setRequiredError("Please provide the number of patients.");
-    numberOfPatients.setNullRepresentation("");
+    projects = new CustomVisibilityComponent(new ComboBox("Select Project", visibleSpaces));
+    ((ComboBox) projects.getInnerComponent()).setImmediate(true);
     
-    projDescriptionContent.addComponent(namesInfo);
-    projDescriptionContent.addComponent(secondaryNames);
-    //secondaryNames.setValue(null);
-    secondaryNames.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-    secondaryNames.setRequired(true);
-    //secondaryNames.addValidator(new NullValidator("Please provide a comma separated list of secondary IDs.", false));
-    secondaryNames.setImmediate(true);
-    secondaryNames.setRequiredError("Please provide a comma separated list of secondary IDs.");
-    secondaryNames.setNullRepresentation("");
+    Component context =
+        Utils.questionize(
+            projects,
+                "Add Patient(s) to the following project",
+                "Select Project");
     
-    projDescriptionContent.addComponent(descInfo);
-    projDescriptionContent.addComponent(description);
-    description.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-    description.setValue("");
+    ((ComboBox) projects.getInnerComponent()).addValueChangeListener(new ValueChangeListener() {
+      
+      @Override
+      public void valueChange(ValueChangeEvent event) {
+        numberOfPatients.setVisible(true);
+      }
+    });
+      
+    projDescriptionContent.addComponent(context);
+    
+    numberOfPatients = new CustomVisibilityComponent(new TextField("Number of Patients"));  
+    numberOfPatients.setVisible(false);
+    ((TextField) numberOfPatients.getInnerComponent()).setImmediate(true);
 
-    numberOfPatients.setConverter(new StringToIntegerConverter());
-    secondaryNames.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
+    Component numberContext =
+        Utils.questionize(
+            numberOfPatients,
+                "How many patients with the same setup should be registered?",
+                "Number of Patients");
+    
+    ((TextField) numberOfPatients.getInnerComponent()).addTextChangeListener(new TextChangeListener() {
+      
+      @Override
+      public void textChange(TextChangeEvent event) {
+        secondaryNames.setVisible(true);
+      }
+    });
+    
+    projDescriptionContent.addComponent(numberContext);
 
-    projDescriptionContent.setCaption("Patient Registration");
-    projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
+    secondaryNames = new CustomVisibilityComponent(new TextField("Identifiers"));
+    ((TextField) secondaryNames.getInnerComponent()).setImmediate(true);
 
-    projDescription.addComponent(projDescriptionContent);
+    secondaryNames.setVisible(false);
+    Component secondaryContext =
+        Utils.questionize(
+            secondaryNames,
+                "Please provide a list of comma separated IDs.",
+                "Identifiers");
+    
+ ((TextField) secondaryNames.getInnerComponent()).addTextChangeListener(new TextChangeListener() {
+      
+      @Override
+      public void textChange(TextChangeEvent event) {
+        description.setVisible(true);
+      }
+    });
+ 
+    projDescriptionContent.addComponent(secondaryContext);
+    
+      description = new CustomVisibilityComponent(new TextField("Description"));  
+      ((TextField) description.getInnerComponent()).setImmediate(true);
+      description.setVisible(false);
+      Component descriptionContext =
+          Utils.questionize(
+              description,
+              "Please provide a general description for the new patient cases",
+                  "Description");
+      
+      ((TextField) description.getInnerComponent()).addTextChangeListener(new TextChangeListener() {
+        
+        @Override
+        public void textChange(TextChangeEvent event) {
+          optionLayoutSection.setVisible(true);
+          hlaTypingSection.setVisible(true);
+          registerPatients.setVisible(true);
+        }
+      });
+      projDescriptionContent.addComponent(descriptionContext);
 
-    return projDescription;
+    return projDescriptionContent;
   }
 
   /**
@@ -330,38 +365,46 @@ public class AddPatientView extends VerticalLayout implements View {
    */
   VerticalLayout hlaTypingLayout() {
 
-    VerticalLayout hlaTypingSection = new VerticalLayout();
+    hlaTypingSection = new VerticalLayout();
     hlaTypingSection.setWidth("100%");
+    hlaTypingSection.setVisible(false);
 
-    VerticalLayout typingLayout = new VerticalLayout();
 
-    typingLayout.setMargin(new MarginInfo(true, false, true, true));
-    typingLayout.setHeight(null);
-    typingLayout.setWidth("100%");
-    typingLayout.setSpacing(true);
+    hlaTypingSection.setMargin(new MarginInfo(true, false, false, false));
+    hlaTypingSection.setHeight(null);
+    hlaTypingSection.setSpacing(true);
+    
+    hlaInfo = new CustomVisibilityComponent(new Label("HLA Typing"));
+    ((Label) hlaInfo.getInnerComponent()).setHeight("24px");
 
-    Label hlaInfo =
-        new Label("Register available HLA typing for this patient (one allele per line)");
-    hlaInfo.setStyleName("info");
-    hlaInfo.setWidth(UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f, Unit.PIXELS);
-
-    typingLayout.addComponent(hlaInfo);
+    Component hlaContext =
+        Utils.questionize(
+            hlaInfo,
+                "Register available HLA typing for this patient (one allele per line)",
+                "HLA Typing");
+    
+    hlaTypingSection.addComponent(hlaContext);
 
     HorizontalLayout hlalayout = new HorizontalLayout();
-    hlalayout.addComponent(registerHLAI);
-    hlalayout.addComponent(hlaItypes);
-    hlalayout.addComponent(registerHLAII);
-    hlalayout.addComponent(hlaIItypes);
+    
+    VerticalLayout hlaLayout1 = new VerticalLayout(); 
+    hlaLayout1.addComponent(registerHLAI);
+    hlaLayout1.addComponent(hlaItypes);
+    
+    VerticalLayout hlaLayout2 = new VerticalLayout(); 
+    hlaLayout2.addComponent(registerHLAII);
+    hlaLayout2.addComponent(hlaIItypes);
+    
+    hlalayout.addComponent(hlaLayout1);
+    hlalayout.addComponent(hlaLayout2);
+    
     hlalayout.setSpacing(true);
 
     typingMethod.addItems(datahandler.getOpenBisClient().getVocabCodesForVocab("Q_HLA_TYPING_METHODS"));
-    typingLayout.addComponent(typingMethod);
-    typingLayout.addComponent(hlalayout);
-
-    hlaTypingSection.addComponent(typingLayout);
+    hlaTypingSection.addComponent(typingMethod);
+    hlaTypingSection.addComponent(hlalayout);
 
     return hlaTypingSection;
-
   }
 
   public void callPatientRegistration() {
@@ -438,22 +481,14 @@ public class AddPatientView extends VerticalLayout implements View {
       boolean expsSpecified = false;
       boolean tissueSpecified = false;
       boolean instrumentSpecified = false;
-
       
       NewIvacSampleBean sampleBean = (NewIvacSampleBean) iter.next();
-      
-      System.out.println("DeepSeq " + sampleBean.getDeepSeq());
-      System.out.println("Tissue " + sampleBean.getTissue());
-      
+ 
       expsSpecified = ((sampleBean.getDeepSeq() == true) | (sampleBean.getDnaSeq() == true) | (sampleBean.getRnaSeq() == true));
       tissueSpecified = (!sampleBean.getTissue().equals(""));
       instrumentSpecified = (!sampleBean.getSeqDevice().equals(""));
       
       valid = valid & (expsSpecified & tissueSpecified & instrumentSpecified);
-      System.out.println(expsSpecified);
-      System.out.println(tissueSpecified);
-      System.out.println(instrumentSpecified);
-
     }
 
     return valid;
@@ -463,8 +498,19 @@ public class AddPatientView extends VerticalLayout implements View {
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
     // this.setContainerDataSource(datahandler.getProject(currentValue));
-    // updateContent();
+    updateContent();
 
+  }
+
+  private void updateContent() {
+    header = "Patient Registration";
+    
+    registerPatients.setVisible(false);
+    numberOfPatients.setVisible(false);
+    secondaryNames.setVisible(false);
+    description.setVisible(false);
+    hlaTypingSection.setVisible(false);
+    optionLayoutSection.setVisible(false);
   }
 
 }

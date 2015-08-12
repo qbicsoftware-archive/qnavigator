@@ -53,10 +53,20 @@ public class HomeView extends VerticalLayout implements View {
   VerticalLayout homeview_content;
   VerticalLayout buttonLayoutSection = new VerticalLayout();
   SpaceBean currentBean;
-  Boolean includePatientCreation = false;
+  //Boolean includePatientCreation = false;
   ToolBar toolBar;
   State state;
   String resourceUrl;
+  String header;
+
+  public String getHeader() {
+    return header;
+  }
+
+  public void setHeader(String header) {
+    this.header = header;
+  }
+
 
   DataHandler datahandler;
 
@@ -89,7 +99,7 @@ public class HomeView extends VerticalLayout implements View {
     super.setSizeFull();
     this.table.setSizeFull();
     homeview_content.setSpacing(true);
-    homeview_content.setMargin(true);
+    //homeview_content.setMargin(true);
   }
 
   /**
@@ -163,7 +173,6 @@ public class HomeView extends VerticalLayout implements View {
   }
   
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
-
     this.setMargin(false);
     // clean up first
     homeview_content.removeAllComponents();
@@ -175,11 +184,11 @@ public class HomeView extends VerticalLayout implements View {
     updateView(browserWidth, browserWidth, browser);
 
     // view overall statistics
-    VerticalLayout statistics = new VerticalLayout();
+    //VerticalLayout statistics = new VerticalLayout();
     VerticalLayout homeViewDescription = new VerticalLayout();
-
-
+    
     // patientButton
+    /*
     if (includePatientCreation) {
       Button addPatient = new Button("Add Patient");
       addPatient.setIcon(FontAwesome.PLUS);
@@ -194,12 +203,14 @@ public class HomeView extends VerticalLayout implements View {
       statistics.addComponent(addPatient);
       statistics.setComponentAlignment(addPatient, Alignment.TOP_RIGHT);
     }
+    */
     // statistics
-    statistics.setCaption("Statistics");
-    statistics.setIcon(FontAwesome.FILE_TEXT_O);
+    //statistics.setCaption("Statistics");
+    //statistics.setIcon(FontAwesome.FILE_TEXT_O);
     Label statContent;
     if (numberOfProjects > 0) {
       statContent = new Label(String.format("You have %s project(s)", numberOfProjects));
+      setHeader(String.format("Total number of projects: %s", numberOfProjects));
     } else {
       statContent =
           new Label(
@@ -207,13 +218,13 @@ public class HomeView extends VerticalLayout implements View {
       statContent.addStyleName(ValoTheme.LABEL_FAILURE);
       statContent.addStyleName(ValoTheme.LABEL_LARGE);
     }
-    statistics.addComponent(statContent);
+    //statistics.addComponent(statContent);
 
-    statistics.setMargin(new MarginInfo(false,false,false,true));
-    statistics.setWidth(100.0f, Unit.PERCENTAGE);
+    //statistics.setMargin(new MarginInfo(false,false,false,true));
+    //statistics.setWidth(100.0f, Unit.PERCENTAGE);
 
-    homeViewDescription.addComponent(statistics);
-    homeViewDescription.setMargin(true);
+    //homeViewDescription.addComponent(statistics);
+    //MhomeViewDescription.setMargin(true);
     homeViewDescription.setWidth("100%");
     homeview_content.addComponent(homeViewDescription);
 
@@ -223,11 +234,11 @@ public class HomeView extends VerticalLayout implements View {
     VerticalLayout tableSectionContent = new VerticalLayout();
 
     tableSectionContent.setCaption("Projects");
-    tableSectionContent.setIcon(FontAwesome.FLASK);
+    tableSectionContent.setIcon(FontAwesome.TABLE);
     tableSectionContent.addComponent(this.table);
 
-    tableSectionContent.setMargin(true);
-    tableSection.setMargin(true);
+    //tableSectionContent.setMargin(true);
+    //tableSection.setMargin(new MarginInfo(true, false, true, true));
 
     this.table.setWidth("100%");
     tableSection.setWidth("100%");
@@ -298,7 +309,7 @@ public class HomeView extends VerticalLayout implements View {
    * refresh all openbis project for current user. Basically currentBean is overwritten
    */
   public void loadProjects() {
-    this.includePatientCreation = false;
+    //this.includePatientCreation = false;
     final SpaceBean homeSpaceBean =
         new SpaceBean("homeSpace", "", false, null, null, null, null, null, null);
     BeanItemContainer<ProjectBean> projectContainer =
@@ -308,9 +319,9 @@ public class HomeView extends VerticalLayout implements View {
         datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(
             datahandler.getOpenBisClient().getSessionToken(), user);
     for (Project project : projects) {
-      if (project.getSpaceCode().contains("IVAC")) {
-        this.includePatientCreation = true;
-      }
+     // if (project.getSpaceCode().contains("IVAC")) {
+     //   this.includePatientCreation = true;
+     // }
       datahandler.addOpenbisDtoProject(project);
       String projectIdentifier = project.getIdentifier();
       String projectCode = project.getCode();

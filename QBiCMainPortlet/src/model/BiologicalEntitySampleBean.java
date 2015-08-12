@@ -19,6 +19,10 @@ public class BiologicalEntitySampleBean {
   private String type;
   
   private String organism;
+  
+  private String organismName;
+
+  private String gender;
 
   private String secondaryName;
   private String additionalInfo;
@@ -30,13 +34,14 @@ public class BiologicalEntitySampleBean {
   
   
 
-  public BiologicalEntitySampleBean(String id, String code, String type, String organism, String secondaryName, String additionalInfo, String externalDB, String properties) {
+  public BiologicalEntitySampleBean(String id, String code, String type, String organism, String organismName, String gender, String secondaryName, String additionalInfo, String externalDB, String properties) {
     super();
     this.id = id;
     this.code = code;
     this.type = type;
     this.setOrganism(organism);
-
+    this.organismName = organismName;
+    this.gender = gender;
     this.secondaryName = secondaryName;
     this.additionalInfo = additionalInfo;
     this.externalDB = externalDB;
@@ -175,5 +180,21 @@ public class BiologicalEntitySampleBean {
 
   public void setOrganism(String organism) {
     this.organism = organism;
+  }
+  
+  public String getOrganismName() {
+    return organismName;
+  }
+
+  public void setOrganismName(String organismName) {
+    this.organismName = organismName;
+  }
+
+  public String getGender() {
+    return gender;
+  }
+
+  public void setGender(String gender) {
+    this.gender = gender;
   }
 }
