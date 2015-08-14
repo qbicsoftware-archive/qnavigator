@@ -71,25 +71,41 @@ public class WorkflowViewController {
         new BeanItemContainer<DatasetBean>(DatasetBean.class);
     Map<String, List<String>> params = new HashMap<String, List<String>>();
     List<String> dsCodes = new ArrayList<String>();
+    
+    // if value is true, filter out
+    HashMap<String, Boolean> fileInfo = new HashMap<String, Boolean>();
+    
 
     for (ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet ds : datasets) {
-      //TODO determine if folder or not
+      FileInfoDssDTO[] filelist = ds.listFiles("original", true);
+      
+      // determine if folder or checksum file which should not displayed for workflows
+      for(FileInfoDssDTO f: filelist) {
+          fileInfo.put(f.getPathInDataSet(), f.isDirectory() | f.getPathInDataSet().endsWith("sha256sum"));
+      }
+      
       dsCodes.add(ds.getCode());
       dataMap.put(ds.getCode(), ds);
     }
-    params.put("codes", dsCodes);
-    QueryTableModel res = openbis.queryFileInformation(params);
-    for (Serializable[] ss : res.getRows()) {
-      String dsCode = (String) ss[0];
+    
+      params.put("codes", dsCodes);
+      QueryTableModel res = openbis.queryFileInformation(params);
+      for (Serializable[] ss : res.getRows()) {
+        String dsCode = (String) ss[0];
+      
       // when tryGetInternalPathInDataStore is used here for project like qmari it takes over a
       // minute. without 0.02s
       String path =
       /* dataMap.get(dsCode).getDataSetDss().tryGetInternalPathInDataStore() + */(String) ss[1];
       // path = path.replace("/mnt/DSS1", "/mnt/nfs/qbic");
-      DatasetBean bean =
-          new DatasetBean((String) ss[2], dataMap.get(dsCode).getDataSetTypeCode(), dsCode, path,
-              dataMap.get(dsCode).getSampleIdentifierOrNull());
-      container.addBean(bean);
+      
+      
+      if(!fileInfo.get(path)) {
+        DatasetBean bean =
+            new DatasetBean((String) ss[2], dataMap.get(dsCode).getDataSetTypeCode(), dsCode, path,
+                dataMap.get(dsCode).getSampleIdentifierOrNull());
+        container.addBean(bean);
+       }
     }
 
 
