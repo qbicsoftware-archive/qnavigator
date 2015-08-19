@@ -123,9 +123,12 @@ public class PatientStatusComponent extends CustomComponent{
     
 
     experiments.getColumn("status").setRenderer(new ProgressBarRenderer());
-    experiments.setColumnOrder("started", "code", "description", "status", "download",
-        "runWorkflow");
+    //experiments.setColumnOrder("started", "code", "description", "status", "download",
+    //    "runWorkflow");
+        experiments.setColumnOrder("started", "code", "description", "status", 
+            "runWorkflow");
 
+        /*
     ButtonRenderer downloadRenderer = new ButtonRenderer(new RendererClickListener() {
       @Override
       public void click(RendererClickEvent event) {
@@ -157,9 +160,10 @@ public class PatientStatusComponent extends CustomComponent{
       }
 
     });
+    */
     
     
-    experiments.getColumn("download").setRenderer(downloadRenderer);
+    //experiments.getColumn("download").setRenderer(downloadRenderer);
 
     experiments.getColumn("runWorkflow").setRenderer(
         new ButtonRenderer(new RendererClickListener() {
@@ -218,7 +222,7 @@ public class PatientStatusComponent extends CustomComponent{
 
       finishedExperiments += statusBean.getStatus();
 
-      statusBean.setDownload("Download");
+     // statusBean.setDownload("Download");
       statusBean.setRunWorkflow("Run");
     }
 

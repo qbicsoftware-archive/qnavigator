@@ -71,6 +71,7 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.ProgressBarRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
+import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.qbicmainportlet.ProjectView.MemberWorker;
 
 public class PatientView extends VerticalLayout implements View {
@@ -145,17 +146,22 @@ public class PatientView extends VerticalLayout implements View {
 
   private PatientStatusComponent statusComponent;
 
+  private WorkflowViewController wfController;
+
+  private WorkflowComponent workflowComponent;
+
   private static Logger LOGGER = new Log4j2Logger(PatientView.class);
 
 
 
-  public PatientView(DataHandler datahandler, State state, String resourceurl) {
-    this(datahandler, state);
+  public PatientView(DataHandler datahandler, State state, String resourceurl, WorkflowViewController wfController) {
+    this(datahandler, state, wfController);
     this.resourceUrl = resourceurl;
   }
 
-  public PatientView(DataHandler datahandler, State state) {
+  public PatientView(DataHandler datahandler, State state, WorkflowViewController wfController) {
     this.datahandler = datahandler;
+    this.wfController = wfController;
     this.state = state;
     resourceUrl = "javascript;";
     initView();
@@ -217,6 +223,8 @@ public class PatientView extends VerticalLayout implements View {
     measuredSamplesComponent = new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results"); 
     statusComponent = new PatientStatusComponent(datahandler, state, resourceUrl);
+    workflowComponent = new WorkflowComponent(wfController);
+
     
     //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
     patientViewTab.addStyleName(ValoTheme.TABSHEET_FRAMED);
@@ -226,11 +234,12 @@ public class PatientView extends VerticalLayout implements View {
     patientViewTab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     patientViewTab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
     patientViewTab.addTab(initHLALayout()).setIcon(FontAwesome.BARCODE);
-    patientViewTab.addTab(initTable()).setIcon(FontAwesome.COGS);
+    patientViewTab.addTab(initTable()).setIcon(FontAwesome.FLASK);
     patientViewTab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
-    patientViewTab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.FLASK);
+    patientViewTab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.TINT);
     patientViewTab.addTab(measuredSamplesComponent).setIcon(FontAwesome.SIGNAL);
     patientViewTab.addTab(resultsComponent).setIcon(FontAwesome.TH_LARGE);
+    patientViewTab.addTab(workflowComponent).setIcon(FontAwesome.COGS);
     
     patientViewTab.setImmediate(true);
 
@@ -256,6 +265,12 @@ public class PatientView extends VerticalLayout implements View {
         }
         else if (event.getTabSheet().getSelectedTab().getCaption().equals("Status")) {
           statusComponent.updateUI(getCurrentBean());
+        }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Workflows")) {
+          Map<String,String> args = new HashMap<String,String>();
+          args.put("id",getCurrentBean().getId());
+          args.put("type", "project");
+          workflowComponent.update(args);
         }
       }
     });
@@ -284,6 +299,7 @@ public class PatientView extends VerticalLayout implements View {
 
     startTime = System.nanoTime();
     //updateProjectStatus();
+    statusComponent.updateUI(this.currentBean);
     endTime = System.nanoTime();
     LOGGER.info(String.format("updateProjectStatus took %f s",
         ((endTime - startTime) / 1000000000.0)));
@@ -881,7 +897,7 @@ public class PatientView extends VerticalLayout implements View {
 
       finishedExperiments += statusBean.getStatus();
 
-      statusBean.setDownload("Download");
+      //statusBean.setDownload("Download");
       statusBean.setRunWorkflow("Run");
 
       /*

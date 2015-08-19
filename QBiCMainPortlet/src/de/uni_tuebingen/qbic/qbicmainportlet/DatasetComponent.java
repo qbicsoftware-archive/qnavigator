@@ -79,7 +79,7 @@ public class DatasetComponent extends CustomComponent{
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Project", "Sample",
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select",
       "File Name", "Dataset Type", "Registration Date", "File Size"};
 
   private int numberOfDatasets;

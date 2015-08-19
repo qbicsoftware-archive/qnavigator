@@ -16,6 +16,8 @@ import model.ProjectBean;
 
 import org.tepi.filtertable.FilterTable;
 
+import submitter.Submitter;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -52,6 +54,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.qbicmainportlet.PatientView.Worker;
 
 @SuppressWarnings("serial")
@@ -110,6 +113,10 @@ public class ProjectView extends VerticalLayout implements View {
   
   private String headerLabel;
 
+  private WorkflowViewController wfController;
+
+  private WorkflowComponent workflowComponent;
+
 
   public String getHeaderLabel() {
     return headerLabel;
@@ -119,12 +126,13 @@ public class ProjectView extends VerticalLayout implements View {
     this.headerLabel = headerLabel;
   }
 
-  public ProjectView(DataHandler datahandler, State state, String resourceurl) {
-    this(datahandler, state);
+  public ProjectView(DataHandler datahandler, State state, String resourceurl, WorkflowViewController wfController) {
+    this(datahandler, state, wfController);
     this.resourceUrl = resourceurl;
   }
 
-  public ProjectView(DataHandler datahandler, State state) {
+  public ProjectView(DataHandler datahandler, State state, WorkflowViewController wfController) {
+    this.wfController = wfController;
     this.datahandler = datahandler;
     this.state = state;
     resourceUrl = "javascript;";
@@ -165,7 +173,8 @@ public class ProjectView extends VerticalLayout implements View {
     datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
     biologicalSamplesComponent = new BiologicalSamplesComponent(datahandler, state, resourceUrl, "Biological Samples");
     measuredSamplesComponent = new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
-    resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");    
+    resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
+    workflowComponent = new WorkflowComponent(wfController);
     
     //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
@@ -174,11 +183,12 @@ public class ProjectView extends VerticalLayout implements View {
     projectview_tab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
     projectview_tab.addTab(initStatistics()).setIcon(FontAwesome.CHECK_CIRCLE);
-    projectview_tab.addTab(initTable()).setIcon(FontAwesome.COGS);
+    projectview_tab.addTab(initTable()).setIcon(FontAwesome.FLASK);
     projectview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
-    projectview_tab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.FLASK);
+    projectview_tab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.TINT);
     projectview_tab.addTab(measuredSamplesComponent).setIcon(FontAwesome.SIGNAL);
     projectview_tab.addTab(resultsComponent).setIcon(FontAwesome.TH_LARGE);
+    projectview_tab.addTab(workflowComponent).setIcon(FontAwesome.COGS);
 
     projectview_tab.setImmediate(true);
 
@@ -201,6 +211,12 @@ public class ProjectView extends VerticalLayout implements View {
         }
         else if (event.getTabSheet().getSelectedTab().getCaption().equals("Results")) {
           resultsComponent.updateUI(navigateToLabel, getCurrentBean().getId(), "results");
+        }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Workflows")) {
+          Map<String,String> args = new HashMap<String,String>();
+          args.put("id",getCurrentBean().getId());
+          args.put("type", navigateToLabel);
+          workflowComponent.update(args);
         }
       }
     });

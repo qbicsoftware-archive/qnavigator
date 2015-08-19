@@ -1391,6 +1391,10 @@ public class DataHandler implements Serializable {
     ExperimentStatusBean hlaType = new ExperimentStatusBean();
     hlaType.setDescription("HLA Typing");
     hlaType.setStatus(0.0);
+    
+    ExperimentStatusBean variantAnno = new ExperimentStatusBean();
+    variantAnno.setDescription("Variant Annotation");
+    variantAnno.setStatus(0.0);
 
     ExperimentStatusBean epitopePred = new ExperimentStatusBean();
     epitopePred.setDescription("Epitope Prediction");
@@ -1424,6 +1428,11 @@ public class DataHandler implements Serializable {
         hlaType.setCode(bean.getCode());
         hlaType.setIdentifier(bean.getId());
       }
+      if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_VARIANT_ANNOTATION.name())) {
+        variantAnno.setStatus(experimentStatus);
+        variantAnno.setCode(bean.getCode());
+        variantAnno.setIdentifier(bean.getId());
+      }
       if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_EPITOPE_PREDICTION.name())) {
         epitopePred.setStatus(experimentStatus);
         epitopePred.setCode(bean.getCode());
@@ -1434,6 +1443,7 @@ public class DataHandler implements Serializable {
     res.addBean(barcode);
     res.addBean(ngsCall);
     res.addBean(hlaType);
+    res.addBean(variantAnno);
     res.addBean(epitopePred);
 
     return res;

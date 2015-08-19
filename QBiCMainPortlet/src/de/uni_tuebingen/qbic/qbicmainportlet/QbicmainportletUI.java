@@ -217,7 +217,6 @@ public class QbicmainportletUI extends UI {
     final HomeView homeView = new HomeView(datahandler, "Your Projects", user, state, resUrl);
     DatasetView datasetView = new DatasetView(datahandler,state, resUrl);
     final SampleView sampleView = new SampleView(datahandler, state, resUrl, multiscaleController);
-    final ProjectView projectView = new ProjectView(datahandler, state, resUrl);
     BarcodeView barcodeView =
         new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
             manager.getBarcodePathVariable());
@@ -225,7 +224,6 @@ public class QbicmainportletUI extends UI {
     ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
-    final PatientView patientView = new PatientView(datahandler, state, resUrl);
     
         
     Submitter submitter = null;
@@ -238,7 +236,11 @@ public class QbicmainportletUI extends UI {
     
     LOGGER.debug("SUBMITTER " + submitter);
     WorkflowViewController controller = new WorkflowViewController(submitter, datahandler.getOpenBisClient(), user);
+
     final WorkflowView workflowView = new WorkflowView(controller);
+    final ProjectView projectView = new ProjectView(datahandler, state, resUrl, controller);
+    final PatientView patientView = new PatientView(datahandler, state, resUrl, controller);
+
     
     VerticalLayout navigatorContent = new VerticalLayout();
 

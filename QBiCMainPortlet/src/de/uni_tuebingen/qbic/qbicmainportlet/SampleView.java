@@ -201,10 +201,10 @@ private DatasetComponent datasetComponent;
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayout.addComponent(this.export);
-    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, true));
     buttonLayoutSection.addComponent(buttonLayout);
     buttonLayoutSection.setSpacing(true);
-    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayoutSection.setMargin(new MarginInfo(false, false, true, true));
 
     return buttonLayoutSection;
   }
@@ -289,10 +289,10 @@ private DatasetComponent datasetComponent;
     notesContent.addComponent(noteComponent);
     notesContent.setMargin(new MarginInfo(true, false, false, true));
     notesLayoutContent.addComponent(notesContent);
-    notesLayoutContent.setMargin(new MarginInfo(true, false, false, true));
+    notesLayoutContent.setMargin(new MarginInfo(true, false, true, true));
 
     notesLayout.addComponent(notesContent);
-    notesLayout.setMargin(new MarginInfo(false, false, false, true));
+    notesLayout.setMargin(new MarginInfo(false, false, true, true));
     
     return notesContent;
   }
@@ -321,9 +321,9 @@ private DatasetComponent datasetComponent;
     sampleDescriptionContent.addComponent(sampleTypeLabel);
     sampleParentLabel = new Label("", ContentMode.HTML);
     sampleDescriptionContent.addComponent(sampleParentLabel);
-    sampleDescriptionContent.setMargin(new MarginInfo(true, false, false, true));
+    sampleDescriptionContent.setMargin(new MarginInfo(true, false, true, true));
     sampleDescription.addComponent(sampleDescriptionContent);
-    sampleDescription.setMargin(new MarginInfo(true, false, false, true));
+    sampleDescription.setMargin(new MarginInfo(true, false, true, true));
     return sampleDescription;
   }
 
@@ -377,12 +377,12 @@ private DatasetComponent datasetComponent;
     //experimentalFactorsContent.setIcon(FontAwesome.TH);
     experimentalFactorLabel = new Label("", ContentMode.HTML);
     experimentalFactorsContent.addComponent(experimentalFactorLabel);
-    experimentalFactorsContent.setMargin(new MarginInfo(true, false, false, true));
+    experimentalFactorsContent.setMargin(new MarginInfo(true, false, true, true));
 
     experimentalFactors.addComponent(experimentalFactorsContent);
     statistics.addComponent(experimentalFactors);
     statistics.setSpacing(true);
-    statistics.setMargin(new MarginInfo(true, false, false, true));
+    statistics.setMargin(new MarginInfo(true, false, true, true));
 
 
     return statistics;
@@ -443,10 +443,10 @@ private DatasetComponent datasetComponent;
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayout.addComponent(this.export);
-    buttonLayout.setMargin(new MarginInfo(false, false, false, false));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, false));
     buttonLayoutSection.addComponent(buttonLayout);
     buttonLayoutSection.setSpacing(true);
-    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayoutSection.setMargin(new MarginInfo(false, false, true, true));
 
     tableSection.addComponent(buttonLayoutSection);
 
