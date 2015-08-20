@@ -126,7 +126,7 @@ public class PatientStatusComponent extends CustomComponent{
     //experiments.setColumnOrder("started", "code", "description", "status", "download",
     //    "runWorkflow");
         experiments.setColumnOrder("started", "code", "description", "status", 
-            "runWorkflow");
+            "workflow");
 
         /*
     ButtonRenderer downloadRenderer = new ButtonRenderer(new RendererClickListener() {
@@ -165,7 +165,7 @@ public class PatientStatusComponent extends CustomComponent{
     
     //experiments.getColumn("download").setRenderer(downloadRenderer);
 
-    experiments.getColumn("runWorkflow").setRenderer(
+    experiments.getColumn("workflow").setRenderer(
         new ButtonRenderer(new RendererClickListener() {
           @Override
           public void click(RendererClickEvent event) {
@@ -185,10 +185,10 @@ public class PatientStatusComponent extends CustomComponent{
               sb.append("workflowExperimentType");
               sb.append("&");
               sb.append("id=");
-              sb.append("Q_WF_NGS_HLATYPING");
-              sb.append("&");
-              sb.append("project=");
               sb.append(currentBean.getId());
+              sb.append("&");
+              sb.append("experiment=");
+              sb.append("Q_WF_NGS_HLATYPING");
               message.add(sb.toString());
               message.add(WorkflowView.navigateToLabel);
               state.notifyObservers(message);
@@ -223,7 +223,7 @@ public class PatientStatusComponent extends CustomComponent{
       finishedExperiments += statusBean.getStatus();
 
      // statusBean.setDownload("Download");
-      statusBean.setRunWorkflow("Run");
+      statusBean.setWorkflow("Run");
     }
 
 

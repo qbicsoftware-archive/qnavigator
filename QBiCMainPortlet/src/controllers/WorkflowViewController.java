@@ -307,6 +307,7 @@ public class WorkflowViewController {
   public String submitAndRegisterWf(String type, String id, Workflow workflow,
       List<DatasetBean> selectedDatasets) throws ConnectException, IllegalArgumentException,
       SubmitFailedException {
+
     SpaceAndProjectCodes spaceandproject = getSpaceAndProjects(type, id);
 
     String spaceCode = spaceandproject.space;
@@ -345,6 +346,7 @@ public class WorkflowViewController {
       case PatientView.navigateToLabel:
       case ProjectView.navigateToLabel:
       case ExperimentView.navigateToLabel:
+      case "workflowExperimentType":
         return new SpaceAndProjectCodes(split[1], split[2]);
       case SampleView.navigateToLabel:
         String expId =

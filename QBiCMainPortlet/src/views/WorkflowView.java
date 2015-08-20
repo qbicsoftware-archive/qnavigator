@@ -177,10 +177,10 @@ public class WorkflowView extends VerticalLayout implements View {
         break;
 
       case "workflowExperimentType":
-        String projectID = map.get("project");
+        String experiment = map.get("experiment");
 
         BeanItemContainer<Workflow> suitableWorkflows =
-            controller.suitableWorkflowsByExperimentType(id);
+            controller.suitableWorkflowsByExperimentType(experiment);
         BeanItemContainer<DatasetBean> suitableDatasets =
             new BeanItemContainer<DatasetBean>(DatasetBean.class);
 
@@ -191,7 +191,7 @@ public class WorkflowView extends VerticalLayout implements View {
           workflowDatasetTypes.addAll(workflowBean.getFileTypes());
         }
 
-        for (Iterator i = controller.getcontainer("project", projectID).getItemIds().iterator(); i
+        for (Iterator i = controller.getcontainer("project", id).getItemIds().iterator(); i
             .hasNext();) {
           DatasetBean datasetBean = (DatasetBean) i.next();
 

@@ -187,7 +187,13 @@ public class BarcodePreviewComponent extends VerticalLayout {
       case "QBiC ID":
         res = s.getCode();
     }
-    return res.substring(0, Math.min(res.length(), 22));
+    
+    if(res == null) {
+      return "";
+    }
+    else {
+      return res.substring(0, Math.min(res.length(), 22));
+    }
   }
 
   public String getCodeString(Sample sample) {

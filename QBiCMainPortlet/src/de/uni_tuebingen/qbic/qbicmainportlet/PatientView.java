@@ -749,6 +749,8 @@ public class PatientView extends VerticalLayout implements View {
         //loadMembers.setVisible(false);
       }
 
+      
+      //OLD 
   void updateProjectStatus() {
 
     BeanItemContainer<ExperimentStatusBean> experimentstatusBeans =
@@ -898,7 +900,7 @@ public class PatientView extends VerticalLayout implements View {
       finishedExperiments += statusBean.getStatus();
 
       //statusBean.setDownload("Download");
-      statusBean.setRunWorkflow("Run");
+      statusBean.setWorkflow("Run");
 
       /*
        * if ((Integer) pairs.getValue() == 0) { Label statusLabel = new Label(pairs.getKey() + ": "
@@ -923,7 +925,6 @@ public class PatientView extends VerticalLayout implements View {
 
     progressBar.setValue((float) finishedExperiments / experimentstatusBeans.size());
   }
-
 
   /**
    * 

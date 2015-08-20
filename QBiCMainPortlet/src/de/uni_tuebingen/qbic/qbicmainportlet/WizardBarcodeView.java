@@ -147,6 +147,9 @@ public class WizardBarcodeView extends VerticalLayout {
     experimentTable.setSelectable(true);
     experimentTable.setMultiSelect(true);
     addComponent(experimentTable);
+    
+    spaceBox = new ComboBox("");
+    projectBox = new ComboBox("");
 
     prepSelect = new OptionGroup("Prepare");
     prepSelect.setStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);

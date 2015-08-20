@@ -162,10 +162,10 @@ public class WorkflowComponent extends CustomComponent{
         break;
 
       case "workflowExperimentType":
-        String projectID = map.get("project");
+        String experiment = map.get("experiment");
 
         BeanItemContainer<Workflow> suitableWorkflows =
-            controller.suitableWorkflowsByExperimentType(id);
+            controller.suitableWorkflowsByExperimentType(experiment);
         BeanItemContainer<DatasetBean> suitableDatasets =
             new BeanItemContainer<DatasetBean>(DatasetBean.class);
 
@@ -176,7 +176,7 @@ public class WorkflowComponent extends CustomComponent{
           workflowDatasetTypes.addAll(workflowBean.getFileTypes());
         }
 
-        for (Iterator i = controller.getcontainer("project", projectID).getItemIds().iterator(); i
+        for (Iterator i = controller.getcontainer("project", id).getItemIds().iterator(); i
             .hasNext();) {
           DatasetBean datasetBean = (DatasetBean) i.next();
 

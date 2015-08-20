@@ -7,14 +7,14 @@ public class ExperimentStatusBean implements Serializable {
   String identifier;
   String code; 
   String description;
-  String runWorkflow;
+  String workflow;
   Double status;
 
-  public ExperimentStatusBean(String identifier, String code, String description, String runWorkflow, Double status) {
+  public ExperimentStatusBean(String identifier, String code, String description, String workflow, Double status) {
     this.identifier = identifier;
     this.code = code;
     this.description = description;
-    this.runWorkflow = runWorkflow;
+    this.workflow = workflow;
     this.status = status;    
   }
   
@@ -46,12 +46,12 @@ public class ExperimentStatusBean implements Serializable {
     this.description = description;
   }
 
-  public String getRunWorkflow() {
-    return runWorkflow;
+  public String getWorkflow() {
+    return workflow;
   }
 
-  public void setRunWorkflow(String runWorkflow) {
-    this.runWorkflow = runWorkflow;
+  public void setWorkflow(String workflow) {
+    this.workflow = workflow;
   }
 
   public Double getStatus() {
