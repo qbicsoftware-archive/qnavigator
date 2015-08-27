@@ -550,7 +550,7 @@ public class DatasetComponent extends CustomComponent{
 
     filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
 
-    filterTable.setColumnCollapsingAllowed(true);
+    filterTable.setColumnCollapsingAllowed(false);
 
     filterTable.setColumnReorderingAllowed(true);
 

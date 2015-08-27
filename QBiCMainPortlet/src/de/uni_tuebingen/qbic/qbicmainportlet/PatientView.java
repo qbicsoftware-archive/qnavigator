@@ -494,7 +494,24 @@ public class PatientView extends VerticalLayout implements View {
     SearchCriteria experimentSc = new SearchCriteria();
     experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_NGS_HLATYPING.name()));
     sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
+    
+    
     List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.getOpenBisClient().getFacade().searchForSamples(sc);
+    
+    sc = new SearchCriteria();
+    sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, "Q_WF_NGS_HLATYPING"));
+    projectSc = new SearchCriteria();
+    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
+    sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
+    
+    experimentSc = new SearchCriteria();
+    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  "Q_WF_NGS_HLATYPING"));
+    sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
+    
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> wfSamples = datahandler.getOpenBisClient().getFacade().searchForSamples(sc);
+
+    
+    
     for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples){
       available = true;
       String classString = sample.getProperties().get("Q_HLA_CLASS");
@@ -505,10 +522,22 @@ public class PatientView extends VerticalLayout implements View {
       if (!(sample.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
         addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
       }
+      
+      if (!(sample.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
+        addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
+      }
 
       labelContent +=
           String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ",
               lastOne, sample.getProperties().get("Q_HLA_TYPING"), addInformation);      
+    }
+    
+    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : wfSamples){
+      available = true;
+
+      labelContent +=
+          String.format("Computational Typing (OptiType)" + "<p> %s </p> ",
+             sample.getProperties().get("Q_HLA_TYPING"));      
     }
     
     
@@ -660,7 +689,13 @@ public class PatientView extends VerticalLayout implements View {
             String email = user.getEmailAddress();
            
             String userString = "<a href=\"mailto:" + email + "\" style=\"color: #0068AA; text-decoration: none\">" + lastName + ", " + firstName + "</a>";
-            members.put(user.getLastName(), userString);
+            if(user.getLastName().length() > 0) {
+              members.put(user.getLastName(), userString);
+            }
+            
+            else {
+              members.put(user.getFirstName(), userString);
+            }
             
             //memberString.append("<a href=\"mailto:");
             //memberString.append(email);
@@ -701,7 +736,7 @@ public class PatientView extends VerticalLayout implements View {
             new Label(
                 "Searching for members. Can take several seconds on big projects. Please be patient.");
         info.setStyleName(ValoTheme.LABEL_SUCCESS);
-        membersLayout.addComponent(info);
+       // membersLayout.addComponent(info);
         membersLayout.addComponent(progress);
         MemberWorker worker = new MemberWorker();
         worker.start();
@@ -851,7 +886,8 @@ public class PatientView extends VerticalLayout implements View {
               message.add(currentBean.getId());
               message.add(BarcodeView.navigateToLabel);
               state.notifyObservers(message);
-            } else {
+            }
+            else {
               ArrayList<String> message = new ArrayList<String>();
               message.add("clicked");
               StringBuilder sb = new StringBuilder("type=");
@@ -962,9 +998,9 @@ public class PatientView extends VerticalLayout implements View {
 
   void resetGraph() {
     graphSectionContent.removeAllComponents();
-    VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
-    graphSection.getComponent(1).setVisible(true);
-    graphSection.getComponent(1).setEnabled(true);
+    //VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
+    //graphSection.getComponent(1).setVisible(true);
+    //graphSection.getComponent(1).setEnabled(true);
   }
 
   /**
@@ -1019,9 +1055,10 @@ public class PatientView extends VerticalLayout implements View {
           new Label(
               "Computing the project graph can take several seconds on big projects. Please be patient.");
       info.setStyleName(ValoTheme.LABEL_SUCCESS);
-      graphSectionContent.addComponent(info);
+      graphSectionContent.removeAllComponents();
+      //graphSectionContent.addComponent(info);
       graphSectionContent.addComponent(progress);
-      graphSectionContent.setComponentAlignment(info, Alignment.MIDDLE_CENTER);
+      //graphSectionContent.setComponentAlignment(info, Alignment.MIDDLE_CENTER);
       graphSectionContent.setComponentAlignment(progress, Alignment.MIDDLE_CENTER);
 
       Worker worker = new Worker(getCurrent());
@@ -1123,10 +1160,10 @@ public class PatientView extends VerticalLayout implements View {
     
     //if (currentBean != null)
     //  LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
-    //if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
-//
-  //    resetGraph();
-   // }
+    if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
+      LOGGER.debug("reseting graph");
+      resetGraph();
+    }
 
     startTime = System.nanoTime();
     this.setContainerDataSource(pbean);

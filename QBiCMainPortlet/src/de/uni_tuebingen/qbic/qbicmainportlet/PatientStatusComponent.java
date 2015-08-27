@@ -12,9 +12,8 @@ import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
@@ -23,10 +22,10 @@ import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.renderers.ButtonRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
-import com.vaadin.ui.renderers.ProgressBarRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
+import com.vaadin.ui.renderers.HtmlRenderer;
+import com.vaadin.ui.renderers.ProgressBarRenderer;
 
 
 public class PatientStatusComponent extends CustomComponent{
@@ -128,43 +127,6 @@ public class PatientStatusComponent extends CustomComponent{
         experiments.setColumnOrder("started", "code", "description", "status", 
             "workflow");
 
-        /*
-    ButtonRenderer downloadRenderer = new ButtonRenderer(new RendererClickListener() {
-      @Override
-      public void click(RendererClickEvent event) {
-        ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
-
-        if (esb.getDescription().equals("Barcode Generation")) {
-          new Notification("Download of Barcodes not available.",
-              "<br/>Please create barcodes by clicking 'Run'.", Type.WARNING_MESSAGE, true)
-              .show(Page.getCurrent());
-        }else if(esb.getIdentifier() == null || esb.getIdentifier().isEmpty()){
-          new Notification("No data available for download.",
-              "<br/>Please do the analysis by clicking 'Run' first.", Type.WARNING_MESSAGE, true)
-              .show(Page.getCurrent());
-        }
-        else {
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          StringBuilder sb = new StringBuilder("type=");
-          sb.append("experiment");
-          sb.append("&");
-          sb.append("id=");
-          // sb.append(currentBean.getId());
-          sb.append(esb.getIdentifier());
-          message.add(sb.toString());
-          message.add(DatasetView.navigateToLabel);
-          state.notifyObservers(message);
-        }
-        
-      }
-
-    });
-    */
-    
-    
-    //experiments.getColumn("download").setRenderer(downloadRenderer);
-
     experiments.getColumn("workflow").setRenderer(
         new ButtonRenderer(new RendererClickListener() {
           @Override
@@ -178,7 +140,38 @@ public class PatientStatusComponent extends CustomComponent{
               message.add(currentBean.getId());
               message.add(BarcodeView.navigateToLabel);
               state.notifyObservers(message);
-            } else {
+            } 
+            else if (esb.getDescription().equals("Variant Annotation")) {
+              ArrayList<String> message = new ArrayList<String>();
+              message.add("clicked");
+              StringBuilder sb = new StringBuilder("type=");
+              sb.append("workflowExperimentType");
+              sb.append("&");
+              sb.append("id=");
+              sb.append(currentBean.getId());
+              sb.append("&");
+              sb.append("experiment=");
+              sb.append("Q_WF_NGS_VARIANT_ANNOTATION");
+              message.add(sb.toString());
+              message.add(WorkflowView.navigateToLabel);
+              state.notifyObservers(message);
+            }
+            else if (esb.getDescription().equals("Epitope Prediction ")) {
+                ArrayList<String> message = new ArrayList<String>();
+                message.add("clicked");
+                StringBuilder sb = new StringBuilder("type=");
+                sb.append("workflowExperimentType");
+                sb.append("&");
+                sb.append("id=");
+                sb.append(currentBean.getId());
+                sb.append("&");
+                sb.append("experiment=");
+                sb.append("Q_WF_NGS_EPITOPE_PREDICTION");
+                message.add(sb.toString());
+                message.add(WorkflowView.navigateToLabel);
+                state.notifyObservers(message);
+            }
+            else if (esb.getDescription().equals("HLA Typing")){
               ArrayList<String> message = new ArrayList<String>();
               message.add("clicked");
               StringBuilder sb = new StringBuilder("type=");
@@ -192,6 +185,15 @@ public class PatientStatusComponent extends CustomComponent{
               message.add(sb.toString());
               message.add(WorkflowView.navigateToLabel);
               state.notifyObservers(message);
+            }
+            
+            else {
+              Notification notif = new Notification("Workflow not (yet) available.", Type.TRAY_NOTIFICATION);
+              // Customize it
+              notif.setDelayMsec(60000);
+              notif.setPosition(Position.MIDDLE_CENTER);
+              // Show it in the page
+              notif.show(Page.getCurrent());
             }
           }
         }));

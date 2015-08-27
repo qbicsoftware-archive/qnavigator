@@ -504,12 +504,12 @@ public class ProjectView extends VerticalLayout implements View {
     // table is already set in setdataresource
   }
 
-  //void resetGraph() {
-  //  graphSectionContent.removeAllComponents();
-  //  VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
-  //  graphSection.getComponent(1).setVisible(true);
-  //  graphSection.getComponent(1).setEnabled(true);
- // }
+  void resetGraph() {
+    graphSectionContent.removeAllComponents();
+    //VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
+    //graphSection.getComponent(1).setVisible(true);
+    //graphSection.getComponent(1).setEnabled(true);
+ }
 
   /**
    * 
@@ -615,8 +615,11 @@ public class ProjectView extends VerticalLayout implements View {
           new Label(
               "Computing the project graph can take several seconds on big projects. Please be patient.");
       info.setStyleName(ValoTheme.LABEL_SUCCESS);
-      graphSectionContent.addComponent(info);
+      graphSectionContent.removeAllComponents();
+      //graphSectionContent.addComponent(info);
       graphSectionContent.addComponent(progress);
+      //graphSectionContent.setComponentAlignment(info, Alignment.MIDDLE_CENTER);
+      graphSectionContent.setComponentAlignment(progress, Alignment.MIDDLE_CENTER);
       Worker worker = new Worker(getCurrent());
       worker.start();
       UI.getCurrent().setPollInterval(500);
@@ -791,7 +794,14 @@ public class ProjectView extends VerticalLayout implements View {
             String email = user.getEmailAddress();
            
             String userString = "<a href=\"mailto:" + email + "\" style=\"color: #0068AA; text-decoration: none\">" + lastName + ", " + firstName + "</a>";
-            members.put(user.getLastName(), userString);
+            
+            if(user.getLastName().length() > 0) {
+              members.put(user.getLastName(), userString);
+            }
+            
+            else {
+              members.put(user.getFirstName(), userString);
+            }
             
             //memberString.append("<a href=\"mailto:");
             //memberString.append(email);
@@ -832,7 +842,7 @@ public class ProjectView extends VerticalLayout implements View {
             new Label(
                 "Searching for members. Can take several seconds on big projects. Please be patient.");
         info.setStyleName(ValoTheme.LABEL_SUCCESS);
-        membersLayout.addComponent(info);
+        //membersLayout.addComponent(info);
         membersLayout.addComponent(progress);
         MemberWorker worker = new MemberWorker();
         worker.start();
@@ -1003,10 +1013,10 @@ public class ProjectView extends VerticalLayout implements View {
     this.table.unselect(this.table.getValue());
     ProjectBean pbean = datahandler.getProject2(currentValue);
     // if the new project bean is different than reset the graph.
-    //if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
-    //  LOGGER.debug("reseting graph");
-    //  resetGraph();
-    //}
+    if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
+      LOGGER.debug("reseting graph");
+      resetGraph();
+    }
     this.setContainerDataSource(pbean);
     updateContent();
     

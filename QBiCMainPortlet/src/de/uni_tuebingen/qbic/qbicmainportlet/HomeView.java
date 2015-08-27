@@ -269,7 +269,7 @@ public class HomeView extends VerticalLayout implements View {
 
     filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
 
-    filterTable.setColumnCollapsingAllowed(true);
+    filterTable.setColumnCollapsingAllowed(false);
 
     filterTable.setColumnReorderingAllowed(true);
     return filterTable;
