@@ -108,7 +108,6 @@ public class WorkflowViewController {
        }
     }
 
-
     return container;
   }
 
@@ -256,7 +255,8 @@ public class WorkflowViewController {
     try {
       return submitter.getAvailableSuitableWorkflows(fileType);
     } catch (Exception e) {
-      e.printStackTrace();
+      //e.printStackTrace();
+      LOGGER.debug("No suitable workflows founds.");
       return new BeanItemContainer<Workflow>(Workflow.class);
     }
   }

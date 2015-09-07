@@ -33,6 +33,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 
 
+
 public class SearchBarView extends CustomComponent {
 
 
@@ -154,7 +155,7 @@ public class SearchBarView extends CustomComponent {
     java.util.EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
     SearchCriteria sc = new SearchCriteria();
     sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, samplecode + "*"));
-    List<Sample> samples = datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc, fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
+    List<Sample> samples = datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc, fetchOptions,LiferayAndVaadinUtils.getUser().getScreenName());
     List<String> ret = new ArrayList<String>(samples.size());
     for(Sample sample : samples){
       ret.add(sample.getCode());

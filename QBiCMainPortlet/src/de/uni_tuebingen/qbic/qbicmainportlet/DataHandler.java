@@ -1416,25 +1416,30 @@ public class DataHandler implements Serializable {
         res.addBean(ngsMeasure);
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_NGS_VARIANT_CALLING.name())) {
-        LOGGER.debug(bean.getCode());
-        LOGGER.debug(bean.getId());
-        LOGGER.debug(String.valueOf(experimentStatus));
         ngsCall.setStatus(experimentStatus);
         ngsCall.setCode(bean.getCode());
         ngsCall.setIdentifier(bean.getId());
       }
-      if (type.equalsIgnoreCase(ExperimentType.Q_NGS_HLATYPING.name())) {
-        hlaType.setStatus(experimentStatus);
+      if (type.equalsIgnoreCase(ExperimentType.Q_NGS_HLATYPING.name()) | type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_HLATYPING.name())) {
+    	if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_HLATYPING.name())) {
+    		hlaType.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
+    		          .get("Q_WF_STATUS").toString()));
+    	}
+    	else {
+    		hlaType.setStatus(experimentStatus);
+    	}
         hlaType.setCode(bean.getCode());
         hlaType.setIdentifier(bean.getId());
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_VARIANT_ANNOTATION.name())) {
-        variantAnno.setStatus(experimentStatus);
+        variantAnno.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
+		          .get("Q_WF_STATUS").toString()));
         variantAnno.setCode(bean.getCode());
         variantAnno.setIdentifier(bean.getId());
       }
       if (type.equalsIgnoreCase(ExperimentType.Q_WF_NGS_EPITOPE_PREDICTION.name())) {
-        epitopePred.setStatus(experimentStatus);
+        epitopePred.setStatus(helpers.OpenBisFunctions.statusToDoubleValue(bean.getProperties()
+		          .get("Q_WF_STATUS").toString()));
         epitopePred.setCode(bean.getCode());
         epitopePred.setIdentifier(bean.getId());
       }

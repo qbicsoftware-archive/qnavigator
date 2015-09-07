@@ -156,7 +156,7 @@ public class PatientStatusComponent extends CustomComponent{
               message.add(WorkflowView.navigateToLabel);
               state.notifyObservers(message);
             }
-            else if (esb.getDescription().equals("Epitope Prediction ")) {
+            else if (esb.getDescription().equals("Epitope Prediction")) {
                 ArrayList<String> message = new ArrayList<String>();
                 message.add("clicked");
                 StringBuilder sb = new StringBuilder("type=");

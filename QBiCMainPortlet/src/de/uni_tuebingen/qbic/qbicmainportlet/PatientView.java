@@ -17,6 +17,7 @@ import logging.Log4j2Logger;
 import logging.Logger;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
@@ -498,19 +499,25 @@ public class PatientView extends VerticalLayout implements View {
     
     List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.getOpenBisClient().getFacade().searchForSamples(sc);
     
-    sc = new SearchCriteria();
-    sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, "Q_WF_NGS_HLATYPING"));
-    projectSc = new SearchCriteria();
-    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
-    sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
+    SearchCriteria sc2 = new SearchCriteria();
+    sc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
+    SearchCriteria projectSc2 = new SearchCriteria();
+    projectSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
+    sc2.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc2));
     
-    experimentSc = new SearchCriteria();
-    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  "Q_WF_NGS_HLATYPING"));
-    sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
+    SearchCriteria experimentSc2 = new SearchCriteria();
+    experimentSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
+    sc2.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc2));
     
-    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> wfSamples = datahandler.getOpenBisClient().getFacade().searchForSamples(sc);
-
+    List<Experiment> wfExperiments = datahandler.getOpenBisClient().getFacade().searchForExperiments(sc2);
     
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> wfSamples = new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample>();
+    
+    for(Experiment exp: wfExperiments) {
+    	if(exp.getCode().contains(currentBean.getCode())) {
+    	wfSamples.addAll(datahandler.getOpenBisClient().getSamplesofExperiment(exp.getIdentifier()));
+    	}
+    }
     
     for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples){
       available = true;
@@ -534,41 +541,10 @@ public class PatientView extends VerticalLayout implements View {
     
     for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : wfSamples){
       available = true;
-
       labelContent +=
-          String.format("Computational Typing (OptiType)" + "<p> %s </p> ",
-             sample.getProperties().get("Q_HLA_TYPING"));      
+          String.format("<u>Computational Typing (OptiType)</u>" + "<p> %s </p> ", sample.getProperties().get("Q_HLA_TYPING"));      
     }
     
-    
-    /*
-    for (Iterator<ExperimentBean> i = currentBean.getExperiments().getItemIds().iterator(); i
-        .hasNext();) {
-      // Get the current item identifier, which is an integer.
-      ExperimentBean expBean = (ExperimentBean) i.next();
-
-      if (expBean.getType().equalsIgnoreCase(model.ExperimentType.Q_NGS_HLATYPING.name())) {
-        for (Iterator<SampleBean> ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
-          SampleBean sampBean = (SampleBean) ii.next();
-          if (sampBean.getType().equalsIgnoreCase(model.ExperimentType.Q_NGS_HLATYPING.name())) {
-            available = true;
-            String classString = sampBean.getProperties().get("Q_HLA_CLASS");
-            String[] splitted = classString.split("_");
-            String lastOne = splitted[splitted.length - 1];
-            String addInformation = "";
-
-            if (!(sampBean.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
-              addInformation = sampBean.getProperties().get("Q_ADDITIONAL_INFO");
-            }
-
-            labelContent +=
-                String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ",
-                    lastOne, sampBean.getProperties().get("Q_HLA_TYPING"), addInformation);
-
-          }
-        }
-      }
-    }*/
     labelContent += "</body>";
     if (available) {
       hlaTypeLabel.setValue(labelContent);

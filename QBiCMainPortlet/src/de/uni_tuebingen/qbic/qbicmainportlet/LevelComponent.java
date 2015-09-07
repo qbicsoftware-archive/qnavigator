@@ -396,7 +396,7 @@ public class LevelComponent extends CustomComponent{
     // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    //buttonLayout.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, true));
     buttonLayout.setHeight(null);
     //buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);

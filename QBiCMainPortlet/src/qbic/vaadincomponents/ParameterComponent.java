@@ -138,14 +138,16 @@ public class ParameterComponent extends WorkflowParameterComponent {
 
     for (Field<?> field : registeredFields) {
       if (!field.isValid() || field.isEmpty()) {
-        String errorMessage = "Warning: Parameter " + field.getCaption() + "is invalid!";
+        //String errorMessage = "Warning: Parameter " + field.getCaption() + "is invalid!";
+        String errorMessage = "Warning: Parameter " + field.getDescription() + "is invalid!";
         Notification.show(errorMessage, Type.TRAY_NOTIFICATION);
         LOGGER.info(errorMessage);
         return false;
       }
 
       String value = field.getValue().toString();
-      paramSet.getParam(field.getCaption()).setValue(value);
+      //paramSet.getParam(field.getCaption()).setValue(value);
+      paramSet.getParam(field.getDescription()).setValue(value);
     }
     return true;
   }
@@ -165,7 +167,8 @@ public class ParameterComponent extends WorkflowParameterComponent {
     ParameterSet paramSet = workFlow.getParameters();
 
     for (Field field : registeredFields) {
-      String resetValue = paramSet.getParam(field.getCaption()).getValue().toString();
+      //String resetValue = paramSet.getParam(field.getCaption()).getValue().toString();
+    	String resetValue = paramSet.getParam(field.getDescription()).getValue().toString();
       field.setValue(resetValue);
     }
   }
@@ -181,9 +184,11 @@ public class ParameterComponent extends WorkflowParameterComponent {
   }
 
   private TextField createParameterField(Parameter param, Validator validator, Converter converter) {
-    TextField field = new TextField(param.getTitle());
-    field.setDescription(param.getDescription());
-    field.addValidator(validator);
+    //TextField field = new TextField(param.getTitle());
+    //field.setDescription(param.getDescription());
+	TextField field = new TextField(param.getDescription());
+	field.setDescription(param.getTitle());
+	field.addValidator(validator);
     field.setImmediate(true);
     field.setConverter(converter);
     return field;
@@ -199,9 +204,11 @@ public class ParameterComponent extends WorkflowParameterComponent {
   }
 
   private ComboBox createStringSelectionParameterField(StringParameter param) {
-    ComboBox box = new ComboBox(param.getTitle());
-    box.setDescription(param.getDescription());
-    box.setFilteringMode(FilteringMode.CONTAINS);
+    //ComboBox box = new ComboBox(param.getTitle());
+    //box.setDescription(param.getDescription());
+	ComboBox box = new ComboBox(param.getDescription());
+	box.setDescription(param.getTitle());
+	box.setFilteringMode(FilteringMode.CONTAINS);
     box.addItems(param.getRange());
     // should only be the range.
     box.setNullSelectionAllowed(false);
@@ -224,9 +231,11 @@ public class ParameterComponent extends WorkflowParameterComponent {
     Map<String, Parameter> updatedParams = new HashMap<String, Parameter>();
 
     for (Field<?> field : registeredFields) {
-      Parameter updatedParam = paramSet.getParam(field.getCaption());
+      //Parameter updatedParam = paramSet.getParam(field.getCaption());
+      Parameter updatedParam = paramSet.getParam(field.getDescription());
       updatedParam.setValue(field.getValue().toString());
-      updatedParams.put(updatedParam.getTitle(), updatedParam);
+      //updatedParams.put(updatedParam.getTitle(), updatedParam);
+      updatedParams.put(updatedParam.getDescription(), updatedParam);
     }
 
     ParameterSet updatedParamSet =

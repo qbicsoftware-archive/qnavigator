@@ -18,6 +18,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
@@ -81,7 +82,7 @@ public class ExperimentView extends VerticalLayout implements View {
    * @param browser
    */
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-    setWidth((browserWidth * 0.6f), Unit.PIXELS);
+	    setWidth((browserWidth * 0.85f), Unit.PIXELS);
   }
 
   /**
@@ -91,18 +92,19 @@ public class ExperimentView extends VerticalLayout implements View {
   void initView() {
 
     expview_content = new VerticalLayout();
-    expview_tab = new TabSheet();
-    expview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
-    expview_tab.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
+    expview_content.setMargin(new MarginInfo(true, false, false, false));
     
-    expview_content.addComponent(initToolBar());
+    expview_tab = new TabSheet();
+    
+    expview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
+
     expview_content.addComponent(expview_tab);
     
-    expview_tab.addTab(initDescription(), "General Information").setIcon(FontAwesome.INFO);;
-    expview_tab.addTab(initStatistics(), "Statistics").setIcon(FontAwesome.BAR_CHART_O);
+    expview_tab.addTab(initDescription(), "General Information").setIcon(FontAwesome.INFO_CIRCLE);;
+    expview_tab.addTab(initStatistics(), "Statistics").setIcon(FontAwesome.CHECK_CIRCLE);
     expview_tab.addTab(initProperties(), "Metadata").setIcon(FontAwesome.LIST_UL);
-    expview_tab.addTab(initTable(), "Samples").setIcon(FontAwesome.FLASK);;
-
+    expview_tab.addTab(initTable(), "Samples").setIcon(FontAwesome.TINT);;
+   
     //expview_content.addComponent(initDescription());
     //expview_content.addComponent(initStatistics());
     //expview_content.addComponent(initTable());
@@ -118,7 +120,6 @@ public class ExperimentView extends VerticalLayout implements View {
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-    updateContentToolBar();
     updateContentDescription();
     updateContentStatistics();
     updateContentProperties();
@@ -134,12 +135,12 @@ public class ExperimentView extends VerticalLayout implements View {
     this.export = new Button("Export as TSV");
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, true));
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayoutSection.setSpacing(true);
     buttonLayoutSection.addComponent(buttonLayout);
-    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, true));
+    buttonLayoutSection.setMargin(new MarginInfo(false, false, true, true));
     buttonLayout.addComponent(this.export);
     return buttonLayout;
   }
@@ -188,9 +189,9 @@ public class ExperimentView extends VerticalLayout implements View {
     //generalInfoContent.setIcon(FontAwesome.INFO);
     generalInfoLabel = new Label("");
 
-    generalInfo.setMargin(new MarginInfo(true, false, false, true));
+    generalInfo.setMargin(new MarginInfo(true, false, true, true));
     generalInfoContent.addComponent(generalInfoLabel);
-    generalInfoContent.setMargin(new MarginInfo(true, false, false, true));
+    generalInfoContent.setMargin(new MarginInfo(true, false, true, true));
     //generalInfoContent.setMargin(true);
     //generalInfo.setMargin(true);
 
@@ -221,7 +222,7 @@ public class ExperimentView extends VerticalLayout implements View {
     statContentLabel = new Label("");
 
     statContent.addComponent(statContentLabel);
-    statContent.setMargin(new MarginInfo(true, false, false, true));
+    statContent.setMargin(new MarginInfo(true, false, true, true));
 
     // statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
     //statContent.setMargin(true);
@@ -255,7 +256,7 @@ public class ExperimentView extends VerticalLayout implements View {
     //properties.setMargin(true);
     //statistics.addComponent(properties);
 
-    statistics.setMargin(new MarginInfo(true, false, false, true));
+    statistics.setMargin(new MarginInfo(true, false, true, true));
     statistics.setSpacing(true);
 
     return statistics;
@@ -277,7 +278,7 @@ public class ExperimentView extends VerticalLayout implements View {
     propertiesContentLabel = new Label("", ContentMode.HTML);
     propertiesContent.addComponent(propertiesContentLabel);
     properties.addComponent(propertiesContent);
-    propertiesContent.setMargin(new MarginInfo(true, false, false, true));
+    propertiesContent.setMargin(new MarginInfo(true, false, true, true));
     
     return properties;
   }
@@ -300,7 +301,7 @@ public class ExperimentView extends VerticalLayout implements View {
     //tableSection.setMargin(true);
     tableSection.setMargin(new MarginInfo(true, false, false, true));
 
-    this.table.setWidth("100%");
+    //this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
 

@@ -139,7 +139,7 @@ public class WorkflowView extends VerticalLayout implements View {
    * @param browser
    */
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-    setWidth((browserWidth * 0.6f), Unit.PIXELS);
+    setWidth((browserWidth * 0.85f), Unit.PIXELS);
   }
 
 
@@ -147,6 +147,7 @@ public class WorkflowView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
 
+    submission.setVisible(false);
     Map<String, String> map = DatasetView.getMap(event.getParameters());
     if (map == null)
       return;
@@ -194,13 +195,22 @@ public class WorkflowView extends VerticalLayout implements View {
         for (Iterator i = controller.getcontainer("project", id).getItemIds().iterator(); i
             .hasNext();) {
           DatasetBean datasetBean = (DatasetBean) i.next();
-
+         
           if (workflowDatasetTypes.contains(datasetBean.getFileType())) {
-            suitableDatasets.addBean(datasetBean);
+        	// only take the file containing the hla typing
+        	if(datasetBean.getFileType().equals("Q_WF_NGS_HLATYPING_RESULTS")) {
+        		if(datasetBean.getFileName().endsWith("alleles")) {
+                    suitableDatasets.addBean(datasetBean);
+        		}
+        	}
+        	else {
+        		suitableDatasets.addBean(datasetBean);
+        	}
           }
         }
-
+        
         datasetBeans = suitableDatasets;
+        
         updateSelection(suitableWorkflows);
         break;
 

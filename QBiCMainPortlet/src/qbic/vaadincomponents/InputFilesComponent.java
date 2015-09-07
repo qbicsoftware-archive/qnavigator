@@ -374,9 +374,16 @@ public class InputFilesComponent extends WorkflowParameterComponent {
 
         if (currentGrid.getSelectionModel() instanceof SingleSelectionModel) {
           Object selectionSingle = currentGrid.getSelectedRow();
+          // Quick solution
+          //TODO 
           if (selectionSingle == null) {
-            showError("Warning: Nothing selected for single input parameter " + caption);
+            if(caption.equals("InputFiles.1.Germline Mutations")) {
+            	continue;
+            }
+            else {
+        	  showError("Warning: Nothing selected for single input parameter " + caption);
             return false;
+            }
           }
           if (selectionSingle instanceof FastaBean) {
             FastaBean selectedBean = (FastaBean) selectionSingle;
