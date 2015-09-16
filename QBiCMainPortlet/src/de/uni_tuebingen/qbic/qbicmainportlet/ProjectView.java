@@ -156,7 +156,7 @@ public class ProjectView extends VerticalLayout implements View {
    */
   void initView() {
     projectview_content = new VerticalLayout();
-    projectview_content.setMargin(new MarginInfo(true, false, false, false));
+    projectview_content.setMargin(new MarginInfo(true, true, false, false));
     
     //labelContent = new VerticalLayout();
     //labelContent.setMargin(new MarginInfo(true, false, true, false));
@@ -177,7 +177,10 @@ public class ProjectView extends VerticalLayout implements View {
     workflowComponent = new WorkflowComponent(wfController);
     
     //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
+    projectview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    projectview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
+
     
     projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);

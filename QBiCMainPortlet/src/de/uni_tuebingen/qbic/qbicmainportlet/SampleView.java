@@ -133,10 +133,12 @@ private DatasetComponent datasetComponent;
    */
   void initView() {
     sampview_content = new VerticalLayout();
-    sampview_content.setMargin(new MarginInfo(true, false, false, false));
+    sampview_content.setMargin(new MarginInfo(true, true, false, false));
     
     sampview_tab = new TabSheet();
     sampview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    sampview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
+    sampview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
     
     header = "";
     

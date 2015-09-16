@@ -211,13 +211,15 @@ public class PatientView extends VerticalLayout implements View {
    */
   void initView() {
     patientViewContent = new VerticalLayout();
-    patientViewContent.setMargin(new MarginInfo(true, false, false, false));
-    
+    patientViewContent.setMargin(new MarginInfo(true, true, false, false));
+    //patientViewContent.setMargin(true);
+    	
     headerLabel = "";
     
     patientViewTab = new TabSheet();
-    patientViewTab.setWidth("100%");
     patientViewTab.setHeight("100%");
+    patientViewTab.setWidth("100%");
+
     
     datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
     biologicalSamplesComponent = new BiologicalSamplesComponent(datahandler, state, resourceUrl, "Biological Samples");
@@ -226,9 +228,9 @@ public class PatientView extends VerticalLayout implements View {
     statusComponent = new PatientStatusComponent(datahandler, state, resourceUrl);
     workflowComponent = new WorkflowComponent(wfController);
 
-    
-    //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
+    patientViewTab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     patientViewTab.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    patientViewTab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
     
     patientViewTab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     patientViewTab.addTab(statusComponent).setIcon(FontAwesome.CHECK_CIRCLE);

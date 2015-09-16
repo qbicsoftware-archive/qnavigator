@@ -263,7 +263,7 @@ public class QbicmainportletUI extends UI {
     setNavigator(navigator);
 
     mainLayout = new VerticalLayout();
-    mainLayout.setMargin(true);
+    mainLayout.setMargin(new MarginInfo(false, true, false, false));
 
     //final TreeView tv = new TreeView(state, navigator, user);
     //tv.setOpenbisClient(this.openBisConnection);
@@ -271,7 +271,10 @@ public class QbicmainportletUI extends UI {
     //state.addObserver(tv);
     //navigator.addViewChangeListener(tv);
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
+    treeViewAndLevelView.setMargin(new MarginInfo(false, true, false, false));
+    //treeViewAndLevelView.setSizeFull();
     HorizontalLayout headerView = new HorizontalLayout();
+    headerView.setMargin(new MarginInfo(false, true, false, false));
     
     headerView.setWidth((getPage().getBrowserWindowHeight() * 0.85f), Unit.PIXELS);
     headerView.setSpacing(false);

@@ -173,13 +173,10 @@ public class HomeView extends VerticalLayout implements View {
   }
   
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
-    this.setMargin(false);
+    this.setMargin(new MarginInfo(false,true,false,false));
     // clean up first
     homeview_content.removeAllComponents();
     homeview_content.setWidth("100%");
-
-    // menubar
-    //homeview_content.addComponent(initToolBar());
 
     updateView(browserWidth, browserWidth, browser);
 
@@ -238,7 +235,7 @@ public class HomeView extends VerticalLayout implements View {
     tableSectionContent.addComponent(this.table);
 
     //tableSectionContent.setMargin(true);
-    //tableSection.setMargin(new MarginInfo(true, false, true, true));
+    tableSection.setMargin(new MarginInfo(false, true, false, false));
 
     this.table.setWidth("100%");
     tableSection.setWidth("100%");

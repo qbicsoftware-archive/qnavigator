@@ -92,11 +92,13 @@ public class ExperimentView extends VerticalLayout implements View {
   void initView() {
 
     expview_content = new VerticalLayout();
-    expview_content.setMargin(new MarginInfo(true, false, false, false));
+    expview_content.setMargin(new MarginInfo(true, true, false, false));
     
     expview_tab = new TabSheet();
     
+    expview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     expview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    expview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
 
     expview_content.addComponent(expview_tab);
     

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import model.NewIvacSampleBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
@@ -270,11 +271,22 @@ public class AddPatientView extends VerticalLayout implements View {
 
     List<String> visibleSpaces = new ArrayList<String>();
 
-    for (Project project : datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
-      if (project.getSpaceCode().startsWith("IVAC")) {
-        visibleSpaces.add(project.getSpaceCode());
-      }
+    for (String space: datahandler.getOpenBisClient().listSpaces()) {
+    	if(space.startsWith("IVAC")) {
+    		
+    	Set<String> users = datahandler.getOpenBisClient().getSpaceMembers(space);
+    	
+    	if(users.contains(LiferayAndVaadinUtils.getUser().getScreenName())) {
+    		visibleSpaces.add(space);
+    	}
+    	}
     }
+    
+    //for (Project project : datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
+    //  if (project.getSpaceCode().startsWith("IVAC")) {
+    //    visibleSpaces.add(project.getSpaceCode());
+     // }
+    //}
     
     projects = new CustomVisibilityComponent(new ComboBox("Select Project", visibleSpaces));
     ((ComboBox) projects.getInnerComponent()).setImmediate(true);
