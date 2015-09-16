@@ -1,0 +1,18 @@
+
+# /LiferayAndVaadinHelpers/
+/LiferayAndVaadinHelpers/.settings
+
+# /MultiscaleView/
+/MultiscaleView/
+
+# /QBiCMainPortlet/
+/QBiCMainPortlet/build
+
+# /QBiCMainPortlet/WebContent/VAADIN/
+/QBiCMainPortlet/WebContent/VAADIN/widgetsets
+
+# /WorkflowMockUp/
+/WorkflowMockUp/
+
+# /workflow_api/
+/workflow_api/*.classpath
