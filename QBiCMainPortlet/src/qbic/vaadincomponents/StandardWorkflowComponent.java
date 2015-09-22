@@ -86,7 +86,6 @@ public class StandardWorkflowComponent extends CustomComponent{
     return inputFileComponent.getSelectedDatasets();
   }
 
-
   /**
    * if the workflow can not be updated for one or another reason, null is returned.
    * e.g. not all mandatory parameters are set

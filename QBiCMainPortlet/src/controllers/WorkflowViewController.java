@@ -7,17 +7,26 @@ import java.net.ConnectException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import javax.xml.bind.JAXBException;
 
 import logging.Log4j2Logger;
 import main.OpenBisClient;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import parser.Parser;
+import properties.Factor;
+
 import submitter.SubmitFailedException;
 import submitter.Submitter;
 import submitter.Workflow;
+import submitter.parameters.Parameter;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
@@ -47,6 +56,10 @@ public class WorkflowViewController {
   private final String wf_status = "Q_WF_STATUS";
   private final String wf_name = "Q_WF_NAME";
   private final String openbis_dss = "DSS1";
+  
+  //used by Microarray QC Workflow. See function fetchExperimentalProperties
+  private String expPropTSV;
+  private Set<String> expFactors;
 
   private enum workflow_statuses {
     RUNNING
@@ -64,49 +77,55 @@ public class WorkflowViewController {
    * @param datasets
    * @return
    */
-  public Container fillTable(List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> datasets) {
+  public Container fillTable(List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> datasets,
+      String projectID) {
     HashMap<String, DataSet> dataMap =
         new HashMap<String, ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
     BeanItemContainer<DatasetBean> container =
         new BeanItemContainer<DatasetBean>(DatasetBean.class);
     Map<String, List<String>> params = new HashMap<String, List<String>>();
     List<String> dsCodes = new ArrayList<String>();
-    
+
     // if value is true, filter out
     HashMap<String, Boolean> fileInfo = new HashMap<String, Boolean>();
-    
+
 
     for (ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet ds : datasets) {
       FileInfoDssDTO[] filelist = ds.listFiles("original", true);
-      
+
       // determine if folder or checksum file which should not displayed for workflows
-      for(FileInfoDssDTO f: filelist) {
-          fileInfo.put(f.getPathInDataSet(), f.isDirectory() | f.getPathInDataSet().endsWith("sha256sum"));
+      for (FileInfoDssDTO f : filelist) {
+        fileInfo.put(f.getPathInDataSet(),
+            f.isDirectory() | f.getPathInDataSet().endsWith("sha256sum"));
       }
-      
+
       dsCodes.add(ds.getCode());
       dataMap.put(ds.getCode(), ds);
     }
-    
-      params.put("codes", dsCodes);
-      QueryTableModel res = openbis.queryFileInformation(params);
-      for (Serializable[] ss : res.getRows()) {
-        String dsCode = (String) ss[0];
-      
+
+    params.put("codes", dsCodes);
+    QueryTableModel res = openbis.queryFileInformation(params);
+    List<String> fileNames = new ArrayList<String>();// these can be used to map to external
+                                                     // ids/secondary names
+    for (Serializable[] ss : res.getRows()) {
+      String dsCode = (String) ss[0];
+      fileNames.add((String) ss[2]);
       // when tryGetInternalPathInDataStore is used here for project like qmari it takes over a
       // minute. without 0.02s
       String path =
       /* dataMap.get(dsCode).getDataSetDss().tryGetInternalPathInDataStore() + */(String) ss[1];
       // path = path.replace("/mnt/DSS1", "/mnt/nfs/qbic");
-      
-      
-      if(!fileInfo.get(path)) {
+
+
+      if (!fileInfo.get(path)) {
         DatasetBean bean =
             new DatasetBean((String) ss[2], dataMap.get(dsCode).getDataSetTypeCode(), dsCode, path,
                 dataMap.get(dsCode).getSampleIdentifierOrNull());
         container.addBean(bean);
-       }
+      }
     }
+    if (true) // TODO only do this for some workflows?
+      fetchExperimentalProperties(projectID, fileNames);
 
     return container;
   }
@@ -138,22 +157,22 @@ public class WorkflowViewController {
       }
       last = Math.max(num, last);
     }
-    
+
     LOGGER.debug("Space: " + space);
     LOGGER.debug("Project: " + project);
-    LOGGER.debug("StringBuilder: " + new StringBuilder("/")
-        .append(space).append("/").append(project).toString());
-    
+    LOGGER.debug("StringBuilder: "
+        + new StringBuilder("/").append(space).append("/").append(project).toString());
+
     String code = project + "E" + Integer.toString(last + 1);
-    
+
     LOGGER.debug("Code: " + code);
-    
+
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("code", code);
     params.put("type", typecode);
     params.put("project", project);
     params.put("space", space);
-    
+
     Map<String, Object> properties = new HashMap<String, Object>();
     properties.put(wf_name, wfName);
     properties.put(wf_version, wfVersion);
@@ -161,8 +180,8 @@ public class WorkflowViewController {
     properties.put(wf_started, Utils.getTime());
     properties.put(wf_status, workflow_statuses.RUNNING.toString());
     params.put("properties", properties);
-    
-    openbis.ingest(openbis_dss, "register-exp", params);   
+
+    openbis.ingest(openbis_dss, "register-exp", params);
     return code;
   }
 
@@ -255,12 +274,12 @@ public class WorkflowViewController {
     try {
       return submitter.getAvailableSuitableWorkflows(fileType);
     } catch (Exception e) {
-      //e.printStackTrace();
+      // e.printStackTrace();
       LOGGER.debug("No suitable workflows founds.");
       return new BeanItemContainer<Workflow>(Workflow.class);
     }
   }
-  
+
   /**
    * returns all known workflows, that can be executed with one of the given filetypes
    * 
@@ -275,29 +294,90 @@ public class WorkflowViewController {
       return new BeanItemContainer<Workflow>(Workflow.class);
     }
   }
-  
+
 
   public BeanItemContainer<DatasetBean> getcontainer(String type, String id) {
-    List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> datasets = new ArrayList<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
-    
-    switch (type){
+    List<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet> datasets =
+        new ArrayList<ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet>();
+
+    switch (type) {
       case "project":
         datasets = openbis.getClientDatasetsOfProjectByIdentifierWithSearchCriteria(id);
         LOGGER.debug("datasets" + datasets);
         break;
-      
+
       case "experiment":
-        //TODO
-          break;
-      
+        // TODO
+        break;
+
       case "sample":
-        //TODO
-          break;
-        
+        // TODO
+        break;
+
       default:
         break;
     }
-    return (BeanItemContainer<DatasetBean>) fillTable(datasets);
+    return (BeanItemContainer<DatasetBean>) fillTable(datasets, id);
+  }
+
+  private void fetchExperimentalProperties(String id, List<String> fileNames) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    List<String> codes = new ArrayList<String>();
+    for (Sample s : openbis.getSamplesOfProject(id))
+      codes.add(s.getCode());
+    params.put("codes", codes);
+    QueryTableModel res = openbis.getAggregationService("get-property-tsv", params);
+
+    Set<String> factorNames = new HashSet<String>();
+    StringBuilder tsv = new StringBuilder();
+    String header = "file\tinternal_ID";
+
+    // XML Parser
+    Parser p = new Parser();
+
+    for (Serializable[] ss : res.getRows()) {
+      String code = (String) ss[0];
+      String extID = (String) ss[1];// how to use this if it is preferred over secondary name?
+      String secondaryName = (String) ss[2];
+      tsv.append(getMatchingStrings(fileNames, code) + "\t" + secondaryName);
+      List<Factor> factors = new ArrayList<Factor>();
+      try {
+        factors = p.getFactorsFromXML((String) ss[3]);
+      } catch (JAXBException e) {
+        e.printStackTrace();
+      }
+      for (Factor f : factors) {
+        factorNames.add(f.getLabel());
+        String val = f.getValue();
+        if (f.hasUnit())
+          val += f.getUnit();
+        tsv.append("\t" + val);
+      }
+      tsv.append("\n");
+    }
+    for (String f : factorNames)
+      header = header + "\t" + f;
+    this.expPropTSV = header + "\n" + tsv;
+    this.expFactors = factorNames;
+  }
+
+  /**
+   * Finds the the first matching string in the list
+   * 
+   * @param list The list of strings to check
+   * @param regex The regular expression to use
+   * @return first matching String
+   */
+  String getMatchingStrings(List<String> list, String regex) {
+
+    Pattern p = Pattern.compile(regex);
+
+    for (String s : list) {
+      if (p.matcher(s).matches()) {
+        return s;
+      }
+    }
+    return "";
   }
 
   public Submitter getSubmitter() {
@@ -402,6 +482,19 @@ public class WorkflowViewController {
 
   public OpenBisClient getOpenbis() {
     return this.openbis;
+  }
+
+  
+  /**
+   * Returns experimental factor names parsed from the properties of samples in this project
+   * @return Unique set of all experimental factors that are saved in Q_Properties of this project
+   */
+  public Set<String> getExperimentalFactors() {
+    return expFactors;
+  }
+
+  public String getExperimentalFactorsTSV() {
+    return expPropTSV;
   }
 
 }
