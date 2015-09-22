@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.net.ConnectException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,8 +57,8 @@ public class WorkflowViewController {
   private final String wf_status = "Q_WF_STATUS";
   private final String wf_name = "Q_WF_NAME";
   private final String openbis_dss = "DSS1";
-  
-  //used by Microarray QC Workflow. See function fetchExperimentalProperties
+
+  // used by Microarray QC Workflow. See function fetchExperimentalProperties
   private String expPropTSV;
   private Set<String> expFactors;
 
@@ -336,29 +337,35 @@ public class WorkflowViewController {
     Parser p = new Parser();
 
     for (Serializable[] ss : res.getRows()) {
+      String xml = (String) ss[3];
       String code = (String) ss[0];
-      String extID = (String) ss[1];// how to use this if it is preferred over secondary name?
-      String secondaryName = (String) ss[2];
-      tsv.append(getMatchingStrings(fileNames, code) + "\t" + secondaryName);
-      List<Factor> factors = new ArrayList<Factor>();
-      try {
-        factors = p.getFactorsFromXML((String) ss[3]);
-      } catch (JAXBException e) {
-        e.printStackTrace();
+      String match = getMatchingStrings(fileNames, code);
+      if (!xml.isEmpty() && !match.isEmpty()) {
+        String extID = (String) ss[1];// how to use this if it is preferred over secondary name?
+        String secondaryName = (String) ss[2];
+        tsv.append(match + "\t" + secondaryName);
+        List<Factor> factors = new ArrayList<Factor>();
+        try {
+          factors = p.getFactorsFromXML(xml);
+        } catch (JAXBException e) {
+          e.printStackTrace();
+        }
+        for (Factor f : factors) {
+          factorNames.add(f.getLabel());
+          String val = f.getValue();
+          if (f.hasUnit())
+            val += f.getUnit();
+          tsv.append("\t" + val);
+        }
+        tsv.append("\n");
       }
-      for (Factor f : factors) {
-        factorNames.add(f.getLabel());
-        String val = f.getValue();
-        if (f.hasUnit())
-          val += f.getUnit();
-        tsv.append("\t" + val);
-      }
-      tsv.append("\n");
     }
     for (String f : factorNames)
       header = header + "\t" + f;
     this.expPropTSV = header + "\n" + tsv;
     this.expFactors = factorNames;
+    LOGGER.debug("experimental properties: " + expFactors);
+    LOGGER.debug("pheno file:\n" + expPropTSV);
   }
 
   /**
@@ -368,12 +375,10 @@ public class WorkflowViewController {
    * @param regex The regular expression to use
    * @return first matching String
    */
-  String getMatchingStrings(List<String> list, String regex) {
-
-    Pattern p = Pattern.compile(regex);
+  static String getMatchingStrings(List<String> list, String substring) {
 
     for (String s : list) {
-      if (p.matcher(s).matches()) {
+      if (s.contains(substring)) {
         return s;
       }
     }
@@ -484,9 +489,10 @@ public class WorkflowViewController {
     return this.openbis;
   }
 
-  
+
   /**
    * Returns experimental factor names parsed from the properties of samples in this project
+   * 
    * @return Unique set of all experimental factors that are saved in Q_Properties of this project
    */
   public Set<String> getExperimentalFactors() {
