@@ -25,7 +25,7 @@ import submitter.parameters.StringParameter;
 import de.uni_tuebingen.qbic.beans.DatasetBean;
 
 public class MicroarrayQCComponent extends CustomComponent {
-  
+
   private static Logger LOGGER = new Log4j2Logger(MicroarrayQCComponent.class);
 
   private Button submit = new Button("Submit");
@@ -51,11 +51,6 @@ public class MicroarrayQCComponent extends CustomComponent {
     submissionContent.setSpacing(true);
     submissionContent.addComponent(inputFileComponent);
     submissionContent.addComponent(parameterComponent);
-    experimentalFactor = new ComboBox("Exp. Variable");
-    experimentalFactor.setNullSelectionAllowed(false);
-    experimentalFactor.addItems(controller.getExperimentalFactors());
-    LOGGER.debug("factors in component: "+controller.getExperimentalFactors().toString());
-    submissionContent.addComponent(experimentalFactor);
     submissionContent.addComponent(buttonContent);
     setCompositionRoot(submissionContent);
   }
@@ -80,6 +75,8 @@ public class MicroarrayQCComponent extends CustomComponent {
   public void update(Workflow workflow, BeanItemContainer<DatasetBean> input) {
     this.inputFileComponent.buildLayout(workflow.getData().getData(), input);
     this.parameterComponent.buildLayout(workflow);
+    this.parameterComponent.setComboboxOptions("Microarray QC.1.f",
+        workflowViewController.getExperimentalFactors());
   }
 
   public void resetParameters() {

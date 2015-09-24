@@ -67,7 +67,6 @@ public class WorkflowViewController {
   };
 
   public WorkflowViewController(Submitter submitter, OpenBisClient openbis, String user) {
-    LOGGER.debug("controller 10:31");
     this.openbis = openbis;
     this.submitter = submitter;
     this.user = user;
@@ -496,7 +495,6 @@ public class WorkflowViewController {
    * @return Unique set of all experimental factors that are saved in Q_Properties of this project
    */
   public Set<String> getExperimentalFactors() {
-    LOGGER.debug("factors requested: "+expFactors);
     return expFactors;
   }
 

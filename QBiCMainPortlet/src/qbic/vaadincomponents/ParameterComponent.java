@@ -3,6 +3,7 @@ package qbic.vaadincomponents;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import logging.Log4j2Logger;
 import submitter.Workflow;
@@ -150,6 +151,24 @@ public class ParameterComponent extends WorkflowParameterComponent {
       paramSet.getParam(field.getDescription()).setValue(value);
     }
     return true;
+  }
+  
+  /**
+   * Can be used to add Options to a Combobox that are only available at runtime (e.g. are created from
+   * openBIS metainformation
+   * @param caption Caption of the field, normally wf name followed by port and parameter name, e.g. "Microarray QC.1.f"
+   * @param params Set of options for this parameter
+   */
+  public void setComboboxOptions(String caption, Set<String> params) {
+    for (Field<?> field : parameterFieldGroup.getFields()) {
+      LOGGER.debug(field.getDescription());
+      LOGGER.debug(field.getCaption());
+      if (field.getDescription().equals(caption)) {
+        if (field instanceof ComboBox) {
+          ((ComboBox) field).addItems(params);
+        }
+      }
+    }
   }
 
   void writetInputList() {
