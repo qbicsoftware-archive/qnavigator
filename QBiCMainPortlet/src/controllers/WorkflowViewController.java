@@ -329,8 +329,8 @@ public class WorkflowViewController {
         String.format("%s-%s-%s-%s", spaceCode, projectCode, experimentCode, sampleCode);
 
     LOGGER.info("User: " + user + " is submitting workflow " + workflow.getID() + " openbis id is:"
-        + openbisId);
-    String submit_id = submitter.submit(workflow, openbisId, user);
+       + openbisId);
+   String submit_id = submitter.submit(workflow, openbisId, user);
     LOGGER.info("Workflow has guse id: " + submit_id);
 
     setWorkflowID(spaceCode, projectCode, experimentCode, submit_id);

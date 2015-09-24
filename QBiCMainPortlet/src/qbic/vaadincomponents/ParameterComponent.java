@@ -144,7 +144,7 @@ public class ParameterComponent extends WorkflowParameterComponent {
         LOGGER.info(errorMessage);
         return false;
       }
-
+     
       String value = field.getValue().toString();
       //paramSet.getParam(field.getCaption()).setValue(value);
       paramSet.getParam(field.getDescription()).setValue(value);

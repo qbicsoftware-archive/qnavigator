@@ -95,12 +95,12 @@ public class WorkflowView extends VerticalLayout implements View {
   private void init() {
 
     viewContent.setWidth("100%");
-    viewContent.setMargin(true);
+    viewContent.setMargin(new MarginInfo(true, false, false, false));
 
     // select available workflows
     workflows = new VerticalLayout();
     VerticalLayout workflowsContent = new VerticalLayout();
-    workflows.setMargin(new MarginInfo(false, true, true, true));
+    workflows.setMargin(new MarginInfo(false, true, true, false));
 
     workflowsContent.addComponent(availableWorkflows);
     availableWorkflows.setSizeFull();
@@ -115,7 +115,7 @@ public class WorkflowView extends VerticalLayout implements View {
 
     // submission
     submission = new VerticalLayout();
-    submission.setMargin(new MarginInfo(false, true, true, true));
+    submission.setMargin(new MarginInfo(false, true, true, false));
 
 
     submission.setCaption(SUBMISSION_CAPTION);

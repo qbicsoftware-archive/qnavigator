@@ -148,7 +148,7 @@ public class AddPatientView extends VerticalLayout implements View {
     addPatientViewContent.addComponent(hlaTypingLayout());
 
     addPatientViewContent.setWidth("100%");
-    addPatientViewContent.setMargin(true);
+    addPatientViewContent.setMargin(new MarginInfo(true, false, false, false));
     this.addComponent(addPatientViewContent);
     this.addComponent(initButtonLayout());
   }
@@ -243,7 +243,7 @@ public class AddPatientView extends VerticalLayout implements View {
 
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, true, true));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, false));
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayoutSection.setWidth("100%");
