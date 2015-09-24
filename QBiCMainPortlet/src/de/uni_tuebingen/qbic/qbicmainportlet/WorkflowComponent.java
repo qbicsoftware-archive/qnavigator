@@ -259,6 +259,7 @@ public class WorkflowComponent extends CustomComponent {
   private void updateParameterView(Workflow workFlow, BeanItemContainer<DatasetBean> projectDatasets) {
     this.submission.setCaption(SUBMISSION_CAPTION + ": " + workFlow.getName());
     this.submission.removeAllComponents();
+    LOGGER.debug(workFlow.getName() + " chosen.");
     if (workFlow.getName().equals("MaxQuant")) {
       BeanItemContainer<RawFilesBean> rawFilesBeans =
           new BeanItemContainer<RawFilesBean>(RawFilesBean.class);
@@ -276,7 +277,7 @@ public class WorkflowComponent extends CustomComponent {
       maxquantComponent.addSubmissionListener(new MaxQuantSubmissionListener(maxquantComponent));
 
       this.submission.addComponent(maxquantComponent);
-    } else if (workFlow.getName().equals("arrayqc_v0_8_2015")) {
+    } else if (workFlow.getName().contains("arrayqc_")) {//TODO this way of finding out the wf is unstable
       MicroarrayQCComponent qcComp = new MicroarrayQCComponent(controller);
       qcComp.update(workFlow, projectDatasets);
       qcComp.addResetListener(new MicroarrayQCResetListener(qcComp));
@@ -318,6 +319,7 @@ public class WorkflowComponent extends CustomComponent {
         // TODO get path of datasetBean and set it as input ?!
         Workflow selectedWorkflow = (Workflow) event.getItemId();
         if (selectedWorkflow != null) {
+          LOGGER.debug("selected wf");
           updateParameterView(selectedWorkflow, datasetBeans);
           submission.setVisible(true);
 
@@ -347,7 +349,7 @@ public class WorkflowComponent extends CustomComponent {
       swc.resetParameters();
     }
   }
-  
+
   public class MicroarrayQCResetListener implements ClickListener {
     private static final long serialVersionUID = -127474228749885664L;
     private MicroarrayQCComponent qcc;
@@ -387,7 +389,7 @@ public class WorkflowComponent extends CustomComponent {
       }
     }
   }
-  
+
   /**
    * listenes to clicks on submit button. Executes standard workflow.
    * 

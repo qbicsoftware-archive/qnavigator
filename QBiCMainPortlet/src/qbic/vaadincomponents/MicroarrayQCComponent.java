@@ -1,7 +1,12 @@
 package qbic.vaadincomponents;
 
+import guse.impl.GuseWorkflowFileSystem;
+
 import java.util.List;
 import java.util.Map;
+
+import logging.Log4j2Logger;
+import logging.Logger;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Button.ClickListener;
@@ -20,6 +25,8 @@ import submitter.parameters.StringParameter;
 import de.uni_tuebingen.qbic.beans.DatasetBean;
 
 public class MicroarrayQCComponent extends CustomComponent {
+  
+  private static Logger LOGGER = new Log4j2Logger(MicroarrayQCComponent.class);
 
   private Button submit = new Button("Submit");
   private Button reset = new Button("Reset");
@@ -47,6 +54,7 @@ public class MicroarrayQCComponent extends CustomComponent {
     experimentalFactor = new ComboBox("Exp. Variable");
     experimentalFactor.setNullSelectionAllowed(false);
     experimentalFactor.addItems(controller.getExperimentalFactors());
+    LOGGER.debug("factors in component: "+controller.getExperimentalFactors().toString());
     submissionContent.addComponent(experimentalFactor);
     submissionContent.addComponent(buttonContent);
     setCompositionRoot(submissionContent);
