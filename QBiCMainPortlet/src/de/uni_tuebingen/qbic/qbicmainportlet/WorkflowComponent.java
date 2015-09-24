@@ -16,6 +16,7 @@ import qbic.model.maxquant.MaxQuantModel;
 import qbic.model.maxquant.MaxquantConverterFactory;
 import qbic.model.maxquant.RawFilesBean;
 import qbic.vaadincomponents.MaxQuantComponent;
+import qbic.vaadincomponents.MicroarrayQCComponent;
 import qbic.vaadincomponents.StandardWorkflowComponent;
 import logging.Log4j2Logger;
 import logging.Logger;
@@ -55,8 +56,8 @@ import de.uni_tuebingen.qbic.beans.DatasetBean;
 import fasta.FastaBean;
 import fasta.FastaDB;
 
-public class WorkflowComponent extends CustomComponent{
-  
+public class WorkflowComponent extends CustomComponent {
+
   private static Logger LOGGER = new Log4j2Logger(WorkflowComponent.class);
   private static final String WORKFKLOW_GRID_DESCRIPTION =
       "If you want to execute a workflow, click on one of the rows in the table. Then select the parameters, input files database/reference files and click on submit.";
@@ -69,7 +70,7 @@ public class WorkflowComponent extends CustomComponent{
   private VerticalLayout workflows;
   private Grid availableWorkflows = new Grid();
   private VerticalLayout submission;
-  
+
   // data
   BeanItemContainer<DatasetBean> datasetBeans;
   private String type;
@@ -83,7 +84,7 @@ public class WorkflowComponent extends CustomComponent{
 
   private void init() {
     VerticalLayout workflowLayout = new VerticalLayout();
-    
+
     viewContent.setWidth("100%");
     viewContent.setMargin(true);
 
@@ -92,7 +93,7 @@ public class WorkflowComponent extends CustomComponent{
     VerticalLayout workflowsContent = new VerticalLayout();
     workflows.setMargin(new MarginInfo(false, true, true, false));
 
-    workflowsContent.addComponent(availableWorkflows );
+    workflowsContent.addComponent(availableWorkflows);
     availableWorkflows.setSizeFull();
     availableWorkflows.setDescription(WORKFKLOW_GRID_DESCRIPTION);
     // availableWorkflows.setWidth("100%");
@@ -132,7 +133,7 @@ public class WorkflowComponent extends CustomComponent{
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
     setWidth((browserWidth * 0.6f), Unit.PIXELS);
   }
-  
+
   public void update(Map<String, String> map) {
 
     if (map == null)
@@ -258,6 +259,7 @@ public class WorkflowComponent extends CustomComponent{
   private void updateParameterView(Workflow workFlow, BeanItemContainer<DatasetBean> projectDatasets) {
     this.submission.setCaption(SUBMISSION_CAPTION + ": " + workFlow.getName());
     this.submission.removeAllComponents();
+    LOGGER.debug(workFlow.getName() + " chosen.");
     if (workFlow.getName().equals("MaxQuant")) {
       BeanItemContainer<RawFilesBean> rawFilesBeans =
           new BeanItemContainer<RawFilesBean>(RawFilesBean.class);
@@ -275,6 +277,12 @@ public class WorkflowComponent extends CustomComponent{
       maxquantComponent.addSubmissionListener(new MaxQuantSubmissionListener(maxquantComponent));
 
       this.submission.addComponent(maxquantComponent);
+    } else if (workFlow.getName().contains("arrayqc_")) {//TODO this way of finding out the wf is unstable
+      MicroarrayQCComponent qcComp = new MicroarrayQCComponent(controller);
+      qcComp.update(workFlow, projectDatasets);
+      qcComp.addResetListener(new MicroarrayQCResetListener(qcComp));
+      qcComp.addSubmissionListener(new MicroarrayQCSubmissionListener(qcComp));
+      this.submission.addComponent(qcComp);
     } else {
       StandardWorkflowComponent standardComponent = new StandardWorkflowComponent(controller);
       standardComponent.update(workFlow, projectDatasets);
@@ -311,6 +319,7 @@ public class WorkflowComponent extends CustomComponent{
         // TODO get path of datasetBean and set it as input ?!
         Workflow selectedWorkflow = (Workflow) event.getItemId();
         if (selectedWorkflow != null) {
+          LOGGER.debug("selected wf");
           updateParameterView(selectedWorkflow, datasetBeans);
           submission.setVisible(true);
 
@@ -340,11 +349,52 @@ public class WorkflowComponent extends CustomComponent{
       swc.resetParameters();
     }
   }
-  
+
+  public class MicroarrayQCResetListener implements ClickListener {
+    private static final long serialVersionUID = -127474228749885664L;
+    private MicroarrayQCComponent qcc;
+
+    public MicroarrayQCResetListener(MicroarrayQCComponent wfComp) {
+      qcc = wfComp;
+    }
+
+    @Override
+    public void buttonClick(ClickEvent event) {
+      qcc.resetParameters();
+    }
+  }
+
+  /**
+   * listens to clicks on submit button. Executes microarray qc workflow.
+   * 
+   * @author friedrich
+   * 
+   */
+  private class MicroarrayQCSubmissionListener implements ClickListener {
+    private static final long serialVersionUID = 243869502031843198L;
+    private MicroarrayQCComponent comp;
+
+    public MicroarrayQCSubmissionListener(MicroarrayQCComponent comp) {
+      this.comp = comp;
+    }
+
+    @Override
+    public void buttonClick(ClickEvent event) {
+      try {
+        List<DatasetBean> selectedDatasets = comp.getSelectedDatasets();
+        Workflow submittedWf = comp.getWorkflow();
+        submit(submittedWf, new ArrayList<DatasetBean>(selectedDatasets));
+      } catch (Exception e) {
+        handleException(e);
+      }
+    }
+  }
+
   /**
    * listenes to clicks on submit button. Executes standard workflow.
+   * 
    * @author wojnar
-   *
+   * 
    */
   private class StandardSubmissionListener implements ClickListener {
     private static final long serialVersionUID = 243869502031843198L;
@@ -365,11 +415,12 @@ public class WorkflowComponent extends CustomComponent{
       }
     }
   }
- /**
-  * listenes to clicks on submit button. Executes maxquant workflow.
-  * @author wojnar
-  *
-  */
+  /**
+   * listenes to clicks on submit button. Executes maxquant workflow.
+   * 
+   * @author wojnar
+   * 
+   */
   private class MaxQuantSubmissionListener implements ClickListener {
     private static final long serialVersionUID = 1888557742642278371L;
     private MaxQuantComponent maxQuantComponent;
@@ -393,24 +444,27 @@ public class WorkflowComponent extends CustomComponent{
     }
 
   }
+
   /**
    * submits workflow with given datasets
-   * @throws SubmitFailedException 
-   * @throws IllegalArgumentException 
-   * @throws ConnectException 
+   * 
+   * @throws SubmitFailedException
+   * @throws IllegalArgumentException
+   * @throws ConnectException
    */
-  void submit(Workflow submittedWf, List<DatasetBean> selectedDatasets) throws ConnectException, IllegalArgumentException, SubmitFailedException{
+  void submit(Workflow submittedWf, List<DatasetBean> selectedDatasets) throws ConnectException,
+      IllegalArgumentException, SubmitFailedException {
     if (submittedWf == null || selectedDatasets.isEmpty()) {
       return;
     }
     // THIS IS THE IMPORTANT LINE IN THAT MESS
-    String openbisId =
-        controller.submitAndRegisterWf(type, id, submittedWf, selectedDatasets );
+    String openbisId = controller.submitAndRegisterWf(type, id, submittedWf, selectedDatasets);
     showNotification("Workflow submitted and saved under " + openbisId);
   }
-  
+
   /**
-   * logs error and shows user that submission failed. Different exceptions yield different error messages
+   * logs error and shows user that submission failed. Different exceptions yield different error
+   * messages
    * 
    * @param e
    */

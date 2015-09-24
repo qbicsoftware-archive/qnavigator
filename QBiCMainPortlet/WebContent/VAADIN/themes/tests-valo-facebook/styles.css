@@ -921,7 +921,7 @@
  */
 
 .v-vaadin-version:after {
-	content: "7.4.8";
+	content: "7.5.1";
 }
 
 .v-widget {
@@ -2489,6 +2489,23 @@ div.v-layout.v-horizontal.v-widget {
 	background: transparent;
 }
 
+.tests-valo-facebook .v-checkbox.v-readonly  > label, .tests-valo-facebook .v-checkbox.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-checkbox.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-checkbox.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-checkbox.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 .tests-valo-facebook .v-checkbox-small {
 	position: relative;
 	line-height: 13px;
@@ -2602,6 +2619,23 @@ div.v-layout.v-horizontal.v-widget {
 	background: transparent;
 }
 
+.tests-valo-facebook .v-checkbox-small.v-readonly  > label, .tests-valo-facebook .v-checkbox-small.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-checkbox-small.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-checkbox-small.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-checkbox-small.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 .tests-valo-facebook .v-checkbox-large {
 	position: relative;
 	line-height: 18px;
@@ -2713,6 +2747,23 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-checkbox-large.v-disabled > input:active ~ label:after {
 	background: transparent;
+}
+
+.tests-valo-facebook .v-checkbox-large.v-readonly  > label, .tests-valo-facebook .v-checkbox-large.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-checkbox-large.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-checkbox-large.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-checkbox-large.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
 }
 
 .tests-valo-facebook .v-filterselect {
@@ -4120,6 +4171,24 @@ div.v-layout.v-horizontal.v-widget {
 	z-index: 1;
 }
 
+.tests-valo-facebook .v-grid-spacer {
+	position: absolute;
+	display: block;
+	background-color: white;
+}
+
+.tests-valo-facebook .v-grid-spacer  > td {
+	width: 100%;
+	height: 100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.v-ie8 .tests-valo-facebook .v-grid-spacer, .v-ie9 .tests-valo-facebook .v-grid-spacer {
+	margin-top: 0;
+}
+
 .tests-valo-facebook .v-grid {
 	outline: none;
 }
@@ -4138,6 +4207,96 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-grid-tablewrapper {
 	border: 1px solid #d4d4d4;
+}
+
+.tests-valo-facebook .v-grid .header-drag-table {
+	border-spacing: 0;
+	position: relative;
+	table-layout: fixed;
+	width: inherit;
+}
+
+.tests-valo-facebook .v-grid .header-drag-table .v-grid-header {
+	position: absolute;
+}
+
+.tests-valo-facebook .v-grid .header-drag-table .v-grid-header  > .v-grid-cell {
+	border: 1px solid #d4d4d4;
+	margin-top: -10px;
+	opacity: 0.9;
+	filter: alpha(opacity=90);
+	z-index: 30000;
+}
+
+.tests-valo-facebook .v-grid .header-drag-table .v-grid-header  > .v-grid-drop-marker {
+	background-color: #3b5998;
+	position: absolute;
+	width: 3px;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu {
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	border-radius: 0;
+	position: absolute;
+	top: 0;
+	right: 0;
+	background-color: #fafafa;
+	border: 1px solid #d4d4d4;
+	padding: 0;
+	z-index: 5;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-button {
+	background: transparent;
+	border: none;
+	color: inherit;
+	cursor: pointer;
+	outline: none;
+	padding: 0 4px;
+	text-align: right;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-button::-moz-focus-inner {
+	border: 0;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-button:after {
+	content: "\f0c9";
+	display: block;
+	font-family: FontAwesome, sans-serif;
+	font-size: 12px;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu.closed {
+	border-radius: 0;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu.open .v-grid-sidebar-button {
+	width: 100%;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu.open .v-grid-sidebar-button:after {
+	content: "\00d7";
+	font-size: 16px;
+	line-height: 1;
+}
+
+.v-ie .tests-valo-facebook .v-grid-sidebar.v-contextmenu.open .v-grid-sidebar-button {
+	vertical-align: middle;
+}
+
+.v-ie8 .tests-valo-facebook .v-grid-sidebar.v-contextmenu.open .v-grid-sidebar-button:after {
+	display: inline;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-content {
+	border-top: 1px solid #d4d4d4;
+	padding: 4px 0;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-content .gwt-MenuBar .gwt-MenuItem .column-hiding-toggle {
+	text-shadow: none;
 }
 
 .tests-valo-facebook .v-grid-cell {
@@ -4322,6 +4481,14 @@ div.v-layout.v-horizontal.v-widget {
 	max-height: 100%;
 }
 
+.v-ie8 .tests-valo-facebook .v-grid-editor-cells  > div .v-datefield-button {
+	margin-left: -30px;
+}
+
+.v-ie8 .tests-valo-facebook .v-grid-editor-cells  > div .v-filterselect-button {
+	margin-left: -27px;
+}
+
 .tests-valo-facebook .v-grid-editor-cells  > div .v-select, .tests-valo-facebook .v-grid-editor-cells  > div .v-select-select {
 	min-width: 100%;
 	max-width: 100%;
@@ -4386,6 +4553,45 @@ div.v-layout.v-horizontal.v-widget {
 	margin-right: 4px;
 }
 
+.tests-valo-facebook .v-grid-spacer {
+	padding-left: 1px;
+}
+
+.tests-valo-facebook .v-grid-spacer > td {
+	display: block;
+	padding: 0;
+	background-color: white;
+	border-top: 1px solid #eeeeee;
+	border-bottom: 1px solid #d4d4d4;
+}
+
+.tests-valo-facebook .v-grid-spacer.stripe > td {
+	background-color: #f5f5f5;
+	border-top: 1px solid #e5e5e5;
+	border-bottom: 1px solid #d4d4d4;
+}
+
+.tests-valo-facebook .v-grid-spacer-deco-container {
+	border-top: 1px solid transparent;
+	position: relative;
+	top: 0;
+	z-index: 5;
+}
+
+.tests-valo-facebook .v-grid-spacer-deco {
+	top: 0;
+	left: 0;
+	width: 2px;
+	background-color: #3b5998;
+	position: absolute;
+	height: 100%;
+	pointer-events: none;
+}
+
+.ie8 .tests-valo-facebook .v-grid-spacer-deco:before, .ie9 .tests-valo-facebook .v-grid-spacer-deco:before, .ie10 .tests-valo-facebook .v-grid-spacer-deco:before {
+	content: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg==);
+}
+
 .tests-valo-facebook .v-grid-cell > .v-progressbar {
 	width: 100%;
 }
@@ -4403,6 +4609,18 @@ div.v-layout.v-horizontal.v-widget {
 	background-image: -webkit-linear-gradient(top, #fafafa 2%, #eaeaea 98%);
 	background-image: linear-gradient(to bottom,#fafafa 2%, #eaeaea 98%);
 	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.tests-valo-facebook .v-grid-header .v-grid-cell.dragged {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+	-webkit-transition: opacity 0.3s ease-in-out;
+	-moz-transition: opacity 0.3s ease-in-out;
+	transition: opacity 0.3s ease-in-out;
+}
+
+.tests-valo-facebook .v-grid-header .v-grid-cell.dragged-column-header {
+	margin-top: -15px;
 }
 
 .tests-valo-facebook .v-grid-footer .v-grid-cell {
@@ -4486,6 +4704,14 @@ div.v-layout.v-horizontal.v-widget {
 	box-shadow: inset 0 1px 0 #f2f2f2;
 }
 
+.v-ie8 .tests-valo-facebook .v-grid-editor-cells > div .v-datefield-button {
+	margin-left: 0px;
+}
+
+.v-ie8 .tests-valo-facebook .v-grid-editor-cells > div .v-filterselect-button {
+	margin-left: 0px;
+}
+
 .tests-valo-facebook .v-grid-editor-cells > div .v-textfield-focus, .tests-valo-facebook .v-grid-editor-cells > div .v-datefield .v-textfield-focus, .tests-valo-facebook .v-grid-editor-cells > div .v-filterselect-input:focus {
 	position: relative;
 }
@@ -4536,6 +4762,25 @@ div.v-layout.v-horizontal.v-widget {
 .tests-valo-facebook .v-grid-editor-save.v-disabled, .tests-valo-facebook .v-grid-editor-cancel.v-disabled {
 	opacity: 0.5;
 	filter: alpha(opacity=50) ;
+}
+
+.tests-valo-facebook .v-grid-spacer {
+	margin-top: -1px;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu.open .v-grid-sidebar-button:after {
+	font-size: 20px;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu.open .v-grid-sidebar-content {
+	margin: 0 0 2px;
+	padding: 4px 4px 2px;
+}
+
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu.closed {
+	background-color: #fafafa;
+	background-image: -webkit-linear-gradient(top, #fafafa 2%, #eaeaea 98%);
+	background-image: linear-gradient(to bottom,#fafafa 2%, #eaeaea 98%);
 }
 
 .tests-valo-facebook .v-grid-scroller::-webkit-scrollbar {
@@ -7176,6 +7421,23 @@ div.v-layout.v-horizontal.v-widget {
 	background: transparent;
 }
 
+.tests-valo-facebook .v-radiobutton.v-readonly  > label, .tests-valo-facebook .v-radiobutton.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-radiobutton.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-radiobutton.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-radiobutton.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 :root .tests-valo-facebook .v-radiobutton > input:checked ~ label:after {
 	width: 5px;
 	height: 5px;
@@ -7322,6 +7584,23 @@ div.v-layout.v-horizontal.v-widget {
 	background: transparent;
 }
 
+.tests-valo-facebook .v-select-optiongroup-small .v-checkbox.v-readonly  > label, .tests-valo-facebook .v-select-optiongroup-small .v-checkbox.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-select-optiongroup-small .v-checkbox.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-select-optiongroup-small .v-checkbox.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-select-optiongroup-small .v-checkbox.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 .tests-valo-facebook .v-select-optiongroup-small .v-radiobutton {
 	position: relative;
 	line-height: 13px;
@@ -7432,6 +7711,23 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-select-optiongroup-small .v-radiobutton.v-disabled > input:active ~ label:after {
 	background: transparent;
+}
+
+.tests-valo-facebook .v-select-optiongroup-small .v-radiobutton.v-readonly  > label, .tests-valo-facebook .v-select-optiongroup-small .v-radiobutton.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-select-optiongroup-small .v-radiobutton.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-select-optiongroup-small .v-radiobutton.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-select-optiongroup-small .v-radiobutton.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
 }
 
 :root .tests-valo-facebook .v-select-optiongroup-small .v-radiobutton > input:checked ~ label:after {
@@ -7580,6 +7876,23 @@ div.v-layout.v-horizontal.v-widget {
 	background: transparent;
 }
 
+.tests-valo-facebook .v-select-optiongroup-large .v-checkbox.v-readonly  > label, .tests-valo-facebook .v-select-optiongroup-large .v-checkbox.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-select-optiongroup-large .v-checkbox.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-select-optiongroup-large .v-checkbox.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-select-optiongroup-large .v-checkbox.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 .tests-valo-facebook .v-select-optiongroup-large .v-radiobutton {
 	position: relative;
 	line-height: 18px;
@@ -7690,6 +8003,23 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-select-optiongroup-large .v-radiobutton.v-disabled > input:active ~ label:after {
 	background: transparent;
+}
+
+.tests-valo-facebook .v-select-optiongroup-large .v-radiobutton.v-readonly  > label, .tests-valo-facebook .v-select-optiongroup-large .v-radiobutton.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-select-optiongroup-large .v-radiobutton.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-select-optiongroup-large .v-radiobutton.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-select-optiongroup-large .v-radiobutton.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
 }
 
 :root .tests-valo-facebook .v-select-optiongroup-large .v-radiobutton > input:checked ~ label:after {
@@ -7830,9 +8160,9 @@ div.v-layout.v-horizontal.v-widget {
 	background-image: radial-gradient(  circle at 50% 50%, #222, #030303);
 	opacity: 0.68;
 	filter: alpha(opacity=68) ;
-	-webkit-animation: valo-animate-in-fade 400ms 100ms;
-	-moz-animation: valo-animate-in-fade 400ms 100ms;
-	animation: valo-animate-in-fade 400ms 100ms;
+	-webkit-animation: valo-animate-in-fade 400ms 100ms backwards;
+	-moz-animation: valo-animate-in-fade 400ms 100ms backwards;
+	animation: valo-animate-in-fade 400ms 100ms backwards;
 }
 
 .v-op12 .tests-valo-facebook .v-window-modalitycurtain {
@@ -9735,9 +10065,9 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-tabsheet-tabsheetpanel > .v-scrollable > .v-widget {
-	-webkit-animation: valo-animate-in-fade 300ms;
-	-moz-animation: valo-animate-in-fade 300ms;
-	animation: valo-animate-in-fade 300ms;
+	-webkit-animation: valo-animate-in-fade 300ms backwards;
+	-moz-animation: valo-animate-in-fade 300ms backwards;
+	animation: valo-animate-in-fade 300ms backwards;
 }
 
 .tests-valo-facebook .v-tabsheet-deco {
@@ -10915,6 +11245,10 @@ div.v-layout.v-horizontal.v-widget {
 	margin-top: 14px;
 }
 
+.tests-valo-facebook .v-verticallayout > .v-slot:first-child .v-formlayout-contentcell h1, .tests-valo-facebook .v-verticallayout > .v-slot:first-child .v-formlayout-contentcell .v-label-h1, .tests-valo-facebook .v-verticallayout > .v-slot:first-child .v-formlayout-contentcell h2, .tests-valo-facebook .v-verticallayout > .v-slot:first-child .v-formlayout-contentcell .v-label-h2, .tests-valo-facebook .v-verticallayout > .v-slot:first-child .v-formlayout-contentcell h3, .tests-valo-facebook .v-verticallayout > .v-slot:first-child .v-formlayout-contentcell .v-label-h3, .tests-valo-facebook .v-verticallayout > .v-slot:first-child .v-formlayout-contentcell h4, .tests-valo-facebook .v-verticallayout > .v-slot:first-child .v-formlayout-contentcell .v-label-h4, .tests-valo-facebook .v-verticallayout > div > .v-slot:first-child .v-formlayout-contentcell h1, .tests-valo-facebook .v-verticallayout > div > .v-slot:first-child .v-formlayout-contentcell .v-label-h1, .tests-valo-facebook .v-verticallayout > div > .v-slot:first-child .v-formlayout-contentcell h2, .tests-valo-facebook .v-verticallayout > div > .v-slot:first-child .v-formlayout-contentcell .v-label-h2, .tests-valo-facebook .v-verticallayout > div > .v-slot:first-child .v-formlayout-contentcell h3, .tests-valo-facebook .v-verticallayout > div > .v-slot:first-child .v-formlayout-contentcell .v-label-h3, .tests-valo-facebook .v-verticallayout > div > .v-slot:first-child .v-formlayout-contentcell h4, .tests-valo-facebook .v-verticallayout > div > .v-slot:first-child .v-formlayout-contentcell .v-label-h4 {
+	margin-top: -0.5em;
+}
+
 .tests-valo-facebook h1.no-margin, .tests-valo-facebook .v-label-h1.no-margin, .tests-valo-facebook h2.no-margin, .tests-valo-facebook .v-label-h2.no-margin, .tests-valo-facebook h3.no-margin, .tests-valo-facebook .v-label-h3.no-margin, .tests-valo-facebook h4.no-margin, .tests-valo-facebook .v-label-h4.no-margin {
 	margin: 0 !important;
 }
@@ -11487,7 +11821,17 @@ div.v-layout.v-horizontal.v-widget {
 	padding: 15px 18px;
 }
 
-.tests-valo-facebook .v-Notification h1 {
+.tests-valo-facebook .v-Notification .v-Notification-caption {
+	color: #3b5998;
+	font-size: 17px;
+	line-height: 1;
+}
+
+.tests-valo-facebook .v-Notification .v-Notification-description {
+	line-height: 1.4;
+}
+
+.tests-valo-facebook .v-Notification-caption {
 	margin: 0;
 	display: inline-block;
 	text-align: left;
@@ -11497,7 +11841,7 @@ div.v-layout.v-horizontal.v-widget {
 	letter-spacing: 0;
 }
 
-.tests-valo-facebook .v-Notification p {
+.tests-valo-facebook .v-Notification-description, .tests-valo-facebook .v-Notification-details {
 	margin: 0;
 	display: inline-block;
 	vertical-align: middle;
@@ -11507,22 +11851,12 @@ div.v-layout.v-horizontal.v-widget {
 	overflow: auto;
 }
 
-.tests-valo-facebook .v-Notification h1 ~ p {
+.tests-valo-facebook .v-Notification-caption ~ .v-Notification-description, .tests-valo-facebook .v-Notification-caption ~ .v-Notification-details {
 	margin-left: 21px;
 }
 
-.tests-valo-facebook .v-Notification .v-icon + h1 {
+.tests-valo-facebook .v-icon + .v-Notification-caption {
 	margin-left: 14px;
-}
-
-.tests-valo-facebook .v-Notification h1 {
-	color: #3b5998;
-	font-size: 17px;
-	line-height: 1;
-}
-
-.tests-valo-facebook .v-Notification p {
-	line-height: 1.4;
 }
 
 .tests-valo-facebook .v-Notification-system {
@@ -11540,7 +11874,7 @@ div.v-layout.v-horizontal.v-widget {
 	line-height: 20px;
 }
 
-.tests-valo-facebook .v-Notification-system p {
+.tests-valo-facebook .v-Notification-system .v-Notification-description, .tests-valo-facebook .v-Notification-system .v-Notification-details {
 	max-width: 50em;
 }
 
@@ -11576,12 +11910,12 @@ div.v-layout.v-horizontal.v-widget {
 	animation: valo-animate-out-slide-down 200ms;
 }
 
-.tests-valo-facebook .v-Notification-system h1 {
+.tests-valo-facebook .v-Notification-system .v-Notification-caption {
 	color: #fff;
 	vertical-align: middle;
 }
 
-.tests-valo-facebook .v-Notification-system p {
+.tests-valo-facebook .v-Notification-system .v-Notification-description, .tests-valo-facebook .v-Notification-system .v-Notification-details {
 	color: #e6e6e6;
 }
 
@@ -11593,7 +11927,7 @@ div.v-layout.v-horizontal.v-widget {
 	text-align: left;
 }
 
-.tests-valo-facebook .v-Notification.tray h1 + p {
+.tests-valo-facebook .v-Notification.tray .v-Notification-caption + .v-Notification-description {
 	display: block;
 	margin: 0.5em 0 0;
 }
@@ -11602,11 +11936,11 @@ div.v-layout.v-horizontal.v-widget {
 	background: #FFF3D2;
 }
 
-.tests-valo-facebook .v-Notification.warning h1 {
+.tests-valo-facebook .v-Notification.warning .v-Notification-caption {
 	color: #AC7C00;
 }
 
-.tests-valo-facebook .v-Notification.warning p {
+.tests-valo-facebook .v-Notification.warning .v-Notification-description {
 	color: #9D874D;
 }
 
@@ -11617,11 +11951,11 @@ div.v-layout.v-horizontal.v-widget {
 	box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.25);
 }
 
-.tests-valo-facebook .v-Notification.error h1 {
+.tests-valo-facebook .v-Notification.error .v-Notification-caption {
 	color: white;
 }
 
-.tests-valo-facebook .v-Notification.error p {
+.tests-valo-facebook .v-Notification.error .v-Notification-description {
 	color: #f4e0df;
 }
 
@@ -11632,12 +11966,12 @@ div.v-layout.v-horizontal.v-widget {
 	line-height: 20px;
 }
 
-.tests-valo-facebook .v-Notification.dark h1 {
+.tests-valo-facebook .v-Notification.dark .v-Notification-caption {
 	color: #fff;
 	vertical-align: middle;
 }
 
-.tests-valo-facebook .v-Notification.dark p {
+.tests-valo-facebook .v-Notification.dark .v-Notification-description, .tests-valo-facebook .v-Notification.dark .v-Notification-details {
 	color: #e6e6e6;
 }
 
@@ -11652,7 +11986,7 @@ div.v-layout.v-horizontal.v-widget {
 	padding: 10px 12px;
 }
 
-.tests-valo-facebook .v-Notification.bar p {
+.tests-valo-facebook .v-Notification.bar .v-Notification-description, .tests-valo-facebook .v-Notification.bar .v-Notification-details {
 	max-width: 50em;
 }
 
@@ -11692,11 +12026,11 @@ div.v-layout.v-horizontal.v-widget {
 	padding: 9px 11px;
 }
 
-.tests-valo-facebook .v-Notification.small h1 {
+.tests-valo-facebook .v-Notification.small .v-Notification-caption {
 	font-size: 14px;
 }
 
-.tests-valo-facebook .v-Notification.small p {
+.tests-valo-facebook .v-Notification.small .v-Notification-description {
 	font-size: 12px;
 }
 
@@ -11766,12 +12100,12 @@ div.v-layout.v-horizontal.v-widget {
 	border: 2px solid #2c9720;
 }
 
-.tests-valo-facebook .v-Notification.success h1, .tests-valo-facebook .v-Notification.failure h1 {
+.tests-valo-facebook .v-Notification.success .v-Notification-caption, .tests-valo-facebook .v-Notification.failure .v-Notification-caption {
 	color: #2c9720;
 	font-weight: 500;
 }
 
-.tests-valo-facebook .v-Notification.success h1:before, .tests-valo-facebook .v-Notification.failure h1:before {
+.tests-valo-facebook .v-Notification.success .v-Notification-caption:before, .tests-valo-facebook .v-Notification.failure .v-Notification-caption:before {
 	font-family: FontAwesome;
 	content: "\f00c";
 	margin-right: 0.5em;
@@ -11785,11 +12119,11 @@ div.v-layout.v-horizontal.v-widget {
 	border-color: #ed473b;
 }
 
-.tests-valo-facebook .v-Notification.failure h1 {
+.tests-valo-facebook .v-Notification.failure .v-Notification-caption {
 	color: #ed473b;
 }
 
-.tests-valo-facebook .v-Notification.failure h1:before {
+.tests-valo-facebook .v-Notification.failure .v-Notification-caption:before {
 	content: "\f05e";
 }
 
@@ -13844,6 +14178,23 @@ div.v-layout.v-horizontal.v-widget {
 	background: transparent;
 }
 
+.tests-valo-facebook .v-checkbox-color1.v-readonly  > label, .tests-valo-facebook .v-checkbox-color1.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-checkbox-color1.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-checkbox-color1.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-checkbox-color1.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 .tests-valo-facebook .v-checkbox-color2 {
 	position: relative;
 	line-height: 15px;
@@ -13954,6 +14305,23 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-checkbox-color2.v-disabled > input:active ~ label:after {
 	background: transparent;
+}
+
+.tests-valo-facebook .v-checkbox-color2.v-readonly  > label, .tests-valo-facebook .v-checkbox-color2.v-readonly  > .v-icon {
+	cursor: default;
+}
+
+.tests-valo-facebook .v-checkbox-color2.v-readonly  > label > .v-icon {
+	cursor: default;
+}
+
+:root .tests-valo-facebook .v-checkbox-color2.v-readonly > input:active ~ label:after {
+	background: transparent;
+}
+
+:root .tests-valo-facebook .v-checkbox-color2.v-readonly > input ~ label:after {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
 }
 
 .tests-valo-facebook .v-slider-color1 .v-slider-handle:before {
