@@ -277,7 +277,7 @@ public class WorkflowComponent extends CustomComponent {
       maxquantComponent.addSubmissionListener(new MaxQuantSubmissionListener(maxquantComponent));
 
       this.submission.addComponent(maxquantComponent);
-    } else if (workFlow.getName().contains("arrayqc_")) {//TODO this way of finding out the wf is unstable
+    } else if (workFlow.getName().contains("Microarray QC")) {
       MicroarrayQCComponent qcComp = new MicroarrayQCComponent(controller);
       qcComp.update(workFlow, projectDatasets);
       qcComp.addResetListener(new MicroarrayQCResetListener(qcComp));

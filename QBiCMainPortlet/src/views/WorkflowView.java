@@ -55,6 +55,7 @@ import de.uni_tuebingen.qbic.qbicmainportlet.DatasetView;
 import fasta.FastaBean;
 import fasta.FastaDB;
 
+@Deprecated
 public class WorkflowView extends VerticalLayout implements View {
 
   /**

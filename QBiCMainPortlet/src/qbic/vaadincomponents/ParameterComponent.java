@@ -161,8 +161,8 @@ public class ParameterComponent extends WorkflowParameterComponent {
    */
   public void setComboboxOptions(String caption, Set<String> params) {
     for (Field<?> field : parameterFieldGroup.getFields()) {
-      LOGGER.debug(field.getDescription());
-      LOGGER.debug(field.getCaption());
+      LOGGER.debug("desc: "+field.getDescription());
+      LOGGER.debug("caption: "+field.getCaption());
       if (field.getDescription().equals(caption)) {
         if (field instanceof ComboBox) {
           ((ComboBox) field).addItems(params);

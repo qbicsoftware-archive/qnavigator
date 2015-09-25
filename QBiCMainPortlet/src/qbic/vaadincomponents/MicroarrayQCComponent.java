@@ -33,7 +33,6 @@ public class MicroarrayQCComponent extends CustomComponent {
 
   private ParameterComponent parameterComponent = new ParameterComponent();
   private InputFilesComponent inputFileComponent = new InputFilesComponent();
-  private ComboBox experimentalFactor = new ComboBox();
 
   private WorkflowViewController workflowViewController;
 
@@ -62,7 +61,6 @@ public class MicroarrayQCComponent extends CustomComponent {
   public Workflow getWorkflow() {
     Workflow tmp = parameterComponent.getWorkflow();
     Map<String, Parameter> params = tmp.getParameters().getParams();
-    params.get("f").setValue(experimentalFactor.getValue());
     StringParameter pheno =
         new StringParameter("pheno", "placeholder for pheno file created from openbis", true, true,
             null);
