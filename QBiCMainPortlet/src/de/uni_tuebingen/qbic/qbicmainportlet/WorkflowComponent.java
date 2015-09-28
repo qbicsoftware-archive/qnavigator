@@ -382,6 +382,7 @@ public class WorkflowComponent extends CustomComponent {
     public void buttonClick(ClickEvent event) {
       try {
         List<DatasetBean> selectedDatasets = comp.getSelectedDatasets();
+        comp.writeParametersToWorkflow();
         Workflow submittedWf = comp.getWorkflow();
         submit(submittedWf, new ArrayList<DatasetBean>(selectedDatasets));
       } catch (Exception e) {

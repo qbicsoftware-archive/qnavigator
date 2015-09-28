@@ -1,9 +1,13 @@
 package qbic.vaadincomponents;
 
-import guse.impl.GuseWorkflowFileSystem;
+import guse.workflowrepresentation.GuseNode;
+import guse.workflowrepresentation.GuseWorkflowRepresentation;
+import guse.workflowrepresentation.InputPort;
 
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONException;
 
 import logging.Log4j2Logger;
 import logging.Logger;
@@ -11,7 +15,6 @@ import logging.Logger;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
@@ -34,10 +37,10 @@ public class MicroarrayQCComponent extends CustomComponent {
   private ParameterComponent parameterComponent = new ParameterComponent();
   private InputFilesComponent inputFileComponent = new InputFilesComponent();
 
-  private WorkflowViewController workflowViewController;
+  private WorkflowViewController controller;
 
   public MicroarrayQCComponent(WorkflowViewController controller) {
-    workflowViewController = controller;
+    this.controller = controller;
     reset.setDescription("Reset Parameters to default values.");
     submit
         .setDescription("Execute Workflow. With given input files, database/reference files and parameters.");
@@ -60,13 +63,7 @@ public class MicroarrayQCComponent extends CustomComponent {
 
   public Workflow getWorkflow() {
     Workflow tmp = parameterComponent.getWorkflow();
-    Map<String, Parameter> params = tmp.getParameters().getParams();
-    StringParameter pheno =
-        new StringParameter("pheno", "placeholder for pheno file created from openbis", true, true,
-            null);
-    pheno.setValue(workflowViewController.getExperimentalFactorsTSV());
-    params.put("pheno", pheno);
-    boolean success = inputFileComponent.updateWorkflow(tmp, workflowViewController);
+    boolean success = inputFileComponent.updateWorkflow(tmp, controller);
     return success ? tmp : null;
   }
 
@@ -74,7 +71,7 @@ public class MicroarrayQCComponent extends CustomComponent {
     this.inputFileComponent.buildLayout(workflow.getData().getData(), input);
     this.parameterComponent.buildLayout(workflow);
     this.parameterComponent.setComboboxOptions("Microarray QC.1.f",
-        workflowViewController.getExperimentalFactors());
+        controller.getExperimentalFactors());
   }
 
   public void resetParameters() {
@@ -87,6 +84,30 @@ public class MicroarrayQCComponent extends CustomComponent {
 
   public void addSubmissionListener(ClickListener listener) {
     submit.addClickListener(listener);
+  }
+
+  public void writeParametersToWorkflow() throws IllegalArgumentException, JSONException {
+    if (parameterComponent.getWorkflow() instanceof GuseWorkflowRepresentation) {
+      GuseWorkflowRepresentation w = (GuseWorkflowRepresentation) parameterComponent.getWorkflow();
+
+      String header = "file\tinternal_ID";
+      for (String f : controller.getExperimentalFactors())
+        header = header + "\t" + f;
+      
+      StringBuilder tsv = new StringBuilder(header);
+      
+      Map<String,String> fileProps = controller.getExperimentalPropsForFiles();
+      for(DatasetBean b : inputFileComponent.getSelectedDatasets()) {
+        String file = b.getFileName();
+        tsv.append("\n"+file+"\t"+fileProps.get(file));
+      }
+      tsv.append("\n");
+      
+      GuseNode node = w.getNode("Workflow");
+      InputPort port = node.getPort("PHENOFILE");
+      port.getParams().get("pheno").setValue(tsv.toString());
+    }
+
   }
 
 

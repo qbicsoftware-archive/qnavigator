@@ -58,8 +58,8 @@ public class WorkflowViewController {
   private final String wf_name = "Q_WF_NAME";
   private final String openbis_dss = "DSS1";
 
-  // used by Microarray QC Workflow. See function fetchExperimentalProperties
-  private String expPropTSV;
+  // used by Microarray QC Workflow. See function mapExperimentalProperties
+  private Map<String, String> expProps;
   private Set<String> expFactors;
 
   private enum workflow_statuses {
@@ -126,7 +126,7 @@ public class WorkflowViewController {
       }
     }
     if (true) // TODO only do this for some workflows?
-      fetchExperimentalProperties(projectID, fileNames);
+      mapExperimentalProperties(projectID, fileNames);
 
     return container;
   }
@@ -320,7 +320,7 @@ public class WorkflowViewController {
     return (BeanItemContainer<DatasetBean>) fillTable(datasets, id);
   }
 
-  private void fetchExperimentalProperties(String id, List<String> fileNames) {
+  private void mapExperimentalProperties(String id, List<String> fileNames) {
     Map<String, Object> params = new HashMap<String, Object>();
     List<String> codes = new ArrayList<String>();
     for (Sample s : openbis.getSamplesOfProject(id))
@@ -329,20 +329,21 @@ public class WorkflowViewController {
     QueryTableModel res = openbis.getAggregationService("get-property-tsv", params);
 
     Set<String> factorNames = new HashSet<String>();
-    StringBuilder tsv = new StringBuilder();
-    String header = "file\tinternal_ID";
+    Map<String, String> fileProps = new HashMap<String, String>();
 
     // XML Parser
     Parser p = new Parser();
 
     for (Serializable[] ss : res.getRows()) {
+      StringBuilder row = new StringBuilder();
+
       String xml = (String) ss[3];
       String code = (String) ss[0];
       String match = getMatchingStrings(fileNames, code);
       if (!xml.isEmpty() && !match.isEmpty()) {
         String extID = (String) ss[1];// how to use this if it is preferred over secondary name?
         String secondaryName = (String) ss[2];
-        tsv.append(match + "\t" + secondaryName);
+        row.append(secondaryName);
         List<Factor> factors = new ArrayList<Factor>();
         try {
           factors = p.getFactorsFromXML(xml);
@@ -354,17 +355,13 @@ public class WorkflowViewController {
           String val = f.getValue();
           if (f.hasUnit())
             val += f.getUnit();
-          tsv.append("\t" + val);
+          row.append("\t" + val);
         }
-        tsv.append("\n");
+        fileProps.put(match, row.toString());
       }
     }
-    for (String f : factorNames)
-      header = header + "\t" + f;
-    this.expPropTSV = header + "\n" + tsv;
+    this.expProps = fileProps;
     this.expFactors = factorNames;
-    LOGGER.debug("experimental properties: " + expFactors);
-    LOGGER.debug("pheno file:\n" + expPropTSV);
   }
 
   /**
@@ -413,8 +410,8 @@ public class WorkflowViewController {
         String.format("%s-%s-%s-%s", spaceCode, projectCode, experimentCode, sampleCode);
 
     LOGGER.info("User: " + user + " is submitting workflow " + workflow.getID() + " openbis id is:"
-       + openbisId);
-   String submit_id = submitter.submit(workflow, openbisId, user);
+        + openbisId);
+    String submit_id = submitter.submit(workflow, openbisId, user);
     LOGGER.info("Workflow has guse id: " + submit_id);
 
     setWorkflowID(spaceCode, projectCode, experimentCode, submit_id);
@@ -498,8 +495,8 @@ public class WorkflowViewController {
     return expFactors;
   }
 
-  public String getExperimentalFactorsTSV() {
-    return expPropTSV;
+  public Map<String, String> getExperimentalPropsForFiles() {
+    return expProps;
   }
 
 }
