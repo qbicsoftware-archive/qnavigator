@@ -26,6 +26,7 @@ public class spaceToProjectPrefixMap {
     aMap.put("IVAC_SARC", "QS");
     aMap.put("IVAC_MACA", "QB");
     aMap.put("IVAC_OVCA", "QO");
+    aMap.put("IVAC_BRAINTUMOR_MUE", "QBM");
     myMap = Collections.unmodifiableMap(aMap);
   }
 }

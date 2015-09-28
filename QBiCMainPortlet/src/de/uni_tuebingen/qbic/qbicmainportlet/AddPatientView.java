@@ -243,7 +243,7 @@ public class AddPatientView extends VerticalLayout implements View {
 
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, true, false));
+    buttonLayout.setMargin(new MarginInfo(true, false, true, false));
     buttonLayout.setHeight(null);
     buttonLayout.setWidth("100%");
     buttonLayoutSection.setWidth("100%");
