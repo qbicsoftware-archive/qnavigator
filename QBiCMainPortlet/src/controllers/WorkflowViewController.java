@@ -334,30 +334,37 @@ public class WorkflowViewController {
     // XML Parser
     Parser p = new Parser();
 
+    Set<String> secondaryNames = new HashSet<String>();
+    
     for (Serializable[] ss : res.getRows()) {
-      StringBuilder row = new StringBuilder();
 
       String xml = (String) ss[3];
       String code = (String) ss[0];
-      String match = getMatchingStrings(fileNames, code);
-      if (!xml.isEmpty() && !match.isEmpty()) {
-        String extID = (String) ss[1];// how to use this if it is preferred over secondary name?
-        String secondaryName = (String) ss[2];
-        row.append(secondaryName);
-        List<Factor> factors = new ArrayList<Factor>();
-        try {
-          factors = p.getFactorsFromXML(xml);
-        } catch (JAXBException e) {
-          e.printStackTrace();
+      List<String> matches = getMatchingStrings(fileNames, code);
+      if (!xml.isEmpty() && !matches.isEmpty()) {
+        for (String match : matches) {
+          StringBuilder row = new StringBuilder();
+          String extID = (String) ss[1];// how to use this if it is preferred over secondary name?
+          String secondaryName = (String) ss[2];
+          while(secondaryNames.contains(secondaryName))
+            secondaryName += "1";
+          secondaryNames.add(secondaryName);
+          row.append(secondaryName);
+          List<Factor> factors = new ArrayList<Factor>();
+          try {
+            factors = p.getFactorsFromXML(xml);
+          } catch (JAXBException e) {
+            e.printStackTrace();
+          }
+          for (Factor f : factors) {
+            factorNames.add(f.getLabel());
+            String val = f.getValue();
+            if (f.hasUnit())
+              val += f.getUnit();
+            row.append("\t" + val);
+          }
+          fileProps.put(match, row.toString());
         }
-        for (Factor f : factors) {
-          factorNames.add(f.getLabel());
-          String val = f.getValue();
-          if (f.hasUnit())
-            val += f.getUnit();
-          row.append("\t" + val);
-        }
-        fileProps.put(match, row.toString());
       }
     }
     this.expProps = fileProps;
@@ -365,20 +372,20 @@ public class WorkflowViewController {
   }
 
   /**
-   * Finds the the first matching string in the list
+   * Finds the the matching strings in the list
    * 
    * @param list The list of strings to check
    * @param regex The regular expression to use
-   * @return first matching String
+   * @return List of matching Strings
    */
-  static String getMatchingStrings(List<String> list, String substring) {
-
+  static List<String> getMatchingStrings(List<String> list, String substring) {
+    List<String> res = new ArrayList<String>();
     for (String s : list) {
       if (s.contains(substring)) {
-        return s;
+        res.add(s);
       }
     }
-    return "";
+    return res;
   }
 
   public Submitter getSubmitter() {

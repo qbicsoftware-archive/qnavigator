@@ -22,8 +22,6 @@ import com.vaadin.ui.VerticalLayout;
 import controllers.WorkflowViewController;
 
 import submitter.Workflow;
-import submitter.parameters.Parameter;
-import submitter.parameters.StringParameter;
 
 import de.uni_tuebingen.qbic.beans.DatasetBean;
 
