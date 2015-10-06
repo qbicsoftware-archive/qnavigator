@@ -95,7 +95,7 @@ public class LevelComponent extends CustomComponent{
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Project", "Sample",
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample",
       "File Name", "Dataset Type", "Registration Date", "File Size"};
 
   private int numberOfDatasets;
@@ -240,7 +240,7 @@ public class LevelComponent extends CustomComponent{
                 datahandler.getOpenBisClient().getSamplesOfProject(projectIdentifier);
 
             for (Sample sample : allSamples) {
-              if (!sample.getSampleTypeCode().equals("Q_TEST_SAMPLE") && !sample.getSampleTypeCode().equals("Q_BIOLOGICAL_SAMPLE") && !sample.getSampleTypeCode().equals("Q_BIOLOGICAL_ENTITY") && !sample.getSampleTypeCode().equals("Q_NGS_SINGLE_SAMPLE_RUN")) {
+              if (!sample.getSampleTypeCode().equals("Q_TEST_SAMPLE") && !sample.getSampleTypeCode().equals("Q_MICROARRAY_RUN") && !sample.getSampleTypeCode().equals("Q_MS_RUN") && !sample.getSampleTypeCode().equals("Q_BIOLOGICAL_SAMPLE") && !sample.getSampleTypeCode().equals("Q_BIOLOGICAL_ENTITY") && !sample.getSampleTypeCode().equals("Q_NGS_SINGLE_SAMPLE_RUN")) {
                 
                 Map<String, String> sampleProperties =  sample.getProperties();
                 TestSampleBean  newBean = new TestSampleBean();
@@ -484,6 +484,9 @@ public class LevelComponent extends CustomComponent{
         } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
             && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
           visualize.setEnabled(true);
+        } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS") 
+        		&& (fileName.endsWith(".html"))) {
+              visualize.setEnabled(true);
         } else {
           visualize.setEnabled(false);
         }
@@ -595,7 +598,15 @@ public class LevelComponent extends CustomComponent{
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/plain");
             res = streamres;
-          } else if (datasetType.equals("FASTQC")) {
+          }
+            else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS") 
+            		&& datasetFileName.endsWith(".html")) {
+                QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+                StreamResource streamres = new StreamResource(re, datasetFileName);
+                streamres.setMIMEType("text/html");
+                res = streamres;        	
+            }
+          else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath = (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();

@@ -60,6 +60,8 @@ public class SampleView extends VerticalLayout implements View {
   private VerticalLayout biologicalSampleStateSection;
   private HorizontalLayout stateInjectLayout;
   private VerticalLayout sampleStateSectionContent;
+  
+  private ChangeMetadataComponent changeMetaDataComponent;
 
   //private MSHBiologicalSampleStateMachine stateMachine;
   private UglyToPrettyNameMapper uglyToPretty = new UglyToPrettyNameMapper();
@@ -143,11 +145,13 @@ private DatasetComponent datasetComponent;
     header = "";
     
     datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
+    changeMetaDataComponent = new ChangeMetadataComponent(datahandler, state, resourceUrl);
     
     sampview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.BAR_CHART_O);
     sampview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     sampview_tab.addTab(initNoteComponent()).setIcon(FontAwesome.PENCIL);
+    sampview_tab.addTab(changeMetaDataComponent).setIcon(FontAwesome.PENCIL_SQUARE_O);
 
     sampview_tab.setImmediate(true);
     
@@ -190,6 +194,8 @@ private DatasetComponent datasetComponent;
     //updateContentButtonLayout();
     //updateMSHBiologicalSampleStateSection();
     updateNoteComponent();
+    changeMetaDataComponent.updateUI(this.currentBean);
+    
   }
 
   /**

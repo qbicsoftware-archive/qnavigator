@@ -221,7 +221,7 @@ public class QbicmainportletUI extends UI {
         new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
             manager.getBarcodePathVariable());
     final ExperimentView experimentView = new ExperimentView(datahandler, state, resUrl);
-    ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
+    //ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
     
@@ -253,7 +253,7 @@ public class QbicmainportletUI extends UI {
     navigator.addView(ProjectView.navigateToLabel, projectView);
     navigator.addView(BarcodeView.navigateToLabel, barcodeView);
     navigator.addView(ExperimentView.navigateToLabel, experimentView);
-    navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
+    //navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
 
     navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateToLabel, addPatientView);
