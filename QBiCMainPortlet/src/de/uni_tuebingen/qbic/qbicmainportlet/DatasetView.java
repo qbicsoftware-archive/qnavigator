@@ -140,7 +140,8 @@ public class DatasetView extends VerticalLayout implements View {
     HorizontalLayout statContent = new HorizontalLayout();
     statContent.setCaption("Statistics");
     statContent.setIcon(FontAwesome.BAR_CHART_O);
-    statContent.addComponent(new Label(String.format("%s registered dataset(s).", numberOfDatasets)));
+    statContent
+        .addComponent(new Label(String.format("%s registered dataset(s).", numberOfDatasets)));
     statContent.setMargin(true);
     statContent.setSpacing(true);
     statistics.addComponent(statContent);
@@ -291,7 +292,7 @@ public class DatasetView extends VerticalLayout implements View {
           String space = datahandler.getOpenBisClient().getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
           message.add(project);
           message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
-          //message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
+          // message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
           message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
           message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
           message.add(space);
@@ -329,8 +330,8 @@ public class DatasetView extends VerticalLayout implements View {
             String parentDatasetFileName =
                 (String) table.getItem(parent).getItemProperty("File Name").getValue();
             url =
-                datahandler.getOpenBisClient().getUrlForDataset(datasetCode, parentDatasetFileName + "/"
-                    + datasetFileName);
+                datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                    parentDatasetFileName + "/" + datasetFileName);
           } else {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
@@ -483,42 +484,43 @@ public class DatasetView extends VerticalLayout implements View {
 
     return filterTable;
   }
-  
+
   @Override
   public void enter(ViewChangeEvent event) {
     Map<String, String> map = getMap(event.getParameters());
-    if(map == null) return;
-    try {      
-          HierarchicalContainer datasetContainer = new HierarchicalContainer();
-          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
-          datasetContainer.addContainerProperty("Project", String.class, null);
-          datasetContainer.addContainerProperty("Sample", String.class, null);
-          //datasetContainer.addContainerProperty("Sample Type", String.class, null);
-          datasetContainer.addContainerProperty("File Name", String.class, null);
-          datasetContainer.addContainerProperty("File Type", String.class, null);
-          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
-          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
-          datasetContainer.addContainerProperty("File Size", String.class, null);
-          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
-          datasetContainer.addContainerProperty("dl_link", String.class, null);
-          datasetContainer.addContainerProperty("CODE", String.class, null);
-          
-          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = null;
-      
+    if (map == null)
+      return;
+    try {
+      HierarchicalContainer datasetContainer = new HierarchicalContainer();
+      datasetContainer.addContainerProperty("Select", CheckBox.class, null);
+      datasetContainer.addContainerProperty("Project", String.class, null);
+      datasetContainer.addContainerProperty("Sample", String.class, null);
+      // datasetContainer.addContainerProperty("Sample Type", String.class, null);
+      datasetContainer.addContainerProperty("File Name", String.class, null);
+      datasetContainer.addContainerProperty("File Type", String.class, null);
+      datasetContainer.addContainerProperty("Dataset Type", String.class, null);
+      datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
+      datasetContainer.addContainerProperty("Validated", Boolean.class, null);
+      datasetContainer.addContainerProperty("File Size", String.class, null);
+      datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
+      datasetContainer.addContainerProperty("dl_link", String.class, null);
+      datasetContainer.addContainerProperty("CODE", String.class, null);
+
+      List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = null;
+
       switch (map.get("type")) {
         case "project":
           String projectIdentifier = map.get("id");
           retrievedDatasets =
-              datahandler.getOpenBisClient()
-                  .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
+              datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(
+                  projectIdentifier);
           break;
 
         case "experiment":
           String experimentIdentifier = map.get("id");
           retrievedDatasets =
-              datahandler.getOpenBisClient()
-                  .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
+              datahandler.getOpenBisClient().getDataSetsOfExperimentByCodeWithSearchCriteria(
+                  experimentIdentifier);
           break;
 
         case "sample":
@@ -532,35 +534,32 @@ public class DatasetView extends VerticalLayout implements View {
               new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
           break;
       }
-      
-          numberOfDatasets = retrievedDatasets.size();
-          if (numberOfDatasets == 0) {
-            new Notification("No datasets available.",
-                "<br/>Please contact the project manager.", Type.WARNING_MESSAGE, true).show(Page
-                .getCurrent());
-          } else {
-            
-            Map<String, String> samples = new HashMap<String, String>();
-                        
-            // project same for all datasets
-            String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
-            for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: retrievedDatasets) {
-              samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);    
-            }
 
-            List<DatasetBean> dsBeans =
-                datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
-            
-            for (DatasetBean d : dsBeans) {
-              Date date = d.getRegistrationDate();
-              SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-              String dateString = sd.format(date);
-              Timestamp ts = Timestamp.valueOf(dateString);
-              String sampleID = samples.get(d.getCode());
-              
-              registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts,
-                  null);
-            }
+      numberOfDatasets = retrievedDatasets.size();
+      if (numberOfDatasets == 0) {
+        new Notification("No datasets available.", "<br/>Please contact the project manager.",
+            Type.WARNING_MESSAGE, true).show(Page.getCurrent());
+      } else {
+
+        Map<String, String> samples = new HashMap<String, String>();
+
+        // project same for all datasets
+        String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
+        for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset : retrievedDatasets) {
+          samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);
+        }
+
+        List<DatasetBean> dsBeans = datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
+
+        for (DatasetBean d : dsBeans) {
+          Date date = d.getRegistrationDate();
+          SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+          String dateString = sd.format(date);
+          Timestamp ts = Timestamp.valueOf(dateString);
+          String sampleID = samples.get(d.getCode());
+
+          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts, null);
+        }
       }
 
       this.setContainerDataSource(datasetContainer);
@@ -572,8 +571,8 @@ public class DatasetView extends VerticalLayout implements View {
     }
   }
 
-  
-  
+
+
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
       String project, String sample, Timestamp ts, Object parent) {
     if (d.hasChildren()) {
@@ -589,8 +588,8 @@ public class DatasetView extends VerticalLayout implements View {
 
       dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
-      //dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
-      //    d.getSample().getType());
+      // dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
+      // d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
       dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(d.getType());
@@ -617,7 +616,7 @@ public class DatasetView extends VerticalLayout implements View {
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
-      //dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
+      // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
       dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());
@@ -716,21 +715,22 @@ public class DatasetView extends VerticalLayout implements View {
       }
     }
   }
-  
+
   /**
-   * The input should have the following form: type=openbis_type&id=openbis_id e.g. type=sample&id=/ABI_SYSBIO/QMARI117AV
-   * It is specifically designed to be used in the case of datasetView. In other cases there is no guarantee that it will work correctly.
-   * returns a map with two entries:
-   * "type": "openbistype"
-   * "id" : "openbisId"
+   * The input should have the following form: type=openbis_type&id=openbis_id e.g.
+   * type=sample&id=/ABI_SYSBIO/QMARI117AV It is specifically designed to be used in the case of
+   * datasetView. In other cases there is no guarantee that it will work correctly. returns a map
+   * with two entries: "type": "openbistype" "id" : "openbisId"
+   * 
    * @param parameters
    * @return
    */
-  public static Map<String, String> getMap(String parameters){
-    if (parameters == null || parameters.equals("")) return null;
+  public static Map<String, String> getMap(String parameters) {
+    if (parameters == null || parameters.equals(""))
+      return null;
     String[] params = parameters.split("&");
-    //TODO check for length == 2 needed ?
-    //if (params == null || params.length != 2)
+    // TODO check for length == 2 needed ?
+    // if (params == null || params.length != 2)
     if (params == null || params.length > 3)
       return null;
     HashMap<String, String> map = new HashMap<String, String>();
@@ -740,9 +740,9 @@ public class DatasetView extends VerticalLayout implements View {
         return null;
       map.put(kv[0], kv[1]);
     }
-   return map;
+    return map;
   }
-  
+
   /**
    * 
    * @return
@@ -759,10 +759,10 @@ public class DatasetView extends VerticalLayout implements View {
    */
   void updateContentToolBar() {
 
-    //Boolean containsData = currentBean.getContainsData();
+    // Boolean containsData = currentBean.getContainsData();
     toolbar.setDownload(false);
     toolbar.setWorkflow(false);
     toolbar.update(navigateToLabel, "");
   }
-  
+
 }
