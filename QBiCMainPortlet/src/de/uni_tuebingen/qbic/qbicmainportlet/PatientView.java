@@ -6,17 +6,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
-import org.tepi.filtertable.FilterTable;
-
-import views.WorkflowView;
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
+
+import org.tepi.filtertable.FilterTable;
+
+import views.WorkflowView;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
@@ -41,27 +42,23 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -74,11 +71,15 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
-import de.uni_tuebingen.qbic.qbicmainportlet.ProjectView.MemberWorker;
 
 public class PatientView extends VerticalLayout implements View {
 
-  public final static String navigateToLabel = "ivacproject";
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2177082328716962295L;
+
+public final static String navigateToLabel = "ivacproject";
 
   private ProjectBean currentBean;
   
@@ -100,16 +101,10 @@ public class PatientView extends VerticalLayout implements View {
 
   private VerticalLayout status;
 
-  private Button registerPatients;
-
   private Grid experiments;
 
   private VerticalLayout buttonLayoutSection;
   private VerticalLayout graphSectionContent;
-  
-  private MenuItem downloadCompleteProjectMenuItem;
-
-  private MenuItem datasetOverviewMenuItem;
   
   private TreeMap<String, String> members;
   private HashMap<String, String> memberLetters;
@@ -143,8 +138,6 @@ public class PatientView extends VerticalLayout implements View {
   private LevelComponent measuredSamplesComponent;
 
   private LevelComponent resultsComponent;
-
-  private AbstractOrderedLayout projMembers;
 
   private PatientStatusComponent statusComponent;
 

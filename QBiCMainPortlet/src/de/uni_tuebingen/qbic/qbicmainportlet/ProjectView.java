@@ -122,6 +122,8 @@ private ConfigurationManager manager;
 
 private UploadComponent uploadComponent;
 
+private LevelComponent projectInformation;
+
 
   public String getHeaderLabel() {
     return headerLabel;
@@ -182,6 +184,7 @@ private UploadComponent uploadComponent;
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
     workflowComponent = new WorkflowComponent(wfController);
     uploadComponent = new UploadComponent();
+    projectInformation = new LevelComponent(datahandler, state, resourceUrl, "");
     
     //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
@@ -262,6 +265,8 @@ private UploadComponent uploadComponent;
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
+    
+    projectInformation.updateUI(navigateToLabel, getCurrentBean().getId(), "information");
   }
 
 
@@ -349,6 +354,7 @@ private UploadComponent uploadComponent;
     projDescription.setMargin(new MarginInfo(true, false, true, true));
     projDescription.setWidth("100%");
     projDescription.setSpacing(true);
+    projDescription.addComponent(projectInformation);
     
     return projDescription;
   }
