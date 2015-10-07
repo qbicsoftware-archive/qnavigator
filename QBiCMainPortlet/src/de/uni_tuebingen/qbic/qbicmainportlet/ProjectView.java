@@ -55,6 +55,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.WorkflowViewController;
+import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.qbicmainportlet.PatientView.Worker;
 
 @SuppressWarnings("serial")
@@ -117,6 +118,10 @@ public class ProjectView extends VerticalLayout implements View {
 
   private WorkflowComponent workflowComponent;
 
+private ConfigurationManager manager;
+
+private UploadComponent uploadComponent;
+
 
   public String getHeaderLabel() {
     return headerLabel;
@@ -126,9 +131,10 @@ public class ProjectView extends VerticalLayout implements View {
     this.headerLabel = headerLabel;
   }
 
-  public ProjectView(DataHandler datahandler, State state, String resourceurl, WorkflowViewController wfController) {
+  public ProjectView(DataHandler datahandler, State state, String resourceurl, WorkflowViewController wfController, ConfigurationManager manager) {
     this(datahandler, state, wfController);
     this.resourceUrl = resourceurl;
+    this.manager = manager;
   }
 
   public ProjectView(DataHandler datahandler, State state, WorkflowViewController wfController) {
@@ -175,6 +181,7 @@ public class ProjectView extends VerticalLayout implements View {
     measuredSamplesComponent = new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
     workflowComponent = new WorkflowComponent(wfController);
+    uploadComponent = new UploadComponent();
     
     //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
@@ -192,6 +199,7 @@ public class ProjectView extends VerticalLayout implements View {
     projectview_tab.addTab(measuredSamplesComponent).setIcon(FontAwesome.SIGNAL);
     projectview_tab.addTab(resultsComponent).setIcon(FontAwesome.TH_LARGE);
     projectview_tab.addTab(workflowComponent).setIcon(FontAwesome.COGS);
+    projectview_tab.addTab(uploadComponent).setIcon(FontAwesome.UPLOAD);
 
     projectview_tab.setImmediate(true);
 
@@ -221,6 +229,9 @@ public class ProjectView extends VerticalLayout implements View {
           args.put("type", navigateToLabel);
           workflowComponent.update(args);
         }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
+            uploadComponent.updateUI(manager, getCurrentBean().getCode());
+          }
       }
     });
       

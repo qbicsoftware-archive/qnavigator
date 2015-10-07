@@ -238,8 +238,8 @@ public class QbicmainportletUI extends UI {
     WorkflowViewController controller = new WorkflowViewController(submitter, datahandler.getOpenBisClient(), user);
 
     final WorkflowView workflowView = new WorkflowView(controller);
-    final ProjectView projectView = new ProjectView(datahandler, state, resUrl, controller);
-    final PatientView patientView = new PatientView(datahandler, state, resUrl, controller);
+    final ProjectView projectView = new ProjectView(datahandler, state, resUrl, controller, manager);
+    final PatientView patientView = new PatientView(datahandler, state, resUrl, controller, manager);
 
     
     VerticalLayout navigatorContent = new VerticalLayout();

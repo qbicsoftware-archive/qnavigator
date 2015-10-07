@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import model.ExperimentBean;
 import model.ProjectBean;
 import model.SampleBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
 import ch.systemsx.cisd.openbis.generic.shared.basic.dto.DataTypeCode;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 
@@ -107,7 +109,15 @@ public class ChangeMetadataComponent extends CustomComponent {
 
     for (PropertyType p : completeProperties) {
       if (p instanceof ControlledVocabularyPropertyType) {
-        controlledVocabularies.put(p.getCode(), datahandler.getOpenBisClient().listVocabularyTermsForProperty(p));
+    	  
+    	  ControlledVocabularyPropertyType controlled_vocab = (ControlledVocabularyPropertyType) p;
+    	  List<String> terms = new ArrayList<String>();
+    	  
+    	  for (VocabularyTerm term : controlled_vocab.getTerms()) {
+    	      terms.add(term.getCode().toString());
+    	    }
+    	  
+        controlledVocabularies.put(p.getCode(), terms);
       }
     }
     return controlledVocabularies;
@@ -148,13 +158,16 @@ public class ChangeMetadataComponent extends CustomComponent {
 			if (controlledVocabularies.keySet().contains(key)) {
 				ComboBox select = new ComboBox(key);
 				fieldGroup.bind(select, key);
-				form2.addComponent(select);
 
 				// Add items with given item IDs
-				for (String item : controlledVocabularies.get(key)) {
-					select.addItem(item);
+				select.addItems(controlledVocabularies.get(key));
+				
+				for(Object itemID: select.getItemIds()) {
+					System.out.println(itemID);
 				}
 				select.setValue(properties.get(key));
+				form2.addComponent(select);
+				
 			} else {
 				TextField tf = new TextField(key);
 				fieldGroup.bind(tf, key);

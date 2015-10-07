@@ -73,6 +73,7 @@ import com.vaadin.ui.renderers.ProgressBarRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.WorkflowViewController;
+import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.qbicmainportlet.ProjectView.MemberWorker;
 
 public class PatientView extends VerticalLayout implements View {
@@ -151,13 +152,18 @@ public class PatientView extends VerticalLayout implements View {
 
   private WorkflowComponent workflowComponent;
 
+private ConfigurationManager manager;
+
+private UploadComponent uploadComponent;
+
   private static Logger LOGGER = new Log4j2Logger(PatientView.class);
 
 
 
-  public PatientView(DataHandler datahandler, State state, String resourceurl, WorkflowViewController wfController) {
+  public PatientView(DataHandler datahandler, State state, String resourceurl, WorkflowViewController wfController, ConfigurationManager manager) {
     this(datahandler, state, wfController);
     this.resourceUrl = resourceurl;
+    this.manager = manager;
   }
 
   public PatientView(DataHandler datahandler, State state, WorkflowViewController wfController) {
@@ -227,6 +233,7 @@ public class PatientView extends VerticalLayout implements View {
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results"); 
     statusComponent = new PatientStatusComponent(datahandler, state, resourceUrl);
     workflowComponent = new WorkflowComponent(wfController);
+    uploadComponent = new UploadComponent();
 
     patientViewTab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     patientViewTab.addStyleName(ValoTheme.TABSHEET_FRAMED);
@@ -243,6 +250,8 @@ public class PatientView extends VerticalLayout implements View {
     patientViewTab.addTab(measuredSamplesComponent).setIcon(FontAwesome.SIGNAL);
     patientViewTab.addTab(resultsComponent).setIcon(FontAwesome.TH_LARGE);
     patientViewTab.addTab(workflowComponent).setIcon(FontAwesome.COGS);
+    patientViewTab.addTab(uploadComponent).setIcon(FontAwesome.UPLOAD);
+
     
     patientViewTab.setImmediate(true);
 
@@ -275,6 +284,9 @@ public class PatientView extends VerticalLayout implements View {
           args.put("type", "project");
           workflowComponent.update(args);
         }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
+            uploadComponent.updateUI(manager, getCurrentBean().getCode());
+          }
       }
     });
 
