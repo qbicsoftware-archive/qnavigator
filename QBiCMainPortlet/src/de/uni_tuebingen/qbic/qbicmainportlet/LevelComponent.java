@@ -123,13 +123,6 @@ public class LevelComponent extends CustomComponent {
     this.setCompositionRoot(mainLayout);
   }
 
-  /**
-   * datasets are set here!
-   * 
-   * @param type
-   * @param id
-   * @param filterFor
-   */
   public void updateUI(String type, String id, String filterFor) {
 
     sampleGrid = new Grid();
@@ -277,8 +270,23 @@ public class LevelComponent extends CustomComponent {
 
                 ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> foundDataset =
                     datasetFilter.get(sample.getIdentifier());
-                if (foundDataset != null) {
-                  retrievedDatasets.addAll(foundDataset);
+                
+							if (foundDataset != null) {
+								for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
+									if (ds.getDataSetTypeCode().equals(
+											"Q_PROJECT_DATA")) {
+										if (ds.getProperties()
+												.get("Q_ATTACHMENT_TYPE")
+												.equals("INFORMATION")) {
+											continue;
+										} else {
+											retrievedDatasets.add(ds);
+										}
+									} else {
+										retrievedDatasets.add(ds);
+									}
+								}
+                  //retrievedDatasets.addAll(foundDataset);
                 }
               }
             }
@@ -302,6 +310,37 @@ public class LevelComponent extends CustomComponent {
                     numberOfDatasets), Label.CONTENT_PREFORMATTED);
           }
 
+          else if (filterFor.equals("information")) {
+              BeanItemContainer<TestSampleBean> samplesContainer = new BeanItemContainer<TestSampleBean>(TestSampleBean.class);
+
+              List<Sample> allSamples =
+                  datahandler.getOpenBisClient().getSamplesOfProject(projectIdentifier);
+
+					for (Sample sample : allSamples) {
+						if (sample.getSampleTypeCode().equals(
+								"Q_ATTACHMENT_SAMPLE")) {
+
+							ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> foundDataset = datasetFilter
+									.get(sample.getIdentifier());
+
+							if (foundDataset != null) {
+								for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
+									if (ds.getProperties()
+											.get("Q_ATTACHMENT_TYPE")
+											.equals("INFORMATION")) {
+										retrievedDatasets.add(ds);
+									}
+								}
+							}
+						}
+					}
+					
+			  sampleGrid.setVisible(false);
+              this.datasetTable.setCaption("Project Data");
+              //descriptionLabel = new Label(String.format("This project contains %s result datasets.", numberOfDatasets), Label.CONTENT_PREFORMATTED);
+              projectInformation = true;
+          }
+          
           break;
 
         case "experiment":
@@ -356,9 +395,13 @@ public class LevelComponent extends CustomComponent {
           registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts, null);
         }
       }
-
-      this.setContainerDataSource(datasetContainer);
-
+          
+      if(projectInformation) {
+    	  this.setContainerDataSource(datasetContainer, FILTER_TABLE_COLUMNS_PROJECT);
+      }
+      else {
+    	  this.setContainerDataSource(datasetContainer, FILTER_TABLE_COLUMNS);
+      }
 
     } catch (Exception e) {
       e.printStackTrace();
