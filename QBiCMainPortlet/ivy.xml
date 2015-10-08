@@ -53,5 +53,6 @@
   		
   		<!--upload -->
   		<dependency org="com.github.lookfirst" name="sardine" rev="5.5" />
+  		<dependency org="commons-io" name="commons-io" rev="2.4" />
 	</dependencies>
 </ivy-module>
