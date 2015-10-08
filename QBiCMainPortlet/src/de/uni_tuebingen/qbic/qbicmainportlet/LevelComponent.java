@@ -348,12 +348,6 @@ public class LevelComponent extends CustomComponent {
         List<DatasetBean> dsBeans = datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
 
         for (DatasetBean d : dsBeans) {
-          LOGGER.debug(d.getFileName());// TODO
-          if (d.hasChildren()) {
-            LOGGER.debug("with children:");
-            for (DatasetBean e : d.getChildren())
-              LOGGER.debug(e.getFileName());
-          }
           Date date = d.getRegistrationDate();
           SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
           String dateString = sd.format(date);

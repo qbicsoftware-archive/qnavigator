@@ -179,7 +179,7 @@ import com.vaadin.data.util.BeanItemContainer;
 
             xmlPropertiesString +=
                     pairsProperties.getKey() + ": "
-                        + pairsProperties.getValue();
+                        + pairsProperties.getValue() + " ";
           }
           break;
         }

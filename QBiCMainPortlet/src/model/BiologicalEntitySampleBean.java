@@ -166,7 +166,7 @@ public class BiologicalEntitySampleBean {
 
           xmlPropertiesString +=
                   pairsProperties.getKey() + ": "
-                      + pairsProperties.getValue();
+                      + pairsProperties.getValue() + " ";
         }
         break;
       }
