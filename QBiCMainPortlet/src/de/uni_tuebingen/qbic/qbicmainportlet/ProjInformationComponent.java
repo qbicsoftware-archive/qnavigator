@@ -1,3 +1,4 @@
+
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.net.MalformedURLException;
@@ -19,16 +20,29 @@ import javax.portlet.PortletSession;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import model.BiologicalEntitySampleBean;
+import model.BiologicalSampleBean;
 import model.DatasetBean;
+import model.ProjectBean;
+import model.SampleBean;
+import model.TestSampleBean;
 
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.event.SelectionEvent;
+import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -40,13 +54,16 @@ import com.vaadin.server.ClientConnector.DetachEvent;
 import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -57,7 +74,7 @@ import com.vaadin.ui.Notification.Type;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
-public class DatasetComponent extends CustomComponent{
+public class ProjInformationComponent extends CustomComponent{
   
   /**
    * 
@@ -66,54 +83,65 @@ public class DatasetComponent extends CustomComponent{
 
   private VerticalLayout mainLayout;
   private static Logger LOGGER = new Log4j2Logger(DatasetView.class);
-  private FilterTreeTable table;
+  private FilterTreeTable datasetTable;
   private HierarchicalContainer datasets;
+  private BeanItemContainer<TestSampleBean> samples;
   VerticalLayout vert;
   private final String DOWNLOAD_BUTTON_CAPTION = "Download";
   private final String VISUALIZE_BUTTON_CAPTION = "Visualize";
   public final static String navigateToLabel = "datasetview";
+  Label descriptionLabel = new Label("");
   private DataHandler datahandler;
-  private ToolBar toolbar;
   private State state;
   private String resourceUrl;
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select",
-      "File Name", "Dataset Type", "Registration Date", "File Size"};
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select","File Name", 
+		 "Registration Date"};
 
   private int numberOfDatasets;
+
+private Label descContent;
+
+private Label contact;
   
-  public DatasetComponent(DataHandler dh, State state, String resourceurl) {
+  public ProjInformationComponent(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
     this.state = state;
     
-    this.setCaption("Datasets");
+    this.setCaption("");
     
     this.initUI();
   }
 
   private void initUI() {
     vert = new VerticalLayout();
-    table = buildFilterTable();
+    datasetTable = buildFilterTable();
+    descContent = new Label("");
+    contact = new Label("", ContentMode.HTML);
     mainLayout = new VerticalLayout(vert);
     
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
   
-  public void updateUI(String type, String id) {
-    //vert = new VerticalLayout();
-    //this.datasets = dataset;
-    //table = buildFilterTable();
-    //this.buildLayout();
-    //this.setContainerDataSource(this.datasets);
-    // this.setContent(vert);
-    //mainLayout.addComponent(vert);
+  public void updateUI(ProjectBean currentBean) {
     
-    if(id == null) return;
-    try {      
+    if(currentBean.getId() == null) return;
+    try {
+    	
+    	
+			contact.setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+					+ currentBean.getId()
+					+ "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
+					+ currentBean.getId() + "</a>");
+			String desc = currentBean.getDescription();
+			if (!desc.isEmpty()) {
+				descContent.setValue(desc);
+			}
+    
           HierarchicalContainer datasetContainer = new HierarchicalContainer();
           datasetContainer.addContainerProperty("Select", CheckBox.class, null);
           datasetContainer.addContainerProperty("Project", String.class, null);
@@ -129,40 +157,66 @@ public class DatasetComponent extends CustomComponent{
           datasetContainer.addContainerProperty("dl_link", String.class, null);
           datasetContainer.addContainerProperty("CODE", String.class, null);
           
-          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = null;
-      
-      switch (type) {
-        case "project":
-          String projectIdentifier = id;
-          retrievedDatasets =
+          //HierarchicalContainer sampleContainer = new HierarchicalContainer()
+          
+          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasetsAll = null;
+          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
+          //List<Sample> retrievedSamples = new ArrayList<Sample>();
+          Map<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>> datasetFilter = new HashMap<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>>();
+
+
+          String projectIdentifier = currentBean.getId();
+          retrievedDatasetsAll =
               datahandler.getOpenBisClient()
                   .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
-          break;
 
-        case "experiment":
-          String experimentIdentifier = id;
-          retrievedDatasets =
-              datahandler.getOpenBisClient()
-                  .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
-          break;
+          for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : retrievedDatasetsAll) {
+            
+            ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> values = datasetFilter.get(ds.getSampleIdentifierOrNull());
+            
+            if (values==null) {
+                values = new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
+                datasetFilter.put(ds.getSampleIdentifierOrNull(), values);
+            }
+            values.add(ds);
+          }
 
-        case "sample":
-          String sampleIdentifier = id;
-          String sampleCode = sampleIdentifier.split("/")[2];
-          retrievedDatasets = datahandler.getOpenBisClient().getDataSetsOfSample(sampleCode);
-          break;
+              BeanItemContainer<TestSampleBean> samplesContainer = new BeanItemContainer<TestSampleBean>(TestSampleBean.class);
 
-        default:
-          retrievedDatasets =
-              new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
-          break;
-      }
+              List<Sample> allSamples =
+                  datahandler.getOpenBisClient().getSamplesOfProject(projectIdentifier);
+
+					for (Sample sample : allSamples) {
+						if (sample.getSampleTypeCode().equals(
+								"Q_ATTACHMENT_SAMPLE")) {
+
+							ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> foundDataset = datasetFilter
+									.get(sample.getIdentifier());
+
+							if (foundDataset != null) {
+								for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
+									if (ds.getProperties()
+											.get("Q_ATTACHMENT_TYPE")
+											.equals("INFORMATION")) {
+										retrievedDatasets.add(ds);
+									}
+								}
+							}
+						}
+					}
+					
+              this.datasetTable.setCaption("Project Data");
+              //descriptionLabel = new Label(String.format("This project contains %s result datasets.", numberOfDatasets), Label.CONTENT_PREFORMATTED);
       
           numberOfDatasets = retrievedDatasets.size();
+          
+          Boolean dataAvailable = true;
+          
           if (numberOfDatasets == 0) {
-            new Notification("No datasets available.",
-                "<br/>Please contact the project manager.", Type.WARNING_MESSAGE, true).show(Page
-                .getCurrent());
+        	dataAvailable = false;  
+            //new Notification("No datasets available.",
+            //    "<br/>Please contact the project manager.", Type.WARNING_MESSAGE, true).show(Page
+            //    .getCurrent());
           } else {
             
             Map<String, String> samples = new HashMap<String, String>();
@@ -185,26 +239,26 @@ public class DatasetComponent extends CustomComponent{
               
               registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts,
                   null);
-            }
+            }            
       }
-
-      this.setContainerDataSource(datasetContainer);
+          
+    this.setContainerDataSource(datasetContainer, dataAvailable);
 
     } catch (Exception e) {
       e.printStackTrace();
-      LOGGER.error(String.format("getting dataset failed for dataset %s %s", type, id),
+      LOGGER.error(String.format("getting dataset failed for dataset %s %s", currentBean.getId()),
           e.getStackTrace());
     }
   }
 
-  public void setContainerDataSource(HierarchicalContainer newDataSource) {
+  public void setContainerDataSource(HierarchicalContainer newDataSource, Boolean dataAvailable) {
     datasets = (HierarchicalContainer) newDataSource;
-    table.setContainerDataSource(this.datasets);
+    datasetTable.setContainerDataSource(this.datasets);
 
-    table.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
+    datasetTable.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
 
-    table.setSizeFull();
-    this.buildLayout();
+    datasetTable.setSizeFull();
+    this.buildLayout(dataAvailable);
   }
 
   public HierarchicalContainer getContainerDataSource() {
@@ -216,33 +270,47 @@ public class DatasetComponent extends CustomComponent{
    * {DatasetView#buildFilterTable} If it is not, strange behaviour has to be expected. builds the
    * Layout of this view.
    */
-  private void buildLayout() {
+  private void buildLayout(Boolean dataAvailable) {
     this.vert.removeAllComponents();
-
     this.vert.setWidth("100%");
 
     // Table (containing datasets) section
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
+    
+    VerticalLayout projDescription = new VerticalLayout();
+    VerticalLayout projDescriptionContent = new VerticalLayout();
+    
+    tableSectionContent.setMargin(new MarginInfo(false, false, false, false));
+    projDescriptionContent.setMargin(new MarginInfo(false, false, false, false));
+    
+    projDescription.setCaption("");
+    
+    projDescriptionContent.addComponent(descContent);
+    projDescriptionContent.addComponent(contact);
 
-    //tableSectionContent.setCaption("Datasets");
-    //tableSectionContent.setIcon(FontAwesome.FLASK);
-    //tableSection.addComponent(new Label(String.format("This project contains %s dataset(s).", numberOfDatasets)));
-    tableSectionContent.setMargin(new MarginInfo(true, false, true, false));
-    tableSection.addComponent(new Label(String.format("This view shows all datasets associated with this project. There are %s registered datasets.", numberOfDatasets), Label.CONTENT_PREFORMATTED));
-    tableSectionContent.addComponent(this.table);
-
+    projDescription.addComponent(projDescriptionContent);
+    
+    projDescriptionContent.setSpacing(true);
+    projDescription.setMargin(new MarginInfo(false, false, false, true));
+    projDescription.setWidth("100%");
+    projDescription.setSpacing(true);    
+    
+    descriptionLabel.setWidth("100%");
+    //tableSection.addComponent(descriptionLabel); 
+    tableSectionContent.addComponent(this.datasetTable);
+    
     tableSection.setMargin(new MarginInfo(true, false, false, true));
-    //tableSectionContent.setMargin(true);
-    //tableSection.setMargin(true);
+    tableSection.setSpacing(true);
 
     tableSection.addComponent(tableSectionContent);
-    this.vert.addComponent(tableSection);
+    
+    this.vert.addComponent(projDescription);
 
-    table.setWidth("100%");
+    datasetTable.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
-    
+
     // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -256,14 +324,15 @@ public class DatasetComponent extends CustomComponent{
     visualize.setEnabled(false);
     buttonLayout.addComponent(this.download);
     buttonLayout.addComponent(visualize);
+    buttonLayout.setSpacing(true);
 
     Button checkAll = new Button("Select all datasets");
     checkAll.addClickListener(new ClickListener() {
 
       @Override
       public void buttonClick(ClickEvent event) {
-        for (Object itemId : table.getItemIds()) {
-          ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue()).setValue(true);
+        for (Object itemId : datasetTable.getItemIds()) {
+          ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue()).setValue(true);
         }
       }
     });
@@ -273,8 +342,8 @@ public class DatasetComponent extends CustomComponent{
 
       @Override
       public void buttonClick(ClickEvent event) {
-        for (Object itemId : table.getItemIds()) {
-          ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue()).setValue(false);
+        for (Object itemId : datasetTable.getItemIds()) {
+          ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue()).setValue(false);
         }
       }
     });
@@ -288,8 +357,8 @@ public class DatasetComponent extends CustomComponent{
     download.setEnabled(false);
 
 
-    for (final Object itemId : this.table.getItemIds()) {
-      setCheckedBox(itemId, (String) this.table.getItem(itemId).getItemProperty("CODE").getValue());
+    for (final Object itemId : this.datasetTable.getItemIds()) {
+      setCheckedBox(itemId, (String) this.datasetTable.getItem(itemId).getItemProperty("CODE").getValue());
     }
 
 
@@ -297,7 +366,7 @@ public class DatasetComponent extends CustomComponent{
     /*
      * Update the visualize button. It is only enabled, if the files can be visualized.
      */
-    this.table.addValueChangeListener(new ValueChangeListener() {
+    this.datasetTable.addValueChangeListener(new ValueChangeListener() {
       /**
        * 
        */
@@ -321,8 +390,8 @@ public class DatasetComponent extends CustomComponent{
         Iterator<Object> iterator = selectedValues.iterator();
         Object next = iterator.next();
         String datasetType =
-            (String) table.getItem(next).getItemProperty("Dataset Type").getValue();
-        String fileName = (String) table.getItem(next).getItemProperty("File Name").getValue();
+            (String) datasetTable.getItem(next).getItemProperty("Dataset Type").getValue();
+        String fileName = (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
         // TODO: No hardcoding!!
         // if (datasetType.equals("FASTQC") || datasetType.equals("QCML") ||
         // datasetType.equals("BAM")
@@ -333,6 +402,9 @@ public class DatasetComponent extends CustomComponent{
         } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
             && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
           visualize.setEnabled(true);
+        } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS") 
+        		&& (fileName.endsWith(".html"))) {
+              visualize.setEnabled(true);
         } else {
           visualize.setEnabled(false);
         }
@@ -345,7 +417,7 @@ public class DatasetComponent extends CustomComponent{
      * Send message that in datasetview the following was selected. WorkflowViews get those messages
      * and save them, if it is valid information for them.
      */
-    this.table.addValueChangeListener(new ValueChangeListener() {
+    this.datasetTable.addValueChangeListener(new ValueChangeListener() {
       /**
        * 
        */
@@ -362,16 +434,16 @@ public class DatasetComponent extends CustomComponent{
           Iterator<Object> iterator = selectedValues.iterator();
           Object next = iterator.next();
           String datasetType =
-              (String) table.getItem(next).getItemProperty("Dataset Type").getValue();
+              (String) datasetTable.getItem(next).getItemProperty("Dataset Type").getValue();
           message.add(datasetType);
-          String project = (String) table.getItem(next).getItemProperty("Project").getValue();
+          String project = (String) datasetTable.getItem(next).getItemProperty("Project").getValue();
 
           String space = datahandler.getOpenBisClient().getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
           message.add(project);
-          message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
+          message.add((String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
           //message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
-          message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
-          message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
+          message.add((String) datasetTable.getItem(next).getItemProperty("dl_link").getValue());
+          message.add((String) datasetTable.getItem(next).getItemProperty("File Name").getValue());
           message.add(space);
           // state.notifyObservers(message);
         } else {
@@ -394,18 +466,18 @@ public class DatasetComponent extends CustomComponent{
 
       @Override
       public void buttonClick(ClickEvent event) {
-        Set<Object> selectedValues = (Set<Object>) table.getValue();
+        Set<Object> selectedValues = (Set<Object>) datasetTable.getValue();
         Iterator<Object> iterator = selectedValues.iterator();
         Object next = iterator.next();
-        String datasetCode = (String) table.getItem(next).getItemProperty("CODE").getValue();
+        String datasetCode = (String) datasetTable.getItem(next).getItemProperty("CODE").getValue();
         String datasetFileName =
-            (String) table.getItem(next).getItemProperty("File Name").getValue();
+            (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
         URL url;
         try {
-          Object parent = table.getParent(next);
+          Object parent = datasetTable.getParent(next);
           if (parent != null) {
             String parentDatasetFileName =
-                (String) table.getItem(parent).getItemProperty("File Name").getValue();
+                (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
             url =
                 datahandler.getOpenBisClient().getUrlForDataset(datasetCode, parentDatasetFileName + "/"
                     + datasetFileName);
@@ -415,7 +487,7 @@ public class DatasetComponent extends CustomComponent{
 
           Window subWindow =
               new Window("QC of Sample: "
-                  + (String) table.getItem(next).getItemProperty("Sample").getValue());
+                  + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
           VerticalLayout subContent = new VerticalLayout();
           subContent.setMargin(true);
           subWindow.setContent(subContent);
@@ -423,7 +495,7 @@ public class DatasetComponent extends CustomComponent{
           // Put some components in it
           Resource res = null;
           String datasetType =
-              (String) table.getItem(next).getItemProperty("Dataset Type").getValue();
+              (String) datasetTable.getItem(next).getItemProperty("Dataset Type").getValue();
           final RequestHandler rh = new ProxyForGenomeViewerRestApi();
           boolean rhAttached = false;
           if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS")
@@ -444,12 +516,20 @@ public class DatasetComponent extends CustomComponent{
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/plain");
             res = streamres;
-          } else if (datasetType.equals("FASTQC")) {
+          }
+            else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS") 
+            		&& datasetFileName.endsWith(".html")) {
+                QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+                StreamResource streamres = new StreamResource(re, datasetFileName);
+                streamres.setMIMEType("text/html");
+                res = streamres;        	
+            }
+          else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
-            String filePath = (String) table.getItem(next).getItemProperty("dl_link").getValue();
+            String filePath = (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
             filePath = String.format("/store%s", filePath.split("store")[1]);
-            String fileId = (String) table.getItem(next).getItemProperty("File Name").getValue();
+            String fileId = (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
             // fileId = "control.1kg.panel.samples.vcf.gz";
             // UI.getCurrent().getSession().addRequestHandler(rh);
             rhAttached = true;
@@ -466,7 +546,7 @@ public class DatasetComponent extends CustomComponent{
             LOGGER.debug(hostTmp);
             String host = Base64.encode(hostTmp.getBytes());
             LOGGER.debug(host);
-            String title = (String) table.getItem(next).getItemProperty("Sample").getValue();
+            String title = (String) datasetTable.getItem(next).getItemProperty("Sample").getValue();
             res =
                 new ExternalResource(
                     String
@@ -514,20 +594,25 @@ public class DatasetComponent extends CustomComponent{
       }
     });
 
-    this.vert.addComponent(buttonLayout);
+    //this.vert.addComponent(buttonLayout);
+    if(dataAvailable) {
+    	this.vert.addComponent(tableSection);
+    	tableSection.addComponent(buttonLayout);
+        projDescription.setMargin(new MarginInfo(false, false, true, true));
+    }
   }
 
 
   private void setCheckedBox(Object itemId, String parentFolder) {
     CheckBox itemCheckBox =
-        (CheckBox) this.table.getItem(itemId).getItemProperty("Select").getValue();
+        (CheckBox) this.datasetTable.getItem(itemId).getItemProperty("Select").getValue();
     itemCheckBox.addValueChangeListener(new TableCheckBoxValueChangeListener(itemId, parentFolder));
 
-    if (table.hasChildren(itemId)) {
-      for (Object childId : table.getChildren(itemId)) {
+    if (datasetTable.hasChildren(itemId)) {
+      for (Object childId : datasetTable.getChildren(itemId)) {
         String newParentFolder =
             Paths.get(parentFolder,
-                (String) this.table.getItem(itemId).getItemProperty("File Name").getValue())
+                (String) this.datasetTable.getItem(itemId).getItemProperty("File Name").getValue())
                 .toString();
         setCheckedBox(childId, newParentFolder);
       }
@@ -550,7 +635,7 @@ public class DatasetComponent extends CustomComponent{
 
     filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
 
-    filterTable.setColumnCollapsingAllowed(false);
+    filterTable.setColumnCollapsingAllowed(true);
 
     filterTable.setColumnReorderingAllowed(true);
 
@@ -641,7 +726,6 @@ public class DatasetComponent extends CustomComponent{
     public void valueChange(ValueChangeEvent event) {
 
       PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-      
       Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
           (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
               "qbic_download", PortletSession.APPLICATION_SCOPE);
@@ -681,24 +765,22 @@ public class DatasetComponent extends CustomComponent{
      */
     private void valueChange(Object itemId, boolean itemSelected,
         Map<String, SimpleEntry<String, Long>> entries, String fileName) {
-      
-      ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
+
+      ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue())
           .setValue(itemSelected);
       fileName =
           Paths.get(fileName,
-              (String) table.getItem(itemId).getItemProperty("File Name").getValue()).toString();
+              (String) datasetTable.getItem(itemId).getItemProperty("File Name").getValue()).toString();
 
       // System.out.println(fileName);
-      if (table.hasChildren(itemId)) {
-        for (Object childId : table.getChildren(itemId)) {
+      if (datasetTable.hasChildren(itemId)) {
+        for (Object childId : datasetTable.getChildren(itemId)) {
           valueChange(childId, itemSelected, entries, fileName);
         }
       } else if (itemSelected) {
-        String datasetCode = (String) table.getItem(itemId).getItemProperty("CODE").getValue();
-        
+        String datasetCode = (String) datasetTable.getItem(itemId).getItemProperty("CODE").getValue();
         Long datasetFileSize =
-            (Long) table.getItem(itemId).getItemProperty("file_size_bytes").getValue();
-
+            (Long) datasetTable.getItem(itemId).getItemProperty("file_size_bytes").getValue();
         entries.put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode,
             datasetFileSize));
       } else {
@@ -734,3 +816,5 @@ public class DatasetComponent extends CustomComponent{
   }
 
 }
+
+

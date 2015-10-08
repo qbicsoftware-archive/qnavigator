@@ -122,7 +122,7 @@ private ConfigurationManager manager;
 
 private UploadComponent uploadComponent;
 
-private LevelComponent projectInformation;
+private ProjInformationComponent projectInformation;
 
 
   public String getHeaderLabel() {
@@ -184,7 +184,7 @@ private LevelComponent projectInformation;
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
     workflowComponent = new WorkflowComponent(wfController);
     uploadComponent = new UploadComponent();
-    projectInformation = new LevelComponent(datahandler, state, resourceUrl, "");
+    projectInformation = new ProjInformationComponent(datahandler, state, resourceUrl);
     
     //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
@@ -192,7 +192,8 @@ private LevelComponent projectInformation;
     projectview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
 
     
-    projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+    //projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+    projectview_tab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
     projectview_tab.addTab(initStatistics()).setIcon(FontAwesome.CHECK_CIRCLE);
@@ -235,6 +236,9 @@ private LevelComponent projectInformation;
         else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
             uploadComponent.updateUI(manager, getCurrentBean().getCode());
           }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("")) {
+        	projectInformation.updateUI(getCurrentBean());
+        }
       }
     });
       
@@ -260,13 +264,13 @@ private LevelComponent projectInformation;
    // updateContentToolBar();
     headerLabel = String.format("%s",getCurrentBean().getCode());
     
-    updateContentDescription();
+    //updateContentDescription();
     updateContentMemberSection();
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
     
-    projectInformation.updateUI(navigateToLabel, getCurrentBean().getId(), "information");
+    projectInformation.updateUI(getCurrentBean());
   }
 
 

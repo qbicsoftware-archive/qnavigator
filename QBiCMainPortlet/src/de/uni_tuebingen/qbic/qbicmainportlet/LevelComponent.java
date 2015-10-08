@@ -97,8 +97,6 @@ public class LevelComponent extends CustomComponent{
 
   private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample",
       "File Name", "Dataset Type", "Registration Date", "File Size"};
-  private final String[] FILTER_TABLE_COLUMNS_PROJECT = new String[] {"Select","File Name", 
-		 "Registration Date"};
 
   private int numberOfDatasets;
 
@@ -296,38 +294,6 @@ private boolean projectInformation;
 
             descriptionLabel = new Label(String.format("This project contains %s result datasets.", numberOfDatasets), Label.CONTENT_PREFORMATTED);
           }
-          
-          else if (filterFor.equals("information")) {
-              BeanItemContainer<TestSampleBean> samplesContainer = new BeanItemContainer<TestSampleBean>(TestSampleBean.class);
-
-              List<Sample> allSamples =
-                  datahandler.getOpenBisClient().getSamplesOfProject(projectIdentifier);
-
-					for (Sample sample : allSamples) {
-						if (sample.getSampleTypeCode().equals(
-								"Q_ATTACHMENT_SAMPLE")) {
-
-							ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> foundDataset = datasetFilter
-									.get(sample.getIdentifier());
-
-							if (foundDataset != null) {
-								for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
-									if (ds.getProperties()
-											.get("Q_ATTACHMENT_TYPE")
-											.equals("INFORMATION")) {
-										retrievedDatasets.add(ds);
-									}
-								}
-							}
-						}
-					}
-					
-			  sampleGrid.setVisible(false);
-              this.datasetTable.setCaption("Project Data");
-              //descriptionLabel = new Label(String.format("This project contains %s result datasets.", numberOfDatasets), Label.CONTENT_PREFORMATTED);
-              projectInformation = true;
-          }
-          
           break;
 
         case "experiment":
@@ -380,12 +346,7 @@ private boolean projectInformation;
             }            
       }
           
-      if(projectInformation) {
-    	  this.setContainerDataSource(datasetContainer, FILTER_TABLE_COLUMNS_PROJECT);
-      }
-      else {
-    	  this.setContainerDataSource(datasetContainer, FILTER_TABLE_COLUMNS);
-      }
+    	  this.setContainerDataSource(datasetContainer);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -394,11 +355,11 @@ private boolean projectInformation;
     }
   }
 
-  public void setContainerDataSource(HierarchicalContainer newDataSource, String[] filter) {
+  public void setContainerDataSource(HierarchicalContainer newDataSource) {
     datasets = (HierarchicalContainer) newDataSource;
     datasetTable.setContainerDataSource(this.datasets);
 
-    datasetTable.setVisibleColumns((Object[]) filter);
+    datasetTable.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
 
     datasetTable.setSizeFull();
     this.buildLayout();
@@ -450,7 +411,7 @@ private boolean projectInformation;
     // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, true, true));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, false));
     buttonLayout.setHeight(null);
     //buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
