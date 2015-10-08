@@ -140,6 +140,17 @@ public class DataHandler implements Serializable {
   //
   // }
 
+  private Date parseDate(String dateString) {
+    Date date = null;
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    try {
+      date = formatter.parse(dateString.split("\\+")[0]);
+
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return date;
+  }
 
   /**
    * 
@@ -160,60 +171,102 @@ public class DataHandler implements Serializable {
 
     params.put("codes", dsCodes);
     QueryTableModel res = getOpenBisClient().queryFileInformation(params);
-  
-    List<List<AggregationAdaptorBean>> beans = new ArrayList<List<AggregationAdaptorBean>>();
-    String curDS = (String) res.getRows().get(0)[0];
-    List<AggregationAdaptorBean> filesInDataset = new ArrayList<AggregationAdaptorBean>();
+
+    //TODO this should work, but here starts the new code in case it doesn't 07.08.15 - Andreas
+    Map<String, List<DatasetBean>> folderStructure = new HashMap<String, List<DatasetBean>>();
+    Map<String, DatasetBean> fileNames = new HashMap<String, DatasetBean>();
+    // dscode - original/result/figure/pca_scree-1.png - pca_scree-1.png - size - folder - date
     for (Serializable[] ss : res.getRows()) {
-      String ds = (String) ss[0];
-      AggregationAdaptorBean b =
-          new AggregationAdaptorBean(ds, (String) ss[1], (String) ss[2], (Long) ss[3],
-              (String) ss[4], (String) ss[5]);
-      if (!curDS.equals(ds)) {
-        curDS = ds;
-        beans.add(filesInDataset);
-        filesInDataset = new ArrayList<AggregationAdaptorBean>();
+
+      DatasetBean b = new DatasetBean();
+      String code = (String) ss[0];
+      String fileName = (String) ss[2];
+      b.setCode(code);
+      b.setType(types.get(code));
+      b.setFileName(fileName);
+      b.setDssPath((String) ss[1]);
+      b.setFileSize((Long) ss[3]);
+      b.setRegistrationDate(parseDate((String) ss[5]));
+
+      // both code and filename are needed for the keys to be unique
+      fileNames.put(code + fileName, b);
+
+      // store file beans under their respective code+folder, except those with "original"
+      String folderKey = (String) ss[4];
+      if (!folderKey.equals("original"))
+        folderKey = code + folderKey;
+      if (folderStructure.containsKey(folderKey)) {
+        folderStructure.get(folderKey).add(b);
+      } else {
+        List<DatasetBean> inFolder = new ArrayList<DatasetBean>();
+        inFolder.add(b);
+        folderStructure.put(folderKey, inFolder);
       }
-      filesInDataset.add(b);
     }
-    beans.add(filesInDataset);
-    List<DatasetBean> roots = new ArrayList<DatasetBean>();
-  
-    for (List<AggregationAdaptorBean> dataset : beans) {
-      List<DatasetBean> lastLevel = new ArrayList<DatasetBean>();
-      List<DatasetBean> curLevel = new ArrayList<DatasetBean>();
-      String curFolder = dataset.get(0).getParent();
-      for (AggregationAdaptorBean b : dataset) {
-        DatasetBean newBean = new DatasetBean();
-        newBean.setFileName(b.getName());
-        newBean.setDssPath(b.getPath());
-        newBean.setFileSize(b.getSize());
-        newBean.setType(types.get(b.getDs()));
-        
-
-        // 2015-05-31 23:47:10 +0200
-        Date date = null;
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-          date = formatter.parse(b.getLastmodified().split("\\+")[0]);
-          System.out.println(date);
-          System.out.println(formatter.format(date));
-
-        } catch (ParseException e) {
-          e.printStackTrace();
-        }
-
-        newBean.setCode(b.getDs());
-        newBean.setRegistrationDate(date);
-        if (!b.getParent().equals(curFolder)) {
-          lastLevel = curLevel;
-          curLevel = new ArrayList<DatasetBean>();
-        }
-        newBean.setChildren(lastLevel);
-        curLevel.add(newBean);
-      }
-      roots.add(curLevel.get(curLevel.size() - 1));
+    // find children samples for our folders
+    for (String fileNameKey : fileNames.keySet()) {
+      // if the fileNameKey is in our folder map we have found a folder (other than "original")
+      if (folderStructure.containsKey(fileNameKey))
+        // and we add the files to this folder bean
+        fileNames.get(fileNameKey).setChildren(folderStructure.get(fileNameKey));
     }
+    // Now the structure should be set up. Root structures have "original" as parent folder
+    List<DatasetBean> roots = folderStructure.get("original");
+    
+    
+    // OLD and slightly buggy, but was in production for months ;)
+    //
+    // List<List<AggregationAdaptorBean>> beans = new ArrayList<List<AggregationAdaptorBean>>();
+    // String curDS = (String) res.getRows().get(0)[0];
+    // List<AggregationAdaptorBean> filesInDataset = new ArrayList<AggregationAdaptorBean>();
+    // for (Serializable[] ss : res.getRows()) {
+    // LOGGER.debug("aggregation service presents :" + (String) ss[0] + " " + (String) ss[1] + " "
+    // + (String) ss[2] + " " + (Long) ss[3] + " " + (String) ss[4] + " " + (String) ss[5]);
+    // String ds = (String) ss[0];
+    // AggregationAdaptorBean b =
+    // new AggregationAdaptorBean(ds, (String) ss[1], (String) ss[2], (Long) ss[3],
+    // (String) ss[4], (String) ss[5]);
+    // if (!curDS.equals(ds)) {
+    // curDS = ds;
+    // beans.add(filesInDataset);
+    // filesInDataset = new ArrayList<AggregationAdaptorBean>();
+    // }
+    // filesInDataset.add(b);
+    // }
+    // beans.add(filesInDataset);
+    // List<DatasetBean> roots = new ArrayList<DatasetBean>();
+    //
+    // for (List<AggregationAdaptorBean> dataset : beans) {
+    // List<DatasetBean> lastLevel = new ArrayList<DatasetBean>();
+    // List<DatasetBean> curLevel = new ArrayList<DatasetBean>();
+    // String curFolder = dataset.get(0).getParent();
+    // for (AggregationAdaptorBean b : dataset) {
+    // DatasetBean newBean = new DatasetBean();
+    // newBean.setFileName(b.getName());
+    // newBean.setDssPath(b.getPath());
+    // newBean.setFileSize(b.getSize());
+    // newBean.setType(types.get(b.getDs()));
+    //
+    // Date date = null;
+    // SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    // try {
+    // date = formatter.parse(b.getLastmodified().split("\\+")[0]);
+    //
+    // } catch (ParseException e) {
+    // e.printStackTrace();
+    // }
+    //
+    // newBean.setCode(b.getDs());
+    // newBean.setRegistrationDate(date);
+    // if (!b.getParent().equals(curFolder)) {
+    // lastLevel = curLevel;
+    // curLevel = new ArrayList<DatasetBean>();
+    // }
+    // newBean.setChildren(lastLevel);
+    // curLevel.add(newBean);
+    // }
+    // roots.add(curLevel.get(curLevel.size() - 1));
+    // }
     return roots;
 
   }
