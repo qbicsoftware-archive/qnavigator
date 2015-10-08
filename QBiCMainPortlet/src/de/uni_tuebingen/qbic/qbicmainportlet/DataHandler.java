@@ -273,7 +273,6 @@ public class DataHandler implements Serializable {
     // roots.add(curLevel.get(curLevel.size() - 1));
     // }
     return roots;
-
   }
 
   /**
@@ -876,6 +875,8 @@ public class DataHandler implements Serializable {
         this.getOpenBisClient().getDataSetsOfSampleByIdentifier(sample.getIdentifier());
 
     Date lastModifiedDate = new Date();
+    if(datasets.size() > 0)
+      lastModifiedDate = datasets.get(0).getRegistrationDate();
 
     for (DataSet dataset : datasets) {
       DatasetBean datasetBean = this.getDataset(dataset);

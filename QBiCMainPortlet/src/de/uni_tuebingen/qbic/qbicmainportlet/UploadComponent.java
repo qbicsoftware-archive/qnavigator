@@ -49,47 +49,46 @@ import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 public class UploadComponent extends CustomComponent {
 
 
-	private DataHandler datahandler;
-	private String resourceUrl;
-	private State state;
-	private VerticalLayout mainView;
+  private DataHandler datahandler;
+  private String resourceUrl;
+  private State state;
+  private VerticalLayout mainView;
 
-	private FormLayout form;
-	private FieldGroup fieldGroup;
-	VerticalLayout vert;
-	String id;
+  private FormLayout form;
+  private FieldGroup fieldGroup;
+  VerticalLayout vert;
+  String id;
 
-	public UploadComponent() {
-		this.setCaption("Upload Files");
-		this.initUI();
-	}
+  public UploadComponent() {
+    this.setCaption("Upload Files");
+    this.initUI();
+  }
 
-	private void initUI() {
-		mainView = new VerticalLayout();
-		
-		mainView.setWidth(100.0f, Unit.PERCENTAGE);
-		mainView.setMargin(new MarginInfo(true, false, true, true));
-		mainView.setSpacing(true);
+  private void initUI() {
+    mainView = new VerticalLayout();
 
-		this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
-	}
+    mainView.setWidth(100.0f, Unit.PERCENTAGE);
+    mainView.setMargin(new MarginInfo(true, false, true, true));
+    mainView.setSpacing(true);
 
-	public void updateUI(ConfigurationManager manager, String projectCode) {		
-		AttachmentConfig attachConfig =
-				new AttachmentConfig(Integer.parseInt(manager.getAttachmentMaxSize()),
-						manager.getAttachmentURI(), manager.getAttachmentUser(),
-						manager.getAttachmenPassword());
-		
-		mainView = new UploadsPanel(manager.getTmpFolder(), projectCode,
-				new ArrayList<String>(Arrays.asList("Project Planning",
-						"Results")), LiferayAndVaadinUtils.getUser()
-						.getScreenName(), attachConfig);
-		
-		mainView.setWidth(100.0f, Unit.PERCENTAGE);
-		mainView.setMargin(new MarginInfo(true, false, true, true));
-		mainView.setSpacing(true);
+    this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
+  }
 
-		this.setCompositionRoot(mainView);
+  public void updateUI(ConfigurationManager manager, String projectCode) {
+    AttachmentConfig attachConfig =
+        new AttachmentConfig(Integer.parseInt(manager.getAttachmentMaxSize()),
+            manager.getAttachmentURI(), manager.getAttachmentUser(), manager.getAttachmenPassword());
 
-	}
+    mainView =
+        new UploadsPanel(manager.getTmpFolder(), projectCode, new ArrayList<String>(Arrays.asList(
+            "Project Planning", "Results")), LiferayAndVaadinUtils.getUser().getScreenName(),
+            attachConfig);
+
+    mainView.setWidth(100.0f, Unit.PERCENTAGE);
+    mainView.setMargin(new MarginInfo(true, false, true, true));
+    mainView.setSpacing(true);
+
+    this.setCompositionRoot(mainView);
+
+  }
 }

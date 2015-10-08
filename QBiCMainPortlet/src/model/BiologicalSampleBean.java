@@ -3,9 +3,7 @@
   import helpers.UglyToPrettyNameMapper;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,11 +11,7 @@ import java.util.Map.Entry;
 import javax.xml.bind.JAXBException;
 
   import parser.Parser;
-import properties.Qproperties;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-
-import com.vaadin.data.util.BeanItemContainer;
-  
+import properties.Qproperties;  
 
   public class BiologicalSampleBean implements Comparable<Object>, Serializable {
 
