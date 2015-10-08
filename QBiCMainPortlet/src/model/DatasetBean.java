@@ -3,6 +3,7 @@ package model;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.vaadin.ui.CheckBox;
 
@@ -50,10 +51,20 @@ public class DatasetBean implements Serializable {
 
   private DatasetBean root;
   private List<DatasetBean> children;
+  
+  private Map<String, String> properties;
 
 
 
-  public DatasetBean(CheckBox isSelected, ProjectBean project, SampleBean sample,
+  public Map<String, String> getProperties() {
+	return properties;
+}
+
+public void setProperties(Map<String, String> properties) {
+	this.properties = properties;
+}
+
+public DatasetBean(CheckBox isSelected, ProjectBean project, SampleBean sample,
       ExperimentBean experiment, String code, String name, String type, long fileSize,
       String humanReadableFileSize, String dssPath, Date registrationDate, String registrator,
       boolean isDirectory, DatasetBean parent, DatasetBean root, List<DatasetBean> children) {

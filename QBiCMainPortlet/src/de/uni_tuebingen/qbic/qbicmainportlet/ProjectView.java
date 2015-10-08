@@ -237,7 +237,7 @@ private ProjInformationComponent projectInformation;
             uploadComponent.updateUI(manager, getCurrentBean().getCode());
           }
         else if (event.getTabSheet().getSelectedTab().getCaption().equals("")) {
-        	projectInformation.updateUI(getCurrentBean());
+        	projectInformation.updateUI(getCurrentBean(), "project");
         }
       }
     });
@@ -270,7 +270,7 @@ private ProjInformationComponent projectInformation;
     updateContentTable();
     updateContentButtonLayout();
     
-    projectInformation.updateUI(getCurrentBean());
+    projectInformation.updateUI(getCurrentBean(), "project");
   }
 
 

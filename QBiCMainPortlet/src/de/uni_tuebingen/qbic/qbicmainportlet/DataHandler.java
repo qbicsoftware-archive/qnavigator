@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -164,9 +165,12 @@ public class DataHandler implements Serializable {
     List<String> dsCodes = new ArrayList<String>();
     Map<String, String> types = new HashMap<String, String>();
 
+    Map<String,Map<String,String>> props = new LinkedHashMap<String,Map<String,String>>();
+    
     for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : datasets) {
       dsCodes.add(ds.getCode());
       types.put(ds.getCode(), ds.getDataSetTypeCode());
+      props.put(ds.getCode(), ds.getProperties());
     }
 
     params.put("codes", dsCodes);
@@ -187,6 +191,7 @@ public class DataHandler implements Serializable {
       b.setDssPath((String) ss[1]);
       b.setFileSize((Long) ss[3]);
       b.setRegistrationDate(parseDate((String) ss[5]));
+      b.setProperties(props.get(code));
 
       // both code and filename are needed for the keys to be unique
       fileNames.put(code + fileName, b);

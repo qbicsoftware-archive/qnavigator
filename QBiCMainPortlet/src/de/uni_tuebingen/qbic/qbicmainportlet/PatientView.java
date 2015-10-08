@@ -149,6 +149,8 @@ private ConfigurationManager manager;
 
 private UploadComponent uploadComponent;
 
+private ProjInformationComponent projectInformation;
+
   private static Logger LOGGER = new Log4j2Logger(PatientView.class);
 
 
@@ -227,12 +229,14 @@ private UploadComponent uploadComponent;
     statusComponent = new PatientStatusComponent(datahandler, state, resourceUrl);
     workflowComponent = new WorkflowComponent(wfController);
     uploadComponent = new UploadComponent();
+    projectInformation = new ProjInformationComponent(datahandler, state, resourceUrl);
 
     patientViewTab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     patientViewTab.addStyleName(ValoTheme.TABSHEET_FRAMED);
     patientViewTab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
     
-    patientViewTab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+    //patientViewTab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+    patientViewTab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
     patientViewTab.addTab(statusComponent).setIcon(FontAwesome.CHECK_CIRCLE);
     patientViewTab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     patientViewTab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
@@ -280,6 +284,9 @@ private UploadComponent uploadComponent;
         else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
             uploadComponent.updateUI(manager, getCurrentBean().getCode());
           }
+        else if (event.getTabSheet().getSelectedTab().getCaption().equals("")) {
+        	projectInformation.updateUI(getCurrentBean(), "patient");
+        }
       }
     });
 
@@ -300,7 +307,7 @@ private UploadComponent uploadComponent;
     LOGGER.info(String.format("updateHLALayout took %f s", ((endTime - startTime) / 1000000000.0)));
 
     startTime = System.nanoTime();
-    updateContentDescription();
+    //updateContentDescription();
     endTime = System.nanoTime();
     LOGGER.info(String.format("updateContentDescription took %f s",
         ((endTime - startTime) / 1000000000.0)));
@@ -312,6 +319,8 @@ private UploadComponent uploadComponent;
     LOGGER.info(String.format("updateProjectStatus took %f s",
         ((endTime - startTime) / 1000000000.0)));
     updateContentMemberSection();
+    
+    projectInformation.updateUI(getCurrentBean(), "patient");
   }
 
   /**

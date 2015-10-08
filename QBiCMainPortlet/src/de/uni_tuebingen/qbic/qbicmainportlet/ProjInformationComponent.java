@@ -32,6 +32,10 @@ import org.tepi.filtertable.FilterTreeTable;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -97,7 +101,7 @@ public class ProjInformationComponent extends CustomComponent{
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select","File Name", 
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select","Description", "File Name", 
 		 "Registration Date"};
 
   private int numberOfDatasets;
@@ -105,6 +109,10 @@ public class ProjInformationComponent extends CustomComponent{
 private Label descContent;
 
 private Label contact;
+
+private Label patientInformation;
+
+private ProjectBean projectBean;
   
   public ProjInformationComponent(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
@@ -121,17 +129,19 @@ private Label contact;
     datasetTable = buildFilterTable();
     descContent = new Label("");
     contact = new Label("", ContentMode.HTML);
+    patientInformation = new Label("No patient information provided.", ContentMode.HTML);
     mainLayout = new VerticalLayout(vert);
     
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
   
-  public void updateUI(ProjectBean currentBean) {
+  public void updateUI(ProjectBean currentBean, String projectType) {
     
     if(currentBean.getId() == null) return;
     try {
-    	
+    		
+    		projectBean = currentBean;
     	
 			contact.setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
 					+ currentBean.getId()
@@ -145,6 +155,7 @@ private Label contact;
           HierarchicalContainer datasetContainer = new HierarchicalContainer();
           datasetContainer.addContainerProperty("Select", CheckBox.class, null);
           datasetContainer.addContainerProperty("Project", String.class, null);
+          datasetContainer.addContainerProperty("Description", String.class, null);
           datasetContainer.addContainerProperty("Sample", String.class, null);
           //datasetContainer.addContainerProperty("Sample Type", String.class, null);
           datasetContainer.addContainerProperty("File Name", String.class, null);
@@ -180,8 +191,6 @@ private Label contact;
             }
             values.add(ds);
           }
-
-              BeanItemContainer<TestSampleBean> samplesContainer = new BeanItemContainer<TestSampleBean>(TestSampleBean.class);
 
               List<Sample> allSamples =
                   datahandler.getOpenBisClient().getSamplesOfProject(projectIdentifier);
@@ -242,7 +251,7 @@ private Label contact;
             }            
       }
           
-    this.setContainerDataSource(datasetContainer, dataAvailable);
+    this.setContainerDataSource(datasetContainer, dataAvailable, projectType);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -251,14 +260,14 @@ private Label contact;
     }
   }
 
-  public void setContainerDataSource(HierarchicalContainer newDataSource, Boolean dataAvailable) {
+  public void setContainerDataSource(HierarchicalContainer newDataSource, Boolean dataAvailable, String projectType) {
     datasets = (HierarchicalContainer) newDataSource;
     datasetTable.setContainerDataSource(this.datasets);
 
     datasetTable.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
 
     datasetTable.setSizeFull();
-    this.buildLayout(dataAvailable);
+    this.buildLayout(dataAvailable, projectType);
   }
 
   public HierarchicalContainer getContainerDataSource() {
@@ -270,7 +279,7 @@ private Label contact;
    * {DatasetView#buildFilterTable} If it is not, strange behaviour has to be expected. builds the
    * Layout of this view.
    */
-  private void buildLayout(Boolean dataAvailable) {
+  private void buildLayout(Boolean dataAvailable, String projectType) {
     this.vert.removeAllComponents();
     this.vert.setWidth("100%");
 
@@ -288,11 +297,44 @@ private Label contact;
     
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
+    
+    if (projectType.equals("patient")) {
+        String patientInfo = "";
+        Boolean available = false;
+        
+        SearchCriteria sampleSc = new SearchCriteria();
+        sampleSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, "Q_BIOLOGICAL_ENTITY"));
+        SearchCriteria projectSc = new SearchCriteria();
+        projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, projectBean.getCode()));
+        sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
+        
+        SearchCriteria experimentSc = new SearchCriteria();
+        experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name()));
+        sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
+        List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.getOpenBisClient().getFacade().searchForSamples(sampleSc);
+        for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample: samples){
+          if (sample.getProperties().get("Q_ADDITIONAL_INFO") != null) {
+            available = true;
+            String[] splitted = sample.getProperties().get("Q_ADDITIONAL_INFO").split(";");
+            for (String s : splitted) {
+              String[] splitted2 = s.split(":");
+              patientInfo += String.format("<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
+            }
+          }
+        }
+        if (available) {
+          patientInformation.setValue(patientInfo);
+        }
+        else {
+          patientInformation.setValue("No patient information provided.");
+        }
+    	projDescriptionContent.addComponent(patientInformation);
+    }
 
     projDescription.addComponent(projDescriptionContent);
     
     projDescriptionContent.setSpacing(true);
-    projDescription.setMargin(new MarginInfo(false, false, false, true));
+    projDescription.setMargin(new MarginInfo(false, false, true, true));
     projDescription.setWidth("100%");
     projDescription.setSpacing(true);    
     
@@ -598,7 +640,7 @@ private Label contact;
     if(dataAvailable) {
     	this.vert.addComponent(tableSection);
     	tableSection.addComponent(buttonLayout);
-        projDescription.setMargin(new MarginInfo(false, false, true, true));
+        projDescription.setMargin(new MarginInfo(false, false, false, true));
     }
   }
 
@@ -661,6 +703,10 @@ private Label contact;
 
       dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
+      String secName = d.getProperties().get("Q_SECONDARY_NAME");
+      if(secName != null) {
+    	  dataset_container.getContainerProperty(new_ds, "Description").setValue(d.getProperties().get("Q_SECONDARY_NAME"));
+      }
       //dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
       //    d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
@@ -689,6 +735,10 @@ private Label contact;
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
+      String secName = d.getProperties().get("Q_SECONDARY_NAME");
+      if(secName != null) {
+    	  dataset_container.getContainerProperty(new_file, "Description").setValue(d.getProperties().get("Q_SECONDARY_NAME"));
+      }
       //dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
