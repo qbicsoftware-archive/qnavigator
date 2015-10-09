@@ -1658,7 +1658,6 @@ public class DataHandler implements Serializable {
       firstLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
 
       this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", firstLevel);
-      System.out.println("Level 1: ");
 
       helpers.Utils.printMapContent(firstLevel);
 
@@ -1712,7 +1711,6 @@ public class DataHandler implements Serializable {
           parentHLA = newBiologicalSampleID;
 
           newBiologicalSampleIDs.add(newBiologicalSampleID);
-          System.out.println(numberOfRegisteredSamples);
           numberOfRegisteredSamples += 1;
 
           primaryTissues.add(sampleBean.getTissue());
@@ -1735,7 +1733,6 @@ public class DataHandler implements Serializable {
           secondLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
 
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", secondLevel);
-          System.out.println("Level 2: ");
           helpers.Utils.printMapContent(secondLevel);
 
           if (sampleBean.getDnaSeq()) {
@@ -1864,9 +1861,7 @@ public class DataHandler implements Serializable {
           // TODO additional level for HLA typing
 
           // call of ingestion services for differeny levels
-          System.out.println("Level 3: ");
           helpers.Utils.printMapContent(thirdLevel);
-          System.out.println("Level 4: ");
           helpers.Utils.printMapContent(fourthLevel);
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", thirdLevel);
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", fourthLevel);
@@ -1889,7 +1884,6 @@ public class DataHandler implements Serializable {
                 + helpers.BarcodeFunctions.checksum(newHLATypingSampleCode);
 
         newHLATypingSampleIDs.add(newHLATypingSampleID);
-        System.out.println(numberOfRegisteredSamples);
         numberOfRegisteredSamples += 1;
 
         hlaClasses.add(entry.getKey());
