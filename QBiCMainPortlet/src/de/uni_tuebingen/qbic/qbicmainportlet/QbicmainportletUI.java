@@ -133,6 +133,20 @@ public class QbicmainportletUI extends UI {
   }
 
   /**
+   * standard error layout, if openbis threw error on initialization despite a successful login
+   * 
+   * @param request
+   */
+  private void buildUserUnknownError(final VaadinRequest request) {
+    VerticalLayout vl = new VerticalLayout();
+    this.setContent(vl);
+    vl.addComponent(new Label(
+        "An error occured, while trying to load projects. Please contact your project manager to make sure your account is added to your projects."));
+    LOGGER
+        .error("Couldn't initialize view. User is probably not added to openBIS and has been informed to contact prject manager.");
+  }
+
+  /**
    * builds page if user is not logged in
    */
   private void buildNotLoggedinLayout() {
@@ -190,6 +204,8 @@ public class QbicmainportletUI extends UI {
 
     this.setContent(layout);
 
+    // TODO so this function uses the same error as above, but doesn't call
+    // OpenbisConnectionErrorLayout...we might want to change that
     final Label status = new Label("Connecting to database.");
     status.addStyleName(ValoTheme.LABEL_HUGE);
     status.addStyleName(ValoTheme.LABEL_LIGHT);
@@ -198,9 +214,13 @@ public class QbicmainportletUI extends UI {
     try {
       buildMainLayout(datahandler, request, LiferayAndVaadinUtils.getUser().getScreenName());
     } catch (Exception e) {
-      LOGGER.error("exception thrown during initialization.", e);
-      status
-          .setValue("An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
+      if (datahandler.getOpenBisClient().loggedin())
+        buildUserUnknownError(request);
+      else {
+        LOGGER.error("exception thrown during initialization.", e);
+        status
+            .setValue("An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
+      }
     }
   }
 
@@ -211,21 +231,22 @@ public class QbicmainportletUI extends UI {
   public void buildMainLayout(DataHandler datahandler, VaadinRequest request, String user) {
 
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
-    MultiscaleController multiscaleController = new MultiscaleController(datahandler.getOpenBisClient(), user);
+    MultiscaleController multiscaleController =
+        new MultiscaleController(datahandler.getOpenBisClient(), user);
 
 
     final HomeView homeView = new HomeView(datahandler, "Your Projects", user, state, resUrl);
-    DatasetView datasetView = new DatasetView(datahandler,state, resUrl);
+    DatasetView datasetView = new DatasetView(datahandler, state, resUrl);
     final SampleView sampleView = new SampleView(datahandler, state, resUrl, multiscaleController);
     BarcodeView barcodeView =
         new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
             manager.getBarcodePathVariable());
     final ExperimentView experimentView = new ExperimentView(datahandler, state, resUrl);
-    //ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
+    // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
-    
-        
+
+
     Submitter submitter = null;
     try {
       submitter = WorkflowSubmitterFactory.getSubmitter(Type.guseSubmitter, manager);
@@ -233,15 +254,17 @@ public class QbicmainportletUI extends UI {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    
-    LOGGER.debug("SUBMITTER " + submitter);
-    WorkflowViewController controller = new WorkflowViewController(submitter, datahandler.getOpenBisClient(), user);
+
+    WorkflowViewController controller =
+        new WorkflowViewController(submitter, datahandler.getOpenBisClient(), user);
 
     final WorkflowView workflowView = new WorkflowView(controller);
-    final ProjectView projectView = new ProjectView(datahandler, state, resUrl, controller, manager);
-    final PatientView patientView = new PatientView(datahandler, state, resUrl, controller, manager);
+    final ProjectView projectView =
+        new ProjectView(datahandler, state, resUrl, controller, manager);
+    final PatientView patientView =
+        new PatientView(datahandler, state, resUrl, controller, manager);
 
-    
+
     VerticalLayout navigatorContent = new VerticalLayout();
 
     final Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
@@ -253,11 +276,11 @@ public class QbicmainportletUI extends UI {
     navigator.addView(ProjectView.navigateToLabel, projectView);
     navigator.addView(BarcodeView.navigateToLabel, barcodeView);
     navigator.addView(ExperimentView.navigateToLabel, experimentView);
-    //navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
+    // navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
 
     navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateToLabel, addPatientView);
-    
+
     navigator.addView(WorkflowView.navigateToLabel, workflowView);
 
     setNavigator(navigator);
@@ -265,29 +288,29 @@ public class QbicmainportletUI extends UI {
     mainLayout = new VerticalLayout();
     mainLayout.setMargin(new MarginInfo(false, true, false, false));
 
-    //final TreeView tv = new TreeView(state, navigator, user);
-    //tv.setOpenbisClient(this.openBisConnection);
-    //tv.loadProjects();
-    //state.addObserver(tv);
-    //navigator.addViewChangeListener(tv);
+    // final TreeView tv = new TreeView(state, navigator, user);
+    // tv.setOpenbisClient(this.openBisConnection);
+    // tv.loadProjects();
+    // state.addObserver(tv);
+    // navigator.addViewChangeListener(tv);
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
     treeViewAndLevelView.setMargin(new MarginInfo(false, true, false, false));
-    //treeViewAndLevelView.setSizeFull();
+    // treeViewAndLevelView.setSizeFull();
     HorizontalLayout headerView = new HorizontalLayout();
     headerView.setMargin(new MarginInfo(false, true, false, false));
-    
+
     headerView.setWidth((getPage().getBrowserWindowHeight() * 0.85f), Unit.PIXELS);
     headerView.setSpacing(false);
-    
+
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setSpacing(true);
-    
+
     final HorizontalLayout labelLayout = new HorizontalLayout();
-    headerView.addComponent(buttonLayout);    
+    headerView.addComponent(buttonLayout);
     headerView.addComponent(labelLayout);
 
-    //treeViewAndLevelView.addComponent(tv);
-    
+    // treeViewAndLevelView.addComponent(tv);
+
     VerticalLayout versionLayout = new VerticalLayout();
 
     Button homeButton = new Button("Home");
@@ -301,13 +324,13 @@ public class QbicmainportletUI extends UI {
       }
 
     });
-    
+
     buttonLayout.addComponent(homeButton);
     Boolean includePatientCreation = false;
-    
+
     List<Project> projects =
-        datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(
-            datahandler.getOpenBisClient().getSessionToken(), user);
+        datahandler.getOpenBisClient().getOpenbisInfoService()
+            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     int numberOfProjects = 0;
     for (Project project : projects) {
       if (project.getSpaceCode().contains("IVAC")) {
@@ -315,8 +338,8 @@ public class QbicmainportletUI extends UI {
       }
       numberOfProjects += 1;
     }
-    
-    
+
+
     // add patient button
     if (includePatientCreation) {
       Button addPatient = new Button("Add Patient");
@@ -332,20 +355,20 @@ public class QbicmainportletUI extends UI {
 
       buttonLayout.addComponent(addPatient);
     }
-    
+
     Button header = new Button(String.format("Total number of projects: %s", numberOfProjects));
     header.setIcon(FontAwesome.HAND_O_RIGHT);
     header.setStyleName(ValoTheme.BUTTON_LARGE);
     header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-    
+
     labelLayout.addComponent(header);
-    
+
     SearchBarView searchBarView = new SearchBarView(datahandler);
 
     headerView.setWidth("100%");
-    headerView.addComponent(searchBarView);    
+    headerView.addComponent(searchBarView);
     headerView.setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
-    //headerView.setComponentAlignment(homeButton, Alignment.TOP_LEFT);
+    // headerView.setComponentAlignment(homeButton, Alignment.TOP_LEFT);
 
     treeViewAndLevelView.addComponent(navigatorContent);
     mainLayout.addComponent(headerView);
@@ -365,17 +388,16 @@ public class QbicmainportletUI extends UI {
         int height = event.getHeight();
         int width = event.getWidth();
         WebBrowser browser = event.getSource().getWebBrowser();
-        //tv.rebuildLayout(height, width, browser);
+        // tv.rebuildLayout(height, width, browser);
         if (currentView instanceof HomeView) {
           homeView.updateView(height, width, browser);
         } else if (currentView instanceof ProjectView) {
           projectView.updateView(height, width, browser);
         } else if (currentView instanceof ExperimentView) {
           experimentView.updateView(height, width, browser);
-        } else if (currentView instanceof WorkflowView){
+        } else if (currentView instanceof WorkflowView) {
           workflowView.updateView(height, width, browser);
-        }
-        else if (currentView instanceof PatientView) {
+        } else if (currentView instanceof PatientView) {
           patientView.updateView(height, width, browser);
         } else if (currentView instanceof AddPatientView) {
           addPatientView.updateView(height, width, browser);
@@ -405,19 +427,18 @@ public class QbicmainportletUI extends UI {
         }
         if (currentView instanceof SampleView) {
           sampleView.updateView(height, width, browser);
-        }else if (currentView instanceof WorkflowView){
+        } else if (currentView instanceof WorkflowView) {
           workflowView.updateView(height, width, browser);
+        } else if (currentView instanceof PatientView) {
+          patientView.updateView(height, width, browser);
+        } else if (currentView instanceof AddPatientView) {
+          addPatientView.updateView(height, width, browser);
         }
-      else if (currentView instanceof PatientView) {
-        patientView.updateView(height, width, browser);
-      } else if (currentView instanceof AddPatientView) {
-        addPatientView.updateView(height, width, browser);
-      }
         return true;
       }
 
       private void setEnabled(View view, boolean enabled) {
-        //tv.setEnabled(enabled);
+        // tv.setEnabled(enabled);
         if (view instanceof HomeView) {
           homeView.setEnabled(enabled);
         }
@@ -438,10 +459,10 @@ public class QbicmainportletUI extends UI {
         // this.setEnabled(currentView, true);
         Object currentBean = null;
         if (currentView instanceof ProjectView) {
-          //TODO refactoring
+          // TODO refactoring
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-          
-          labelLayout.removeAllComponents();        
+
+          labelLayout.removeAllComponents();
           Button header = new Button(projectView.getHeaderLabel());
           header.setStyleName(ValoTheme.BUTTON_LARGE);
           header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
@@ -450,36 +471,36 @@ public class QbicmainportletUI extends UI {
           labelLayout.addComponent(header);
         } else if (currentView instanceof HomeView) {
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-          
-          labelLayout.removeAllComponents();        
+
+          labelLayout.removeAllComponents();
           Button header = new Button(homeView.getHeader());
           header.setStyleName(ValoTheme.BUTTON_LARGE);
           header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
           header.setIcon(FontAwesome.HAND_O_RIGHT);
 
           labelLayout.addComponent(header);
-          //currentBean = projectView.getCurrentBean();
+          // currentBean = projectView.getCurrentBean();
         } else if (currentView instanceof ExperimentView) {
           currentBean = experimentView.getCurrentBean();
-          
+
         } else if (currentView instanceof SampleView) {
-          //TODO refactoring
+          // TODO refactoring
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-          
-          labelLayout.removeAllComponents();        
+
+          labelLayout.removeAllComponents();
           Button header = new Button(sampleView.getHeader());
           header.setStyleName(ValoTheme.BUTTON_LARGE);
           header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
           header.setIcon(FontAwesome.HAND_O_RIGHT);
 
           labelLayout.addComponent(header);
-          
+
         } else if (currentView instanceof DatasetView) {
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
         } else if (currentView instanceof PatientView) {
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-          
-          labelLayout.removeAllComponents();        
+
+          labelLayout.removeAllComponents();
           Button header = new Button(patientView.getHeaderLabel());
           header.setStyleName(ValoTheme.BUTTON_LARGE);
           header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
@@ -487,8 +508,8 @@ public class QbicmainportletUI extends UI {
           labelLayout.addComponent(header);
         } else if (currentView instanceof AddPatientView) {
           currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-          
-          labelLayout.removeAllComponents();        
+
+          labelLayout.removeAllComponents();
           Button header = new Button(addPatientView.getHeader());
           header.setStyleName(ValoTheme.BUTTON_LARGE);
           header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
