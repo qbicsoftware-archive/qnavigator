@@ -84,8 +84,8 @@ public class LevelComponent extends CustomComponent {
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample",
-      "File Name", "Dataset Type", "Registration Date", "File Size"};
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample", "File Name",
+      "Dataset Type", "Registration Date", "File Size"};
 
   private int numberOfDatasets;
 
@@ -259,23 +259,20 @@ public class LevelComponent extends CustomComponent {
 
                 ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> foundDataset =
                     datasetFilter.get(sample.getIdentifier());
-                
-							if (foundDataset != null) {
-								for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
-									if (ds.getDataSetTypeCode().equals(
-											"Q_PROJECT_DATA")) {
-										if (ds.getProperties()
-												.get("Q_ATTACHMENT_TYPE")
-												.equals("INFORMATION")) {
-											continue;
-										} else {
-											retrievedDatasets.add(ds);
-										}
-									} else {
-										retrievedDatasets.add(ds);
-									}
-								}
-                  //retrievedDatasets.addAll(foundDataset);
+
+                if (foundDataset != null) {
+                  for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
+                    if (ds.getDataSetTypeCode().equals("Q_PROJECT_DATA")) {
+                      if (ds.getProperties().get("Q_ATTACHMENT_TYPE").equals("INFORMATION")) {
+                        continue;
+                      } else {
+                        retrievedDatasets.add(ds);
+                      }
+                    } else {
+                      retrievedDatasets.add(ds);
+                    }
+                  }
+                  // retrievedDatasets.addAll(foundDataset);
                 }
               }
             }
@@ -346,8 +343,8 @@ public class LevelComponent extends CustomComponent {
           registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts, null);
         }
       }
-          
-    	  this.setContainerDataSource(datasetContainer);
+
+      this.setContainerDataSource(datasetContainer);
 
     } catch (Exception e) {
       e.printStackTrace();
