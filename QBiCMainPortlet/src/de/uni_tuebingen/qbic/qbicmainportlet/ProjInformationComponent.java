@@ -1,4 +1,3 @@
-
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.net.MalformedURLException;
@@ -78,8 +77,8 @@ import com.vaadin.ui.Notification.Type;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
-public class ProjInformationComponent extends CustomComponent{
-  
+public class ProjInformationComponent extends CustomComponent {
+
   /**
    * 
    */
@@ -101,26 +100,26 @@ public class ProjInformationComponent extends CustomComponent{
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select","Description", "File Name", 
-		 "Registration Date"};
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Description", "File Name",
+      "Registration Date"};
 
   private int numberOfDatasets;
 
-private Label descContent;
+  private Label descContent;
 
-private Label contact;
+  private Label contact;
 
-private Label patientInformation;
+  private Label patientInformation;
 
-private ProjectBean projectBean;
-  
+  private ProjectBean projectBean;
+
   public ProjInformationComponent(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
     this.state = state;
-    
+
     this.setCaption("");
-    
+
     this.initUI();
   }
 
@@ -131,127 +130,128 @@ private ProjectBean projectBean;
     contact = new Label("", ContentMode.HTML);
     patientInformation = new Label("No patient information provided.", ContentMode.HTML);
     mainLayout = new VerticalLayout(vert);
-    
+
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
-  
+
   public void updateUI(ProjectBean currentBean, String projectType) {
-    
-    if(currentBean.getId() == null) return;
+
+    if (currentBean.getId() == null)
+      return;
     try {
-    		
-    		projectBean = currentBean;
-    	
-			contact.setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
-					+ currentBean.getId()
-					+ "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
-					+ currentBean.getId() + "</a>");
-			String desc = currentBean.getDescription();
-			if (!desc.isEmpty()) {
-				descContent.setValue(desc);
-			}
-    
-          HierarchicalContainer datasetContainer = new HierarchicalContainer();
-          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
-          datasetContainer.addContainerProperty("Project", String.class, null);
-          datasetContainer.addContainerProperty("Description", String.class, null);
-          datasetContainer.addContainerProperty("Sample", String.class, null);
-          //datasetContainer.addContainerProperty("Sample Type", String.class, null);
-          datasetContainer.addContainerProperty("File Name", String.class, null);
-          datasetContainer.addContainerProperty("File Type", String.class, null);
-          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
-          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
-          datasetContainer.addContainerProperty("File Size", String.class, null);
-          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
-          datasetContainer.addContainerProperty("dl_link", String.class, null);
-          datasetContainer.addContainerProperty("CODE", String.class, null);
-          
-          //HierarchicalContainer sampleContainer = new HierarchicalContainer()
-          
-          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasetsAll = null;
-          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
-          //List<Sample> retrievedSamples = new ArrayList<Sample>();
-          Map<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>> datasetFilter = new HashMap<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>>();
 
+      projectBean = currentBean;
 
-          String projectIdentifier = currentBean.getId();
-          retrievedDatasetsAll =
-              datahandler.getOpenBisClient()
-                  .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
-
-          for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : retrievedDatasetsAll) {
-            
-            ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> values = datasetFilter.get(ds.getSampleIdentifierOrNull());
-            
-            if (values==null) {
-                values = new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
-                datasetFilter.put(ds.getSampleIdentifierOrNull(), values);
-            }
-            values.add(ds);
-          }
-
-              List<Sample> allSamples =
-                  datahandler.getOpenBisClient().getSamplesOfProject(projectIdentifier);
-
-					for (Sample sample : allSamples) {
-						if (sample.getSampleTypeCode().equals(
-								"Q_ATTACHMENT_SAMPLE")) {
-
-							ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> foundDataset = datasetFilter
-									.get(sample.getIdentifier());
-
-							if (foundDataset != null) {
-								for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
-									if (ds.getProperties()
-											.get("Q_ATTACHMENT_TYPE")
-											.equals("INFORMATION")) {
-										retrievedDatasets.add(ds);
-									}
-								}
-							}
-						}
-					}
-					
-              this.datasetTable.setCaption("Project Data");
-              //descriptionLabel = new Label(String.format("This project contains %s result datasets.", numberOfDatasets), Label.CONTENT_PREFORMATTED);
-      
-          numberOfDatasets = retrievedDatasets.size();
-          
-          Boolean dataAvailable = true;
-          
-          if (numberOfDatasets == 0) {
-        	dataAvailable = false;  
-            //new Notification("No datasets available.",
-            //    "<br/>Please contact the project manager.", Type.WARNING_MESSAGE, true).show(Page
-            //    .getCurrent());
-          } else {
-            
-            Map<String, String> samples = new HashMap<String, String>();
-                        
-            // project same for all datasets
-            String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
-            for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: retrievedDatasets) {
-              samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);    
-            }
-
-            List<DatasetBean> dsBeans =
-                datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
-            
-            for (DatasetBean d : dsBeans) {
-              Date date = d.getRegistrationDate();
-              SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-              String dateString = sd.format(date);
-              Timestamp ts = Timestamp.valueOf(dateString);
-              String sampleID = samples.get(d.getCode());
-              
-              registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts,
-                  null);
-            }            
+      contact
+          .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+              + currentBean.getId()
+              + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
+              + currentBean.getId() + "</a>");
+      String desc = currentBean.getDescription();
+      if (!desc.isEmpty()) {
+        descContent.setValue(desc);
       }
-          
-    this.setContainerDataSource(datasetContainer, dataAvailable, projectType);
+
+      HierarchicalContainer datasetContainer = new HierarchicalContainer();
+      datasetContainer.addContainerProperty("Select", CheckBox.class, null);
+      datasetContainer.addContainerProperty("Project", String.class, null);
+      datasetContainer.addContainerProperty("Description", String.class, null);
+      datasetContainer.addContainerProperty("Sample", String.class, null);
+      // datasetContainer.addContainerProperty("Sample Type", String.class, null);
+      datasetContainer.addContainerProperty("File Name", String.class, null);
+      datasetContainer.addContainerProperty("File Type", String.class, null);
+      datasetContainer.addContainerProperty("Dataset Type", String.class, null);
+      datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
+      datasetContainer.addContainerProperty("Validated", Boolean.class, null);
+      datasetContainer.addContainerProperty("File Size", String.class, null);
+      datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
+      datasetContainer.addContainerProperty("dl_link", String.class, null);
+      datasetContainer.addContainerProperty("CODE", String.class, null);
+
+      // HierarchicalContainer sampleContainer = new HierarchicalContainer()
+
+      List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasetsAll = null;
+      List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets =
+          new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
+      // List<Sample> retrievedSamples = new ArrayList<Sample>();
+      Map<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>> datasetFilter =
+          new HashMap<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>>();
+
+
+      String projectIdentifier = currentBean.getId();
+      retrievedDatasetsAll =
+          datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(
+              projectIdentifier);
+
+      for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : retrievedDatasetsAll) {
+
+        ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> values =
+            datasetFilter.get(ds.getSampleIdentifierOrNull());
+
+        if (values == null) {
+          values = new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
+          datasetFilter.put(ds.getSampleIdentifierOrNull(), values);
+        }
+        values.add(ds);
+      }
+
+      List<Sample> allSamples =
+          datahandler.getOpenBisClient().getSamplesOfProject(projectIdentifier);
+
+      for (Sample sample : allSamples) {
+        if (sample.getSampleTypeCode().equals("Q_ATTACHMENT_SAMPLE")) {
+
+          ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> foundDataset =
+              datasetFilter.get(sample.getIdentifier());
+
+          if (foundDataset != null) {
+            for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
+              if (ds.getProperties().get("Q_ATTACHMENT_TYPE").equals("INFORMATION")) {
+                retrievedDatasets.add(ds);
+              }
+            }
+          }
+        }
+      }
+
+      this.datasetTable.setCaption("Project Data");
+      // descriptionLabel = new Label(String.format("This project contains %s result datasets.",
+      // numberOfDatasets), Label.CONTENT_PREFORMATTED);
+
+      numberOfDatasets = retrievedDatasets.size();
+
+      Boolean dataAvailable = true;
+
+      if (numberOfDatasets == 0) {
+        dataAvailable = false;
+        // new Notification("No datasets available.",
+        // "<br/>Please contact the project manager.", Type.WARNING_MESSAGE, true).show(Page
+        // .getCurrent());
+      } else {
+
+        Map<String, String> samples = new HashMap<String, String>();
+
+        // project same for all datasets
+        String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
+        for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset : retrievedDatasets) {
+          samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);
+        }
+
+        List<DatasetBean> dsBeans = datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
+
+        for (DatasetBean d : dsBeans) {
+          Date date = d.getRegistrationDate();
+          SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+          String dateString = sd.format(date);
+          Timestamp ts = Timestamp.valueOf(dateString);
+          String sampleID = samples.get(d.getCode());
+
+          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts, null);
+        }
+      }
+
+      this.setContainerDataSource(datasetContainer, dataAvailable, projectType);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -260,7 +260,8 @@ private ProjectBean projectBean;
     }
   }
 
-  public void setContainerDataSource(HierarchicalContainer newDataSource, Boolean dataAvailable, String projectType) {
+  public void setContainerDataSource(HierarchicalContainer newDataSource, Boolean dataAvailable,
+      String projectType) {
     datasets = (HierarchicalContainer) newDataSource;
     datasetTable.setContainerDataSource(this.datasets);
 
@@ -273,7 +274,7 @@ private ProjectBean projectBean;
   public HierarchicalContainer getContainerDataSource() {
     return this.datasets;
   }
-  
+
   /**
    * Precondition: {DatasetView#table} has to be initialized. e.g. with
    * {DatasetView#buildFilterTable} If it is not, strange behaviour has to be expected. builds the
@@ -286,67 +287,70 @@ private ProjectBean projectBean;
     // Table (containing datasets) section
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
-    
+
     VerticalLayout projDescription = new VerticalLayout();
     VerticalLayout projDescriptionContent = new VerticalLayout();
-    
+
     tableSectionContent.setMargin(new MarginInfo(false, false, false, false));
     projDescriptionContent.setMargin(new MarginInfo(false, false, false, false));
-    
+
     projDescription.setCaption("");
-    
+
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
-    
+
     if (projectType.equals("patient")) {
-        String patientInfo = "";
-        Boolean available = false;
-        
-        SearchCriteria sampleSc = new SearchCriteria();
-        sampleSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, "Q_BIOLOGICAL_ENTITY"));
-        SearchCriteria projectSc = new SearchCriteria();
-        projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, projectBean.getCode()));
-        sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
-        
-        SearchCriteria experimentSc = new SearchCriteria();
-        experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name()));
-        sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
-        List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.getOpenBisClient().getFacade().searchForSamples(sampleSc);
-        for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample: samples){
-          if (sample.getProperties().get("Q_ADDITIONAL_INFO") != null) {
-            available = true;
-            String[] splitted = sample.getProperties().get("Q_ADDITIONAL_INFO").split(";");
-            for (String s : splitted) {
-              String[] splitted2 = s.split(":");
-              patientInfo += String.format("<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
-            }
+      String patientInfo = "";
+      Boolean available = false;
+
+      SearchCriteria sampleSc = new SearchCriteria();
+      sampleSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+          "Q_BIOLOGICAL_ENTITY"));
+      SearchCriteria projectSc = new SearchCriteria();
+      projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
+          projectBean.getCode()));
+      sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
+
+      SearchCriteria experimentSc = new SearchCriteria();
+      experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+          model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name()));
+      sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
+      List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples =
+          datahandler.getOpenBisClient().getFacade().searchForSamples(sampleSc);
+      for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples) {
+        if (sample.getProperties().get("Q_ADDITIONAL_INFO") != null) {
+          available = true;
+          String[] splitted = sample.getProperties().get("Q_ADDITIONAL_INFO").split(";");
+          for (String s : splitted) {
+            String[] splitted2 = s.split(":");
+            patientInfo += String.format("<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
           }
         }
-        if (available) {
-          patientInformation.setValue(patientInfo);
-        }
-        else {
-          patientInformation.setValue("No patient information provided.");
-        }
-    	projDescriptionContent.addComponent(patientInformation);
+      }
+      if (available) {
+        patientInformation.setValue(patientInfo);
+      } else {
+        patientInformation.setValue("No patient information provided.");
+      }
+      projDescriptionContent.addComponent(patientInformation);
     }
 
     projDescription.addComponent(projDescriptionContent);
-    
+
     projDescriptionContent.setSpacing(true);
     projDescription.setMargin(new MarginInfo(false, false, true, true));
     projDescription.setWidth("100%");
-    projDescription.setSpacing(true);    
-    
+    projDescription.setSpacing(true);
+
     descriptionLabel.setWidth("100%");
-    //tableSection.addComponent(descriptionLabel); 
+    // tableSection.addComponent(descriptionLabel);
     tableSectionContent.addComponent(this.datasetTable);
-    
+
     tableSection.setMargin(new MarginInfo(true, false, false, true));
     tableSection.setSpacing(true);
 
     tableSection.addComponent(tableSectionContent);
-    
+
     this.vert.addComponent(projDescription);
 
     datasetTable.setWidth("100%");
@@ -358,7 +362,7 @@ private ProjectBean projectBean;
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setMargin(new MarginInfo(false, false, true, false));
     buttonLayout.setHeight(null);
-    //buttonLayout.setWidth("100%");
+    // buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
 
     this.download.setEnabled(false);
@@ -374,7 +378,8 @@ private ProjectBean projectBean;
       @Override
       public void buttonClick(ClickEvent event) {
         for (Object itemId : datasetTable.getItemIds()) {
-          ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue()).setValue(true);
+          ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue())
+              .setValue(true);
         }
       }
     });
@@ -385,7 +390,8 @@ private ProjectBean projectBean;
       @Override
       public void buttonClick(ClickEvent event) {
         for (Object itemId : datasetTable.getItemIds()) {
-          ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue()).setValue(false);
+          ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue())
+              .setValue(false);
         }
       }
     });
@@ -400,7 +406,8 @@ private ProjectBean projectBean;
 
 
     for (final Object itemId : this.datasetTable.getItemIds()) {
-      setCheckedBox(itemId, (String) this.datasetTable.getItem(itemId).getItemProperty("CODE").getValue());
+      setCheckedBox(itemId, (String) this.datasetTable.getItem(itemId).getItemProperty("CODE")
+          .getValue());
     }
 
 
@@ -433,7 +440,8 @@ private ProjectBean projectBean;
         Object next = iterator.next();
         String datasetType =
             (String) datasetTable.getItem(next).getItemProperty("Dataset Type").getValue();
-        String fileName = (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
+        String fileName =
+            (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
         // TODO: No hardcoding!!
         // if (datasetType.equals("FASTQC") || datasetType.equals("QCML") ||
         // datasetType.equals("BAM")
@@ -444,17 +452,15 @@ private ProjectBean projectBean;
         } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
             && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
           visualize.setEnabled(true);
-        } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS") 
-        		&& (fileName.endsWith(".html"))) {
-              visualize.setEnabled(true);
+        } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS")
+            && (fileName.endsWith(".html"))) {
+          visualize.setEnabled(true);
         } else {
           visualize.setEnabled(false);
         }
       }
     });
 
-
-    // TODO Workflow Views should get those data and be happy
     /*
      * Send message that in datasetview the following was selected. WorkflowViews get those messages
      * and save them, if it is valid information for them.
@@ -478,12 +484,13 @@ private ProjectBean projectBean;
           String datasetType =
               (String) datasetTable.getItem(next).getItemProperty("Dataset Type").getValue();
           message.add(datasetType);
-          String project = (String) datasetTable.getItem(next).getItemProperty("Project").getValue();
+          String project =
+              (String) datasetTable.getItem(next).getItemProperty("Project").getValue();
 
           String space = datahandler.getOpenBisClient().getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
           message.add(project);
           message.add((String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
-          //message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
+          // message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
           message.add((String) datasetTable.getItem(next).getItemProperty("dl_link").getValue());
           message.add((String) datasetTable.getItem(next).getItemProperty("File Name").getValue());
           message.add(space);
@@ -521,8 +528,8 @@ private ProjectBean projectBean;
             String parentDatasetFileName =
                 (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
             url =
-                datahandler.getOpenBisClient().getUrlForDataset(datasetCode, parentDatasetFileName + "/"
-                    + datasetFileName);
+                datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                    parentDatasetFileName + "/" + datasetFileName);
           } else {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
@@ -558,20 +565,20 @@ private ProjectBean projectBean;
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/plain");
             res = streamres;
-          }
-            else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS") 
-            		&& datasetFileName.endsWith(".html")) {
-                QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-                StreamResource streamres = new StreamResource(re, datasetFileName);
-                streamres.setMIMEType("text/html");
-                res = streamres;        	
-            }
-          else if (datasetType.equals("FASTQC")) {
+          } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS")
+              && datasetFileName.endsWith(".html")) {
+            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+            StreamResource streamres = new StreamResource(re, datasetFileName);
+            streamres.setMIMEType("text/html");
+            res = streamres;
+          } else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
-            String filePath = (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
+            String filePath =
+                (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
             filePath = String.format("/store%s", filePath.split("store")[1]);
-            String fileId = (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
+            String fileId =
+                (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
             // fileId = "control.1kg.panel.samples.vcf.gz";
             // UI.getCurrent().getSession().addRequestHandler(rh);
             rhAttached = true;
@@ -636,11 +643,11 @@ private ProjectBean projectBean;
       }
     });
 
-    //this.vert.addComponent(buttonLayout);
-    if(dataAvailable) {
-    	this.vert.addComponent(tableSection);
-    	tableSection.addComponent(buttonLayout);
-        projDescription.setMargin(new MarginInfo(false, false, false, true));
+    // this.vert.addComponent(buttonLayout);
+    if (dataAvailable) {
+      this.vert.addComponent(tableSection);
+      tableSection.addComponent(buttonLayout);
+      projDescription.setMargin(new MarginInfo(false, false, false, true));
     }
   }
 
@@ -687,7 +694,8 @@ private ProjectBean projectBean;
 
     return filterTable;
   }
-  
+
+  @SuppressWarnings("unchecked")
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
       String project, String sample, Timestamp ts, Object parent) {
     if (d.hasChildren()) {
@@ -704,11 +712,13 @@ private ProjectBean projectBean;
       dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
       String secName = d.getProperties().get("Q_SECONDARY_NAME");
-      if(secName != null) {
-    	  dataset_container.getContainerProperty(new_ds, "Description").setValue(d.getProperties().get("Q_SECONDARY_NAME"));
+      // TODO add User here
+      if (secName != null) {
+        dataset_container.getContainerProperty(new_ds, "Description").setValue(
+            d.getProperties().get("Q_SECONDARY_NAME"));
       }
-      //dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
-      //    d.getSample().getType());
+      // dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
+      // d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
       dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(d.getType());
@@ -736,10 +746,12 @@ private ProjectBean projectBean;
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
       String secName = d.getProperties().get("Q_SECONDARY_NAME");
-      if(secName != null) {
-    	  dataset_container.getContainerProperty(new_file, "Description").setValue(d.getProperties().get("Q_SECONDARY_NAME"));
+      // TODO add User here too
+      if (secName != null) {
+        dataset_container.getContainerProperty(new_file, "Description").setValue(
+            d.getProperties().get("Q_SECONDARY_NAME"));
       }
-      //dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
+      // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
       dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());
@@ -820,7 +832,8 @@ private ProjectBean projectBean;
           .setValue(itemSelected);
       fileName =
           Paths.get(fileName,
-              (String) datasetTable.getItem(itemId).getItemProperty("File Name").getValue()).toString();
+              (String) datasetTable.getItem(itemId).getItemProperty("File Name").getValue())
+              .toString();
 
       // System.out.println(fileName);
       if (datasetTable.hasChildren(itemId)) {
@@ -828,7 +841,8 @@ private ProjectBean projectBean;
           valueChange(childId, itemSelected, entries, fileName);
         }
       } else if (itemSelected) {
-        String datasetCode = (String) datasetTable.getItem(itemId).getItemProperty("CODE").getValue();
+        String datasetCode =
+            (String) datasetTable.getItem(itemId).getItemProperty("CODE").getValue();
         Long datasetFileSize =
             (Long) datasetTable.getItem(itemId).getItemProperty("file_size_bytes").getValue();
         entries.put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode,
@@ -838,21 +852,23 @@ private ProjectBean projectBean;
       }
     }
   }
-  
+
+  //TODO seems this isn't used. can we delete it?
   /**
-   * The input should have the following form: type=openbis_type&id=openbis_id e.g. type=sample&id=/ABI_SYSBIO/QMARI117AV
-   * It is specifically designed to be used in the case of datasetView. In other cases there is no guarantee that it will work correctly.
-   * returns a map with two entries:
-   * "type": "openbistype"
-   * "id" : "openbisId"
+   * The input should have the following form: type=openbis_type&id=openbis_id e.g.
+   * type=sample&id=/ABI_SYSBIO/QMARI117AV It is specifically designed to be used in the case of
+   * datasetView. In other cases there is no guarantee that it will work correctly. returns a map
+   * with two entries: "type": "openbistype" "id" : "openbisId"
+   * 
    * @param parameters
    * @return
    */
-  public static Map<String, String> getMap(String parameters){
-    if (parameters == null || parameters.equals("")) return null;
+  public static Map<String, String> getMap(String parameters) {
+    if (parameters == null || parameters.equals(""))
+      return null;
     String[] params = parameters.split("&");
-    //TODO check for length == 2 needed ?
-    //if (params == null || params.length != 2)
+    // TODO check for length == 2 needed ?
+    // if (params == null || params.length != 2)
     if (params == null || params.length > 3)
       return null;
     HashMap<String, String> map = new HashMap<String, String>();
@@ -862,9 +878,7 @@ private ProjectBean projectBean;
         return null;
       map.put(kv[0], kv[1]);
     }
-   return map;
+    return map;
   }
 
 }
-
-
