@@ -246,17 +246,13 @@ public class DatasetComponent extends CustomComponent{
     // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, true, false));
+    buttonLayout.setMargin(new MarginInfo(false, false, true, true));
     buttonLayout.setHeight(null);
     //buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
 
-    this.download.setEnabled(false);
     final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
-    visualize.setEnabled(false);
-    buttonLayout.addComponent(this.download);
-    buttonLayout.addComponent(visualize);
-
+    	
     Button checkAll = new Button("Select all datasets");
     checkAll.addClickListener(new ClickListener() {
 
@@ -281,12 +277,16 @@ public class DatasetComponent extends CustomComponent{
 
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
+    buttonLayout.addComponent(visualize);
+    buttonLayout.addComponent(this.download);
+
+
     /**
      * prepare download.
      */
-    download.setResource(new ExternalResource("javascript:"));
     download.setEnabled(false);
-
+    download.setResource(new ExternalResource("javascript:"));
+    visualize.setEnabled(false);
 
     for (final Object itemId : this.table.getItemIds()) {
       setCheckedBox(itemId, (String) this.table.getItem(itemId).getItemProperty("CODE").getValue());

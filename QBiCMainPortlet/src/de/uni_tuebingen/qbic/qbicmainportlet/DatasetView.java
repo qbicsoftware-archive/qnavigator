@@ -174,12 +174,10 @@ public class DatasetView extends VerticalLayout implements View {
     buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(false);
 
-    this.download.setEnabled(false);
     final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
-    visualize.setEnabled(false);
     buttonLayout.addComponent(this.download);
     buttonLayout.addComponent(visualize);
-
+    
     Button checkAll = new Button("Select all datasets");
     checkAll.addClickListener(new ClickListener() {
 
@@ -209,7 +207,7 @@ public class DatasetView extends VerticalLayout implements View {
      */
     download.setResource(new ExternalResource("javascript:"));
     download.setEnabled(false);
-
+    visualize.setEnabled(false);
 
     for (final Object itemId : this.table.getItemIds()) {
       setCheckedBox(itemId, (String) this.table.getItem(itemId).getItemProperty("CODE").getValue());
