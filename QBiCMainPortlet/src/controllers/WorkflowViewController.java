@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
@@ -27,7 +26,6 @@ import properties.Factor;
 import submitter.SubmitFailedException;
 import submitter.Submitter;
 import submitter.Workflow;
-import submitter.parameters.Parameter;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
@@ -61,6 +59,9 @@ public class WorkflowViewController {
   // used by Microarray QC Workflow. See function mapExperimentalProperties
   private Map<String, String> expProps;
   private Set<String> expFactors;
+  private String projectID;
+  private List<String> fileNames;
+  private List<String> expDesignWfs = new ArrayList<String>(Arrays.asList("Microarray QC"));
 
   private enum workflow_statuses {
     RUNNING
@@ -125,8 +126,11 @@ public class WorkflowViewController {
         container.addBean(bean);
       }
     }
-    if (true) // TODO only do this for some workflows?
-      mapExperimentalProperties(projectID, fileNames);
+    // needed for experimental design mapping
+    this.projectID = projectID;
+    this.fileNames = fileNames;
+    // if (true) //
+    // mapExperimentalProperties(projectID, fileNames);
 
     return container;
   }
@@ -273,7 +277,13 @@ public class WorkflowViewController {
    */
   public BeanItemContainer<Workflow> suitableWorkflows(List<String> fileType) {
     try {
-      return submitter.getAvailableSuitableWorkflows(fileType);
+      BeanItemContainer<Workflow> wfs = submitter.getAvailableSuitableWorkflows(fileType);
+      for (Workflow wf : wfs.getItemIds()) {
+        if (expDesignWfs.contains(wf.getName()))// TODO add other workflows to the list that are
+                                                // needed
+          mapExperimentalProperties(projectID, fileNames);
+      }
+      return wfs;
     } catch (Exception e) {
       // e.printStackTrace();
       LOGGER.debug("No suitable workflows founds.");
@@ -335,7 +345,7 @@ public class WorkflowViewController {
     Parser p = new Parser();
 
     Set<String> secondaryNames = new HashSet<String>();
-    
+
     for (Serializable[] ss : res.getRows()) {
 
       String xml = (String) ss[3];
@@ -346,7 +356,7 @@ public class WorkflowViewController {
           StringBuilder row = new StringBuilder();
           String extID = (String) ss[1];// how to use this if it is preferred over secondary name?
           String secondaryName = (String) ss[2];
-          while(secondaryNames.contains(secondaryName))
+          while (secondaryNames.contains(secondaryName))
             secondaryName += "1";
           secondaryNames.add(secondaryName);
           row.append(secondaryName);
