@@ -368,8 +368,6 @@ public class ProjInformationComponent extends CustomComponent {
     this.download.setEnabled(false);
     final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
     visualize.setEnabled(false);
-    buttonLayout.addComponent(this.download);
-    buttonLayout.addComponent(visualize);
     buttonLayout.setSpacing(true);
 
     Button checkAll = new Button("Select all datasets");
@@ -398,6 +396,11 @@ public class ProjInformationComponent extends CustomComponent {
 
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
+    
+    buttonLayout.addComponent(checkAll);
+    buttonLayout.addComponent(uncheckAll);
+    buttonLayout.addComponent(visualize);
+    buttonLayout.addComponent(this.download);
     /**
      * prepare download.
      */

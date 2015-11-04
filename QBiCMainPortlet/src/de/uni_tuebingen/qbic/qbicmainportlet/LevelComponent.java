@@ -84,7 +84,7 @@ public class LevelComponent extends CustomComponent {
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample", "File Name",
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample", "File Name", "Description",
       "Dataset Type", "Registration Date", "File Size"};
 
   private int numberOfDatasets;
@@ -124,6 +124,7 @@ public class LevelComponent extends CustomComponent {
       datasetContainer.addContainerProperty("Select", CheckBox.class, null);
       datasetContainer.addContainerProperty("Project", String.class, null);
       datasetContainer.addContainerProperty("Sample", String.class, null);
+      datasetContainer.addContainerProperty("Description", String.class, null);
       // datasetContainer.addContainerProperty("Sample Type", String.class, null);
       datasetContainer.addContainerProperty("File Name", String.class, null);
       datasetContainer.addContainerProperty("File Type", String.class, null);
@@ -223,11 +224,6 @@ public class LevelComponent extends CustomComponent {
 
             numberOfDatasets = retrievedDatasets.size();
 
-            descriptionLabel =
-                new Label(
-                    String.format(
-                        "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
-                        numberOfSamples, numberOfDatasets), Label.CONTENT_PREFORMATTED);
 
           }
 
@@ -276,24 +272,22 @@ public class LevelComponent extends CustomComponent {
                 }
               }
             }
-            numberOfSamples = samplesContainer.size();
-            samples = samplesContainer;
-            final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(samples);
-            gpc.removeContainerProperty("id");
-            sampleGrid.setContainerDataSource(gpc);
-            sampleGrid.setColumnReorderingAllowed(true);
-            sampleGrid.setColumnOrder("code", "type", "secondaryName");
-            numberOfSamples = samplesContainer.size();
+            //numberOfSamples = samplesContainer.size();
+            //samples = samplesContainer;
+            //final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(samples);
+            //gpc.removeContainerProperty("id");
+            //sampleGrid.setContainerDataSource(gpc);
+            //sampleGrid.setColumnReorderingAllowed(true);
+            //sampleGrid.setColumnOrder("code", "type", "secondaryName");
+            //numberOfSamples = samplesContainer.size();
 
-            sampleGrid.setCaption("Result Samples");
-            helpers.GridFunctions.addColumnFilters(sampleGrid, gpc);
+            //sampleGrid.setCaption("Result Samples");
+            //helpers.GridFunctions.addColumnFilters(sampleGrid, gpc);
+            sampleGrid.setVisible(false);
             this.datasetTable.setCaption("Result Files");
 
             numberOfDatasets = retrievedDatasets.size();
-
-            descriptionLabel =
-                new Label(String.format("This project contains %s result datasets.",
-                    numberOfDatasets), Label.CONTENT_PREFORMATTED);
+           
           }
           break;
 
@@ -342,8 +336,21 @@ public class LevelComponent extends CustomComponent {
 
           registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts, null);
         }
-      }
+        
+        if (filterFor.equals("measured")) {
+			descriptionLabel = new Label(
+					String.format(
+							"This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
+							numberOfSamples, dsBeans.size()),
+					Label.CONTENT_PREFORMATTED);
+		} else if (filterFor.equals("results")) {
+            descriptionLabel =
+                    new Label(String.format("This project contains %s result datasets.",
+                    		dsBeans.size()), Label.CONTENT_PREFORMATTED);
+		}
 
+      }
+      
       this.setContainerDataSource(datasetContainer);
 
     } catch (Exception e) {
@@ -755,6 +762,13 @@ public class LevelComponent extends CustomComponent {
 
 
       dataset_container.setChildrenAllowed(new_ds, true);
+      
+      String secName = d.getProperties().get("Q_SECONDARY_NAME");
+      // TODO add User here too
+      if (secName != null) {
+        dataset_container.getContainerProperty(new_ds, "Description").setValue(
+            secName);
+      }
 
       dataset_container.getContainerProperty(new_ds, "Select").setValue(new CheckBox());
 
@@ -784,7 +798,13 @@ public class LevelComponent extends CustomComponent {
 
       Object new_file = dataset_container.addItem();
       dataset_container.setChildrenAllowed(new_file, false);
-
+      
+      String secName = d.getProperties().get("Q_SECONDARY_NAME");
+      // TODO add User here too
+      if (secName != null) {
+        dataset_container.getContainerProperty(new_file, "Description").setValue(
+            secName);
+      }
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);

@@ -194,20 +194,27 @@ public class WorkflowView extends VerticalLayout implements View {
         }
 
         for (Iterator i = controller.getcontainer("project", id).getItemIds().iterator(); i
-            .hasNext();) {
-          DatasetBean datasetBean = (DatasetBean) i.next();
-         
-          if (workflowDatasetTypes.contains(datasetBean.getFileType())) {
-        	// only take the file containing the hla typing
-        	if(datasetBean.getFileType().equals("Q_WF_NGS_HLATYPING_RESULTS")) {
-        		if(datasetBean.getFileName().endsWith("alleles")) {
-                    suitableDatasets.addBean(datasetBean);
+        		.hasNext();) {
+        	DatasetBean datasetBean = (DatasetBean) i.next();
+
+        	if (workflowDatasetTypes.contains(datasetBean.getFileType())) {
+        		// only take the file containing the hla typing
+        		if(datasetBean.getFileType().equals("Q_WF_NGS_HLATYPING_RESULTS")) {
+        			if(datasetBean.getFileName().endsWith("alleles")) {
+        				suitableDatasets.addBean(datasetBean);
+        			}
+        		}
+
+        		else if(experiment.equals("Q_WF_NGS_EPITOPE_PREDICTION") & datasetBean.getFileType().equals("Q_NGS_VARIANT_CALLING_DATA")) {
+        			if(datasetBean.getFileName().endsWith("GSvar")) {
+        				suitableDatasets.addBean(datasetBean);
+        			}
+        		}
+        		
+        		else {
+        			suitableDatasets.addBean(datasetBean);
         		}
         	}
-        	else {
-        		suitableDatasets.addBean(datasetBean);
-        	}
-          }
         }
         
         datasetBeans = suitableDatasets;
@@ -246,7 +253,8 @@ public class WorkflowView extends VerticalLayout implements View {
     }
 
     availableWorkflows.setContainerDataSource(filtergpcontainer(suitableWorkflows));
-    availableWorkflows.setColumnOrder("name", "version", "fileTypes");
+   // availableWorkflows.setColumnOrder("name", "version", "fileTypes");
+    availableWorkflows.setColumnOrder("name", "version");
     workflows.setVisible(true);
   }
 
@@ -271,6 +279,7 @@ public class WorkflowView extends VerticalLayout implements View {
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(suitableWorkflows);
 
     gpcontainer.removeContainerProperty("ID");
+    gpcontainer.removeContainerProperty("fileTypes");
     gpcontainer.removeContainerProperty("data");
     gpcontainer.removeContainerProperty("datasetType");
     gpcontainer.removeContainerProperty("nodes");

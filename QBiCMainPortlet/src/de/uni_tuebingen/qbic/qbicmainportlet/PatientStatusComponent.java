@@ -2,6 +2,8 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.apache.logging.log4j.core.Logger;
+
 import model.ExperimentStatusBean;
 import model.ProjectBean;
 import views.WorkflowView;
@@ -77,7 +79,7 @@ public class PatientStatusComponent extends CustomComponent{
   public void updateUI(final ProjectBean currentBean) {
     BeanItemContainer<ExperimentStatusBean> experimentstatusBeans =
         datahandler.computeIvacPatientStatus(currentBean);
-
+    
     int finishedExperiments = 0;
     status.removeAllComponents();
     status.setWidth(100.0f, Unit.PERCENTAGE);

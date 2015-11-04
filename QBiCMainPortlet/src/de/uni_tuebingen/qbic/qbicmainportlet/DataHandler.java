@@ -102,6 +102,7 @@ public class DataHandler implements Serializable {
     if (space_list == null) {
       space_list = this.getOpenBisClient().getFacade().getSpacesWithProjects();
     }
+
     return space_list;
   }
 
@@ -223,17 +224,14 @@ public class DataHandler implements Serializable {
     // Remove empty folders
     List<DatasetBean> level = roots;
     while (!level.isEmpty()) {
-      LOGGER.debug("new level");
       List<DatasetBean> collect = new ArrayList<DatasetBean>();
       List<DatasetBean> toRemove = new ArrayList<DatasetBean>();
       for (DatasetBean b : level) {
-        LOGGER.debug(b.getFileName());
         if (b.hasChildren()) {
           collect.addAll(b.getChildren());
         } else {
           if (b.getFileSize() == 0) {
             toRemove.add(b);
-            LOGGER.debug("removing empty folder " + b.getFileName() + " from view");
           }
         }
       }
@@ -242,13 +240,10 @@ public class DataHandler implements Serializable {
     }
 
     // TODO remove following lines if it works, this is for debug
-    LOGGER.debug("data sets after removal of empty folders:");
     level = roots;
     while (!level.isEmpty()) {
-      LOGGER.debug("new level");
       List<DatasetBean> collect = new ArrayList<DatasetBean>();
       for (DatasetBean b : level) {
-        LOGGER.debug(b.getFileName());
         if (b.hasChildren())
           collect.addAll(b.getChildren());
       }
@@ -389,16 +384,20 @@ public class DataHandler implements Serializable {
       if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
         status = assignedProperties.get("Q_CURRENT_STATUS");
       }
+      
+      else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
+    	  status = assignedProperties.get("Q_WF_STATUS");
+      }
 
-      Image statusColor = new Image(status, this.setExperimentStatusColor(status));
-      statusColor.setWidth("15px");
-      statusColor.setHeight("15px");
-      statusColor.setCaption(status);
+      //Image statusColor = new Image(status, this.setExperimentStatusColor(status));
+      //statusColor.setWidth("15px");
+      //statusColor.setHeight("15px");
+      //statusColor.setCaption(status);
 
       newExperimentBean.setId(experiment.getIdentifier());
       newExperimentBean.setCode(experiment.getCode());
       newExperimentBean.setType(experiment.getExperimentTypeCode());
-      newExperimentBean.setStatus(statusColor);
+      newExperimentBean.setStatus(status);
       newExperimentBean.setRegistrator(experiment.getRegistrationDetails().getUserId());
       newExperimentBean.setRegistrationDate(experiment.getRegistrationDetails()
           .getRegistrationDate());
@@ -448,6 +447,16 @@ public class DataHandler implements Serializable {
       ExperimentBean newExperimentBean = new ExperimentBean();
 
       Map<String, String> assignedProperties = experiment.getProperties();
+      
+      String status = "";
+
+      if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
+        status = assignedProperties.get("Q_CURRENT_STATUS");
+      }
+      
+      else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
+    	  status = assignedProperties.get("Q_WF_STATUS");
+      }
 
 
       newExperimentBean.setId(experiment.getIdentifier());
@@ -457,6 +466,7 @@ public class DataHandler implements Serializable {
       newExperimentBean.setRegistrator(experiment.getRegistrationDetails().getUserId());
       newExperimentBean.setRegistrationDate(experiment.getRegistrationDetails()
           .getRegistrationDate());
+      newExperimentBean.setStatus(status);
       experimentBeans.addBean(newExperimentBean);
     }
 
@@ -547,6 +557,10 @@ public class DataHandler implements Serializable {
     if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
       status = assignedProperties.get("Q_CURRENT_STATUS");
     }
+    
+    else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
+  	  status = assignedProperties.get("Q_WF_STATUS");
+    }
 
     for (PropertyType p : completeProperties) {
 
@@ -568,14 +582,14 @@ public class DataHandler implements Serializable {
         this.getOpenBisClient().getLabelsofProperties(
             this.getOpenBisClient().getExperimentTypeByString(experiment.getExperimentTypeCode()));
 
-    Image statusColor = new Image(status, this.setExperimentStatusColor(status));
-    statusColor.setWidth("15px");
-    statusColor.setHeight("15px");
+    //Image statusColor = new Image(status, this.setExperimentStatusColor(status));
+    //statusColor.setWidth("15px");
+    //statusColor.setHeight("15px");
 
     ebean.setId(experiment.getIdentifier());
     ebean.setCode(experiment.getCode());
     ebean.setType(experiment.getExperimentTypeCode());
-    ebean.setStatus(statusColor);
+    ebean.setStatus(status);
     ebean.setRegistrator(experiment.getRegistrationDetails().getUserId());
     ebean.setRegistrationDate(experiment.getRegistrationDetails().getRegistrationDate());
     ebean.setProperties(properties);
@@ -833,8 +847,13 @@ public class DataHandler implements Serializable {
     Map<String, List<String>> controlledVocabularies = new HashMap<String, List<String>>();
     Map<String, String> properties = new HashMap<String, String>();
 
+
     if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
       status = assignedProperties.get("Q_CURRENT_STATUS");
+    }
+    
+    else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
+  	  status = assignedProperties.get("Q_WF_STATUS");
     }
 
     for (PropertyType p : completeProperties) {
@@ -857,14 +876,14 @@ public class DataHandler implements Serializable {
         this.getOpenBisClient().getLabelsofProperties(
             this.getOpenBisClient().getExperimentTypeByString(experiment.getExperimentTypeCode()));
 
-    Image statusColor = new Image(status, this.setExperimentStatusColor(status));
-    statusColor.setWidth("15px");
-    statusColor.setHeight("15px");
+    //Image statusColor = new Image(status, this.setExperimentStatusColor(status));
+    //statusColor.setWidth("15px");
+    //statusColor.setHeight("15px");
 
     newExperimentBean.setId(experiment.getIdentifier());
     newExperimentBean.setCode(experiment.getCode());
     newExperimentBean.setType(experiment.getExperimentTypeCode());
-    newExperimentBean.setStatus(statusColor);
+    newExperimentBean.setStatus(status);
     newExperimentBean.setRegistrator(experiment.getRegistrationDetails().getUserId());
     newExperimentBean
         .setRegistrationDate(experiment.getRegistrationDetails().getRegistrationDate());
@@ -1477,7 +1496,7 @@ public class DataHandler implements Serializable {
     BeanItemContainer<ExperimentStatusBean> res =
         new BeanItemContainer<ExperimentStatusBean>(ExperimentStatusBean.class);
     BeanItemContainer<ExperimentBean> cont = projectBean.getExperiments();
-
+    
     // TODO set download link and workflow triggering
     // TODO add immune monitoring, report generation, vaccine design
 
@@ -1503,6 +1522,7 @@ public class DataHandler implements Serializable {
 
     for (ExperimentBean bean : cont.getItemIds()) {
       String type = bean.getType();
+      
       Double experimentStatus =
           bean.getProperties().get("Q_CURRENT_STATUS") == null ? 0.0 : helpers.OpenBisFunctions
               .statusToDoubleValue(bean.getProperties().get("Q_CURRENT_STATUS").toString());
@@ -1673,7 +1693,7 @@ public class DataHandler implements Serializable {
 
       // call of ingestion service to register project
       this.getOpenBisClient().triggerIngestionService("register-proj", projectMap);
-      helpers.Utils.printMapContent(projectMap);
+      //helpers.Utils.printMapContent(projectMap);
 
       String newProjectDetailsCode =
           projectPrefix + Utils.createCountString(numberOfProject, 3) + "E_INFO";
@@ -1703,7 +1723,7 @@ public class DataHandler implements Serializable {
 
       this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", firstLevel);
 
-      helpers.Utils.printMapContent(firstLevel);
+      //helpers.Utils.printMapContent(firstLevel);
 
       Map<String, Object> fithLevel = new HashMap<String, Object>();
 
@@ -1776,7 +1796,7 @@ public class DataHandler implements Serializable {
           secondLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
 
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", secondLevel);
-          helpers.Utils.printMapContent(secondLevel);
+          //helpers.Utils.printMapContent(secondLevel);
 
           if (sampleBean.getDnaSeq()) {
             String newSamplePreparationCode = newProjectCode + "E" + numberOfRegisteredExperiments;
@@ -1904,8 +1924,8 @@ public class DataHandler implements Serializable {
           // TODO additional level for HLA typing
 
           // call of ingestion services for differeny levels
-          helpers.Utils.printMapContent(thirdLevel);
-          helpers.Utils.printMapContent(fourthLevel);
+          //helpers.Utils.printMapContent(thirdLevel);
+          //helpers.Utils.printMapContent(fourthLevel);
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", thirdLevel);
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", fourthLevel);
         }

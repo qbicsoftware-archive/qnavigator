@@ -26,7 +26,7 @@ public class TarWriter {
   private final int DEFAULT_BUFFER_SIZE = 32768;
   private int MAX_BUFFER_SIZE = 65536;
   private int BUFFER_SIZE = DEFAULT_BUFFER_SIZE;
-
+  
   // Standard in most modern tar applications
   private final int tar_record_size = 512;
   final int tar_block_size = tar_record_size * 20;
@@ -69,7 +69,7 @@ public class TarWriter {
   public void setOutputStream(OutputStream out) {
     if (tar != null) {
       try {
-        this.tar.close();
+        tar.close();
       } catch (IOException e) {
         LOGGER.error("closing previous stream failed.", e.getCause());
       }
@@ -83,10 +83,12 @@ public class TarWriter {
   /**
    * tries to close the tar stream
    */
-  public void closeStream() {
+  public void closeStream() {	  
     if (tar != null) {
       try {
-        this.tar.close();
+    	tar.flush();
+        //tar.close();
+    	tar.finish();
       } catch (IOException e) {
         LOGGER.error("closing previous stream failed.", e.getCause());
       }
@@ -121,28 +123,28 @@ public class TarWriter {
    * @param fileSize
    */
   public void writeEntry(String entryName, InputStream entry, long fileSize) {
-    // System.out.println(entryName + entry + fileSize);
+    //LOGGER.debug(entryName + " " + entry + " " + fileSize);
     TarEntry tar_entry = new TarEntry(entryName);
     tar_entry.setSize(fileSize);
     tar_entry.getRealSize();
+    long totalWritten = 0;
     try {
       tar.putNextEntry(tar_entry);
-      long totalWritten = 0;
       int bytesRead = 0;
       final byte[] buffer = new byte[BUFFER_SIZE];
       // System.out.println("File: " + entryName + ", Size: " + Long.toString(fileSize));
 
 
       while ((bytesRead = entry.read(buffer)) > 0) {
-        // System.out.println("bytes read: " + Integer.toString(bytesRead) + " buffer.length: " +
-        // Integer.toString(buffer.length));
+        //System.out.println("bytes read: " + Integer.toString(bytesRead) + " buffer.length: " +
+       //Integer.toString(buffer.length));
         tar.write(buffer, 0, bytesRead);
         totalWritten += bytesRead;
-        // System.out.println("totalWritten: " + totalWritten);
-        if (totalWritten >= buffer.length) {
+        
+        //if (totalWritten >= buffer.length) {
           // Avoid chunked encoding for small resources
-          tar.flush();
-        }
+          //tar.flush();
+        //}
       }
       // System.out.println("bytesRead");
       tar.closeEntry();
@@ -161,6 +163,7 @@ public class TarWriter {
       }
 
     }
+    //LOGGER.debug("Total Written: " + totalWritten);
   }
 
   /**

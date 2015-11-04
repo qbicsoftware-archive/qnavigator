@@ -220,7 +220,9 @@ public class WorkflowComponent extends CustomComponent {
     }
 
     availableWorkflows.setContainerDataSource(filtergpcontainer(suitableWorkflows));
-    availableWorkflows.setColumnOrder("name", "version", "fileTypes");
+    //availableWorkflows.setColumnOrder("name", "version", "fileTypes");
+    availableWorkflows.setColumnOrder("name", "version");
+    
     workflows.setVisible(true);
   }
 

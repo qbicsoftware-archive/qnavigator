@@ -212,10 +212,11 @@ public class Utils {
         // Could be extended to an exclusion list if we don't want to show further columns
         if (exklusionList.contains(o.toString())) {
           continue;
-        } else if (o.toString().equals("status")) {
-          Image image = (Image) it.getItemProperty(o).getValue();
-          rowString += image.getCaption() + "\t";
-        } else {
+        } //else if (o.toString().equals("status")) {
+          //Image image = (Image) it.getItemProperty(o).getValue();
+          //rowString += image.getCaption() + "\t";
+       // } 
+      else {
           Property prop = it.getItemProperty(o);
           
           if(prop.getValue() == null) {

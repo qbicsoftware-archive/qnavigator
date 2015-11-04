@@ -22,7 +22,7 @@ public class ExperimentBean implements Serializable {
   private String code;
   private String type;
   private String prettyType;
-  private Image status;
+  private String status;
   private String registrator;
   private Date registrationDate;
   private BeanItemContainer<SampleBean> samples;
@@ -47,7 +47,7 @@ public class ExperimentBean implements Serializable {
 
 
 
-  public ExperimentBean(String id, String code, String type, Image status, String registrator,
+  public ExperimentBean(String id, String code, String type, String status, String registrator,
       Date registrationDate, BeanItemContainer<SampleBean> samples, String lastChangedSample,
       Date lastChangedDataset, Map<String, String> properties,
       Map<String, List<String>> controlledVocabularies, Map<String, String> typeLabels) {
@@ -113,13 +113,13 @@ public class ExperimentBean implements Serializable {
 
 
 
-  public Image getStatus() {
+  public String getStatus() {
     return status;
   }
 
 
 
-  public void setStatus(Image status) {
+  public void setStatus(String status) {
     this.status = status;
   }
 

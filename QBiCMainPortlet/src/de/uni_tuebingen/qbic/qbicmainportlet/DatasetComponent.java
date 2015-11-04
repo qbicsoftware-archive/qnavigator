@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
 
@@ -22,6 +25,7 @@ import logging.Logger;
 import model.DatasetBean;
 
 import org.apache.catalina.util.Base64;
+import org.apache.commons.io.IOUtils;
 import org.tepi.filtertable.FilterTreeTable;
 
 import com.liferay.portal.kernel.util.WebKeys;
@@ -176,6 +180,8 @@ public class DatasetComponent extends CustomComponent{
             List<DatasetBean> dsBeans =
                 datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
             
+            numberOfDatasets = dsBeans.size();
+
             for (DatasetBean d : dsBeans) {
               Date date = d.getRegistrationDate();
               SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -333,6 +339,8 @@ public class DatasetComponent extends CustomComponent{
         } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
             && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
           visualize.setEnabled(true);
+        } else if (datasetType.equals("Q_WF_NGS_EPITOPE_PREDICTION_RESULTS") && fileName.endsWith(".tsv"))  {
+            visualize.setEnabled(true);
         } else {
           visualize.setEnabled(false);
         }
@@ -444,6 +452,33 @@ public class DatasetComponent extends CustomComponent{
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/plain");
             res = streamres;
+          } else if (datasetType.equals("Q_WF_NGS_EPITOPE_PREDICTION_RESULTS")
+                  &&  datasetFileName.endsWith(".tsv")) {
+                QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+                StreamResource streamres = new StreamResource(re, datasetFileName);
+                streamres.setMIMEType("text/plain");
+                res = streamres;
+                
+                StringWriter writer = new StringWriter();
+                try {
+					IOUtils.copy(streamres.getStream().getStream(), writer, "UTF-8");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                String theString = writer.toString();
+                //LOGGER.debug(theString);
+                
+                Scanner scannerTest = new Scanner(streamres.getStream().getStream());
+                scannerTest.useDelimiter(System.getProperty("line.separator"));
+                while(scannerTest.hasNext()){
+                    //parse line to get Emp Object
+                	Scanner scanner = new Scanner(scannerTest.next());
+                    scanner.useDelimiter("\\s*\t\\s*");
+                    LOGGER.debug(scanner.next());
+                }
+                scannerTest.close();
+                
           } else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {

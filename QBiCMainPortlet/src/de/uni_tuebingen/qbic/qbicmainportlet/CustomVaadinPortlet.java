@@ -1,8 +1,11 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -28,14 +31,19 @@ import model.ExperimentBean;
 import model.ProjectBean;
 import model.SampleBean;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
+import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
+import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.vaadin.server.DeploymentConfiguration;
+import com.vaadin.server.Page;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 
 /**
  * 
@@ -148,6 +156,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
         return;
       }
       serveEntries(entry, new TarWriter(), response, openBisClient);
+
     } else {
       response.setContentType("text/javascript");
       response.setProperty(ResourceResponse.HTTP_STATUS_CODE,
@@ -155,6 +164,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
       response.getWriter().append("Please select at least one dataset for download");
       return;
     }
+
   }
 
   /**
@@ -169,43 +179,103 @@ public class CustomVaadinPortlet extends VaadinPortlet {
   private void serveEntries(HashMap<String, SimpleEntry<String, Long>> entries, TarWriter writer,
       ResourceResponse response, OpenBisClient openbisClient) {
 
-    String filename = "qbicdatasets" + ".tar";
+	  if(entries.keySet().size() > 1) {
 
-    response.setContentType(writer.getContentType());
-    StringBuilder sb = new StringBuilder("attachement; filename=\"");
-    sb.append(filename);
-    sb.append("\"");
-    response.setProperty("Content-Disposition", sb.toString());
+		  String timestamp = new SimpleDateFormat("yyyyMMddhhmm").format(new Date());
 
-    long tarFileLength = writer.computeTarLength2(entries);
-    // response.setContentLength((int) tarFileLength);
-    // For some reason setContentLength does not work
-    response.setProperty("Content-Length", String.valueOf(tarFileLength));
-    try {
-      writer.setOutputStream(response.getPortletOutputStream());
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+		  String filename = "qbicdatasets" + timestamp + ".tar";
+
+		  response.setContentType(writer.getContentType());
+		  StringBuilder sb = new StringBuilder("attachement; filename=\"");
+		  sb.append(filename);
+		  sb.append("\"");
+		  response.setProperty("Content-Disposition", sb.toString());
+
+		  long tarFileLength = writer.computeTarLength2(entries);
+		  
+		  // For some reason setContentLength does not work
+		  //response.setProperty("Content-Length", String.valueOf(tarFileLength));
+		  
+		  // Seems to work with Liferay 6.2, when using setProperty some tarred files are corrupt, unexpected end of file
+		  // Didn't work with Liferay 6.2 either
+		  // However deactivating GzipFilter by setting com.liferay.portal.servlet.filters.gzip.GZipFilter=false seems to fix it
+		  // Probably the Content Length can't be set in the header of this Filter
+		  response.setContentLength((int) tarFileLength);
 
 
-    Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
-    Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
-    while (it.hasNext()) {
-      Entry<String, SimpleEntry<String, Long>> entry = it.next();
-      String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
-      String[] splittedFilePath = entryKey.split("/");
+		  try {	
+			  writer.setOutputStream(response.getPortletOutputStream());
 
-      if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
-        writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(),
-            openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
-      } else {
-        writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(), openbisClient
-            .getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
-      }
-    }
-    writer.closeStream();
+		  } catch (IOException e) {
+			  // TODO Auto-generated catch block
+			  e.printStackTrace();
+		  }
 
+		  Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+		  Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+		  while (it.hasNext()) {
+			  Entry<String, SimpleEntry<String, Long>> entry = it.next();
+			  String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+			  String[] splittedFilePath = entryKey.split("/");
+
+			  if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+				  //writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(),
+				  writer.writeEntry(entry.getKey(),
+						  openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
+			  } else {
+				  //writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(), openbisClient
+				  writer.writeEntry(splittedFilePath[splittedFilePath.length-1], openbisClient
+						  .getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
+			  }
+		  }
+		  
+		  //new Notification("Download of tar-archive", "You are downloading datasets compressed as tar-archive. If you need instructions how to unpack the file please follow the instructions on " , Type.TRAY_NOTIFICATION, true)
+	      //        .show(Page.getCurrent());
+		  writer.closeStream();
+		  
+	  } else {
+		  Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries
+				  .entrySet();
+		  Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet
+				  .iterator();
+
+		  //response.setContentType(writer.getContentType());
+
+		  while (it.hasNext()) {
+			  Entry<String, SimpleEntry<String, Long>> entry = it.next();
+			  String entryKey = entry.getKey().replaceFirst(
+					  entry.getValue().getKey() + "/", "");
+			  String[] splittedFilePath = entryKey.split("/");
+
+			  InputStream datasetStream = openbisClient.getDatasetStream(
+					  entry.getValue().getKey(), entryKey);
+
+			  StringBuilder sb = new StringBuilder("attachement; filename=\"");
+			  sb.append(splittedFilePath[splittedFilePath.length - 1]);
+			  sb.append("\"");
+			  response.setProperty("Content-Disposition", sb.toString());
+			  response.setProperty("Content-Type", getPortletContext().getMimeType((splittedFilePath[splittedFilePath.length - 1])));
+			  Integer fileSize = (int) (long) entry.getValue().getValue();
+	 
+			  //response.setProperty("Content-Length", String.valueOf(fileSize));
+
+			  response.setContentLength(fileSize);
+			  
+			  byte[] buffer = new byte[32768];
+			  int bytesRead;
+			  try {
+				  while ((bytesRead = datasetStream.read(buffer)) != -1) {
+					  response.getPortletOutputStream().write(buffer, 0,
+							  bytesRead);
+				  }
+
+			  } catch (IOException e) {
+				  // TODO Auto-generated catch block
+				  e.printStackTrace();
+			  }
+			  
+		  }
+	  }
   }
 
   void serveProject2(ProjectBean bean, TarWriter writer, ResourceResponse response,

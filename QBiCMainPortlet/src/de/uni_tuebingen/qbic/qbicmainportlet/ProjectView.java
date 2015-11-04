@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import model.ExperimentBean;
 import model.ProjectBean;
 
 import org.tepi.filtertable.FilterTable;
@@ -696,6 +697,13 @@ private ProjInformationComponent projectInformation;
   public void setContainerDataSource(ProjectBean projectBean) {
     this.currentBean = projectBean;
     this.table.setContainerDataSource(projectBean.getExperiments());
+    
+    for (Iterator i = table.getItemIds().iterator(); i.hasNext();) {
+    	// Get the current item identifier, which is an integer.
+        ExperimentBean item = (ExperimentBean) i.next();
+        
+    	LOGGER.debug("Status " + item.getStatus());
+    }
     table.setVisibleColumns(new Object[] {"code", "type", "registrationDate", "registrator",
         "status"});
     
