@@ -79,6 +79,7 @@ public class WorkflowComponent extends CustomComponent {
   public WorkflowComponent(WorkflowViewController controller) {
     this.controller = controller;
     this.setCaption("Workflows");
+    LOGGER.debug("new wf component");
     init();
   }
 
@@ -144,8 +145,6 @@ public class WorkflowComponent extends CustomComponent {
 
     switch (type) {
       case "project":
-        LOGGER.debug(type);
-        LOGGER.debug(id);
         datasetBeans = controller.getcontainer(type, id);
         List<String> datasetTypesInProject = new ArrayList<String>();
 
@@ -215,6 +214,8 @@ public class WorkflowComponent extends CustomComponent {
    * @param suitableWorkflows
    */
   void updateSelection(BeanItemContainer<Workflow> suitableWorkflows) {
+    this.submission.setCaption("");
+    this.submission.removeAllComponents();
     if (!(suitableWorkflows.size() > 0)) {
       showNotification("No suitable workflows found. Pleace contact your project manager.");
     }
@@ -373,7 +374,7 @@ public class WorkflowComponent extends CustomComponent {
    * 
    */
   private class MicroarrayQCSubmissionListener implements ClickListener {
-    private static final long serialVersionUID = 243869502031843198L;
+    private static final long serialVersionUID = 24386950203184318L;
     private MicroarrayQCComponent comp;
 
     public MicroarrayQCSubmissionListener(MicroarrayQCComponent comp) {
