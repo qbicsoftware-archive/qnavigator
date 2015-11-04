@@ -77,12 +77,12 @@ public class PatientView extends VerticalLayout implements View {
   /**
 	 * 
 	 */
-	private static final long serialVersionUID = 2177082328716962295L;
+  private static final long serialVersionUID = 2177082328716962295L;
 
-public final static String navigateToLabel = "ivacproject";
+  public final static String navigateToLabel = "ivacproject";
 
   private ProjectBean currentBean;
-  
+
   FilterTable registeredExperiments;
 
   VerticalLayout patientViewContent;
@@ -94,7 +94,7 @@ public final static String navigateToLabel = "ivacproject";
   private Label contact;
 
   private Label descContent;
-  
+
   private Button export;
 
   private Label patientInformation;
@@ -105,7 +105,7 @@ public final static String navigateToLabel = "ivacproject";
 
   private VerticalLayout buttonLayoutSection;
   private VerticalLayout graphSectionContent;
-  
+
   private TreeMap<String, String> members;
   private HashMap<String, String> memberLetters;
 
@@ -145,17 +145,18 @@ public final static String navigateToLabel = "ivacproject";
 
   private WorkflowComponent workflowComponent;
 
-private ConfigurationManager manager;
+  private ConfigurationManager manager;
 
-private UploadComponent uploadComponent;
+  private UploadComponent uploadComponent;
 
-private ProjInformationComponent projectInformation;
+  private ProjInformationComponent projectInformation;
 
   private static Logger LOGGER = new Log4j2Logger(PatientView.class);
 
 
 
-  public PatientView(DataHandler datahandler, State state, String resourceurl, WorkflowViewController wfController, ConfigurationManager manager) {
+  public PatientView(DataHandler datahandler, State state, String resourceurl,
+      WorkflowViewController wfController, ConfigurationManager manager) {
     this(datahandler, state, wfController);
     this.resourceUrl = resourceurl;
     this.manager = manager;
@@ -177,22 +178,21 @@ private ProjInformationComponent projectInformation;
    */
   public void setContainerDataSource(ProjectBean projectBean) {
     this.currentBean = projectBean;
-    
+
     registeredExperiments.setContainerDataSource(projectBean.getExperiments());
-    registeredExperiments.setVisibleColumns(new Object[] {"code", "type", "registrationDate", "registrator",
-       "status"});
-    
+    registeredExperiments.setVisibleColumns(new Object[] {"code", "type", "registrationDate",
+        "registrator", "status"});
+
     int rowNumber = projectBean.getExperiments().size();
-        
+
     if (rowNumber == 0) {
       registeredExperiments.setVisible(false);
-    }
-    else {
+    } else {
       registeredExperiments.setVisible(true);
       registeredExperiments.setPageLength(Math.min(rowNumber, 10));
     }
   }
-  
+
 
   /**
    * updates view, if height, width or the browser changes.
@@ -213,19 +213,21 @@ private ProjInformationComponent projectInformation;
   void initView() {
     patientViewContent = new VerticalLayout();
     patientViewContent.setMargin(new MarginInfo(true, true, false, false));
-    //patientViewContent.setMargin(true);
-    	
+    // patientViewContent.setMargin(true);
+
     headerLabel = "";
-    
+
     patientViewTab = new TabSheet();
     patientViewTab.setHeight("100%");
     patientViewTab.setWidth("100%");
 
-    
+
     datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
-    biologicalSamplesComponent = new BiologicalSamplesComponent(datahandler, state, resourceUrl, "Biological Samples");
-    measuredSamplesComponent = new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
-    resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results"); 
+    biologicalSamplesComponent =
+        new BiologicalSamplesComponent(datahandler, state, resourceUrl, "Biological Samples");
+    measuredSamplesComponent =
+        new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
+    resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
     statusComponent = new PatientStatusComponent(datahandler, state, resourceUrl);
     workflowComponent = new WorkflowComponent(wfController);
     uploadComponent = new UploadComponent();
@@ -234,8 +236,8 @@ private ProjInformationComponent projectInformation;
     patientViewTab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     patientViewTab.addStyleName(ValoTheme.TABSHEET_FRAMED);
     patientViewTab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
-    
-    //patientViewTab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+
+    // patientViewTab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     patientViewTab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
     patientViewTab.addTab(statusComponent).setIcon(FontAwesome.CHECK_CIRCLE);
     patientViewTab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
@@ -249,43 +251,37 @@ private ProjInformationComponent projectInformation;
     patientViewTab.addTab(workflowComponent).setIcon(FontAwesome.COGS);
     patientViewTab.addTab(uploadComponent).setIcon(FontAwesome.UPLOAD);
 
-    
+
     patientViewTab.setImmediate(true);
 
-    
+
     patientViewTab.addSelectedTabChangeListener(new SelectedTabChangeListener() {
-      
+
       @Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
         if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
           loadGraph();
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
           datasetComponent.updateUI("project", getCurrentBean().getId());
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Measured Samples")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Measured Samples")) {
           measuredSamplesComponent.updateUI("project", getCurrentBean().getId(), "measured");
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Biological Samples")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Biological Samples")) {
           biologicalSamplesComponent.updateUI(getCurrentBean().getId());
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Results")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Results")) {
           resultsComponent.updateUI("project", getCurrentBean().getId(), "results");
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Status")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Status")) {
           statusComponent.updateUI(getCurrentBean());
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Workflows")) {
-          Map<String,String> args = new HashMap<String,String>();
-          args.put("id",getCurrentBean().getId());
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Workflows")) {
+          Map<String, String> args = new HashMap<String, String>();
+          args.put("id", getCurrentBean().getId());
           args.put("type", "project");
           workflowComponent.update(args);
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
-            uploadComponent.updateUI(manager, getCurrentBean().getCode());
-          }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("")) {
-        	projectInformation.updateUI(getCurrentBean(), "patient");
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
+          //(get space from currentBean)
+          uploadComponent.updateUI(manager, getCurrentBean().getCode(), currentBean.getId().split("/")[1], datahandler
+              .getOpenBisClient());
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("")) {
+          projectInformation.updateUI(getCurrentBean(), "patient");
         }
       }
     });
@@ -300,26 +296,26 @@ private ProjInformationComponent projectInformation;
   public void updateContent() {
     setHeaderLabel("Patient " + getCurrentBean().getCode());
 
-    //updateContentToolBar();
+    // updateContentToolBar();
     long startTime = System.nanoTime();
     updateHLALayout();
     long endTime = System.nanoTime();
     LOGGER.info(String.format("updateHLALayout took %f s", ((endTime - startTime) / 1000000000.0)));
 
     startTime = System.nanoTime();
-    //updateContentDescription();
+    // updateContentDescription();
     endTime = System.nanoTime();
     LOGGER.info(String.format("updateContentDescription took %f s",
         ((endTime - startTime) / 1000000000.0)));
 
     startTime = System.nanoTime();
-    //updateProjectStatus();
+    // updateProjectStatus();
     statusComponent.updateUI(this.currentBean);
     endTime = System.nanoTime();
     LOGGER.info(String.format("updateProjectStatus took %f s",
         ((endTime - startTime) / 1000000000.0)));
     updateContentMemberSection();
-    
+
     projectInformation.updateUI(getCurrentBean(), "patient");
   }
 
@@ -331,10 +327,10 @@ private ProjInformationComponent projectInformation;
   VerticalLayout initDescription() {
     VerticalLayout projDescription = new VerticalLayout();
     VerticalLayout projDescriptionContent = new VerticalLayout();
-    
+
     projDescription.setCaption("");
     projDescription.setIcon(FontAwesome.FILE_TEXT_O);
-    
+
     descContent = new Label("");
     contact = new Label("", ContentMode.HTML);
 
@@ -355,7 +351,7 @@ private ProjInformationComponent projectInformation;
     projDescription.setMargin(new MarginInfo(true, false, true, true));
     projDescription.setSpacing(true);
     projDescription.setWidth("100%");
-    
+
     return projDescription;
   }
 
@@ -371,18 +367,22 @@ private ProjInformationComponent projectInformation;
     }
     String patientInfo = "";
     Boolean available = false;
-    
+
     SearchCriteria sampleSc = new SearchCriteria();
-    sampleSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, "Q_BIOLOGICAL_ENTITY"));
+    sampleSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        "Q_BIOLOGICAL_ENTITY"));
     SearchCriteria projectSc = new SearchCriteria();
-    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
+    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
+        currentBean.getCode()));
     sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
-    
+
     SearchCriteria experimentSc = new SearchCriteria();
-    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name()));
+    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name()));
     sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
-    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.getOpenBisClient().getFacade().searchForSamples(sampleSc);
-    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample: samples){
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples =
+        datahandler.getOpenBisClient().getFacade().searchForSamples(sampleSc);
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples) {
       if (sample.getProperties().get("Q_ADDITIONAL_INFO") != null) {
         available = true;
         String[] splitted = sample.getProperties().get("Q_ADDITIONAL_INFO").split(";");
@@ -392,74 +392,68 @@ private ProjInformationComponent projectInformation;
         }
       }
     }
-    
-   
+
+
     /*
-    for (Iterator<ExperimentBean> i = currentBean.getExperiments().getItemIds().iterator(); i
-        .hasNext();) {
-      // Get the current item identifier, which is an integer.
-      ExperimentBean expBean = i.next();
-
-      if (expBean.getType().equalsIgnoreCase(model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name())) {
-        for (Iterator<SampleBean> ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
-          SampleBean sampBean = ii.next();
-          if (sampBean.getType().equals("Q_BIOLOGICAL_ENTITY")) {
-            if (sampBean.getProperties().get("Q_ADDITIONAL_INFO") != null) {
-              available = true;
-              String[] splitted = sampBean.getProperties().get("Q_ADDITIONAL_INFO").split(";");
-              for (String s : splitted) {
-                String[] splitted2 = s.split(":");
-                patientInfo += String.format("<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
-
-              }
-            }
-          }
-        }
-      }
-    }*/
+     * for (Iterator<ExperimentBean> i = currentBean.getExperiments().getItemIds().iterator(); i
+     * .hasNext();) { // Get the current item identifier, which is an integer. ExperimentBean
+     * expBean = i.next();
+     * 
+     * if (expBean.getType().equalsIgnoreCase(model.ExperimentType.Q_EXPERIMENTAL_DESIGN.name())) {
+     * for (Iterator<SampleBean> ii = expBean.getSamples().getItemIds().iterator(); ii.hasNext();) {
+     * SampleBean sampBean = ii.next(); if (sampBean.getType().equals("Q_BIOLOGICAL_ENTITY")) { if
+     * (sampBean.getProperties().get("Q_ADDITIONAL_INFO") != null) { available = true; String[]
+     * splitted = sampBean.getProperties().get("Q_ADDITIONAL_INFO").split(";"); for (String s :
+     * splitted) { String[] splitted2 = s.split(":"); patientInfo +=
+     * String.format("<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
+     * 
+     * } } } } } }
+     */
     if (available) {
       patientInformation.setValue(patientInfo);
-    }
-    else {
+    } else {
       patientInformation.setValue("No patient information provided.");
     }
-    
-   // membersSection.removeAllComponents();
-   // membersSection.addComponent(getMembersComponent());
+
+    // membersSection.removeAllComponents();
+    // membersSection.addComponent(getMembersComponent());
   }
-  
-  
+
+
   VerticalLayout initMemberSection() {
     VerticalLayout projMembers = new VerticalLayout();
     projMembers.setCaption("Members");
-    
+
     membersSection = new VerticalLayout();
     Component membersContent = new VerticalLayout();
 
-    //membersContent.setIcon(FontAwesome.USERS);
-    //membersContent.setCaption("Members");
+    // membersContent.setIcon(FontAwesome.USERS);
+    // membersContent.setCaption("Members");
     membersSection.addComponent(membersContent);
-    //membersSection.setMargin(new MarginInfo(false, false, false, true));
+    // membersSection.setMargin(new MarginInfo(false, false, false, true));
     membersSection.setWidth("100%");
     membersSection.setSpacing(true);
-    
+
     membersSection.setMargin(new MarginInfo(true, false, true, true));
     projMembers.addComponent(membersSection);
-    
+
     projMembers.setMargin(new MarginInfo(true, false, true, true));
     projMembers.setWidth("100%");
     projMembers.setSpacing(true);
-    
-    return projMembers; 
+
+    return projMembers;
   }
-  
+
   void updateContentMemberSection() {
     membersSection.removeAllComponents();
-    
+
     Component memberComponent = getMembersComponent();
-    
-    membersSection.addComponent(new Label("The following people are members of this project. If you would like to contact them, click on their name.", Label.CONTENT_PREFORMATTED));
-    
+
+    membersSection
+        .addComponent(new Label(
+            "The following people are members of this project. If you would like to contact them, click on their name.",
+            Label.CONTENT_PREFORMATTED));
+
     membersSection.addComponent(memberComponent);
     membersSection.setComponentAlignment(memberComponent, Alignment.MIDDLE_CENTER);
   }
@@ -472,7 +466,7 @@ private ProjInformationComponent projectInformation;
   VerticalLayout initHLALayout() {
     VerticalLayout hlaTyping = new VerticalLayout();
     VerticalLayout hlaTypingContent = new VerticalLayout();
-    
+
     hlaTyping.setCaption("HLA Typing");
 
     // String desc = currentBean.getDescription();
@@ -484,8 +478,8 @@ private ProjInformationComponent projectInformation;
 
     hlaTypingContent.setMargin(new MarginInfo(true, false, true, true));
     hlaTypingContent.setSpacing(true);
-    //hlaTypingContent.setCaption("HLA Typing");
-    //hlaTypingContent.setIcon(FontAwesome.BARCODE);
+    // hlaTypingContent.setCaption("HLA Typing");
+    // hlaTypingContent.setIcon(FontAwesome.BARCODE);
     hlaTypingContent.addComponent(hlaTypeLabel);
 
     hlaTyping.addComponent(hlaTypingContent);
@@ -501,41 +495,51 @@ private ProjInformationComponent projectInformation;
     String labelContent = "<head> <title></title> </head> <body> ";
 
     Boolean available = false;
-    
+
     SearchCriteria sc = new SearchCriteria();
-    sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, model.ExperimentType.Q_NGS_HLATYPING.name()));
+    sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_NGS_HLATYPING.name()));
     SearchCriteria projectSc = new SearchCriteria();
-    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
+    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
+        currentBean.getCode()));
     sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
-    
+
     SearchCriteria experimentSc = new SearchCriteria();
-    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_NGS_HLATYPING.name()));
+    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_NGS_HLATYPING.name()));
     sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
-    
-    
-    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples = datahandler.getOpenBisClient().getFacade().searchForSamples(sc);
-    
+
+
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples =
+        datahandler.getOpenBisClient().getFacade().searchForSamples(sc);
+
     SearchCriteria sc2 = new SearchCriteria();
-    sc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
+    sc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
     SearchCriteria projectSc2 = new SearchCriteria();
-    projectSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
+    projectSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
+        currentBean.getCode()));
     sc2.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc2));
-    
+
     SearchCriteria experimentSc2 = new SearchCriteria();
-    experimentSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,  model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
+    experimentSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
     sc2.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc2));
-    
-    List<Experiment> wfExperiments = datahandler.getOpenBisClient().getFacade().searchForExperiments(sc2);
-    
-    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> wfSamples = new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample>();
-    
-    for(Experiment exp: wfExperiments) {
-    	if(exp.getCode().contains(currentBean.getCode())) {
-    	wfSamples.addAll(datahandler.getOpenBisClient().getSamplesofExperiment(exp.getIdentifier()));
-    	}
+
+    List<Experiment> wfExperiments =
+        datahandler.getOpenBisClient().getFacade().searchForExperiments(sc2);
+
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> wfSamples =
+        new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample>();
+
+    for (Experiment exp : wfExperiments) {
+      if (exp.getCode().contains(currentBean.getCode())) {
+        wfSamples
+            .addAll(datahandler.getOpenBisClient().getSamplesofExperiment(exp.getIdentifier()));
+      }
     }
-    
-    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples){
+
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples) {
       available = true;
       String classString = sample.getProperties().get("Q_HLA_CLASS");
       String[] splitted = classString.split("_");
@@ -545,42 +549,43 @@ private ProjInformationComponent projectInformation;
       if (!(sample.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
         addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
       }
-      
+
       if (!(sample.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
         addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
       }
 
       labelContent +=
-          String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ",
-              lastOne, sample.getProperties().get("Q_HLA_TYPING"), addInformation);      
+          String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ", lastOne,
+              sample.getProperties().get("Q_HLA_TYPING"), addInformation);
     }
-    
-    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : wfSamples){
+
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : wfSamples) {
       available = true;
       labelContent +=
-          String.format("<u>Computational Typing (OptiType)</u>" + "<p> %s </p> ", sample.getProperties().get("Q_HLA_TYPING"));      
+          String.format("<u>Computational Typing (OptiType)</u>" + "<p> %s </p> ", sample
+              .getProperties().get("Q_HLA_TYPING"));
     }
-    
+
     labelContent += "</body>";
     if (available) {
       hlaTypeLabel.setValue(labelContent);
     }
-    
+
     else {
       hlaTypeLabel.setValue("Not available.");
     }
   }
-  
+
   VerticalLayout initTable() {
     registeredExperiments = this.buildFilterTable();
     this.tableClickChangeTreeView();
     VerticalLayout tableSection = new VerticalLayout();
     VerticalLayout tableSectionContent = new VerticalLayout();
-    
+
     tableSection.setCaption("Experiments");
 
-    //tableSectionContent.setCaption("Registered Experiments");
-    //tableSectionContent.setIcon(FontAwesome.FLASK);
+    // tableSectionContent.setCaption("Registered Experiments");
+    // tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(registeredExperiments);
 
     tableSectionContent.setMargin(new MarginInfo(true, false, false, true));
@@ -590,7 +595,7 @@ private ProjInformationComponent projectInformation;
     tableSectionContent.setWidth("100%");
 
     tableSection.addComponent(tableSectionContent);
-    
+
     this.export = new Button("Export as TSV");
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -631,7 +636,7 @@ private ProjInformationComponent projectInformation;
     toolbar.setWorkflow(containsData);
     toolbar.update("project", currentBean.getId());
   }
- 
+
 
   class MemberWorker extends Thread {
 
@@ -650,12 +655,14 @@ private ProjInformationComponent projectInformation;
             "liferay error, could not retrieve companyId. Trying default companyId, which is "
                 + companyId, e.getStackTrace());
       }
-      Set<String> list = datahandler.removeQBiCStaffFromMemberSet(datahandler.getOpenBisClient().getSpaceMembers(currentBean.getId().split("/")[1]));
+      Set<String> list =
+          datahandler.removeQBiCStaffFromMemberSet(datahandler.getOpenBisClient().getSpaceMembers(
+              currentBean.getId().split("/")[1]));
       members = new TreeMap<String, String>();
       memberLetters = new HashMap<String, String>();
-      
+
       LOGGER.debug(list.toString());
-      
+
       if (list != null) {
         memberString = new StringBuilder();
         for (String member : list) {
@@ -666,12 +673,12 @@ private ProjInformationComponent projectInformation;
           }
 
           if (memberString.length() > 0) {
-            //memberString.append(" , ");
+            // memberString.append(" , ");
           }
 
           if (user == null) {
             LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
-            //memberString.append(member);
+            // memberString.append(member);
             members.put(member, member);
             // membersLayout.addComponent(new Label(member));
           } else {
@@ -679,21 +686,23 @@ private ProjInformationComponent projectInformation;
             String lastName = user.getLastName();
 
             String email = user.getEmailAddress();
-           
-            String userString = "<a href=\"mailto:" + email + "\" style=\"color: #0068AA; text-decoration: none\">" + lastName + ", " + firstName + "</a>";
-            if(user.getLastName().length() > 0) {
+
+            String userString =
+                "<a href=\"mailto:" + email + "\" style=\"color: #0068AA; text-decoration: none\">"
+                    + lastName + ", " + firstName + "</a>";
+            if (user.getLastName().length() > 0) {
               members.put(user.getLastName(), userString);
             }
-            
+
             else {
               members.put(user.getFirstName(), userString);
             }
-            
-            //memberString.append("<a href=\"mailto:");
-            //memberString.append(email);
-            //memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
-            //memberString.append(fullname);
-            //memberString.append("</a>");
+
+            // memberString.append("<a href=\"mailto:");
+            // memberString.append(email);
+            // memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
+            // memberString.append(fullname);
+            // memberString.append("</a>");
           }
         }
         synchronized (UI.getCurrent()) {
@@ -710,74 +719,74 @@ private ProjInformationComponent projectInformation;
    */
   private Component getMembersComponent() {
     membersLayout = new HorizontalLayout();
-    //membersLayout.setIcon(FontAwesome.USERS);
-    //membersLayout.setCaption("Members");
+    // membersLayout.setIcon(FontAwesome.USERS);
+    // membersLayout.setCaption("Members");
     membersLayout.setWidth("100%");
 
 
-    //final Button loadMembers = new Button("[+]");
-    //membersLayout.addComponent(loadMembers);
-    //loadMembers.setStyleName(ValoTheme.BUTTON_LINK);
-    //loadMembers.addClickListener(new ClickListener() {
+    // final Button loadMembers = new Button("[+]");
+    // membersLayout.addComponent(loadMembers);
+    // loadMembers.setStyleName(ValoTheme.BUTTON_LINK);
+    // loadMembers.addClickListener(new ClickListener() {
 
-      //@Override
-      //public void buttonClick(ClickEvent event) {
-        ProgressBar progress = new ProgressBar();
-        progress.setIndeterminate(true);
-        Label info =
-            new Label(
-                "Searching for members. Can take several seconds on big projects. Please be patient.");
-        info.setStyleName(ValoTheme.LABEL_SUCCESS);
-       // membersLayout.addComponent(info);
-        membersLayout.addComponent(progress);
-        MemberWorker worker = new MemberWorker();
-        worker.start();
-        UI.getCurrent().setPollInterval(500);
-       // loadMembers.setEnabled(false);
-        
-        return membersLayout;
+    // @Override
+    // public void buttonClick(ClickEvent event) {
+    ProgressBar progress = new ProgressBar();
+    progress.setIndeterminate(true);
+    Label info =
+        new Label(
+            "Searching for members. Can take several seconds on big projects. Please be patient.");
+    info.setStyleName(ValoTheme.LABEL_SUCCESS);
+    // membersLayout.addComponent(info);
+    membersLayout.addComponent(progress);
+    MemberWorker worker = new MemberWorker();
+    worker.start();
+    UI.getCurrent().setPollInterval(500);
+    // loadMembers.setEnabled(false);
+
+    return membersLayout;
   }
 
 
-      public void processedMember() {
-        String memberString = "";
-        Label label;
-        
-        if(members.size() < 1) {
-          label = new Label("No Members found.");
-        }
-        else {
-          for(Entry<String, String> entry: members.entrySet()) {
-            String firstLetter = String.valueOf(entry.getKey().charAt(0));
-            
-            if(!memberLetters.containsKey(firstLetter)) {
-              memberString += String.format("<font size='16'><b>%s</b></font><br>", firstLetter.toUpperCase());
-              memberLetters.put(firstLetter, "");
-              }
-            
-            memberString += String.format("%s<br>", entry.getValue());
-          }
-          label = new Label(memberString, ContentMode.HTML);
-        }
-        
-        //if (memberString == null || memberString.length() == 0) {
-        //  label = new Label("no members found.");
-        //} else {
-        //  label = new Label(memberString.toString(), ContentMode.HTML);
-        //}
-        
-        membersLayout.removeAllComponents();
-        membersLayout.addComponent(label);
-        membersLayout.setSpacing(true);
-        membersLayout.setMargin(new MarginInfo(false, false, true, true));
+  public void processedMember() {
+    String memberString = "";
+    Label label;
 
+    if (members.size() < 1) {
+      label = new Label("No Members found.");
+    } else {
+      for (Entry<String, String> entry : members.entrySet()) {
+        String firstLetter = String.valueOf(entry.getKey().charAt(0));
 
-        UI.getCurrent().setPollInterval(-1);
-        //loadMembers.setVisible(false);
+        if (!memberLetters.containsKey(firstLetter)) {
+          memberString +=
+              String.format("<font size='16'><b>%s</b></font><br>", firstLetter.toUpperCase());
+          memberLetters.put(firstLetter, "");
+        }
+
+        memberString += String.format("%s<br>", entry.getValue());
       }
+      label = new Label(memberString, ContentMode.HTML);
+    }
 
-      
-      //OLD 
+    // if (memberString == null || memberString.length() == 0) {
+    // label = new Label("no members found.");
+    // } else {
+    // label = new Label(memberString.toString(), ContentMode.HTML);
+    // }
+
+    membersLayout.removeAllComponents();
+    membersLayout.addComponent(label);
+    membersLayout.setSpacing(true);
+    membersLayout.setMargin(new MarginInfo(false, false, true, true));
+
+
+    UI.getCurrent().setPollInterval(-1);
+    // loadMembers.setVisible(false);
+  }
+
+
+  // OLD
   void updateProjectStatus() {
 
     BeanItemContainer<ExperimentStatusBean> experimentstatusBeans =
@@ -819,12 +828,12 @@ private ProjInformationComponent projectInformation;
     gpc.removeContainerProperty("identifier");
 
     experiments.setContainerDataSource(gpc);
-    //experiments.setHeaderVisible(false);
+    // experiments.setHeaderVisible(false);
     experiments.setHeightMode(HeightMode.ROW);
     experiments.setHeightByRows(gpc.size());
     experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.6f, Unit.PIXELS);
-    
-    
+
+
 
     experiments.getColumn("status").setRenderer(new ProgressBarRenderer());
     experiments.setColumnOrder("started", "code", "description", "status", "download",
@@ -839,12 +848,11 @@ private ProjInformationComponent projectInformation;
           new Notification("Download of Barcodes not available.",
               "<br/>Please create barcodes by clicking 'Run'.", Type.WARNING_MESSAGE, true)
               .show(Page.getCurrent());
-        }else if(esb.getIdentifier() == null || esb.getIdentifier().isEmpty()){
+        } else if (esb.getIdentifier() == null || esb.getIdentifier().isEmpty()) {
           new Notification("No data available for download.",
               "<br/>Please do the analysis by clicking 'Run' first.", Type.WARNING_MESSAGE, true)
               .show(Page.getCurrent());
-        }
-        else {
+        } else {
           ArrayList<String> message = new ArrayList<String>();
           message.add("clicked");
           StringBuilder sb = new StringBuilder("type=");
@@ -857,12 +865,12 @@ private ProjInformationComponent projectInformation;
           message.add(DatasetView.navigateToLabel);
           state.notifyObservers(message);
         }
-        
+
       }
 
     });
-    
-    
+
+
     experiments.getColumn("download").setRenderer(downloadRenderer);
 
     experiments.getColumn("runWorkflow").setRenderer(
@@ -878,8 +886,7 @@ private ProjInformationComponent projectInformation;
               message.add(currentBean.getId());
               message.add(BarcodeView.navigateToLabel);
               state.notifyObservers(message);
-            }
-            else {
+            } else {
               ArrayList<String> message = new ArrayList<String>();
               message.add("clicked");
               StringBuilder sb = new StringBuilder("type=");
@@ -927,7 +934,7 @@ private ProjInformationComponent projectInformation;
 
       finishedExperiments += statusBean.getStatus();
 
-      //statusBean.setDownload("Download");
+      // statusBean.setDownload("Download");
       statusBean.setWorkflow("Run");
 
       /*
@@ -962,11 +969,11 @@ private ProjInformationComponent projectInformation;
   public VerticalLayout initProjectStatus() {
     status = new VerticalLayout();
     status.setWidth(100.0f, Unit.PERCENTAGE);
-    
+
     status.setMargin(new MarginInfo(true, false, true, true));
     status.setSpacing(true);
-    //status.setCaption("Project Status");
-    //status.setIcon(FontAwesome.CHECK_SQUARE);
+    // status.setCaption("Project Status");
+    // status.setIcon(FontAwesome.CHECK_SQUARE);
     status.setSizeFull();
 
     VerticalLayout projectStatus = new VerticalLayout();
@@ -990,9 +997,9 @@ private ProjInformationComponent projectInformation;
 
   void resetGraph() {
     graphSectionContent.removeAllComponents();
-    //VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
-    //graphSection.getComponent(1).setVisible(true);
-    //graphSection.getComponent(1).setEnabled(true);
+    // VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
+    // graphSection.getComponent(1).setVisible(true);
+    // graphSection.getComponent(1).setEnabled(true);
   }
 
   /**
@@ -1002,7 +1009,7 @@ private ProjInformationComponent projectInformation;
   VerticalLayout initGraph() {
     VerticalLayout graphSection = new VerticalLayout();
     graphSectionContent = new VerticalLayout();
-    
+
     graphSection.setCaption("Project Graph");
 
     graphSectionContent.setMargin(new MarginInfo(true, false, true, true));
@@ -1013,7 +1020,7 @@ private ProjInformationComponent projectInformation;
     graphSection.addComponent(graphSectionContent);
     return graphSection;
   }
-  
+
   public void processed() {
     UI.getCurrent().setPollInterval(-1);
   }
@@ -1034,7 +1041,7 @@ private ProjInformationComponent projectInformation;
 
     }
   }
-  
+
   public void loadGraph() {
     LOGGER.debug(String.valueOf(graphSectionContent.getComponentCount() == 0));
     if (graphSectionContent.getComponentCount() > 0)
@@ -1048,9 +1055,9 @@ private ProjInformationComponent projectInformation;
               "Computing the project graph can take several seconds on big projects. Please be patient.");
       info.setStyleName(ValoTheme.LABEL_SUCCESS);
       graphSectionContent.removeAllComponents();
-      //graphSectionContent.addComponent(info);
+      // graphSectionContent.addComponent(info);
       graphSectionContent.addComponent(progress);
-      //graphSectionContent.setComponentAlignment(info, Alignment.MIDDLE_CENTER);
+      // graphSectionContent.setComponentAlignment(info, Alignment.MIDDLE_CENTER);
       graphSectionContent.setComponentAlignment(progress, Alignment.MIDDLE_CENTER);
 
       Worker worker = new Worker(getCurrent());
@@ -1058,11 +1065,12 @@ private ProjInformationComponent projectInformation;
       UI.getCurrent().setPollInterval(500);
     }
   }
-  
+
   private void tableClickChangeTreeView() {
     registeredExperiments.setSelectable(true);
     registeredExperiments.setImmediate(true);
-    registeredExperiments.addValueChangeListener(new ViewTablesClickListener(registeredExperiments, ExperimentView.navigateToLabel));
+    registeredExperiments.addValueChangeListener(new ViewTablesClickListener(registeredExperiments,
+        ExperimentView.navigateToLabel));
   }
 
   /**
@@ -1102,11 +1110,11 @@ private ProjInformationComponent projectInformation;
 
   void updateContentGraph() {
     Resource resource = getGraphResource();
-    
+
     if (resource != null) {
       graphSectionContent.removeAllComponents();
       Image graphImage = new Image("", resource);
-      
+
       graphSectionContent.addComponent(graphImage);
       graphSectionContent.setComponentAlignment(graphImage, Alignment.MIDDLE_CENTER);
 
@@ -1117,7 +1125,7 @@ private ProjInformationComponent projectInformation;
       graphSectionContent.addComponent(error);
       graphSectionContent.setComponentAlignment(error, Alignment.MIDDLE_CENTER);
 
-      LOGGER.error(String.format("%s: %s",error.getValue(),currentBean.getId()));
+      LOGGER.error(String.format("%s: %s", error.getValue(), currentBean.getId()));
     }
   }
 
@@ -1131,7 +1139,9 @@ private ProjInformationComponent projectInformation;
     Resource resource = null;
     try {
       GraphGenerator graphFrame =
-          new GraphGenerator(datahandler.getOpenBisClient().getSamplesOfProject(currentBean.getId()), datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(), currentBean.getId());
+          new GraphGenerator(datahandler.getOpenBisClient()
+              .getSamplesOfProject(currentBean.getId()), datahandler.getOpenBisClient()
+              .getSampleTypes(), datahandler.getOpenBisClient(), currentBean.getId());
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
@@ -1149,9 +1159,9 @@ private ProjInformationComponent projectInformation;
     LOGGER.info(String.format("getProject took %f s", ((endTime - startTime) / 1000000000.0)));
     // if the new project bean is different than reset the graph.
     LOGGER.debug(String.valueOf(currentBean == null));
-    
-    //if (currentBean != null)
-    //  LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
+
+    // if (currentBean != null)
+    // LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
     if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
       LOGGER.debug("reseting graph");
       resetGraph();
@@ -1162,9 +1172,9 @@ private ProjInformationComponent projectInformation;
     endTime = System.nanoTime();
     LOGGER.info(String.format("setContainerDataSource took %f s",
         ((endTime - startTime) / 1000000000.0)));
-    
+
     updateContent();
-    
+
     patientViewTab.setSelectedTab(0);
 
   }
@@ -1172,5 +1182,5 @@ private ProjInformationComponent projectInformation;
   public ProjectBean getCurrentBean() {
     return currentBean;
   }
-  
+
 }

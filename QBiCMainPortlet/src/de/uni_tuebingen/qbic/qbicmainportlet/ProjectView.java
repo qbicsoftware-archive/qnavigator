@@ -101,7 +101,7 @@ public class ProjectView extends VerticalLayout implements View {
   private HorizontalLayout membersLayout;
 
   private DatasetComponent datasetComponent;
-  
+
   Map<String, String> members = new TreeMap<String, String>();
   Map<String, String> memberLetters = new HashMap<String, String>();
 
@@ -112,18 +112,18 @@ public class ProjectView extends VerticalLayout implements View {
   private LevelComponent resultsComponent;
 
   private static Logger LOGGER = new Log4j2Logger(ProjectView.class);
-  
+
   private String headerLabel;
 
   private WorkflowViewController wfController;
 
   private WorkflowComponent workflowComponent;
 
-private ConfigurationManager manager;
+  private ConfigurationManager manager;
 
-private UploadComponent uploadComponent;
+  private UploadComponent uploadComponent;
 
-private ProjInformationComponent projectInformation;
+  private ProjInformationComponent projectInformation;
 
 
   public String getHeaderLabel() {
@@ -134,7 +134,8 @@ private ProjInformationComponent projectInformation;
     this.headerLabel = headerLabel;
   }
 
-  public ProjectView(DataHandler datahandler, State state, String resourceurl, WorkflowViewController wfController, ConfigurationManager manager) {
+  public ProjectView(DataHandler datahandler, State state, String resourceurl,
+      WorkflowViewController wfController, ConfigurationManager manager) {
     this(datahandler, state, wfController);
     this.resourceUrl = resourceurl;
     this.manager = manager;
@@ -166,34 +167,36 @@ private ProjInformationComponent projectInformation;
   void initView() {
     projectview_content = new VerticalLayout();
     projectview_content.setMargin(new MarginInfo(true, true, false, false));
-    
-    //labelContent = new VerticalLayout();
-    //labelContent.setMargin(new MarginInfo(true, false, true, false));
-    
+
+    // labelContent = new VerticalLayout();
+    // labelContent.setMargin(new MarginInfo(true, false, true, false));
+
     headerLabel = "";
-    
-    //labelContent.addComponent(headerLabel);
-    //projectview_content.addComponent(labelContent);
-    
+
+    // labelContent.addComponent(headerLabel);
+    // projectview_content.addComponent(labelContent);
+
     projectview_tab = new TabSheet();
     projectview_tab.setWidth("100%");
     projectview_tab.setHeight("100%");
 
     datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
-    biologicalSamplesComponent = new BiologicalSamplesComponent(datahandler, state, resourceUrl, "Biological Samples");
-    measuredSamplesComponent = new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
+    biologicalSamplesComponent =
+        new BiologicalSamplesComponent(datahandler, state, resourceUrl, "Biological Samples");
+    measuredSamplesComponent =
+        new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
     workflowComponent = new WorkflowComponent(wfController);
     uploadComponent = new UploadComponent();
     projectInformation = new ProjInformationComponent(datahandler, state, resourceUrl);
-    
-    //projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
+
+    // projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
 
-    
-    //projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+
+    // projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
@@ -208,53 +211,48 @@ private ProjInformationComponent projectInformation;
 
     projectview_tab.setImmediate(true);
 
-    
+
     projectview_tab.addSelectedTabChangeListener(new SelectedTabChangeListener() {
-      
+
       @Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
         if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
           loadGraph();
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
           datasetComponent.updateUI(navigateToLabel, getCurrentBean().getId());
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Measured Samples")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Measured Samples")) {
           measuredSamplesComponent.updateUI(navigateToLabel, getCurrentBean().getId(), "measured");
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Biological Samples")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Biological Samples")) {
           biologicalSamplesComponent.updateUI(getCurrentBean().getId());
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Results")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Results")) {
           resultsComponent.updateUI(navigateToLabel, getCurrentBean().getId(), "results");
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Workflows")) {
-          Map<String,String> args = new HashMap<String,String>();
-          args.put("id",getCurrentBean().getId());
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Workflows")) {
+          Map<String, String> args = new HashMap<String, String>();
+          args.put("id", getCurrentBean().getId());
           args.put("type", navigateToLabel);
           workflowComponent.update(args);
-        }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
-            uploadComponent.updateUI(manager, getCurrentBean().getCode());
-          }
-        else if (event.getTabSheet().getSelectedTab().getCaption().equals("")) {
-        	projectInformation.updateUI(getCurrentBean(), "project");
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
+          // (get space from currentBean)
+          uploadComponent.updateUI(manager, getCurrentBean().getCode(),
+              currentBean.getId().split("/")[1], datahandler.getOpenBisClient());
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("")) {
+          projectInformation.updateUI(getCurrentBean(), "project");
         }
       }
     });
-      
-    //projectview_content.addComponent(initMenuBar());
+
+    // projectview_content.addComponent(initMenuBar());
     projectview_content.addComponent(projectview_tab);
-    //projectview_content.addComponent(initDescription());
-    //projectview_content.addComponent(initStatistics());
-    //projectview_content.addComponent(initTable());
-    //projectview_content.addComponent(initButtonLayout());
-    
-    //projectview_content.addComponent(initGraph());
+    // projectview_content.addComponent(initDescription());
+    // projectview_content.addComponent(initStatistics());
+    // projectview_content.addComponent(initTable());
+    // projectview_content.addComponent(initButtonLayout());
+
+    // projectview_content.addComponent(initGraph());
 
     // use the component that is returned by initTable
     // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    //projectview_content.setWidth("100%");
+    // projectview_content.setWidth("100%");
     this.addComponent(projectview_content);
   }
 
@@ -262,15 +260,15 @@ private ProjInformationComponent projectInformation;
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-   // updateContentToolBar();
-    headerLabel = String.format("%s",getCurrentBean().getCode());
-    
-    //updateContentDescription();
+    // updateContentToolBar();
+    headerLabel = String.format("%s", getCurrentBean().getCode());
+
+    // updateContentDescription();
     updateContentMemberSection();
     updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
-    
+
     projectInformation.updateUI(getCurrentBean(), "project");
   }
 
@@ -319,11 +317,11 @@ private ProjInformationComponent projectInformation;
    * updates the menu bar based on the new content (currentbean was changed)
    */
   void updateContentToolBar() {
-    
+
     Boolean containsData = currentBean.getContainsData();
     toolbar.setDownload(containsData);
     toolbar.setWorkflow(containsData);
-    toolbar.setBarcode(currentBean.getExperiments().size() >0);
+    toolbar.setBarcode(currentBean.getExperiments().size() > 0);
     toolbar.update(navigateToLabel, currentBean.getId());
   }
 
@@ -335,7 +333,7 @@ private ProjInformationComponent projectInformation;
   VerticalLayout initDescription() {
     VerticalLayout projDescription = new VerticalLayout();
     VerticalLayout projDescriptionContent = new VerticalLayout();
-    
+
     projDescription.setCaption("");
 
     // String desc = currentBean.getDescription();
@@ -351,8 +349,8 @@ private ProjInformationComponent projectInformation;
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(contact);
     projDescriptionContent.setMargin(new MarginInfo(true, false, true, true));
-    //projDescriptionContent.setCaption("Description");
-    //projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
+    // projDescriptionContent.setCaption("Description");
+    // projDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
 
     projDescription.addComponent(projDescriptionContent);
     projDescriptionContent.setSpacing(true);
@@ -360,32 +358,32 @@ private ProjInformationComponent projectInformation;
     projDescription.setWidth("100%");
     projDescription.setSpacing(true);
     projDescription.addComponent(projectInformation);
-    
+
     return projDescription;
   }
-  
+
   VerticalLayout initMemberSection() {
     VerticalLayout projMembers = new VerticalLayout();
     projMembers.setCaption("Members");
-    
+
     membersSection = new VerticalLayout();
     Component membersContent = new VerticalLayout();
 
-    //membersContent.setIcon(FontAwesome.USERS);
-    //membersContent.setCaption("Members");
+    // membersContent.setIcon(FontAwesome.USERS);
+    // membersContent.setCaption("Members");
     membersSection.addComponent(membersContent);
-    //membersSection.setMargin(new MarginInfo(false, false, false, true));
+    // membersSection.setMargin(new MarginInfo(false, false, false, true));
     membersSection.setWidth("100%");
     membersSection.setSpacing(true);
-    
+
     membersSection.setMargin(new MarginInfo(true, false, true, true));
     projMembers.addComponent(membersSection);
-    
+
     projMembers.setMargin(new MarginInfo(true, false, true, true));
     projMembers.setWidth("100%");
     projMembers.setSpacing(true);
-    
-    return projMembers; 
+
+    return projMembers;
   }
 
   void updateContentDescription() {
@@ -399,11 +397,11 @@ private ProjInformationComponent projectInformation;
       descContent.setValue(desc);
     }
 
-    //membersSection.removeAllComponents();
-   // membersSection.addComponent(getMembersComponent());
-    //membersSection.setMargin(new MarginInfo(false, false, false, true));
+    // membersSection.removeAllComponents();
+    // membersSection.addComponent(getMembersComponent());
+    // membersSection.setMargin(new MarginInfo(false, false, false, true));
   }
-  
+
   void updateContentMemberSection() {
     membersSection.removeAllComponents();
     membersSection.addComponent(getMembersComponent());
@@ -420,8 +418,8 @@ private ProjInformationComponent projectInformation;
     statistics.setCaption("Status");
 
     statContent = new HorizontalLayout();
-    //statContent.setCaption("Statistics");
-    //statContent.setIcon(FontAwesome.BAR_CHART_O);
+    // statContent.setCaption("Statistics");
+    // statContent.setIcon(FontAwesome.BAR_CHART_O);
     statContent.addComponent(new Label(""));
 
     // TODO
@@ -451,9 +449,9 @@ private ProjInformationComponent projectInformation;
     // status bar section
 
     status = new VerticalLayout();
-    //status.setMargin(new MarginInfo(false, false, false, true));
+    // status.setMargin(new MarginInfo(false, false, false, true));
     status.setSpacing(true);
-    
+
     statistics.addComponent(status);
     return statistics;
   }
@@ -475,8 +473,8 @@ private ProjInformationComponent projectInformation;
     status.removeAllComponents();
     VerticalLayout statusContent =
         this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
-    //statusContent.setCaption("Status");
-    //statusContent.setIcon(FontAwesome.CLOCK_O);
+    // statusContent.setCaption("Status");
+    // statusContent.setIcon(FontAwesome.CLOCK_O);
 
     // TODO
     // statusContent.addComponent(new Label(projectInformation.statusMessage));
@@ -495,8 +493,8 @@ private ProjInformationComponent projectInformation;
     VerticalLayout tableSectionContent = new VerticalLayout();
 
     tableSection.setCaption("Experiments");
-    //tableSectionContent.setCaption("Registered Experiments");
-    //tableSectionContent.setIcon(FontAwesome.FLASK);
+    // tableSectionContent.setCaption("Registered Experiments");
+    // tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
 
     tableSectionContent.setMargin(new MarginInfo(true, false, false, true));
@@ -506,7 +504,7 @@ private ProjInformationComponent projectInformation;
     tableSectionContent.setWidth("100%");
 
     tableSection.addComponent(tableSectionContent);
-    
+
     this.export = new Button("Export as TSV");
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -531,10 +529,10 @@ private ProjInformationComponent projectInformation;
 
   void resetGraph() {
     graphSectionContent.removeAllComponents();
-    //VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
-    //graphSection.getComponent(1).setVisible(true);
-    //graphSection.getComponent(1).setEnabled(true);
- }
+    // VerticalLayout graphSection = (VerticalLayout) graphSectionContent.getParent();
+    // graphSection.getComponent(1).setVisible(true);
+    // graphSection.getComponent(1).setEnabled(true);
+  }
 
   /**
    * 
@@ -543,70 +541,47 @@ private ProjInformationComponent projectInformation;
   VerticalLayout initGraph() {
     VerticalLayout graphSection = new VerticalLayout();
     graphSectionContent = new VerticalLayout();
-    graphSection.setCaption( "Project Graph");
+    graphSection.setCaption("Project Graph");
 
-    //graphSectionContent.setCaption("Project Graph");
-    //graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
+    // graphSectionContent.setCaption("Project Graph");
+    // graphSectionContent.setIcon(FontAwesome.SHARE_SQUARE_O);
 
     graphSectionContent.setMargin(new MarginInfo(true, false, true, true));
     graphSection.setMargin(new MarginInfo(true, false, true, true));
     graphSection.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     graphSectionContent.setWidth("100%");
     /*
-    final Button loadGraph = new Button("[+]");
-    loadGraph.setStyleName(ValoTheme.BUTTON_LINK);
-    loadGraph.addClickListener(new ClickListener() {
-
-      @Override
-      public void buttonClick(ClickEvent event) {
-        if (graphSectionContent.getComponentCount() == 0
-            || !(graphSectionContent.getComponent(0) instanceof Image)) {
-          ProgressBar progress = new ProgressBar();
-          progress.setIndeterminate(true);
-          Label info =
-              new Label(
-                  "Computing the project graph can take several seconds on big projects. Please be patient.");
-          info.setStyleName(ValoTheme.LABEL_SUCCESS);
-          graphSectionContent.addComponent(info);
-          graphSectionContent.addComponent(progress);
-          Worker worker = new Worker(getCurrent());
-          worker.start();
-          UI.getCurrent().setPollInterval(500);
-          loadGraph.setEnabled(false);
-        }
-
-
-      }
-
-      public void processed() {
-        UI.getCurrent().setPollInterval(-1);
-        loadGraph.setVisible(false);
-      }
-
-      class Worker extends Thread {
-        private ProjectView projectView;
-
-        public Worker(ProjectView current) {
-          projectView = current;
-        }
-
-        @Override
-        public void run() {
-          projectView.updateContentGraph();
-          synchronized (UI.getCurrent()) {
-            processed();
-          }
-
-        }
-      }
-    });
-
-  */
+     * final Button loadGraph = new Button("[+]"); loadGraph.setStyleName(ValoTheme.BUTTON_LINK);
+     * loadGraph.addClickListener(new ClickListener() {
+     * 
+     * @Override public void buttonClick(ClickEvent event) { if
+     * (graphSectionContent.getComponentCount() == 0 || !(graphSectionContent.getComponent(0)
+     * instanceof Image)) { ProgressBar progress = new ProgressBar();
+     * progress.setIndeterminate(true); Label info = new Label(
+     * "Computing the project graph can take several seconds on big projects. Please be patient.");
+     * info.setStyleName(ValoTheme.LABEL_SUCCESS); graphSectionContent.addComponent(info);
+     * graphSectionContent.addComponent(progress); Worker worker = new Worker(getCurrent());
+     * worker.start(); UI.getCurrent().setPollInterval(500); loadGraph.setEnabled(false); }
+     * 
+     * 
+     * }
+     * 
+     * public void processed() { UI.getCurrent().setPollInterval(-1); loadGraph.setVisible(false); }
+     * 
+     * class Worker extends Thread { private ProjectView projectView;
+     * 
+     * public Worker(ProjectView current) { projectView = current; }
+     * 
+     * @Override public void run() { projectView.updateContentGraph(); synchronized
+     * (UI.getCurrent()) { processed(); }
+     * 
+     * } } });
+     */
     graphSection.addComponent(graphSectionContent);
-    //graphSection.addComponent(loadGraph);
+    // graphSection.addComponent(loadGraph);
     return graphSection;
   }
-  
+
   public void processed() {
     UI.getCurrent().setPollInterval(-1);
   }
@@ -627,7 +602,7 @@ private ProjInformationComponent projectInformation;
 
     }
   }
-  
+
   public void loadGraph() {
     LOGGER.debug(String.valueOf(graphSectionContent.getComponentCount() == 0));
     if (graphSectionContent.getComponentCount() > 0)
@@ -641,9 +616,9 @@ private ProjInformationComponent projectInformation;
               "Computing the project graph can take several seconds on big projects. Please be patient.");
       info.setStyleName(ValoTheme.LABEL_SUCCESS);
       graphSectionContent.removeAllComponents();
-      //graphSectionContent.addComponent(info);
+      // graphSectionContent.addComponent(info);
       graphSectionContent.addComponent(progress);
-      //graphSectionContent.setComponentAlignment(info, Alignment.MIDDLE_CENTER);
+      // graphSectionContent.setComponentAlignment(info, Alignment.MIDDLE_CENTER);
       graphSectionContent.setComponentAlignment(progress, Alignment.MIDDLE_CENTER);
       Worker worker = new Worker(getCurrent());
       worker.start();
@@ -657,11 +632,11 @@ private ProjInformationComponent projectInformation;
 
   void updateContentGraph() {
     Resource resource = getGraphResource();
-    
+
     if (resource != null) {
       graphSectionContent.removeAllComponents();
       Image graphImage = new Image("", resource);
-  
+
       graphSectionContent.addComponent(graphImage);
       graphSectionContent.setComponentAlignment(graphImage, Alignment.MIDDLE_CENTER);
     } else {
@@ -671,7 +646,7 @@ private ProjInformationComponent projectInformation;
       graphSectionContent.addComponent(error);
       graphSectionContent.setComponentAlignment(error, Alignment.MIDDLE_CENTER);
 
-      LOGGER.error(String.format("%s: %s",error.getValue(),currentBean.getId()));
+      LOGGER.error(String.format("%s: %s", error.getValue(), currentBean.getId()));
     }
   }
 
@@ -697,22 +672,21 @@ private ProjInformationComponent projectInformation;
   public void setContainerDataSource(ProjectBean projectBean) {
     this.currentBean = projectBean;
     this.table.setContainerDataSource(projectBean.getExperiments());
-    
+
     for (Iterator i = table.getItemIds().iterator(); i.hasNext();) {
-    	// Get the current item identifier, which is an integer.
-        ExperimentBean item = (ExperimentBean) i.next();
-        
-    	LOGGER.debug("Status " + item.getStatus());
+      // Get the current item identifier, which is an integer.
+      ExperimentBean item = (ExperimentBean) i.next();
+
+      LOGGER.debug("Status " + item.getStatus());
     }
     table.setVisibleColumns(new Object[] {"code", "type", "registrationDate", "registrator",
         "status"});
-    
+
     int rowNumber = this.table.size();
-    
+
     if (rowNumber == 0) {
       this.table.setVisible(false);
-    }
-    else {
+    } else {
       this.table.setVisible(true);
       this.table.setPageLength(Math.min(rowNumber, 10));
     }
@@ -728,9 +702,11 @@ private ProjInformationComponent projectInformation;
   private Resource getGraphResource() {
     Resource resource = null;
     try {
-      
+
       GraphGenerator graphFrame =
-          new GraphGenerator(datahandler.getOpenBisClient().getSamplesOfProject(currentBean.getId()), datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(), currentBean.getId());
+          new GraphGenerator(datahandler.getOpenBisClient()
+              .getSamplesOfProject(currentBean.getId()), datahandler.getOpenBisClient()
+              .getSampleTypes(), datahandler.getOpenBisClient(), currentBean.getId());
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
@@ -741,7 +717,8 @@ private ProjInformationComponent projectInformation;
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table, ExperimentView.navigateToLabel));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table,
+        ExperimentView.navigateToLabel));
   }
 
   /**
@@ -777,7 +754,7 @@ private ProjInformationComponent projectInformation;
     return filterTable;
   }
 
-  
+
   class MemberWorker extends Thread {
 
     @Override
@@ -795,12 +772,14 @@ private ProjInformationComponent projectInformation;
             "liferay error, could not retrieve companyId. Trying default companyId, which is "
                 + companyId, e.getStackTrace());
       }
-      Set<String> list = datahandler.removeQBiCStaffFromMemberSet(datahandler.getOpenBisClient().getSpaceMembers(currentBean.getId().split("/")[1]));
+      Set<String> list =
+          datahandler.removeQBiCStaffFromMemberSet(datahandler.getOpenBisClient().getSpaceMembers(
+              currentBean.getId().split("/")[1]));
       members = new TreeMap<String, String>();
       memberLetters = new HashMap<String, String>();
-      
+
       LOGGER.debug(list.toString());
-      
+
       if (list != null) {
         memberString = new StringBuilder();
         for (String member : list) {
@@ -811,12 +790,12 @@ private ProjInformationComponent projectInformation;
           }
 
           if (memberString.length() > 0) {
-            //memberString.append(" , ");
+            // memberString.append(" , ");
           }
 
           if (user == null) {
             LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
-            //memberString.append(member);
+            // memberString.append(member);
             members.put(member, member);
             // membersLayout.addComponent(new Label(member));
           } else {
@@ -824,22 +803,24 @@ private ProjInformationComponent projectInformation;
             String lastName = user.getLastName();
 
             String email = user.getEmailAddress();
-           
-            String userString = "<a href=\"mailto:" + email + "\" style=\"color: #0068AA; text-decoration: none\">" + lastName + ", " + firstName + "</a>";
-            
-            if(user.getLastName().length() > 0) {
+
+            String userString =
+                "<a href=\"mailto:" + email + "\" style=\"color: #0068AA; text-decoration: none\">"
+                    + lastName + ", " + firstName + "</a>";
+
+            if (user.getLastName().length() > 0) {
               members.put(user.getLastName(), userString);
             }
-            
+
             else {
               members.put(user.getFirstName(), userString);
             }
-            
-            //memberString.append("<a href=\"mailto:");
-            //memberString.append(email);
-            //memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
-            //memberString.append(fullname);
-            //memberString.append("</a>");
+
+            // memberString.append("<a href=\"mailto:");
+            // memberString.append(email);
+            // memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
+            // memberString.append(fullname);
+            // memberString.append("</a>");
           }
         }
         synchronized (UI.getCurrent()) {
@@ -856,142 +837,105 @@ private ProjInformationComponent projectInformation;
    */
   private Component getMembersComponent() {
     membersLayout = new HorizontalLayout();
-    //membersLayout.setIcon(FontAwesome.USERS);
-    //membersLayout.setCaption("Members");
+    // membersLayout.setIcon(FontAwesome.USERS);
+    // membersLayout.setCaption("Members");
     membersLayout.setWidth("100%");
 
 
-    //final Button loadMembers = new Button("[+]");
-    //membersLayout.addComponent(loadMembers);
-    //loadMembers.setStyleName(ValoTheme.BUTTON_LINK);
-    //loadMembers.addClickListener(new ClickListener() {
+    // final Button loadMembers = new Button("[+]");
+    // membersLayout.addComponent(loadMembers);
+    // loadMembers.setStyleName(ValoTheme.BUTTON_LINK);
+    // loadMembers.addClickListener(new ClickListener() {
 
-      //@Override
-      //public void buttonClick(ClickEvent event) {
-        ProgressBar progress = new ProgressBar();
-        progress.setIndeterminate(true);
-        Label info =
-            new Label(
-                "Searching for members. Can take several seconds on big projects. Please be patient.");
-        info.setStyleName(ValoTheme.LABEL_SUCCESS);
-        //membersLayout.addComponent(info);
-        membersLayout.addComponent(progress);
-        MemberWorker worker = new MemberWorker();
-        worker.start();
-        UI.getCurrent().setPollInterval(500);
-       // loadMembers.setEnabled(false);
-        
-        return membersLayout;
+    // @Override
+    // public void buttonClick(ClickEvent event) {
+    ProgressBar progress = new ProgressBar();
+    progress.setIndeterminate(true);
+    Label info =
+        new Label(
+            "Searching for members. Can take several seconds on big projects. Please be patient.");
+    info.setStyleName(ValoTheme.LABEL_SUCCESS);
+    // membersLayout.addComponent(info);
+    membersLayout.addComponent(progress);
+    MemberWorker worker = new MemberWorker();
+    worker.start();
+    UI.getCurrent().setPollInterval(500);
+    // loadMembers.setEnabled(false);
+
+    return membersLayout;
   }
 
 
-      public void processedMember() {
-        String memberString = "";
-        Label label;
-        
-        if(members.size() < 1) {
-          label = new Label("No Members found.");
-        }
-        else {
-          for(Entry<String, String> entry: members.entrySet()) {
-            String firstLetter = String.valueOf(entry.getKey().charAt(0));
-            
-            if(!memberLetters.containsKey(firstLetter)) {
-              memberString += String.format("<font size='16'><b>%s</b></font><br>", firstLetter.toUpperCase());
-              memberLetters.put(firstLetter, "");
-              }
-            
-            memberString += String.format("%s<br>", entry.getValue());
-          }
-          label = new Label(memberString, ContentMode.HTML);
-        }
-        
-        //if (memberString == null || memberString.length() == 0) {
-        //  label = new Label("no members found.");
-        //} else {
-        //  label = new Label(memberString.toString(), ContentMode.HTML);
-        //}
-        
-        membersLayout.removeAllComponents();
-        membersLayout.addComponent(label);
-        membersLayout.setSpacing(true);
-        membersLayout.setMargin(new MarginInfo(false, false, true, true));
+  public void processedMember() {
+    String memberString = "";
+    Label label;
 
+    if (members.size() < 1) {
+      label = new Label("No Members found.");
+    } else {
+      for (Entry<String, String> entry : members.entrySet()) {
+        String firstLetter = String.valueOf(entry.getKey().charAt(0));
 
-        UI.getCurrent().setPollInterval(-1);
-        //loadMembers.setVisible(false);
+        if (!memberLetters.containsKey(firstLetter)) {
+          memberString +=
+              String.format("<font size='16'><b>%s</b></font><br>", firstLetter.toUpperCase());
+          memberLetters.put(firstLetter, "");
+        }
+
+        memberString += String.format("%s<br>", entry.getValue());
       }
+      label = new Label(memberString, ContentMode.HTML);
+    }
 
-      /*
-      class Worker extends Thread {
+    // if (memberString == null || memberString.length() == 0) {
+    // label = new Label("no members found.");
+    // } else {
+    // label = new Label(memberString.toString(), ContentMode.HTML);
+    // }
 
-        @Override
-        public void run() {
-          Company company = null;
-          long companyId = 1;
-          try {
-            String webId = PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
-            company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
-            companyId = company.getCompanyId();
-            LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
-                companyId));
-          } catch (PortalException | SystemException e) {
-            LOGGER.error(
-                "liferay error, could not retrieve companyId. Trying default companyId, which is "
-                    + companyId, e.getStackTrace());
-          }
-          Set<String> list =
-              datahandler.openBisClient.getSpaceMembers(currentBean.getId().split("/")[1]);
-          if (list != null) {
-            memberString = new StringBuilder();
-            for (String member : list) {
-              User user = null;
-              try {
-                user = UserLocalServiceUtil.getUserByScreenName(companyId, member);
-              } catch (PortalException | SystemException e) {
-              }
+    membersLayout.removeAllComponents();
+    membersLayout.addComponent(label);
+    membersLayout.setSpacing(true);
+    membersLayout.setMargin(new MarginInfo(false, false, true, true));
 
-              if (memberString.length() > 0) {
-                memberString.append(" , ");
-              }
 
-              if (user == null) {
-                LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", member));
-                memberString.append(member);
-                // membersLayout.addComponent(new Label(member));
-              } else {
-                String fullname = user.getFullName();
-                String email = user.getEmailAddress();
-                // VaadinSession.getCurrent().getService();
-                // ThemeDisplay themedisplay =
-                // (ThemeDisplay)
-                // VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY);
-                // String url = user.getPortraitURL(themedisplay);
-                // ExternalResource er = new ExternalResource(url);
-                // com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(), er);
-                // image.setHeight(80, Unit.PIXELS);
-                // image.setWidth(65, Unit.PIXELS);
-                // membersLayout.addComponent(image);
-                // String labelString =
-                // new String("<a href=\"mailto:" + email
-                // + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>");
-                // Label userLabel = new Label(labelString, ContentMode.HTML);
-                // membersLayout.addComponent(userLabel);
-                memberString.append("<a href=\"mailto:");
-                memberString.append(email);
-                memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
-                memberString.append(fullname);
-                memberString.append("</a>");
-              }
-            }
-            synchronized (UI.getCurrent()) {
-              processed();
-            }
-          }
-        }
-      }
-    });
-    */
+    UI.getCurrent().setPollInterval(-1);
+    // loadMembers.setVisible(false);
+  }
+
+  /*
+   * class Worker extends Thread {
+   * 
+   * @Override public void run() { Company company = null; long companyId = 1; try { String webId =
+   * PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID); company =
+   * CompanyLocalServiceUtil.getCompanyByWebId(webId); companyId = company.getCompanyId();
+   * LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
+   * companyId)); } catch (PortalException | SystemException e) { LOGGER.error(
+   * "liferay error, could not retrieve companyId. Trying default companyId, which is " + companyId,
+   * e.getStackTrace()); } Set<String> list =
+   * datahandler.openBisClient.getSpaceMembers(currentBean.getId().split("/")[1]); if (list != null)
+   * { memberString = new StringBuilder(); for (String member : list) { User user = null; try { user
+   * = UserLocalServiceUtil.getUserByScreenName(companyId, member); } catch (PortalException |
+   * SystemException e) { }
+   * 
+   * if (memberString.length() > 0) { memberString.append(" , "); }
+   * 
+   * if (user == null) { LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal",
+   * member)); memberString.append(member); // membersLayout.addComponent(new Label(member)); } else
+   * { String fullname = user.getFullName(); String email = user.getEmailAddress(); //
+   * VaadinSession.getCurrent().getService(); // ThemeDisplay themedisplay = // (ThemeDisplay) //
+   * VaadinService.getCurrentRequest().getAttribute(WebKeys.THEME_DISPLAY); // String url =
+   * user.getPortraitURL(themedisplay); // ExternalResource er = new ExternalResource(url); //
+   * com.vaadin.ui.Image image = new com.vaadin.ui.Image(user.getFullName(), er); //
+   * image.setHeight(80, Unit.PIXELS); // image.setWidth(65, Unit.PIXELS); //
+   * membersLayout.addComponent(image); // String labelString = // new String("<a href=\"mailto:" +
+   * email // + "\" style=\"color: #0068AA; text-decoration: none\">" + fullname + "</a>"); // Label
+   * userLabel = new Label(labelString, ContentMode.HTML); // membersLayout.addComponent(userLabel);
+   * memberString.append("<a href=\"mailto:"); memberString.append(email);
+   * memberString.append("\" style=\"color: #0068AA; text-decoration: none\">");
+   * memberString.append(fullname); memberString.append("</a>"); } } synchronized (UI.getCurrent())
+   * { processed(); } } } } });
+   */
 
   /**
    * 
@@ -1028,9 +972,9 @@ private ProjInformationComponent projectInformation;
         finishedExperiments += (Integer) pairs.getValue();
       }
     }
-    //ProgressBar progressBar = new ProgressBar();
-    //progressBar.setValue((float) finishedExperiments / statusValues.keySet().size());
-    //projectStatusContent.addComponent(progressBar);
+    // ProgressBar progressBar = new ProgressBar();
+    // progressBar.setValue((float) finishedExperiments / statusValues.keySet().size());
+    // projectStatusContent.addComponent(progressBar);
 
     return projectStatusContent;
   }
@@ -1051,7 +995,7 @@ private ProjInformationComponent projectInformation;
     }
     this.setContainerDataSource(pbean);
     updateContent();
-    
+
     projectview_tab.setSelectedTab(0);
   }
 
@@ -1067,7 +1011,7 @@ private ProjInformationComponent projectInformation;
   public void setEnabled(boolean enabled) {
     this.export.setEnabled(enabled);
     this.table.setEnabled(enabled);
-//     this.createBarcodesMenuItem.getParent().setEnabled(false);
+    // this.createBarcodesMenuItem.getParent().setEnabled(false);
     // this.downloadCompleteProjectMenuItem.getParent().setEnabled(false);
     this.toolbar.setEnabled(enabled);
   }
