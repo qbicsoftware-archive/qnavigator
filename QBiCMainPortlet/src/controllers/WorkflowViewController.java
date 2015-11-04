@@ -251,7 +251,7 @@ public class WorkflowViewController {
     Map<String, Object> properties = new HashMap<String, Object>();
     properties.put(wf_id, wfID);
     params.put("properties", properties);
-    openbis.ingest(openbis_dss, "notify-user", params);
+    openbis.ingest(openbis_dss, "update-experiment-metadata", params);
   }
 
   /**

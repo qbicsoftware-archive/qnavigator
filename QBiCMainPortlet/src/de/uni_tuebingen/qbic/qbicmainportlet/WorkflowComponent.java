@@ -248,6 +248,7 @@ public class WorkflowComponent extends CustomComponent {
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(suitableWorkflows);
 
     gpcontainer.removeContainerProperty("ID");
+    gpcontainer.removeContainerProperty("fileTypes");
     gpcontainer.removeContainerProperty("data");
     gpcontainer.removeContainerProperty("datasetType");
     gpcontainer.removeContainerProperty("nodes");
