@@ -89,50 +89,71 @@ public class SearchBarView extends CustomComponent {
         LOGGER.info("searching for sample: " + (String)searchfield.getValue());
         
         if (searchfield.getValue() == null || searchfield.getValue().toString().equals("")) {
-          Notification.show("Please provide a Barcode before clicking GoTo.", Type.WARNING_MESSAGE);
-        }
-        
-        else {
-        String entity = (String) searchfield.getValue().toString();
-        
-        Matcher matcher = pattern.matcher(entity);
-        Matcher matcher2 = pattern2.matcher(entity);
-       
-        LOGGER.debug(entity);
-        Boolean patternFound1 = matcher.find();
-        Boolean patternFound2 = matcher2.find();
-        
-        LOGGER.debug(patternFound1.toString());
-        LOGGER.debug(patternFound2.toString());
-        
-        if (patternFound1) {
-          Sample foundSample = datahandler.getOpenBisClient().getSampleByIdentifier(matcher.group(0).toString());
-          String identifier = foundSample.getIdentifier();
-          
-          State state = (State) UI.getCurrent().getSession().getAttribute("state");
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          message.add(identifier);
-          message.add("sample");
-          state.notifyObservers(message);
-        }
-        
-        else if (patternFound2) {
-          Sample foundSample = datahandler.getOpenBisClient().getSampleByIdentifier(matcher2.group(0).toString());
-          String identifier = foundSample.getIdentifier();
-          
-          State state = (State) UI.getCurrent().getSession().getAttribute("state");
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          message.add(identifier);
-          message.add("sample");
-          state.notifyObservers(message);
-        }
-        else {
-          Notification.show("Please provide a valid Sample Barcode.", Type.WARNING_MESSAGE);
-        }
-        }
-      }
+					Notification.show(
+							"Please provide a Barcode before clicking GoTo.",
+							Type.WARNING_MESSAGE);
+				}
+
+				else {
+					String entity = (String) searchfield.getValue().toString();
+
+					Matcher matcher = pattern.matcher(entity);
+					Matcher matcher2 = pattern2.matcher(entity);
+
+					LOGGER.debug(entity);
+					Boolean patternFound1 = matcher.find();
+					Boolean patternFound2 = matcher2.find();
+
+					LOGGER.debug(patternFound1.toString());
+					LOGGER.debug(patternFound2.toString());
+
+					if (patternFound1) {
+						try {
+							Sample foundSample = datahandler.getOpenBisClient()
+									.getSampleByIdentifier(
+											matcher.group(0).toString());
+							String identifier = foundSample.getIdentifier();
+
+							State state = (State) UI.getCurrent().getSession()
+									.getAttribute("state");
+							ArrayList<String> message = new ArrayList<String>();
+							message.add("clicked");
+							message.add(identifier);
+							message.add("sample");
+							state.notifyObservers(message);
+						} catch (Exception e) {
+							Notification.show(
+									"No Sample found for given barcode.",
+									Type.WARNING_MESSAGE);
+						}
+					}
+
+					else if (patternFound2) {
+						try {
+							Sample foundSample = datahandler.getOpenBisClient()
+									.getSampleByIdentifier(
+											matcher2.group(0).toString());
+							String identifier = foundSample.getIdentifier();
+
+							State state = (State) UI.getCurrent().getSession()
+									.getAttribute("state");
+							ArrayList<String> message = new ArrayList<String>();
+							message.add("clicked");
+							message.add(identifier);
+							message.add("sample");
+							state.notifyObservers(message);
+						} catch (Exception e) {
+							Notification.show(
+									"No Sample found for given barcode.",
+									Type.WARNING_MESSAGE);
+						}
+					} else {
+						Notification.show(
+								"Please provide a valid Sample Barcode.",
+								Type.WARNING_MESSAGE);
+					}
+				}
+			}
     });
     
     // setClickShortcut() would add global shortcut, instead we
