@@ -162,9 +162,10 @@ public class ChangeMetadataComponent extends CustomComponent {
 				// Add items with given item IDs
 				select.addItems(controlledVocabularies.get(key));
 				
-				for(Object itemID: select.getItemIds()) {
+				/*for(Object itemID: select.getItemIds()) {
 					System.out.println(itemID);
 				}
+				*/
 				select.setValue(properties.get(key));
 				form2.addComponent(select);
 				

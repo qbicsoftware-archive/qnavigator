@@ -16,7 +16,7 @@ public class ProjectBean implements Serializable {
   private String id;
   private String code;
   private String description;
-  private SpaceBean space;
+  private String space;
   private BeanItemContainer<ExperimentBean> experiments;
   private ProgressBar progress;
   private Date registrationDate;
@@ -26,7 +26,7 @@ public class ProjectBean implements Serializable {
   private Set<String> members;
   private Boolean containsData;
 
-  public ProjectBean(String id, String code, String description, SpaceBean space,
+  public ProjectBean(String id, String code, String description, String space,
       BeanItemContainer<ExperimentBean> experiments, ProgressBar progress, Date registrationDate,
       String registrator, String contact, Set<String> members, Boolean containsData) {
     super();
@@ -71,11 +71,11 @@ public class ProjectBean implements Serializable {
     this.description = description;
   }
 
-  public SpaceBean getSpace() {
+  public String getSpace() {
     return space;
   }
 
-  public void setSpace(SpaceBean space) {
+  public void setSpace(String space) {
     this.space = space;
   }
 

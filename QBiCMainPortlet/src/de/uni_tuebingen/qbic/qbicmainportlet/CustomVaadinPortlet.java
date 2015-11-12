@@ -42,8 +42,10 @@ import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.UI;
 
 /**
  * 
@@ -228,9 +230,6 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 						  .getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
 			  }
 		  }
-		  
-		  //new Notification("Download of tar-archive", "You are downloading datasets compressed as tar-archive. If you need instructions how to unpack the file please follow the instructions on " , Type.TRAY_NOTIFICATION, true)
-	      //        .show(Page.getCurrent());
 		  writer.closeStream();
 		  
 	  } else {

@@ -70,6 +70,37 @@ public class UglyToPrettyNameMapper {
 		namesMapping.put("Q_WF_NGS_RNA_EXPRESSION_ANALYSIS_RUN", "RNA Expression Workflow Run");
 		namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION_RUN", "Variant Annotation Workflow Run");
 		namesMapping.put("Q_WF_NGS_VARIANT_CALLING_RUN", "Variant Calling Workflow Run");
+		
+		// openBIS dataset types translated
+		namesMapping.put("Q_EXT_MS_QUALITYCONTROL_RESULTS", "Mass Spectrometry Quality Control (External)");
+		namesMapping.put("Q_EXT_NGS_QUALITYCONTROL_RESULTS", "NGS Quality Control (External)");
+		namesMapping.put("Q_MA_RAW_DATA", "Microarray Raw Data");
+		namesMapping.put("Q_MS_RAW_DATA", "Mass Spectrometry Raw Data");
+		namesMapping.put("Q_NGS_HLATYPING_DATA", "HLA Typing Results");
+		namesMapping.put("Q_NGS_IMMUNE_MONITORING_DATA", "Immune Monitoring Data");
+		namesMapping.put("Q_NGS_MAPPING_DATA", "Mapped NGS Reads");
+		namesMapping.put("Q_NGS_RAW_DATA", "NGS Raw Data");
+		namesMapping.put("Q_NGS_VARIANT_CALLING_DATA", "Variant Calling Data");
+		namesMapping.put("Q_PROJECT_DATA", "Project related Data");
+		namesMapping.put("Q_WF_MA_QUALITYCONTROL_LOGS", "Microarray Qualit Control Logs");
+		namesMapping.put("Q_WF_MA_QUALITYCONTROL_RESULTS", "Micoarray Quality Control");
+		namesMapping.put("Q_WF_MS_MAXQUANT_ORIGINAL_OUT", "MaxQuant Outfile");
+		namesMapping.put("Q_WF_MS_MAXQUANT_RESULTS", "MaxQuant Results");
+		namesMapping.put("Q_WF_MS_PEPTIDEID_LOGS", "Peptide Identification Logs");
+		namesMapping.put("Q_WF_MS_PEPTIDEID_RESULTS", "Peptide Identification Results");
+		namesMapping.put("Q_WF_MS_QUALITYCONTROL_LOGS", "Mass Spectrometry Quality Control Logs");
+		namesMapping.put("Q_WF_MS_QUALITYCONTROL_RESULTS", "Mass Spectrometry Quality Control Results");
+		namesMapping.put("Q_WF_NGS_EPITOPE_PREDICTION_LOGS", "Epitope Prediction Logs");
+		namesMapping.put("Q_WF_NGS_EPITOPE_PREDICTION_RESULTS", "Epitope Prediction Results");
+		namesMapping.put("Q_WF_NGS_HLATYPING_LOGS", "HLA Typing Logs");
+		namesMapping.put("Q_WF_NGS_HLATYPING_RESULTS", "HLA Typing Results");
+		namesMapping.put("Q_WF_NGS_QUALITYCONTROL_RESULTS", "NGS Quality Control Results");
+		namesMapping.put("Q_WF_NGS_RNAEXPRESSIONANALYSIS_LOGS", "Gene Expression Analysis Logs");
+		namesMapping.put("Q_WF_NGS_RNAEXPRESSIONANALYSIS_RESULTS", "Gene Expression Analysis Results");
+		namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION_LOGS", "Variant Annotation Logs");
+		namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION_RESULTS", "Variant Annotation Results");
+		namesMapping.put("Q_WF_NGS_VARIANT_CALLING_LOGS", "Variant Calling Logs");
+		namesMapping.put("Q_WF_NGS_VARIANT_CALLING_RESULTS", "Variant Calling Results");
 		*/
 		
 		// Mulstiscale HCC specific stuff
@@ -86,8 +117,6 @@ public class UglyToPrettyNameMapper {
 		namesMapping.put("MSH_SENT_TO_HUMAN_GENETICS",
 				"Tumor sample sent to Human Genetics department");
 		
-		
-
 	}
 
 	public String getPrettyName(String uglyName) {

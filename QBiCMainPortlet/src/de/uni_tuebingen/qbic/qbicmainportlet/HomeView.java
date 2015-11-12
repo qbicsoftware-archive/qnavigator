@@ -118,8 +118,9 @@ public class HomeView extends VerticalLayout implements View {
     setExportButton();
 
     this.table.setContainerDataSource(spaceBean.getProjects());
-    this.table.setVisibleColumns(new Object[] {"code", "description"});
+    this.table.setVisibleColumns(new Object[] {"code", "space", "description"});
     this.table.setColumnHeader("code", "Name");
+    this.table.setColumnHeader("space", "Project");
     this.table.setColumnHeader("description", "Description");
     this.table.setColumnExpandRatio("Name", 1);
     this.table.setColumnExpandRatio("Description", 3);
@@ -206,8 +207,8 @@ public class HomeView extends VerticalLayout implements View {
     //statistics.setIcon(FontAwesome.FILE_TEXT_O);
     Label statContent;
     if (numberOfProjects > 0) {
-      statContent = new Label(String.format("You have %s project(s)", numberOfProjects));
-      setHeader(String.format("Total number of projects: %s", numberOfProjects));
+      statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
+      setHeader(String.format("Total number of Sub-Projects: %s", numberOfProjects));
     } else {
       statContent =
           new Label(
@@ -230,7 +231,7 @@ public class HomeView extends VerticalLayout implements View {
     VerticalLayout tableSection = new VerticalLayout();
     VerticalLayout tableSectionContent = new VerticalLayout();
 
-    tableSectionContent.setCaption("Projects");
+    tableSectionContent.setCaption("Sub-Projects");
     tableSectionContent.setIcon(FontAwesome.TABLE);
     tableSectionContent.addComponent(this.table);
 
@@ -319,12 +320,14 @@ public class HomeView extends VerticalLayout implements View {
      // if (project.getSpaceCode().contains("IVAC")) {
      //   this.includePatientCreation = true;
      // }
-      datahandler.addOpenbisDtoProject(project);
+      //datahandler.addOpenbisDtoProject(project);
       String projectIdentifier = project.getIdentifier();
       String projectCode = project.getCode();
 
       // Project descriptions can be long; truncate the string to provide a brief preview
+      
       String desc = project.getDescription();
+      
       if (desc == null) {
         desc = "";
       } else if (desc.length() > 0) {
@@ -333,8 +336,9 @@ public class HomeView extends VerticalLayout implements View {
           desc += "...";
         }
       }
+      
       ProjectBean newProjectBean =
-          new ProjectBean(projectIdentifier, projectCode, desc, homeSpaceBean,
+          new ProjectBean(projectIdentifier, projectCode, desc, project.getSpaceCode(),
               new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new ProgressBar(),
               new Date(), "", "", null, false);
       projectContainer.addBean(newProjectBean);
@@ -344,5 +348,4 @@ public class HomeView extends VerticalLayout implements View {
       this.setContainerDataSource(homeSpaceBean, caption);
     }
   }
-
 }
