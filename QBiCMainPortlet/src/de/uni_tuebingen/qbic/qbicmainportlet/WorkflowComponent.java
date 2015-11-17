@@ -218,6 +218,7 @@ public class WorkflowComponent extends CustomComponent {
   void updateSelection(BeanItemContainer<Workflow> suitableWorkflows) {
     this.submission.setCaption("");
     this.submission.removeAllComponents();
+    
     if (!(suitableWorkflows.size() > 0)) {
       showNotification("No suitable workflows found. Please contact your project manager.");
     }
@@ -308,11 +309,13 @@ public class WorkflowComponent extends CustomComponent {
 
       @Override
       public Component getDetails(RowReference rowReference) {
-        FormLayout main = new FormLayout();
         Workflow w = (Workflow) rowReference.getItemId();
+        
         Label description = new Label(w.getDescription(), ContentMode.HTML);
         description.setCaption("Description");
-        main.addComponent(description);
+        
+        VerticalLayout main = new VerticalLayout(description);
+        main.setMargin(true);
         return main;
       }
     });
@@ -332,6 +335,10 @@ public class WorkflowComponent extends CustomComponent {
           // detailed Description should be visible
           availableWorkflows.setDetailsVisible(selectedWorkflow,
               !availableWorkflows.isDetailsVisible(selectedWorkflow));
+          
+          
+          LOGGER.debug(String.valueOf(availableWorkflows.isDetailsVisible(selectedWorkflow)));
+
         } else {
           LOGGER.warn("selected Workflow is null?");
           submission.setVisible(false);
