@@ -157,8 +157,10 @@ public class HomeView extends VerticalLayout implements View {
    * @return
    */
   ToolBar initToolBar() {
-    SearchBarView searchBarView = new SearchBarView(datahandler);
-    toolBar = new ToolBar(resourceUrl, state, searchBarView);
+    //SearchBarView searchBarView = new SearchBarView(datahandler);
+    SearchEngineView searchEngineView = new SearchEngineView(datahandler);
+    
+    toolBar = new ToolBar(resourceUrl, state, searchEngineView);
     toolBar.init();
     return toolBar;
   }

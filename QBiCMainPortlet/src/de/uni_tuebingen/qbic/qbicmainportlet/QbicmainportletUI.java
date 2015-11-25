@@ -214,8 +214,10 @@ public class QbicmainportletUI extends UI {
     try {
       buildMainLayout(datahandler, request, LiferayAndVaadinUtils.getUser().getScreenName());
     } catch (Exception e) {
-      if (datahandler.getOpenBisClient().loggedin())
+      if (datahandler.getOpenBisClient().loggedin()) {
+    	LOGGER.error("User not known?", e);  
         buildUserUnknownError(request);
+      }
       else {
         LOGGER.error("exception thrown during initialization.", e);
         status
@@ -363,8 +365,10 @@ public class QbicmainportletUI extends UI {
 
     labelLayout.addComponent(header);
 
-    SearchBarView searchBarView = new SearchBarView(datahandler);
-
+    //SearchBarView searchBarView = new SearchBarView(datahandler);
+    SearchEngineView searchBarView = new SearchEngineView(datahandler);
+    
+    
     headerView.setWidth("100%");
     headerView.addComponent(searchBarView);
     headerView.setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
