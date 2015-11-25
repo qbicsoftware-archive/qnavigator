@@ -35,12 +35,15 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -49,6 +52,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.PopupView;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -416,7 +420,7 @@ public class LevelComponent extends CustomComponent {
     // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, true, false));
+    buttonLayout.setMargin(new MarginInfo(true, false, true, true));
     buttonLayout.setHeight(null);
     // buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
@@ -456,6 +460,38 @@ public class LevelComponent extends CustomComponent {
     buttonLayout.addComponent(uncheckAll);
     buttonLayout.addComponent(visualize);
     buttonLayout.addComponent(this.download);
+    
+	String content = 
+			"<p> In case of multiple file selections, Project Browser will create a tar archive.</p>" +
+		    "<hr>" +	
+		    "<p> If you need help on extracting a tar archive file, follow the tips below: </p>" +
+		    "<p>" + FontAwesome.WINDOWS.getHtml() + " Windows </p>" +
+		    "<p> To open/extract TAR file on Windows, you can use 7-Zip, Easy 7-Zip, PeaZip.</p>" +
+		   	"<hr>" +
+		   	"<p>" + FontAwesome.APPLE.getHtml() + " MacOS </p>" +
+		   	"<p> To open/extract TAR file on Mac, you can use Mac OS built-in utility Archive Utility,<br> or third-part freeware. </p>" +
+    		"<hr>" +
+    		"<p>" + FontAwesome.LINUX.getHtml() + " Linux </p>" +
+		    "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> " +
+		    "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
+	
+	PopupView tooltip = new PopupView(new helpers.ToolTip(content));
+	tooltip.setHeight("44px");
+	
+	HorizontalLayout help = new HorizontalLayout();
+	help.setSizeFull();
+	HorizontalLayout helpContent = new HorizontalLayout();
+	//helpContent.setSizeFull();
+	
+	help.setMargin(new MarginInfo(false,false,false,true));
+	Label helpText = new Label("Attention: Click here before Download!");
+	helpContent.addComponent(new Label(FontAwesome.QUESTION_CIRCLE.getHtml(), ContentMode.HTML));
+	helpContent.addComponent(helpText);
+	helpContent.addComponent(tooltip);	
+	helpContent.setSpacing(true);
+	
+	help.addComponent(helpContent);
+	help.setComponentAlignment(helpContent, Alignment.TOP_CENTER);
     
     /**
      * prepare download.
@@ -704,8 +740,9 @@ public class LevelComponent extends CustomComponent {
       }
     });
 
-    // this.vert.addComponent(buttonLayout);
-    tableSection.addComponent(buttonLayout);
+    this.vert.addComponent(buttonLayout);
+    this.vert.addComponent(help);
+
   }
 
 

@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.UglyToPrettyNameMapper;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
@@ -33,6 +35,8 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.event.LayoutEvents.LayoutClickEvent;
+import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -43,14 +47,22 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.ClientConnector.DetachEvent;
 import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.PopupView;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -58,6 +70,8 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.PopupView.Content;
+import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -224,9 +238,8 @@ public class DatasetComponent extends CustomComponent{
    */
   private void buildLayout() {
     this.vert.removeAllComponents();
-
     this.vert.setWidth("100%");
-
+    
     // Table (containing datasets) section
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
@@ -281,12 +294,43 @@ public class DatasetComponent extends CustomComponent{
       }
     });
 
+	String content = 
+			"<p> In case of multiple file selections, Project Browser will create a tar archive.</p>" +
+		    "<hr>" +	
+		    "<p> If you need help on extracting a tar archive file, follow the tips below: </p>" +
+		    "<p>" + FontAwesome.WINDOWS.getHtml() + " Windows </p>" +
+		    "<p> To open/extract TAR file on Windows, you can use 7-Zip, Easy 7-Zip, PeaZip.</p>" +
+		   	"<hr>" +
+		   	"<p>" + FontAwesome.APPLE.getHtml() + " MacOS </p>" +
+		   	"<p> To open/extract TAR file on Mac, you can use Mac OS built-in utility Archive Utility,<br> or third-party freeware. </p>" +
+    		"<hr>" +
+    		"<p>" + FontAwesome.LINUX.getHtml() + " Linux </p>" +
+		    "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> " +
+		    "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
+	
+	PopupView tooltip = new PopupView(new helpers.ToolTip(content));
+	tooltip.setHeight("44px");
+	
+	HorizontalLayout help = new HorizontalLayout();
+	help.setSizeFull();
+	HorizontalLayout helpContent = new HorizontalLayout();
+	//helpContent.setSizeFull();
+	
+	help.setMargin(new MarginInfo(false,false,false,true));
+	Label helpText = new Label("Attention: Click here before Download!");
+	helpContent.addComponent(new Label(FontAwesome.QUESTION_CIRCLE.getHtml(), ContentMode.HTML));
+	helpContent.addComponent(helpText);
+	helpContent.addComponent(tooltip);	
+	helpContent.setSpacing(true);
+	
+	help.addComponent(helpContent);
+	help.setComponentAlignment(helpContent, Alignment.TOP_CENTER);
+		
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
     buttonLayout.addComponent(visualize);
     buttonLayout.addComponent(this.download);
-
-
+        
     /**
      * prepare download.
      */
@@ -348,7 +392,6 @@ public class DatasetComponent extends CustomComponent{
     });
 
 
-    // TODO Workflow Views should get those data and be happy
     /*
      * Send message that in datasetview the following was selected. WorkflowViews get those messages
      * and save them, if it is valid information for them.
@@ -389,8 +432,7 @@ public class DatasetComponent extends CustomComponent{
 
       }
     });
-
-
+        
     // TODO get the GV to work here. Together with reverse proxy
     // Assumes that table Value Change listner is enabling or disabling the button if preconditions
     // are not fullfilled
@@ -550,6 +592,8 @@ public class DatasetComponent extends CustomComponent{
     });
 
     this.vert.addComponent(buttonLayout);
+    this.vert.addComponent(help);
+
   }
 
 
@@ -598,6 +642,9 @@ public class DatasetComponent extends CustomComponent{
   
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
       String project, String sample, Timestamp ts, Object parent) {
+	  
+	  UglyToPrettyNameMapper mapper = new UglyToPrettyNameMapper();
+	  
     if (d.hasChildren()) {
 
       Object new_ds = dataset_container.addItem();

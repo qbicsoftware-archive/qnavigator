@@ -1,14 +1,20 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Page;
+import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+
 
 /*
  * Link that looks like a Button, that is actually a Label Based on
  * https://vaadin.com/forum/#!/thread/69989
  */
-public class ButtonLink extends Label {
+public class ButtonLink extends Label{
   /**
    * 
    */
@@ -47,4 +53,5 @@ public class ButtonLink extends Label {
     sb.append("</a>");
     super.setValue(sb.toString());
   }
+
 }

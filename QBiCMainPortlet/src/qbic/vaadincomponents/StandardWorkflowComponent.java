@@ -44,7 +44,6 @@ public class StandardWorkflowComponent extends CustomComponent{
     setCompositionRoot(submissionContent);
   }
   
-  
   /**
    * add a listener that decides what to do if the reset button was clicked
    * @param listener

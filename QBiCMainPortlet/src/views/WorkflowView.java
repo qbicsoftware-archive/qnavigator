@@ -322,22 +322,24 @@ public class WorkflowView extends VerticalLayout implements View {
   }
 
 
+  
+    private void addComponentListeners() {
 
-  private void addComponentListeners() {
+        availableWorkflows.setDetailsGenerator(new DetailsGenerator() {
+          private static final long serialVersionUID = 6123522348935657638L;
 
-    availableWorkflows.setDetailsGenerator(new DetailsGenerator() {
-      private static final long serialVersionUID = 6123522348935657638L;
-
-      @Override
-      public Component getDetails(RowReference rowReference) {
-        FormLayout main = new FormLayout();
-        Workflow w = (Workflow) rowReference.getItemId();
-        Label description = new Label(w.getDescription(), ContentMode.HTML);
-        description.setCaption("Description");
-        main.addComponent(description);
-        return main;
-      }
-    });
+          @Override
+          public Component getDetails(RowReference rowReference) {
+            Workflow w = (Workflow) rowReference.getItemId();
+            
+            Label description = new Label(w.getDescription(), ContentMode.HTML);
+            description.setCaption("Description");
+            
+            VerticalLayout main = new VerticalLayout(description);
+            main.setMargin(true);
+            return main;
+          }
+        });
 
     availableWorkflows.addItemClickListener(new ItemClickListener() {
       private static final long serialVersionUID = 3786125825391677177L;

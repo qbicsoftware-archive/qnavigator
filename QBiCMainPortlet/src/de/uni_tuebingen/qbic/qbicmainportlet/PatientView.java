@@ -259,6 +259,9 @@ public class PatientView extends VerticalLayout implements View {
 
       @Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
+    	LOGGER.debug(event.getTabSheet().getSelectedTab().getCaption());
+    	LOGGER.debug(getCurrentBean().getId());
+    	
         if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
           loadGraph();
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {

@@ -677,7 +677,6 @@ public class ProjectView extends VerticalLayout implements View {
       // Get the current item identifier, which is an integer.
       ExperimentBean item = (ExperimentBean) i.next();
 
-      LOGGER.debug("Status " + item.getStatus());
     }
     table.setVisibleColumns(new Object[] {"code", "type", "registrationDate", "registrator",
         "status"});

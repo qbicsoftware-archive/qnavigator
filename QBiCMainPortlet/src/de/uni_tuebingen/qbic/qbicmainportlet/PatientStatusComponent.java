@@ -69,7 +69,6 @@ public class PatientStatusComponent extends CustomComponent{
     ProgressBar progressBar = new ProgressBar();
     progressBar.setValue(0f);
     status.addComponent(progressBar);
-
     projectStatus.addComponent(status);
     
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.85f, Unit.PIXELS);
