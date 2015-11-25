@@ -9,12 +9,14 @@ import javax.portlet.PortletSession;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
+import logging.Log4j2Logger;
+import main.OpenBisClient;
+import model.DBConfig;
+import model.DBManager;
 import submitter.Submitter;
 import submitter.WorkflowSubmitterFactory;
 import submitter.WorkflowSubmitterFactory.Type;
 import views.WorkflowView;
-import logging.Log4j2Logger;
-import main.OpenBisClient;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.liferay.portal.kernel.util.WebKeys;
@@ -25,11 +27,10 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
@@ -40,13 +41,13 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.MultiscaleController;
@@ -106,7 +107,8 @@ public class QbicmainportletUI extends UI {
     }
   }
 
-  void errorMessageIfIsProduction() {
+
+void errorMessageIfIsProduction() {
     if (isInProductionMode())
       try {
         VaadinService.getCurrentResponse().sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT,
@@ -572,7 +574,11 @@ public class QbicmainportletUI extends UI {
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
             manager.getDataSourceUrl());
     this.openBisConnection.login();
-    this.datahandler = new DataHandler(openBisConnection);
+    
+    DBConfig mysqlConfig = new DBConfig(manager.getMsqlHost(), manager.getMysqlPort(), manager.getMysqlDB(), manager.getMysqlUser(), manager.getMysqlPass());
+    DBManager databaseManager = new DBManager(mysqlConfig);
+    
+    this.datahandler = new DataHandler(openBisConnection, databaseManager);
   }
 
 }

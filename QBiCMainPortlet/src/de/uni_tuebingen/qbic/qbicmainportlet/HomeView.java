@@ -118,9 +118,10 @@ public class HomeView extends VerticalLayout implements View {
     setExportButton();
 
     this.table.setContainerDataSource(spaceBean.getProjects());
-    this.table.setVisibleColumns(new Object[] {"code", "space", "description"});
+    this.table.setVisibleColumns(new Object[] {"code", "space", "description", "principalInvestigator"});
     this.table.setColumnHeader("code", "Name");
     this.table.setColumnHeader("space", "Project");
+    this.table.setColumnHeader("principalInvestigator", "P.I.");
     this.table.setColumnHeader("description", "Description");
     this.table.setColumnExpandRatio("Name", 1);
     this.table.setColumnExpandRatio("Description", 3);
@@ -341,6 +342,16 @@ public class HomeView extends VerticalLayout implements View {
           new ProjectBean(projectIdentifier, projectCode, desc, project.getSpaceCode(),
               new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new ProgressBar(),
               new Date(), "", "", null, false);
+      
+      String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectCode);
+      
+      if(pi.equals("")) {
+          newProjectBean.setPrincipalInvestigator("Unknown");
+      }
+      else {
+          newProjectBean.setPrincipalInvestigator(pi);
+      }
+      
       projectContainer.addBean(newProjectBean);
     }
     homeSpaceBean.setProjects(projectContainer);

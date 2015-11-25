@@ -180,8 +180,11 @@ public class PatientView extends VerticalLayout implements View {
     this.currentBean = projectBean;
 
     registeredExperiments.setContainerDataSource(projectBean.getExperiments());
-    registeredExperiments.setVisibleColumns(new Object[] {"code", "type", "registrationDate",
-        "registrator", "status"});
+    
+    registeredExperiments.setVisibleColumns(new Object[] {"code", "prettyType", "registrationDate", "registrator",
+    "status"});
+
+    registeredExperiments.setColumnHeader("prettyType", "Type");
 
     int rowNumber = projectBean.getExperiments().size();
 
@@ -585,7 +588,7 @@ public class PatientView extends VerticalLayout implements View {
     VerticalLayout tableSection = new VerticalLayout();
     VerticalLayout tableSectionContent = new VerticalLayout();
 
-    tableSection.setCaption("Experiments");
+    tableSection.setCaption("Exp. Steps");
 
     // tableSectionContent.setCaption("Registered Experiments");
     // tableSectionContent.setIcon(FontAwesome.FLASK);
