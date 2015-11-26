@@ -136,7 +136,8 @@ private VerticalLayout statusContent;
     vert = new VerticalLayout();
     datasetTable = buildFilterTable();
     descContent = new Label("");
-    investigator = new Label("");
+    investigator = new Label("", ContentMode.PREFORMATTED);
+    investigator.setCaption("Investigator");
     contact = new Label("", ContentMode.HTML);
     patientInformation = new Label("No patient information provided.", ContentMode.HTML);
     mainLayout = new VerticalLayout(vert);
@@ -159,7 +160,9 @@ private VerticalLayout statusContent;
       String identifier = currentBean.getId();
       String space = identifier.split("/")[1];
       
-      investigator.setValue(String.format("Principal Investigator: %s", projectBean.getPrincipalInvestigator()));
+      String pi = projectBean.getPrincipalInvestigator();
+      investigator.setValue(pi);
+
 
       contact
           .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"

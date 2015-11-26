@@ -369,17 +369,15 @@ public class DataHandler implements Serializable {
     progressBar.setValue(projectStatus);
 
     Date registrationDate = project.getRegistrationDetails().getRegistrationDate();
-    
-    String pi = getDatabaseManager().getInvestigatorForProject(project.getCode());
-    
-    LOGGER.debug("PI set to ? " + pi);
-    if(pi.equals("")) {
-        newProjectBean.setPrincipalInvestigator("Unknown");
+
+    String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+
+    if (pi.equals("")) {
+      newProjectBean.setPrincipalInvestigator("No information provided.");
+    } else {
+      newProjectBean.setPrincipalInvestigator(pi);
     }
-    else {
-        newProjectBean.setPrincipalInvestigator(pi);
-    }
-    
+
     newProjectBean.setId(project.getIdentifier());
     newProjectBean.setCode(project.getCode());
     String desc = project.getDescription();
@@ -403,15 +401,15 @@ public class DataHandler implements Serializable {
       if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
         status = assignedProperties.get("Q_CURRENT_STATUS");
       }
-      
+
       else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
-    	  status = assignedProperties.get("Q_WF_STATUS");
+        status = assignedProperties.get("Q_WF_STATUS");
       }
 
-      //Image statusColor = new Image(status, this.setExperimentStatusColor(status));
-      //statusColor.setWidth("15px");
-      //statusColor.setHeight("15px");
-      //statusColor.setCaption(status);
+      // Image statusColor = new Image(status, this.setExperimentStatusColor(status));
+      // statusColor.setWidth("15px");
+      // statusColor.setHeight("15px");
+      // statusColor.setCaption(status);
 
       newExperimentBean.setId(experiment.getIdentifier());
       newExperimentBean.setCode(experiment.getCode());
@@ -459,6 +457,14 @@ public class DataHandler implements Serializable {
     newProjectBean.setRegistrator(project.getRegistrationDetails().getUserId());
     newProjectBean.setContact(project.getRegistrationDetails().getUserEmail());
 
+    String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+
+    if (pi.equals("")) {
+      newProjectBean.setPrincipalInvestigator("No information provided.");
+    } else {
+      newProjectBean.setPrincipalInvestigator(pi);
+    }
+
     BeanItemContainer<ExperimentBean> experimentBeans =
         new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
 
@@ -466,15 +472,15 @@ public class DataHandler implements Serializable {
       ExperimentBean newExperimentBean = new ExperimentBean();
 
       Map<String, String> assignedProperties = experiment.getProperties();
-      
+
       String status = "";
 
       if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
         status = assignedProperties.get("Q_CURRENT_STATUS");
       }
-      
+
       else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
-    	  status = assignedProperties.get("Q_WF_STATUS");
+        status = assignedProperties.get("Q_WF_STATUS");
       }
 
 
@@ -576,9 +582,9 @@ public class DataHandler implements Serializable {
     if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
       status = assignedProperties.get("Q_CURRENT_STATUS");
     }
-    
+
     else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
-  	  status = assignedProperties.get("Q_WF_STATUS");
+      status = assignedProperties.get("Q_WF_STATUS");
     }
 
     for (PropertyType p : completeProperties) {
@@ -601,9 +607,9 @@ public class DataHandler implements Serializable {
         this.getOpenBisClient().getLabelsofProperties(
             this.getOpenBisClient().getExperimentTypeByString(experiment.getExperimentTypeCode()));
 
-    //Image statusColor = new Image(status, this.setExperimentStatusColor(status));
-    //statusColor.setWidth("15px");
-    //statusColor.setHeight("15px");
+    // Image statusColor = new Image(status, this.setExperimentStatusColor(status));
+    // statusColor.setWidth("15px");
+    // statusColor.setHeight("15px");
 
     ebean.setId(experiment.getIdentifier());
     ebean.setCode(experiment.getCode());
@@ -834,12 +840,12 @@ public class DataHandler implements Serializable {
     List<DataSet> datasets =
         (experiment_identifiers.size() > 0) ? getOpenBisClient().getFacade()
             .listDataSetsForExperiments(experiment_identifiers) : new ArrayList<DataSet>();
-    newProjectBean.setContainsData(datasets.size() != 0);
+            newProjectBean.setContainsData(datasets.size() != 0);
 
-    newProjectBean.setExperiments(experimentBeans);
-    newProjectBean.setMembers(this.getOpenBisClient().getSpaceMembers(project.getSpaceCode()));
+            newProjectBean.setExperiments(experimentBeans);
+            newProjectBean.setMembers(this.getOpenBisClient().getSpaceMembers(project.getSpaceCode()));
 
-    return newProjectBean;
+            return newProjectBean;
   }
 
 
@@ -870,9 +876,9 @@ public class DataHandler implements Serializable {
     if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
       status = assignedProperties.get("Q_CURRENT_STATUS");
     }
-    
+
     else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
-  	  status = assignedProperties.get("Q_WF_STATUS");
+      status = assignedProperties.get("Q_WF_STATUS");
     }
 
     for (PropertyType p : completeProperties) {
@@ -895,9 +901,9 @@ public class DataHandler implements Serializable {
         this.getOpenBisClient().getLabelsofProperties(
             this.getOpenBisClient().getExperimentTypeByString(experiment.getExperimentTypeCode()));
 
-    //Image statusColor = new Image(status, this.setExperimentStatusColor(status));
-    //statusColor.setWidth("15px");
-    //statusColor.setHeight("15px");
+    // Image statusColor = new Image(status, this.setExperimentStatusColor(status));
+    // statusColor.setWidth("15px");
+    // statusColor.setHeight("15px");
 
     newExperimentBean.setId(experiment.getIdentifier());
     newExperimentBean.setCode(experiment.getCode());
@@ -905,7 +911,7 @@ public class DataHandler implements Serializable {
     newExperimentBean.setStatus(status);
     newExperimentBean.setRegistrator(experiment.getRegistrationDetails().getUserId());
     newExperimentBean
-        .setRegistrationDate(experiment.getRegistrationDetails().getRegistrationDate());
+    .setRegistrationDate(experiment.getRegistrationDetails().getRegistrationDate());
     newExperimentBean.setProperties(properties);
     newExperimentBean.setControlledVocabularies(controlledVocabularies);
     newExperimentBean.setTypeLabels(typeLabels);
@@ -1043,7 +1049,7 @@ public class DataHandler implements Serializable {
       newBean.setFileSize(dto.getFileSize());
       newBean.setFileType(d.getDataSetTypeCode());
       newBean
-          .setHumanReadableFileSize(DashboardUtil.humanReadableByteCount(dto.getFileSize(), true));
+      .setHumanReadableFileSize(DashboardUtil.humanReadableByteCount(dto.getFileSize(), true));
       newBean.setParent(datasetBean);
       newBean.setProject(datasetBean.getProject());
       newBean.setRegistrationDate(datasetBean.getRegistrationDate());
@@ -1305,7 +1311,7 @@ public class DataHandler implements Serializable {
       dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(file_name);
       dataset_container.getContainerProperty(new_file, "File Type")
-          .setValue(d.getDataSetTypeCode());
+      .setValue(d.getDataSetTypeCode());
       dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(
           d.getDataSetTypeCode());
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
@@ -1489,7 +1495,7 @@ public class DataHandler implements Serializable {
 
     // project was planned (otherwise it would hopefully not exist :) )
     res.put("Project Planned", 1);
-    
+
     // design is pre-registered to the test sample level
     int prereg = 0;
     for (ExperimentBean bean : cont.getItemIds()) {
@@ -1516,7 +1522,7 @@ public class DataHandler implements Serializable {
     BeanItemContainer<ExperimentStatusBean> res =
         new BeanItemContainer<ExperimentStatusBean>(ExperimentStatusBean.class);
     BeanItemContainer<ExperimentBean> cont = projectBean.getExperiments();
-    
+
     // TODO set download link and workflow triggering
     // TODO add immune monitoring, report generation, vaccine design
 
@@ -1542,7 +1548,7 @@ public class DataHandler implements Serializable {
 
     for (ExperimentBean bean : cont.getItemIds()) {
       String type = bean.getType();
-      
+
       Double experimentStatus =
           bean.getProperties().get("Q_CURRENT_STATUS") == null ? 0.0 : helpers.OpenBisFunctions
               .statusToDoubleValue(bean.getProperties().get("Q_CURRENT_STATUS").toString());
@@ -1659,12 +1665,12 @@ public class DataHandler implements Serializable {
         while (it.hasNext()) {
           Map.Entry pairs = (Map.Entry) it.next();
           this.connectedPersons.getContainerProperty(newPerson, labelMap.get(pairs.getKey()))
-              .setValue(pairs.getValue());
+          .setValue(pairs.getValue());
         }
         this.connectedPersons.getContainerProperty(newPerson, "Project").setValue(
             this.getOpenBisClient()
-                .getProjectOfExperimentByIdentifier(parent.getExperimentIdentifierOrNull())
-                .getCode().toString());
+            .getProjectOfExperimentByIdentifier(parent.getExperimentIdentifierOrNull())
+            .getCode().toString());
 
       }
     }
@@ -1713,7 +1719,7 @@ public class DataHandler implements Serializable {
 
       // call of ingestion service to register project
       this.getOpenBisClient().triggerIngestionService("register-proj", projectMap);
-      //helpers.Utils.printMapContent(projectMap);
+      // helpers.Utils.printMapContent(projectMap);
 
       String newProjectDetailsCode =
           projectPrefix + Utils.createCountString(numberOfProject, 3) + "E_INFO";
@@ -1730,7 +1736,7 @@ public class DataHandler implements Serializable {
           newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "H";
       String newBiologicalEntitiyID =
           "/" + space + "/" + newBiologicalEntitiyCode
-              + helpers.BarcodeFunctions.checksum(newBiologicalEntitiyCode);
+          + helpers.BarcodeFunctions.checksum(newBiologicalEntitiyCode);
       numberOfRegisteredSamples += 1;
 
       // register first level of new patient
@@ -1743,7 +1749,7 @@ public class DataHandler implements Serializable {
 
       this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", firstLevel);
 
-      //helpers.Utils.printMapContent(firstLevel);
+      // helpers.Utils.printMapContent(firstLevel);
 
       Map<String, Object> fithLevel = new HashMap<String, Object>();
 
@@ -1790,7 +1796,7 @@ public class DataHandler implements Serializable {
               newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "B";
           String newBiologicalSampleID =
               "/" + space + "/" + newBiologicalSampleCode
-                  + helpers.BarcodeFunctions.checksum(newBiologicalSampleCode);
+              + helpers.BarcodeFunctions.checksum(newBiologicalSampleCode);
 
           parentHLA = newBiologicalSampleID;
 
@@ -1816,7 +1822,7 @@ public class DataHandler implements Serializable {
           secondLevel.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
 
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", secondLevel);
-          //helpers.Utils.printMapContent(secondLevel);
+          // helpers.Utils.printMapContent(secondLevel);
 
           if (sampleBean.getDnaSeq()) {
             String newSamplePreparationCode = newProjectCode + "E" + numberOfRegisteredExperiments;
@@ -1829,7 +1835,7 @@ public class DataHandler implements Serializable {
                 newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "B";
             String newTestSampleID =
                 "/" + space + "/" + newTestSampleCode
-                    + helpers.BarcodeFunctions.checksum(newTestSampleCode);
+                + helpers.BarcodeFunctions.checksum(newTestSampleCode);
             newTestSampleIDs.add(newTestSampleID);
             numberOfRegisteredSamples += 1;
             testTypes.add("DNA");
@@ -1844,7 +1850,7 @@ public class DataHandler implements Serializable {
                 newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "R";
             String newNGSRunID =
                 "/" + space + "/" + newNGSRunCode
-                    + helpers.BarcodeFunctions.checksum(newNGSRunCode);
+                + helpers.BarcodeFunctions.checksum(newNGSRunCode);
             newNGSRunIDs.add(newNGSRunID);
             numberOfRegisteredSamples += 1;
 
@@ -1865,7 +1871,7 @@ public class DataHandler implements Serializable {
                 newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "B";
             String newTestSampleID =
                 "/" + space + "/" + newTestSampleCode
-                    + helpers.BarcodeFunctions.checksum(newTestSampleCode);
+                + helpers.BarcodeFunctions.checksum(newTestSampleCode);
             newTestSampleIDs.add(newTestSampleID);
             numberOfRegisteredSamples += 1;
             testTypes.add("RNA");
@@ -1880,7 +1886,7 @@ public class DataHandler implements Serializable {
                 newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "R";
             String newNGSRunID =
                 "/" + space + "/" + newNGSRunCode
-                    + helpers.BarcodeFunctions.checksum(newNGSRunCode);
+                + helpers.BarcodeFunctions.checksum(newNGSRunCode);
             newNGSRunIDs.add(newNGSRunID);
             numberOfRegisteredSamples += 1;
 
@@ -1900,7 +1906,7 @@ public class DataHandler implements Serializable {
                 newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "B";
             String newTestSampleID =
                 "/" + space + "/" + newTestSampleCode
-                    + helpers.BarcodeFunctions.checksum(newTestSampleCode);
+                + helpers.BarcodeFunctions.checksum(newTestSampleCode);
             newTestSampleIDs.add(newTestSampleID);
             numberOfRegisteredSamples += 1;
             testTypes.add("DNA");
@@ -1915,7 +1921,7 @@ public class DataHandler implements Serializable {
                 newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "R";
             String newNGSRunID =
                 "/" + space + "/" + newNGSRunCode
-                    + helpers.BarcodeFunctions.checksum(newNGSRunCode);
+                + helpers.BarcodeFunctions.checksum(newNGSRunCode);
             newNGSRunIDs.add(newNGSRunID);
             numberOfRegisteredSamples += 1;
 
@@ -1944,8 +1950,8 @@ public class DataHandler implements Serializable {
           // TODO additional level for HLA typing
 
           // call of ingestion services for differeny levels
-          //helpers.Utils.printMapContent(thirdLevel);
-          //helpers.Utils.printMapContent(fourthLevel);
+          // helpers.Utils.printMapContent(thirdLevel);
+          // helpers.Utils.printMapContent(fourthLevel);
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", thirdLevel);
           this.getOpenBisClient().triggerIngestionService("register-ivac-lvl", fourthLevel);
         }
@@ -1964,7 +1970,7 @@ public class DataHandler implements Serializable {
 
         String newHLATypingSampleID =
             "/" + space + "/" + newHLATypingSampleCode
-                + helpers.BarcodeFunctions.checksum(newHLATypingSampleCode);
+            + helpers.BarcodeFunctions.checksum(newHLATypingSampleCode);
 
         newHLATypingSampleIDs.add(newHLATypingSampleID);
         numberOfRegisteredSamples += 1;
@@ -1986,7 +1992,7 @@ public class DataHandler implements Serializable {
 
     }
   }
-  
+
   /**
    * 
    * @param statusValues
@@ -2040,12 +2046,12 @@ public class DataHandler implements Serializable {
   }
 
 
-public DBManager getDatabaseManager() {
-	return databaseManager;
-}
+  public DBManager getDatabaseManager() {
+    return databaseManager;
+  }
 
 
-public void setDatabaseManager(DBManager databaseManager) {
-	this.databaseManager = databaseManager;
-}
+  public void setDatabaseManager(DBManager databaseManager) {
+    this.databaseManager = databaseManager;
+  }
 }

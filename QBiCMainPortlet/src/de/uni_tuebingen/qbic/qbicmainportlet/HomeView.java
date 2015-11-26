@@ -53,7 +53,7 @@ public class HomeView extends VerticalLayout implements View {
   VerticalLayout homeview_content;
   VerticalLayout buttonLayoutSection = new VerticalLayout();
   SpaceBean currentBean;
-  //Boolean includePatientCreation = false;
+  // Boolean includePatientCreation = false;
   ToolBar toolBar;
   State state;
   String resourceUrl;
@@ -91,7 +91,8 @@ public class HomeView extends VerticalLayout implements View {
    * execute the above constructor with default settings, in order to have the same settings
    */
   public HomeView(DataHandler datahandler) {
-    this(datahandler, "You seem to have no registered projects. Please contact QBiC.", "", new State(), "");
+    this(datahandler, "You seem to have no registered projects. Please contact QBiC.", "",
+        new State(), "");
   }
 
   public void setSizeFull() {
@@ -99,7 +100,7 @@ public class HomeView extends VerticalLayout implements View {
     super.setSizeFull();
     this.table.setSizeFull();
     homeview_content.setSpacing(true);
-    //homeview_content.setMargin(true);
+    // homeview_content.setMargin(true);
   }
 
   /**
@@ -118,10 +119,11 @@ public class HomeView extends VerticalLayout implements View {
     setExportButton();
 
     this.table.setContainerDataSource(spaceBean.getProjects());
-    this.table.setVisibleColumns(new Object[] {"code", "space", "description", "principalInvestigator"});
+    this.table.setVisibleColumns(new Object[] {"code", "space", "description",
+        "principalInvestigator"});
     this.table.setColumnHeader("code", "Name");
     this.table.setColumnHeader("space", "Project");
-    this.table.setColumnHeader("principalInvestigator", "P.I.");
+    this.table.setColumnHeader("principalInvestigator", "Investigator");
     this.table.setColumnHeader("description", "Description");
     this.table.setColumnExpandRatio("Name", 1);
     this.table.setColumnExpandRatio("Description", 3);
@@ -153,7 +155,7 @@ public class HomeView extends VerticalLayout implements View {
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
     setWidth((browserWidth * 0.85f), Unit.PIXELS);
   }
-  
+
   /**
    * 
    * @return
@@ -173,9 +175,9 @@ public class HomeView extends VerticalLayout implements View {
     toolBar.setWorkflow(false);
     toolBar.update("", "");
   }
-  
+
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
-    this.setMargin(new MarginInfo(false,true,false,false));
+    this.setMargin(new MarginInfo(false, true, false, false));
     // clean up first
     homeview_content.removeAllComponents();
     homeview_content.setWidth("100%");
@@ -183,29 +185,24 @@ public class HomeView extends VerticalLayout implements View {
     updateView(browserWidth, browserWidth, browser);
 
     // view overall statistics
-    //VerticalLayout statistics = new VerticalLayout();
+    // VerticalLayout statistics = new VerticalLayout();
     VerticalLayout homeViewDescription = new VerticalLayout();
-    
+
     // patientButton
     /*
-    if (includePatientCreation) {
-      Button addPatient = new Button("Add Patient");
-      addPatient.setIcon(FontAwesome.PLUS);
-      addPatient.setStyleName("addpatient");
-
-      addPatient.addClickListener(new ClickListener() {
-        @Override
-        public void buttonClick(ClickEvent event) {
-          UI.getCurrent().getNavigator().navigateTo(String.format(AddPatientView.navigateToLabel));
-        }
-      });
-      statistics.addComponent(addPatient);
-      statistics.setComponentAlignment(addPatient, Alignment.TOP_RIGHT);
-    }
-    */
+     * if (includePatientCreation) { Button addPatient = new Button("Add Patient");
+     * addPatient.setIcon(FontAwesome.PLUS); addPatient.setStyleName("addpatient");
+     * 
+     * addPatient.addClickListener(new ClickListener() {
+     * 
+     * @Override public void buttonClick(ClickEvent event) {
+     * UI.getCurrent().getNavigator().navigateTo(String.format(AddPatientView.navigateToLabel)); }
+     * }); statistics.addComponent(addPatient); statistics.setComponentAlignment(addPatient,
+     * Alignment.TOP_RIGHT); }
+     */
     // statistics
-    //statistics.setCaption("Statistics");
-    //statistics.setIcon(FontAwesome.FILE_TEXT_O);
+    // statistics.setCaption("Statistics");
+    // statistics.setIcon(FontAwesome.FILE_TEXT_O);
     Label statContent;
     if (numberOfProjects > 0) {
       statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
@@ -217,13 +214,13 @@ public class HomeView extends VerticalLayout implements View {
       statContent.addStyleName(ValoTheme.LABEL_FAILURE);
       statContent.addStyleName(ValoTheme.LABEL_LARGE);
     }
-    //statistics.addComponent(statContent);
+    // statistics.addComponent(statContent);
 
-    //statistics.setMargin(new MarginInfo(false,false,false,true));
-    //statistics.setWidth(100.0f, Unit.PERCENTAGE);
+    // statistics.setMargin(new MarginInfo(false,false,false,true));
+    // statistics.setWidth(100.0f, Unit.PERCENTAGE);
 
-    //homeViewDescription.addComponent(statistics);
-    //MhomeViewDescription.setMargin(true);
+    // homeViewDescription.addComponent(statistics);
+    // MhomeViewDescription.setMargin(true);
     homeViewDescription.setWidth("100%");
     homeview_content.addComponent(homeViewDescription);
 
@@ -236,7 +233,7 @@ public class HomeView extends VerticalLayout implements View {
     tableSectionContent.setIcon(FontAwesome.TABLE);
     tableSectionContent.addComponent(this.table);
 
-    //tableSectionContent.setMargin(true);
+    // tableSectionContent.setMargin(true);
     tableSection.setMargin(new MarginInfo(false, true, false, false));
 
     this.table.setWidth("100%");
@@ -251,7 +248,8 @@ public class HomeView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table,
+        ProjectView.navigateToLabel));
   }
 
 
@@ -308,27 +306,27 @@ public class HomeView extends VerticalLayout implements View {
    * refresh all openbis project for current user. Basically currentBean is overwritten
    */
   public void loadProjects() {
-    //this.includePatientCreation = false;
+    // this.includePatientCreation = false;
     final SpaceBean homeSpaceBean =
         new SpaceBean("homeSpace", "", false, null, null, null, null, null, null);
     BeanItemContainer<ProjectBean> projectContainer =
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
     List<Project> projects =
-        datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(
-            datahandler.getOpenBisClient().getSessionToken(), user);
+        datahandler.getOpenBisClient().getOpenbisInfoService()
+            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     for (Project project : projects) {
-     // if (project.getSpaceCode().contains("IVAC")) {
-     //   this.includePatientCreation = true;
-     // }
-      //datahandler.addOpenbisDtoProject(project);
+      // if (project.getSpaceCode().contains("IVAC")) {
+      // this.includePatientCreation = true;
+      // }
+      // datahandler.addOpenbisDtoProject(project);
       String projectIdentifier = project.getIdentifier();
       String projectCode = project.getCode();
 
       // Project descriptions can be long; truncate the string to provide a brief preview
-      
+
       String desc = project.getDescription();
-      
+
       if (desc == null) {
         desc = "";
       } else if (desc.length() > 0) {
@@ -337,21 +335,22 @@ public class HomeView extends VerticalLayout implements View {
           desc += "...";
         }
       }
-      
+
       ProjectBean newProjectBean =
           new ProjectBean(projectIdentifier, projectCode, desc, project.getSpaceCode(),
               new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new ProgressBar(),
               new Date(), "", "", null, false);
-      
+
       String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectCode);
-      
-      if(pi.equals("")) {
-          newProjectBean.setPrincipalInvestigator("Unknown");
+
+      if (pi.equals("")) {
+        newProjectBean.setPrincipalInvestigator("No information provided.");
+      } else {
+        newProjectBean.setPrincipalInvestigator(pi);
       }
-      else {
-          newProjectBean.setPrincipalInvestigator(pi);
-      }
-      
+
+      // LOGGER.debug("PI? for " + projectCode + " " + pi);
+
       projectContainer.addBean(newProjectBean);
     }
     homeSpaceBean.setProjects(projectContainer);

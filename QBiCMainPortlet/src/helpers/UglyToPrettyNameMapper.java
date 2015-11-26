@@ -143,6 +143,7 @@ public class UglyToPrettyNameMapper {
 		namesMapping.put("Q_WF_NGS_HLATYPING_LOGS", "HLA Typing Logs");
 		namesMapping.put("Q_WF_NGS_HLATYPING_RESULTS", "HLA Typing Results");
 		namesMapping.put("Q_WF_NGS_QUALITYCONTROL_RESULTS", "NGS Quality Control Results");
+		namesMapping.put("Q_WF_NGS_QUALITYCONTROL_LOGS", "NGS Quality Control Logs");
 		namesMapping.put("Q_WF_NGS_RNAEXPRESSIONANALYSIS_LOGS", "Gene Expression Analysis Logs");
 		namesMapping.put("Q_WF_NGS_RNAEXPRESSIONANALYSIS_RESULTS", "Gene Expression Analysis Results");
 		namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION_LOGS", "Variant Annotation Logs");

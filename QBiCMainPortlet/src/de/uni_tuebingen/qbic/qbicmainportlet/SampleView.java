@@ -332,6 +332,7 @@ private DatasetComponent datasetComponent;
     sampleDescriptionContent.addComponent(lastChangedDatasetLabel);
     sampleDescriptionContent.addComponent(propertiesLabel);
     sampleDescriptionContent.addComponent(experimentalFactorLabel);
+    sampleDescriptionContent.setSpacing(true);
 
     sampleDescriptionContent.setMargin(new MarginInfo(true, false, true, true));
     sampleDescription.addComponent(sampleDescriptionContent);
@@ -384,6 +385,7 @@ private DatasetComponent datasetComponent;
     lastChangedDatasetLabel = new Label("");
     statContent.addComponent(lastChangedDatasetLabel);
     statContent.setMargin(new MarginInfo(true, false, false, true));
+    statContent.setSpacing(true);
     // statContent.setMargin(true);
     // statContent.setSpacing(true);
 
