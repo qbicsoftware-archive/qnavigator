@@ -73,8 +73,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "1.1";
-  private String revision = "df46167";
+  private String version = "1.1.1";
+  private String revision = "c08054e";
   private String resUrl;
   protected View currentView;
 
@@ -108,7 +108,7 @@ public class QbicmainportletUI extends UI {
   }
 
 
-void errorMessageIfIsProduction() {
+  void errorMessageIfIsProduction() {
     if (isInProductionMode())
       try {
         VaadinService.getCurrentResponse().sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT,
@@ -574,10 +574,12 @@ void errorMessageIfIsProduction() {
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
             manager.getDataSourceUrl());
     this.openBisConnection.login();
-    
-    DBConfig mysqlConfig = new DBConfig(manager.getMsqlHost(), manager.getMysqlPort(), manager.getMysqlDB(), manager.getMysqlUser(), manager.getMysqlPass());
+
+    DBConfig mysqlConfig =
+        new DBConfig(manager.getMsqlHost(), manager.getMysqlPort(), manager.getMysqlDB(),
+            manager.getMysqlUser(), manager.getMysqlPass());
     DBManager databaseManager = new DBManager(mysqlConfig);
-    
+
     this.datahandler = new DataHandler(openBisConnection, databaseManager);
   }
 
