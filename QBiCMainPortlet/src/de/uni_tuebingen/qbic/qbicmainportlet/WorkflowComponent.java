@@ -328,7 +328,6 @@ public class WorkflowComponent extends CustomComponent {
         // TODO get path of datasetBean and set it as input ?!
         Workflow selectedWorkflow = (Workflow) event.getItemId();
         if (selectedWorkflow != null) {
-          LOGGER.debug("selected wf");
           updateParameterView(selectedWorkflow, datasetBeans);
           submission.setVisible(true);
 
@@ -336,9 +335,6 @@ public class WorkflowComponent extends CustomComponent {
           availableWorkflows.setDetailsVisible(selectedWorkflow,
               !availableWorkflows.isDetailsVisible(selectedWorkflow));
           
-          
-          LOGGER.debug(String.valueOf(availableWorkflows.isDetailsVisible(selectedWorkflow)));
-
         } else {
           LOGGER.warn("selected Workflow is null?");
           submission.setVisible(false);
