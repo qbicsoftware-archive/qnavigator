@@ -20,6 +20,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
+import ch.systemsx.cisd.openbis.generic.shared.basic.dto.FetchOption;
 
 import com.liferay.portal.kernel.search.messaging.SearchReaderMessageListener;
 import com.vaadin.data.util.BeanItemContainer;
@@ -30,6 +31,7 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -93,43 +95,47 @@ public class SearchEngineView extends CustomComponent {
 
 	public void initUI() {
 
-		System.out.println("is it real?");
 		mainlayout = new Panel();
 		mainlayout.addStyleName(ValoTheme.PANEL_BORDERLESS);
 
 		// Search bar
 		// *----------- search text field .... search button-----------*
 		HorizontalLayout searchbar = new HorizontalLayout();
+
+		VerticalLayout searchFieldLayout = new VerticalLayout();
+
 		searchbar.setSpacing(true);
 		final TextField searchfield = new TextField();
 		searchfield.setHeight("44px");
 		searchfield.setImmediate(true);
 
 		searchfield.setInputPrompt("search DB");
-		searchfield.setCaption("QSearch");
-		searchfield.setWidth("100%");
-		
+		//searchfield.setCaption("QSearch");
+		searchfield.setWidth(20.0f, Unit.EM);
+
 		// TODO would be nice to have a autofill or something similar
-		searchbar.addComponent(searchfield);
-		
-		NativeSelect navsel = new NativeSelect("Scope");
+		searchFieldLayout.addComponent(searchfield);
+
+		NativeSelect navsel = new NativeSelect();
 		navsel.addItem("Whole DB");
 		navsel.addItem("Experiments Only");
 		navsel.addItem("Samples Only");
 		navsel.setValue("Whole DB");
 		navsel.setWidth(10.0f, Unit.EM);
 		navsel.setNullSelectionAllowed(false);
-		searchbar.addComponent(navsel);
-		
-		Button searchOk = new Button("Go!");
-		searchOk.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+		searchFieldLayout.addComponent(navsel);
+
+		searchbar.addComponent(searchFieldLayout);
+
+
+
+
+		Button searchOk = new Button("Search");
+		//searchOk.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 		searchOk.setIcon(FontAwesome.SEARCH);
 		searchOk.addClickListener(new ClickListener() {
 			private static final long serialVersionUID = -2409450448301908214L;
-			private SearchResultsSampleBean tmpSearchBean;
-			private SearchResultsExperimentBean tmpExperimentBean;
-			private BeanItemContainer<SearchResultsSampleBean> sampleBeanContainer;
-			private BeanItemContainer<SearchResultsExperimentBean> expBeanContainer;
+			
 
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -149,154 +155,46 @@ public class SearchEngineView extends CustomComponent {
 									.getSampleByIdentifier(
 											matcher.group(0).toString()); */
 
-						List<Sample> sampleResults = querySamples(queryString);
+						datahandler.setSampleResults(querySamples(queryString));
+						datahandler.setExpResults(queryExperiments(queryString));
+						datahandler.setLastQueryString(queryString);
 
-						//						for (Sample i : sampleResults) {
-						//							System.out.println(i);
-						//							
-						//						}
-						//						
-						List<Experiment> expResults = queryExperiments(queryString);
 
-						//						for (Experiment i : expResults) {
-						//							System.out.println(i);
-						//						}
+						State state = (State) UI.getCurrent().getSession()
+								.getAttribute("state");
+						ArrayList<String> message = new ArrayList<String>();
+						message.add("clicked");
+						message.add("view");
+						message.add("searchresults");
+						state.notifyObservers(message);
 
-						Window window = new Window("Search results for '" + queryString + "':");
-						window.center();
-						window.setWidth("80%");
-						VerticalLayout winContent = new VerticalLayout();
-						winContent.setMargin(true);
-						winContent.setSpacing(true);
+//						Window window = new Window("Search results for '" + queryString + "':");
+//						window.center();
+//						window.setWidth("80%");
+//						VerticalLayout winContent = new VerticalLayout();
+//						winContent.setMargin(true);
+//						winContent.setSpacing(true);
+
+
 
 						
 
-						Collection<SearchResultsExperimentBean> expCollection = new ArrayList<SearchResultsExperimentBean>();
-
-						for (Experiment i : expResults) {
-							//System.out.println(i);
-							//Label sampleLabel = new Label(i.toString());
-							//SearchResultsSampleItem sampleItem = new SearchResultsSampleItem(i, rowNumber);
-
-							tmpExperimentBean = new SearchResultsExperimentBean(i, queryString);
-							expCollection.add(tmpExperimentBean);
-
-						}
-
-						expBeanContainer = new BeanItemContainer<SearchResultsExperimentBean>(SearchResultsExperimentBean.class, expCollection);
-
-						Grid expGrid = new Grid(expBeanContainer);
-						expGrid.setCaption("Found Experiments");
-						expGrid.setColumnOrder("experimentID", "experimentName", "matchedField");
-						expGrid.setSizeFull();
-						expGrid.getColumn("experimentID").setExpandRatio(0);
-						expGrid.getColumn("experimentName").setExpandRatio(1);
-						expGrid.getColumn("matchedField").setExpandRatio(1);
-
-						expGrid.setHeightMode(HeightMode.ROW);
-						expGrid.setHeightByRows(5);
-						expGrid.setSelectionMode(SelectionMode.SINGLE);
-
-						expGrid.addItemClickListener(new ItemClickListener() {
-							@Override
-							public void itemClick(ItemClickEvent event) {
-								System.out.println(event.getItemId() + " ::: " + event.getPropertyId()) ;
-								String cellType = new String(event.getPropertyId().toString());
-
-								if (cellType.equals("expID")) {
-									String cellContent = new String(sampleBeanContainer.getContainerProperty(event.getItemId(),
-											event.getPropertyId()).getValue().toString());
-
-									Notification.show("Value: " + cellContent);
-
-									State state = (State) UI.getCurrent().getSession()
-											.getAttribute("state");
-									ArrayList<String> message = new ArrayList<String>();
-									message.add("clicked");
-									message.add(cellContent);
-									message.add("sample");
-									state.notifyObservers(message);
-								}
-							}
-						});
-
-						if (expResults.size() == 0) {
-							Label noExps = new Label("no experiments were found");
-							noExps.setCaption("Found Experiments");
-							winContent.addComponent(noExps);
-						}
-						else {
-							winContent.addComponent(expGrid);
-						}
+						
 
 						//Grid testGrid = new Grid();
 
 						//int rowNumber = 1;
 
+
+
+						
+						//System.out.println(beanContainer.getContainerPropertyIds());
 						
 
-						Collection<SearchResultsSampleBean> sampleCollection = new ArrayList<SearchResultsSampleBean>();
-
-						for (Sample i : sampleResults) {
-							//System.out.println(i);
-							//Label sampleLabel = new Label(i.toString());
-							//SearchResultsSampleItem sampleItem = new SearchResultsSampleItem(i, rowNumber);
-
-							tmpSearchBean = new SearchResultsSampleBean(i, queryString);
-							sampleCollection.add(tmpSearchBean);
-
-						}
-
-						sampleBeanContainer = new BeanItemContainer<SearchResultsSampleBean>(SearchResultsSampleBean.class, sampleCollection);
-						//System.out.println(beanContainer.getContainerPropertyIds());
-						Grid sampleGrid = new Grid(sampleBeanContainer);
-						sampleGrid.setCaption("Found Samples");
-						sampleGrid.setColumnOrder("sampleID", "sampleName", "matchedField");
-						sampleGrid.setSizeFull();
-						sampleGrid.getColumn("sampleID").setExpandRatio(0);
-						sampleGrid.getColumn("sampleName").setExpandRatio(1);
-						sampleGrid.getColumn("matchedField").setExpandRatio(1);
-
-						sampleGrid.setHeightMode(HeightMode.ROW);
-						sampleGrid.setHeightByRows(5);
-						sampleGrid.setSelectionMode(SelectionMode.SINGLE);
-
-						sampleGrid.addItemClickListener(new ItemClickListener() {
-							@Override
-							public void itemClick(ItemClickEvent event) {
-								System.out.println(event.getItemId() + " ::: " + event.getPropertyId()) ;
-								String cellType = new String(event.getPropertyId().toString());
-
-								if (cellType.equals("sampleID")) {
-									String cellContent = new String(sampleBeanContainer.getContainerProperty(event.getItemId(),
-											event.getPropertyId()).getValue().toString());
-
-									Notification.show("Value: " + cellContent);
-
-									State state = (State) UI.getCurrent().getSession()
-											.getAttribute("state");
-									ArrayList<String> message = new ArrayList<String>();
-									message.add("clicked");
-									message.add(cellContent);
-									message.add("sample");
-									state.notifyObservers(message);
-								}
-							}
-						});
-
-						if (sampleResults.size() == 0) {
-							Label noSamples = new Label("no samples were found");
-							noSamples.setCaption("Found Samples");
-							winContent.addComponent(noSamples);
-						}
-						else {
-							winContent.addComponent(sampleGrid);
-						}
 
 
-
-						window.setContent(winContent);
-						UI.getCurrent().addWindow(window);
+//						window.setContent(winContent);
+//						UI.getCurrent().addWindow(window);
 
 						//datahandler.getOpenBisClient().getLabelsofProperties(test);
 
@@ -328,6 +226,7 @@ public class SearchEngineView extends CustomComponent {
 		searchfield.setValidationVisible(false);
 
 		searchbar.addComponent(searchOk);
+		//searchbar.setComponentAlignment(searchOk, Alignment.MIDDLE_CENTER);
 		//searchbar.setMargin(new MarginInfo(true, false, true, false));
 		mainlayout.setContent(searchbar);
 		//mainlayout.setComponentAlignment(searchbar, Alignment.MIDDLE_RIGHT);
@@ -377,6 +276,7 @@ public class SearchEngineView extends CustomComponent {
 		java.util.EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
 		SearchCriteria sc = new SearchCriteria();
 		sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, samplecode + "*"));
+		
 		List<Sample> samples = datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc, fetchOptions,LiferayAndVaadinUtils.getUser().getScreenName());
 		List<String> ret = new ArrayList<String>(samples.size());
 		for(Sample sample : samples){

@@ -126,13 +126,13 @@ public class ToolBar extends HorizontalLayout {
     workflows.setEnabled(false);
     
     addComponent(menuBar);
-    menuBar.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f), Unit.PIXELS);
-    searchEngineView.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.2f), Unit.PIXELS);
-
+    //menuBar.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f), Unit.PIXELS);
+    //searchEngineView.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.2f), Unit.PIXELS);
+    //searchEngineView.setWidth("100%");
     addComponent(searchEngineView);
     setComponentAlignment(searchEngineView, Alignment.TOP_RIGHT);
-    setExpandRatio(menuBar, 0.7f);
-    setExpandRatio(searchEngineView, 0.3f);
+    //setExpandRatio(menuBar, 0.7f);
+    //setExpandRatio(searchEngineView, 0.3f);
   }
 
   void update(final String type, final String id) {

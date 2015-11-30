@@ -9,14 +9,6 @@ import javax.portlet.PortletSession;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
-import submitter.Submitter;
-import submitter.WorkflowSubmitterFactory;
-import submitter.WorkflowSubmitterFactory.Type;
-import views.WorkflowView;
-import logging.Log4j2Logger;
-import main.OpenBisClient;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.annotations.Theme;
@@ -25,11 +17,10 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
@@ -40,20 +31,27 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import controllers.MultiscaleController;
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import logging.Log4j2Logger;
+import main.OpenBisClient;
+import submitter.Submitter;
+import submitter.WorkflowSubmitterFactory;
+import submitter.WorkflowSubmitterFactory.Type;
+import views.WorkflowView;
 
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
@@ -79,6 +77,7 @@ public class QbicmainportletUI extends UI {
 
   @Override
   protected void init(VaadinRequest request) {
+    LOGGER.info("vaadin init starts: " + System.currentTimeMillis());
     if (LiferayAndVaadinUtils.getUser() == null) {
       buildNotLoggedinLayout();
     } else {
@@ -86,6 +85,7 @@ public class QbicmainportletUI extends UI {
       // log who is connecting, when.
       LOGGER.info(String.format("QbicNavigator (%s.%s) used by: %s", version, revision,
           LiferayAndVaadinUtils.getUser().getScreenName()));
+
 
       // try to init connection to openbis and write some session attributes, that can be accessed
       // globally
@@ -99,10 +99,11 @@ public class QbicmainportletUI extends UI {
         errorMessageIfIsProduction();
         return;
       }
-
+      LOGGER.info("init openbis finished: " + System.currentTimeMillis());
       this.resUrl =
           (String) getPortletSession().getAttribute("resURL", PortletSession.APPLICATION_SCOPE);
       initProgressBarAndThreading(request);
+      LOGGER.info("vaadin init finished: " + System.currentTimeMillis());
     }
   }
 
@@ -142,8 +143,8 @@ public class QbicmainportletUI extends UI {
     this.setContent(vl);
     vl.addComponent(new Label(
         "An error occured, while trying to load projects. Please contact your project manager to make sure your account is added to your projects."));
-    LOGGER
-        .error("Couldn't initialize view. User is probably not added to openBIS and has been informed to contact prject manager.");
+    LOGGER.error(
+        "Couldn't initialize view. User is probably not added to openBIS and has been informed to contact prject manager.");
   }
 
   /**
@@ -215,13 +216,12 @@ public class QbicmainportletUI extends UI {
       buildMainLayout(datahandler, request, LiferayAndVaadinUtils.getUser().getScreenName());
     } catch (Exception e) {
       if (datahandler.getOpenBisClient().loggedin()) {
-    	LOGGER.error("User not known?", e);  
+        LOGGER.error("User not known?", e);
         buildUserUnknownError(request);
-      }
-      else {
+      } else {
         LOGGER.error("exception thrown during initialization.", e);
-        status
-            .setValue("An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
+        status.setValue(
+            "An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
       }
     }
   }
@@ -232,22 +232,35 @@ public class QbicmainportletUI extends UI {
 
   public void buildMainLayout(DataHandler datahandler, VaadinRequest request, String user) {
 
+    LOGGER.info("buildMainLayout starts: " + System.currentTimeMillis());
+
+
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
     MultiscaleController multiscaleController =
         new MultiscaleController(datahandler.getOpenBisClient(), user);
 
 
+
     final HomeView homeView = new HomeView(datahandler, "Your Projects", user, state, resUrl);
+    LOGGER.info("homeview: " + System.currentTimeMillis());
     DatasetView datasetView = new DatasetView(datahandler, state, resUrl);
+    LOGGER.info("datasetview: " + System.currentTimeMillis());
     final SampleView sampleView = new SampleView(datahandler, state, resUrl, multiscaleController);
-    BarcodeView barcodeView =
-        new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
-            manager.getBarcodePathVariable());
+    LOGGER.info("sampleview: " + System.currentTimeMillis());
+    BarcodeView barcodeView = new BarcodeView(datahandler.getOpenBisClient(),
+        manager.getBarcodeScriptsFolder(), manager.getBarcodePathVariable());
+    LOGGER.info("barcodeview: " + System.currentTimeMillis());
     final ExperimentView experimentView = new ExperimentView(datahandler, state, resUrl);
     // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
+    LOGGER.info("expview: " + System.currentTimeMillis());
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
+    LOGGER.info("patientview: " + System.currentTimeMillis());
 
+    final SearchResultsView searchResultsView =
+        new SearchResultsView(datahandler, "Search results", user, state, resUrl);
+
+    LOGGER.info("get guse submitter: " + System.currentTimeMillis());
 
     Submitter submitter = null;
     try {
@@ -256,6 +269,7 @@ public class QbicmainportletUI extends UI {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
+    LOGGER.info("guse submitter found " + System.currentTimeMillis());
 
     WorkflowViewController controller =
         new WorkflowViewController(submitter, datahandler.getOpenBisClient(), user);
@@ -282,6 +296,8 @@ public class QbicmainportletUI extends UI {
 
     navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateToLabel, addPatientView);
+
+    navigator.addView(SearchResultsView.navigateToLabel, searchResultsView);
 
     navigator.addView(WorkflowView.navigateToLabel, workflowView);
 
@@ -330,9 +346,10 @@ public class QbicmainportletUI extends UI {
     buttonLayout.addComponent(homeButton);
     Boolean includePatientCreation = false;
 
-    List<Project> projects =
-        datahandler.getOpenBisClient().getOpenbisInfoService()
-            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+
+
+    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     int numberOfProjects = 0;
     for (Project project : projects) {
       if (project.getSpaceCode().contains("IVAC")) {
@@ -340,7 +357,6 @@ public class QbicmainportletUI extends UI {
       }
       numberOfProjects += 1;
     }
-
 
     // add patient button
     if (includePatientCreation) {
@@ -365,14 +381,19 @@ public class QbicmainportletUI extends UI {
 
     labelLayout.addComponent(header);
 
-    //SearchBarView searchBarView = new SearchBarView(datahandler);
+    // SearchBarView searchBarView = new SearchBarView(datahandler);
     SearchEngineView searchBarView = new SearchEngineView(datahandler);
-    
-    
+
+
     headerView.setWidth("100%");
     headerView.addComponent(searchBarView);
     headerView.setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
     // headerView.setComponentAlignment(homeButton, Alignment.TOP_LEFT);
+
+    headerView.setExpandRatio(buttonLayout, 1);
+    headerView.setExpandRatio(labelLayout, 1);
+    headerView.setExpandRatio(searchBarView, 2);
+
 
     treeViewAndLevelView.addComponent(navigatorContent);
     mainLayout.addComponent(headerView);
@@ -540,8 +561,8 @@ public class QbicmainportletUI extends UI {
 
     LOGGER.debug("used urifragement: " + requestParams);
     if (requestParams != null) {
-      navigator.navigateTo(requestParams.startsWith("!") ? requestParams.substring(1)
-          : requestParams);
+      navigator
+          .navigateTo(requestParams.startsWith("!") ? requestParams.substring(1) : requestParams);
     } else {
       navigator.navigateTo("");
     }
@@ -572,11 +593,13 @@ public class QbicmainportletUI extends UI {
   }
 
   private void initConnection() {
-    this.openBisConnection =
-        new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
-            manager.getDataSourceUrl());
+    LOGGER.info("before init: " + System.currentTimeMillis());
+    this.openBisConnection = new OpenBisClient(manager.getDataSourceUser(),
+        manager.getDataSourcePassword(), manager.getDataSourceUrl());
     this.openBisConnection.login();
+    LOGGER.info("after init: " + System.currentTimeMillis());
     this.datahandler = new DataHandler(openBisConnection);
+
   }
 
 }

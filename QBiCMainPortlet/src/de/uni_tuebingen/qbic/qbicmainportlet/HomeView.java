@@ -1,19 +1,10 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
-import helpers.Utils;
-
 import java.util.Date;
 import java.util.List;
 
-import logging.Log4j2Logger;
-import model.ExperimentBean;
-import model.ProjectBean;
-import model.SpaceBean;
-
 import org.tepi.filtertable.FilterTable;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
@@ -21,23 +12,23 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import helpers.Utils;
+import logging.Log4j2Logger;
+import model.ExperimentBean;
+import model.ProjectBean;
+import model.SpaceBean;
 
 public class HomeView extends VerticalLayout implements View {
 
@@ -53,7 +44,7 @@ public class HomeView extends VerticalLayout implements View {
   VerticalLayout homeview_content;
   VerticalLayout buttonLayoutSection = new VerticalLayout();
   SpaceBean currentBean;
-  //Boolean includePatientCreation = false;
+  // Boolean includePatientCreation = false;
   ToolBar toolBar;
   State state;
   String resourceUrl;
@@ -76,7 +67,8 @@ public class HomeView extends VerticalLayout implements View {
 
   private String user;
 
-  public HomeView(DataHandler datahandler, String caption, String user, State state, String resUrl) {
+  public HomeView(DataHandler datahandler, String caption, String user, State state,
+      String resUrl) {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
     this.datahandler = datahandler;
@@ -91,7 +83,8 @@ public class HomeView extends VerticalLayout implements View {
    * execute the above constructor with default settings, in order to have the same settings
    */
   public HomeView(DataHandler datahandler) {
-    this(datahandler, "You seem to have no registered projects. Please contact QBiC.", "", new State(), "");
+    this(datahandler, "You seem to have no registered projects. Please contact QBiC.", "",
+        new State(), "");
   }
 
   public void setSizeFull() {
@@ -99,7 +92,7 @@ public class HomeView extends VerticalLayout implements View {
     super.setSizeFull();
     this.table.setSizeFull();
     homeview_content.setSpacing(true);
-    //homeview_content.setMargin(true);
+    // homeview_content.setMargin(true);
   }
 
   /**
@@ -152,15 +145,15 @@ public class HomeView extends VerticalLayout implements View {
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
     setWidth((browserWidth * 0.85f), Unit.PIXELS);
   }
-  
+
   /**
    * 
    * @return
    */
   ToolBar initToolBar() {
-    //SearchBarView searchBarView = new SearchBarView(datahandler);
+    // SearchBarView searchBarView = new SearchBarView(datahandler);
     SearchEngineView searchEngineView = new SearchEngineView(datahandler);
-    
+
     toolBar = new ToolBar(resourceUrl, state, searchEngineView);
     toolBar.init();
     return toolBar;
@@ -174,9 +167,9 @@ public class HomeView extends VerticalLayout implements View {
     toolBar.setWorkflow(false);
     toolBar.update("", "");
   }
-  
+
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
-    this.setMargin(new MarginInfo(false,true,false,false));
+    this.setMargin(new MarginInfo(false, true, false, false));
     // clean up first
     homeview_content.removeAllComponents();
     homeview_content.setWidth("100%");
@@ -184,47 +177,41 @@ public class HomeView extends VerticalLayout implements View {
     updateView(browserWidth, browserWidth, browser);
 
     // view overall statistics
-    //VerticalLayout statistics = new VerticalLayout();
+    // VerticalLayout statistics = new VerticalLayout();
     VerticalLayout homeViewDescription = new VerticalLayout();
-    
+
     // patientButton
     /*
-    if (includePatientCreation) {
-      Button addPatient = new Button("Add Patient");
-      addPatient.setIcon(FontAwesome.PLUS);
-      addPatient.setStyleName("addpatient");
-
-      addPatient.addClickListener(new ClickListener() {
-        @Override
-        public void buttonClick(ClickEvent event) {
-          UI.getCurrent().getNavigator().navigateTo(String.format(AddPatientView.navigateToLabel));
-        }
-      });
-      statistics.addComponent(addPatient);
-      statistics.setComponentAlignment(addPatient, Alignment.TOP_RIGHT);
-    }
-    */
+     * if (includePatientCreation) { Button addPatient = new Button("Add Patient");
+     * addPatient.setIcon(FontAwesome.PLUS); addPatient.setStyleName("addpatient");
+     * 
+     * addPatient.addClickListener(new ClickListener() {
+     * 
+     * @Override public void buttonClick(ClickEvent event) {
+     * UI.getCurrent().getNavigator().navigateTo(String.format(AddPatientView.navigateToLabel)); }
+     * }); statistics.addComponent(addPatient); statistics.setComponentAlignment(addPatient,
+     * Alignment.TOP_RIGHT); }
+     */
     // statistics
-    //statistics.setCaption("Statistics");
-    //statistics.setIcon(FontAwesome.FILE_TEXT_O);
+    // statistics.setCaption("Statistics");
+    // statistics.setIcon(FontAwesome.FILE_TEXT_O);
     Label statContent;
     if (numberOfProjects > 0) {
       statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
       setHeader(String.format("Total number of Sub-Projects: %s", numberOfProjects));
     } else {
-      statContent =
-          new Label(
-              String.format("You have no projects so far. Please contact your project manager."));
+      statContent = new Label(
+          String.format("You have no projects so far. Please contact your project manager."));
       statContent.addStyleName(ValoTheme.LABEL_FAILURE);
       statContent.addStyleName(ValoTheme.LABEL_LARGE);
     }
-    //statistics.addComponent(statContent);
+    // statistics.addComponent(statContent);
 
-    //statistics.setMargin(new MarginInfo(false,false,false,true));
-    //statistics.setWidth(100.0f, Unit.PERCENTAGE);
+    // statistics.setMargin(new MarginInfo(false,false,false,true));
+    // statistics.setWidth(100.0f, Unit.PERCENTAGE);
 
-    //homeViewDescription.addComponent(statistics);
-    //MhomeViewDescription.setMargin(true);
+    // homeViewDescription.addComponent(statistics);
+    // MhomeViewDescription.setMargin(true);
     homeViewDescription.setWidth("100%");
     homeview_content.addComponent(homeViewDescription);
 
@@ -237,7 +224,7 @@ public class HomeView extends VerticalLayout implements View {
     tableSectionContent.setIcon(FontAwesome.TABLE);
     tableSectionContent.addComponent(this.table);
 
-    //tableSectionContent.setMargin(true);
+    // tableSectionContent.setMargin(true);
     tableSection.setMargin(new MarginInfo(false, true, false, false));
 
     this.table.setWidth("100%");
@@ -252,7 +239,8 @@ public class HomeView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
+    this.table
+        .addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
   }
 
 
@@ -309,27 +297,33 @@ public class HomeView extends VerticalLayout implements View {
    * refresh all openbis project for current user. Basically currentBean is overwritten
    */
   public void loadProjects() {
-    //this.includePatientCreation = false;
+    // this.includePatientCreation = false;
     final SpaceBean homeSpaceBean =
         new SpaceBean("homeSpace", "", false, null, null, null, null, null, null);
     BeanItemContainer<ProjectBean> projectContainer =
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
-    List<Project> projects =
-        datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(
-            datahandler.getOpenBisClient().getSessionToken(), user);
+    LOGGER.info("projects load");
+    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+    LOGGER.info("projects finsished");
+
+
+    // getProjectsQuicker(
+    // datahandler.getOpenBisClient().getSessionToken(), user);
+
     for (Project project : projects) {
-     // if (project.getSpaceCode().contains("IVAC")) {
-     //   this.includePatientCreation = true;
-     // }
-      //datahandler.addOpenbisDtoProject(project);
+      // if (project.getSpaceCode().contains("IVAC")) {
+      // this.includePatientCreation = true;
+      // }
+      // datahandler.addOpenbisDtoProject(project);
       String projectIdentifier = project.getIdentifier();
       String projectCode = project.getCode();
 
       // Project descriptions can be long; truncate the string to provide a brief preview
-      
+
       String desc = project.getDescription();
-      
+
       if (desc == null) {
         desc = "";
       } else if (desc.length() > 0) {
@@ -338,11 +332,10 @@ public class HomeView extends VerticalLayout implements View {
           desc += "...";
         }
       }
-      
-      ProjectBean newProjectBean =
-          new ProjectBean(projectIdentifier, projectCode, desc, project.getSpaceCode(),
-              new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new ProgressBar(),
-              new Date(), "", "", null, false);
+
+      ProjectBean newProjectBean = new ProjectBean(projectIdentifier, projectCode, desc,
+          project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
+          new ProgressBar(), new Date(), "", "", null, false);
       projectContainer.addBean(newProjectBean);
     }
     homeSpaceBean.setProjects(projectContainer);
@@ -350,4 +343,5 @@ public class HomeView extends VerticalLayout implements View {
       this.setContainerDataSource(homeSpaceBean, caption);
     }
   }
+
 }
