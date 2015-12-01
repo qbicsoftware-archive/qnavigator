@@ -746,7 +746,7 @@ public class DatasetView extends VerticalLayout implements View {
    * @return
    */
   ToolBar initToolBar() {
-    SearchBarView searchBarView = new SearchBarView(datahandler);
+    SearchEngineView searchBarView = new SearchEngineView(datahandler);
     toolbar = new ToolBar(resourceUrl, state, searchBarView);
     toolbar.init();
     return toolbar;
