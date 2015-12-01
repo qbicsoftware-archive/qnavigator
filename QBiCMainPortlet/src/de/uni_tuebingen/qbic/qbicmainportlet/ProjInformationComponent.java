@@ -44,6 +44,8 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.server.ExternalResource;
@@ -62,6 +64,7 @@ import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -104,6 +107,8 @@ public class ProjInformationComponent extends CustomComponent {
       "Registration Date"};
 
   private int numberOfDatasets;
+  
+  private Label investigator;
 
   private Label descContent;
 
@@ -112,6 +117,10 @@ public class ProjInformationComponent extends CustomComponent {
   private Label patientInformation;
 
   private ProjectBean projectBean;
+
+private Label experimentLabel;
+
+private VerticalLayout statusContent;
 
   public ProjInformationComponent(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
@@ -127,9 +136,14 @@ public class ProjInformationComponent extends CustomComponent {
     vert = new VerticalLayout();
     datasetTable = buildFilterTable();
     descContent = new Label("");
+    investigator = new Label("", ContentMode.PREFORMATTED);
+    investigator.setCaption("Investigator");
     contact = new Label("", ContentMode.HTML);
     patientInformation = new Label("No patient information provided.", ContentMode.HTML);
     mainLayout = new VerticalLayout(vert);
+    
+    experimentLabel = new Label("");
+    statusContent = new VerticalLayout();
 
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
@@ -140,18 +154,28 @@ public class ProjInformationComponent extends CustomComponent {
     if (currentBean.getId() == null)
       return;
     try {
-
+    	
       projectBean = currentBean;
+      
+      String identifier = currentBean.getId();
+      String space = identifier.split("/")[1];
+      
+      String pi = projectBean.getPrincipalInvestigator();
+      investigator.setValue(pi);
+
 
       contact
           .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
-              + currentBean.getId()
+              + identifier
               + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
-              + currentBean.getId() + "</a>");
+              + currentBean.getCode() + " (" + space + ")" + "</a>");
       String desc = currentBean.getDescription();
       if (!desc.isEmpty()) {
         descContent.setValue(desc);
       }
+      
+      experimentLabel.setValue((String.format("This project includes %s experimental step(s)", currentBean.getExperiments().size())));
+      statusContent = datahandler.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
 
       HierarchicalContainer datasetContainer = new HierarchicalContainer();
       datasetContainer.addContainerProperty("Select", CheckBox.class, null);
@@ -296,9 +320,13 @@ public class ProjInformationComponent extends CustomComponent {
 
     projDescription.setCaption("");
 
+    projDescriptionContent.addComponent(investigator);
     projDescriptionContent.addComponent(descContent);
-    projDescriptionContent.addComponent(contact);
-
+    projDescriptionContent.addComponent(experimentLabel);
+    projDescriptionContent.addComponent(statusContent);
+    statusContent.setSpacing(true);
+    statusContent.setMargin(new MarginInfo(false, false, false, true));
+    
     if (projectType.equals("patient")) {
       String patientInfo = "";
       Boolean available = false;
@@ -336,6 +364,8 @@ public class ProjInformationComponent extends CustomComponent {
     }
 
     projDescription.addComponent(projDescriptionContent);
+    
+    projDescriptionContent.addComponent(contact);
 
     projDescriptionContent.setSpacing(true);
     projDescription.setMargin(new MarginInfo(false, false, true, true));
@@ -458,7 +488,8 @@ public class ProjInformationComponent extends CustomComponent {
         } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS")
             && (fileName.endsWith(".html"))) {
           visualize.setEnabled(true);
-        } else {
+        }
+        else {
           visualize.setEnabled(false);
         }
       }
@@ -505,7 +536,7 @@ public class ProjInformationComponent extends CustomComponent {
 
       }
     });
-
+    
 
     // TODO get the GV to work here. Together with reverse proxy
     // Assumes that table Value Change listner is enabling or disabling the button if preconditions
@@ -537,9 +568,10 @@ public class ProjInformationComponent extends CustomComponent {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
 
-          Window subWindow =
-              new Window("QC of Sample: "
-                  + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
+          Window subWindow = new Window();
+          //("QC of Sample: "
+          //        + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
+          
           VerticalLayout subContent = new VerticalLayout();
           subContent.setMargin(true);
           subWindow.setContent(subContent);
@@ -576,7 +608,8 @@ public class ProjInformationComponent extends CustomComponent {
             res = streamres;
           } else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
-          } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
+          } 
+          else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath =
                 (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
             filePath = String.format("/store%s", filePath.split("store")[1]);
@@ -645,6 +678,74 @@ public class ProjInformationComponent extends CustomComponent {
         }
       }
     });
+    
+    
+    this.datasetTable.addItemClickListener(new ItemClickListener() {
+        @Override
+        public void itemClick(ItemClickEvent event) {
+            if(!event.isDoubleClick()) {
+                String datasetCode = (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
+                String datasetFileName =
+                    (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name").getValue();
+                URL url;
+                try {
+                  Resource res = null;
+                  Object parent = datasetTable.getParent(event.getItemId());
+                  if (parent != null) {
+                    String parentDatasetFileName =
+                        (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
+                    url =
+                        datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                            parentDatasetFileName + "/" + datasetFileName);
+                  } else {
+                    url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
+                  }
+                  
+                  Window subWindow = new Window();                  
+                  VerticalLayout subContent = new VerticalLayout();
+                  subContent.setMargin(true);
+                  subWindow.setContent(subContent);
+                  QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+                  Boolean visualize = false;
+                  
+                  if (datasetFileName.endsWith(".pdf")) {
+                      QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+                      StreamResource streamres = new StreamResource(re, datasetFileName);
+                      streamres.setMIMEType("application/pdf");
+                      res = streamres;
+                      visualize = true;
+                    }
+                  
+                  if(visualize) {
+                  LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
+                  BrowserFrame frame = new BrowserFrame("", res);
+                  
+                  frame.setSizeFull();
+                  subContent.addComponent(frame);
+
+                  // Center it in the browser window
+                  subWindow.center();
+                  subWindow.setModal(true);
+                  subWindow.setSizeFull();
+                  
+                  frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
+
+                  // Open it in the UI
+                  ui.addWindow(subWindow);
+                  }
+                  
+                } catch (MalformedURLException e) {
+                    LOGGER.error(String.format(
+                        "Visualization failed because of malformedURL for dataset: %s", datasetCode));
+                    Notification
+                        .show(
+                            "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+                            Notification.Type.ERROR_MESSAGE);
+                  }
+            }
+        }
+    });
+
 
     // this.vert.addComponent(buttonLayout);
     if (dataAvailable) {

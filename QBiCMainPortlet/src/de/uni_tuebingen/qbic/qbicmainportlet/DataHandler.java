@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
@@ -21,9 +22,13 @@ import javax.xml.bind.JAXBException;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.VerticalLayout;
 
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
@@ -39,6 +44,7 @@ import de.uni_tuebingen.qbic.util.DashboardUtil;
 import helpers.Utils;
 import logging.Log4j2Logger;
 import main.OpenBisClient;
+import model.DBManager;
 import model.DatasetBean;
 import model.ExperimentBean;
 import model.ExperimentStatusBean;
@@ -142,13 +148,15 @@ public class DataHandler implements Serializable {
   }
 
   private OpenBisClient openBisClient;
+  private DBManager databaseManager;
 
   private Map<String, Project> dtoProjects = new HashMap<String, Project>();
   private Map<String, Experiment> dtoExperiments = new HashMap<String, Experiment>();
 
-  public DataHandler(OpenBisClient client) {
+  public DataHandler(OpenBisClient client, DBManager databaseManager) {
     // reset(); //TODO useless?
     this.setOpenBisClient(client);
+    this.setDatabaseManager(databaseManager);
   }
 
 
@@ -396,6 +404,14 @@ public class DataHandler implements Serializable {
 
     Date registrationDate = project.getRegistrationDetails().getRegistrationDate();
 
+    String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+
+    if (pi.equals("")) {
+      newProjectBean.setPrincipalInvestigator("No information provided.");
+    } else {
+      newProjectBean.setPrincipalInvestigator(pi);
+    }
+
     newProjectBean.setId(project.getIdentifier());
     newProjectBean.setCode(project.getCode());
     String desc = project.getDescription();
@@ -474,6 +490,14 @@ public class DataHandler implements Serializable {
     newProjectBean.setProgress(progressBar);
     newProjectBean.setRegistrator(project.getRegistrationDetails().getUserId());
     newProjectBean.setContact(project.getRegistrationDetails().getUserEmail());
+
+    String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+
+    if (pi.equals("")) {
+      newProjectBean.setPrincipalInvestigator("No information provided.");
+    } else {
+      newProjectBean.setPrincipalInvestigator(pi);
+    }
 
     BeanItemContainer<ExperimentBean> experimentBeans =
         new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
@@ -1500,12 +1524,13 @@ public class DataHandler implements Serializable {
 
     // project was planned (otherwise it would hopefully not exist :) )
     res.put("Project Planned", 1);
+
     // design is pre-registered to the test sample level
     int prereg = 0;
     for (ExperimentBean bean : cont.getItemIds()) {
       String type = bean.getType();
 
-      if (type.equals("Sampling units")) {
+      if (type.equals("Q_EXPERIMENTAL_DESIGN")) {
         prereg = 1;
         break;
       }
@@ -1986,6 +2011,48 @@ public class DataHandler implements Serializable {
     }
   }
 
+  /**
+   * 
+   * @param statusValues
+   * @return
+   */
+  public VerticalLayout createProjectStatusComponent(Map<String, Integer> statusValues) {
+    VerticalLayout projectStatusContent = new VerticalLayout();
+
+    Iterator<Entry<String, Integer>> it = statusValues.entrySet().iterator();
+    int finishedExperiments = 0;
+
+    while (it.hasNext()) {
+      Map.Entry<String, Integer> pairs = (Map.Entry<String, Integer>) it.next();
+
+      if ((Integer) pairs.getValue() == 0) {
+        Label statusLabel =
+            new Label(pairs.getKey() + ": " + FontAwesome.TIMES.getHtml(), ContentMode.HTML);
+        statusLabel.addStyleName("redicon");
+        projectStatusContent.addComponent(statusLabel);
+      }
+
+      else {
+        Label statusLabel =
+            new Label(pairs.getKey() + ": " + FontAwesome.CHECK.getHtml(), ContentMode.HTML);
+        statusLabel.addStyleName("greenicon");
+
+        if (pairs.getKey().equals("Project Planned")) {
+          projectStatusContent.addComponentAsFirst(statusLabel);
+        } else {
+          projectStatusContent.addComponent(statusLabel);
+
+        }
+        finishedExperiments += (Integer) pairs.getValue();
+      }
+    }
+    // ProgressBar progressBar = new ProgressBar();
+    // progressBar.setValue((float) finishedExperiments / statusValues.keySet().size());
+    // projectStatusContent.addComponent(progressBar);
+
+    return projectStatusContent;
+  }
+
 
   public OpenBisClient getOpenBisClient() {
     return openBisClient;
@@ -1994,5 +2061,15 @@ public class DataHandler implements Serializable {
 
   public void setOpenBisClient(OpenBisClient openBisClient) {
     this.openBisClient = openBisClient;
+  }
+
+
+  public DBManager getDatabaseManager() {
+    return databaseManager;
+  }
+
+
+  public void setDatabaseManager(DBManager databaseManager) {
+    this.databaseManager = databaseManager;
   }
 }

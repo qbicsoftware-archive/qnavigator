@@ -56,7 +56,7 @@ public class ExperimentBean implements Serializable {
     this.code = code;
     this.type = type;
     this.prettyType = prettyNameMapper.getPrettyName(type);
-    this.type = this.prettyType;
+    this.type = type;
     this.status = status;
     this.registrator = registrator;
     this.registrationDate = registrationDate;
@@ -107,8 +107,8 @@ public class ExperimentBean implements Serializable {
 
 
   public void setType(String type) {
-    this.type = prettyNameMapper.getPrettyName(type);
-   //this.type = type;
+    this.type = type;
+    this.prettyType = prettyNameMapper.getPrettyName(type);
   }
 
 
@@ -269,9 +269,16 @@ public class ExperimentBean implements Serializable {
     return containsData;
   }
 
-
-
   public void setContainsData(Boolean containsData) {
     this.containsData = containsData;
   }
+  
+  public String getPrettyType() {
+		return prettyType;
+	}
+  
+	public void setPrettyType(String prettyType) {
+		this.prettyType = prettyType;
+	}
+
 }

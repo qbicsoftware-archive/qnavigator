@@ -1,5 +1,7 @@
 package model;
 
+import helpers.UglyToPrettyNameMapper;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Iterator;
@@ -25,6 +27,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
   private String id;
   private String code;
   private String type;
+  private String prettyType;
   // Map containing parents of the sample and the corresponding sample types
   // private Map<String, String> parents;
   private List<Sample> parents;
@@ -33,6 +36,9 @@ public class SampleBean implements Comparable<Object>, Serializable {
   private Date lastChangedDataset;
   private Map<String, String> properties;
   private Map<String, String> typeLabels;
+  
+  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
+
 
   public SampleBean(String id, String code, String type, List<Sample> parents,
       BeanItemContainer<DatasetBean> datasets, Date lastChangedDataset,
@@ -41,6 +47,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
     this.id = id;
     this.code = code;
     this.type = type;
+    this.prettyType = prettyNameMapper.getPrettyName(type);
     this.parents = parents;
     this.datasets = datasets;
     this.lastChangedDataset = lastChangedDataset;
@@ -87,6 +94,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
 
   public void setType(String type) {
     this.type = type;
+    this.prettyType = prettyNameMapper.getPrettyName(type);
   }
 
 
@@ -175,7 +183,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
     } else {
       for (Sample sample : this.getParents()) {
         parentsBottom +=
-            "<li><b>" + sample.getCode() + "</b> (" + sample.getSampleTypeCode() + ") </li>";
+            "<li><b>" + sample.getCode() + "</b> (" + prettyNameMapper.getPrettyName(sample.getSampleTypeCode()) + ") </li>";
       }
       parentsBottom += "</ul>";
 
@@ -237,5 +245,14 @@ public class SampleBean implements Comparable<Object>, Serializable {
   public void setChildren(List<Sample> children) {
     this.children = children;
   }
+  
+  public String getPrettyType() {
+		return prettyType;
+	}
+
+	public void setPrettyType(String prettyType) {
+		this.prettyType = prettyType;
+	}
+
 
 }

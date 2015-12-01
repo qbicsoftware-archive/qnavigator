@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,6 +82,9 @@ public class AddPatientView extends VerticalLayout implements View {
   private CheckBox registerHLAI = new CheckBox("MHC Class I");
   private CheckBox registerHLAII = new CheckBox("MHC Class II");
   private VerticalLayout hlaTypingSection;
+  private VerticalLayout expSetup = new VerticalLayout();
+  private VerticalLayout optionLayout = new VerticalLayout();
+  private VerticalLayout hlaLayout = new VerticalLayout();
 
   private TextArea hlaItypes = new TextArea();
   private TextArea hlaIItypes = new TextArea();
@@ -142,10 +146,10 @@ public class AddPatientView extends VerticalLayout implements View {
     
     addPatientViewContent = new VerticalLayout();
 
-    addPatientViewContent.addComponent(initExperimentalSetupLayout());
-    addPatientViewContent.addComponent(initOptionLayout());
+    addPatientViewContent.addComponent(expSetup);
+    addPatientViewContent.addComponent(optionLayout);
 
-    addPatientViewContent.addComponent(hlaTypingLayout());
+    addPatientViewContent.addComponent(hlaLayout);
 
     addPatientViewContent.setWidth("100%");
     addPatientViewContent.setMargin(new MarginInfo(true, false, false, false));
@@ -157,12 +161,12 @@ public class AddPatientView extends VerticalLayout implements View {
    * 
    * @return
    */
-  VerticalLayout initOptionLayout() {
-    optionLayoutSection = new VerticalLayout();
-    optionLayoutSection.setWidth("100%");
-    optionLayoutSection.setVisible(false);
+  void initOptionLayout() {
+	  optionLayout.removeAllComponents();  
+	  optionLayout.setWidth("100%");
+	  optionLayout.setVisible(false);
 
-    VerticalLayout optionLayout = new VerticalLayout();
+    VerticalLayout optionLayoutContent = new VerticalLayout();
 
     Button addSample = new Button("Add Sample");
     addSample.addClickListener(new ClickListener() {
@@ -173,10 +177,10 @@ public class AddPatientView extends VerticalLayout implements View {
       }
     });
 
-    optionLayout.setMargin(new MarginInfo(true, false, false, false));
-    optionLayout.setHeight(null);
-    optionLayout.setWidth("100%");
-    optionLayout.setSpacing(true);
+    optionLayoutContent.setMargin(new MarginInfo(true, false, false, false));
+    optionLayoutContent.setHeight(null);
+    optionLayoutContent.setWidth("100%");
+    optionLayoutContent.setSpacing(true);
 
 
     final Grid optionGrid = new Grid();
@@ -198,15 +202,15 @@ public class AddPatientView extends VerticalLayout implements View {
     optionGrid.setContainerDataSource(sampleOptions);
     optionGrid.setColumnOrder("type", "secondaryName", "tissue", "amount", "dnaSeq", "rnaSeq", "deepSeq");
     
-    optionLayout.addComponent(gridInfoContent);
-    optionLayout.addComponent(optionGrid);
-    optionLayout.addComponent(addSample);
+    optionLayoutContent.addComponent(gridInfoContent);
+    optionLayoutContent.addComponent(optionGrid);
+    optionLayoutContent.addComponent(addSample);
 
     final GridEditForm form =
         new GridEditForm(datahandler.getOpenBisClient().getVocabCodesForVocab("Q_PRIMARY_TISSUES"),
             datahandler.getOpenBisClient().getVocabCodesForVocab("Q_SEQUENCER_DEVICES"));
 
-    optionLayout.addComponent(form);
+    optionLayoutContent.addComponent(form);
     form.setVisible(false);
 
     optionGrid.addSelectionListener(new SelectionListener() {
@@ -219,8 +223,7 @@ public class AddPatientView extends VerticalLayout implements View {
       }
     });
 
-    optionLayoutSection.addComponent(optionLayout);
-    return optionLayoutSection;
+    optionLayout.addComponent(optionLayoutContent);
   }
 
   /**
@@ -261,16 +264,17 @@ public class AddPatientView extends VerticalLayout implements View {
    * 
    * @return
    */
-  VerticalLayout initExperimentalSetupLayout() {
-    VerticalLayout projDescriptionContent = new VerticalLayout();
+  void initExperimentalSetupLayout() {
+    expSetup.removeAllComponents();
 
-    projDescriptionContent.setWidth("100%");
+    expSetup.setWidth("100%");
 
-    projDescriptionContent.setSpacing(true);
-    projDescriptionContent.setMargin(new MarginInfo(true, false, false, false));
+    expSetup.setSpacing(true);
+    expSetup.setMargin(new MarginInfo(true, false, false, false));
 
-    List<String> visibleSpaces = new ArrayList<String>();
+    Set<String> visibleSpaces = new LinkedHashSet<>();
 
+    /*
     for (String space: datahandler.getOpenBisClient().listSpaces()) {
     	if(space.startsWith("IVAC")) {
     		
@@ -279,6 +283,15 @@ public class AddPatientView extends VerticalLayout implements View {
     	if(users.contains(LiferayAndVaadinUtils.getUser().getScreenName())) {
     		visibleSpaces.add(space);
     	}
+    	}
+    }
+    */
+    
+    for (Project project: datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(
+            datahandler.getOpenBisClient().getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
+    	
+    	if(project.getIdentifier().contains("IVAC")) {
+    		visibleSpaces.add(project.getSpaceCode());
     	}
     }
     
@@ -305,7 +318,7 @@ public class AddPatientView extends VerticalLayout implements View {
       }
     });
       
-    projDescriptionContent.addComponent(context);
+    expSetup.addComponent(context);
     
     numberOfPatients = new CustomVisibilityComponent(new TextField("Number of Patients"));  
     numberOfPatients.setVisible(false);
@@ -325,7 +338,7 @@ public class AddPatientView extends VerticalLayout implements View {
       }
     });
     
-    projDescriptionContent.addComponent(numberContext);
+    expSetup.addComponent(numberContext);
 
     secondaryNames = new CustomVisibilityComponent(new TextField("Identifiers"));
     ((TextField) secondaryNames.getInnerComponent()).setImmediate(true);
@@ -345,7 +358,7 @@ public class AddPatientView extends VerticalLayout implements View {
       }
     });
  
-    projDescriptionContent.addComponent(secondaryContext);
+ expSetup.addComponent(secondaryContext);
     
       description = new CustomVisibilityComponent(new TextField("Description"));  
       ((TextField) description.getInnerComponent()).setImmediate(true);
@@ -360,14 +373,13 @@ public class AddPatientView extends VerticalLayout implements View {
         
         @Override
         public void textChange(TextChangeEvent event) {
-          optionLayoutSection.setVisible(true);
-          hlaTypingSection.setVisible(true);
+          optionLayout.setVisible(true);
+          hlaLayout.setVisible(true);
           registerPatients.setVisible(true);
         }
       });
-      projDescriptionContent.addComponent(descriptionContext);
+      expSetup.addComponent(descriptionContext);
 
-    return projDescriptionContent;
   }
 
   /**
@@ -375,16 +387,15 @@ public class AddPatientView extends VerticalLayout implements View {
    * 
    * @return
    */
-  VerticalLayout hlaTypingLayout() {
+  void hlaTypingLayout() {
 
-    hlaTypingSection = new VerticalLayout();
-    hlaTypingSection.setWidth("100%");
-    hlaTypingSection.setVisible(false);
+    hlaLayout.removeAllComponents();
+    hlaLayout.setWidth("100%");
+    hlaLayout.setVisible(false);
 
-
-    hlaTypingSection.setMargin(new MarginInfo(true, false, false, false));
-    hlaTypingSection.setHeight(null);
-    hlaTypingSection.setSpacing(true);
+    hlaLayout.setMargin(new MarginInfo(true, false, false, false));
+    hlaLayout.setHeight(null);
+    hlaLayout.setSpacing(true);
     
     hlaInfo = new CustomVisibilityComponent(new Label("HLA Typing"));
     ((Label) hlaInfo.getInnerComponent()).setHeight("24px");
@@ -395,7 +406,7 @@ public class AddPatientView extends VerticalLayout implements View {
                 "Register available HLA typing for this patient (one allele per line)",
                 "HLA Typing");
     
-    hlaTypingSection.addComponent(hlaContext);
+    hlaLayout.addComponent(hlaContext);
 
     HorizontalLayout hlalayout = new HorizontalLayout();
     
@@ -413,10 +424,8 @@ public class AddPatientView extends VerticalLayout implements View {
     hlalayout.setSpacing(true);
 
     typingMethod.addItems(datahandler.getOpenBisClient().getVocabCodesForVocab("Q_HLA_TYPING_METHODS"));
-    hlaTypingSection.addComponent(typingMethod);
-    hlaTypingSection.addComponent(hlalayout);
-
-    return hlaTypingSection;
+    hlaLayout.addComponent(typingMethod);
+    hlaLayout.addComponent(hlalayout);
   }
 
   public void callPatientRegistration() {
@@ -516,13 +525,16 @@ public class AddPatientView extends VerticalLayout implements View {
 
   private void updateContent() {
     header = "Patient Registration";
+    initExperimentalSetupLayout();
+    initOptionLayout();
+    hlaTypingLayout();
     
     registerPatients.setVisible(false);
     numberOfPatients.setVisible(false);
     secondaryNames.setVisible(false);
     description.setVisible(false);
-    hlaTypingSection.setVisible(false);
-    optionLayoutSection.setVisible(false);
+    hlaLayout.setVisible(false);
+    optionLayout.setVisible(false);
   }
 
 }

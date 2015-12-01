@@ -102,6 +102,9 @@ public class DatasetComponent extends CustomComponent{
 
   private int numberOfDatasets;
   
+  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
+
+  
   public DatasetComponent(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
@@ -662,7 +665,7 @@ public class DatasetComponent extends CustomComponent{
       //    d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
-      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(d.getType());
+      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()) + " Folder");
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
@@ -689,7 +692,7 @@ public class DatasetComponent extends CustomComponent{
       //dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
-      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());
+      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()));
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_file, "File Size").setValue(

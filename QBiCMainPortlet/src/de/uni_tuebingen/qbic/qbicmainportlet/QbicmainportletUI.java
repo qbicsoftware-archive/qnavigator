@@ -9,6 +9,10 @@ import javax.portlet.PortletSession;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
+import logging.Log4j2Logger;
+import main.OpenBisClient;
+import model.DBConfig;
+import model.DBManager;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.annotations.Theme;
@@ -107,7 +111,8 @@ public class QbicmainportletUI extends UI {
     }
   }
 
-  void errorMessageIfIsProduction() {
+
+void errorMessageIfIsProduction() {
     if (isInProductionMode())
       try {
         VaadinService.getCurrentResponse().sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT,
@@ -598,7 +603,11 @@ public class QbicmainportletUI extends UI {
         manager.getDataSourcePassword(), manager.getDataSourceUrl());
     this.openBisConnection.login();
     LOGGER.info("after init: " + System.currentTimeMillis());
-    this.datahandler = new DataHandler(openBisConnection);
+    
+    DBConfig mysqlConfig = new DBConfig(manager.getMsqlHost(), manager.getMysqlPort(), manager.getMysqlDB(), manager.getMysqlUser(), manager.getMysqlPass());
+    DBManager databaseManager = new DBManager(mysqlConfig);
+    
+    this.datahandler = new DataHandler(openBisConnection, databaseManager);
 
   }
 

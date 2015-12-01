@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.UglyToPrettyNameMapper;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -34,6 +36,8 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -41,6 +45,7 @@ import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -94,6 +99,8 @@ public class LevelComponent extends CustomComponent {
   private int numberOfDatasets;
 
   private int numberOfSamples;
+  
+  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
 
   public LevelComponent(DataHandler dh, State state, String resourceurl, String caption) {
     this.datahandler = dh;
@@ -739,6 +746,72 @@ public class LevelComponent extends CustomComponent {
         }
       }
     });
+    
+    this.datasetTable.addItemClickListener(new ItemClickListener() {
+        @Override
+        public void itemClick(ItemClickEvent event) {
+            if(!event.isDoubleClick()) {
+                String datasetCode = (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
+                String datasetFileName =
+                    (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name").getValue();
+                URL url;
+                try {
+                  Resource res = null;
+                  Object parent = datasetTable.getParent(event.getItemId());
+                  if (parent != null) {
+                    String parentDatasetFileName =
+                        (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
+                    url =
+                        datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                            parentDatasetFileName + "/" + datasetFileName);
+                  } else {
+                    url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
+                  }
+                  
+                  Window subWindow = new Window();                  
+                  VerticalLayout subContent = new VerticalLayout();
+                  subContent.setMargin(true);
+                  subWindow.setContent(subContent);
+                  QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+                  Boolean visualize = false;
+                  
+                  if (datasetFileName.endsWith(".pdf")) {
+                      QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+                      StreamResource streamres = new StreamResource(re, datasetFileName);
+                      streamres.setMIMEType("application/pdf");
+                      res = streamres;
+                      visualize = true;
+                    }
+                  
+                  if(visualize) {
+                  LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
+                  BrowserFrame frame = new BrowserFrame("", res);
+                  
+                  frame.setSizeFull();
+                  subContent.addComponent(frame);
+
+                  // Center it in the browser window
+                  subWindow.center();
+                  subWindow.setModal(true);
+                  subWindow.setSizeFull();
+                  
+                  frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
+
+                  // Open it in the UI
+                  ui.addWindow(subWindow);
+                  }
+                  
+                } catch (MalformedURLException e) {
+                    LOGGER.error(String.format(
+                        "Visualization failed because of malformedURL for dataset: %s", datasetCode));
+                    Notification
+                        .show(
+                            "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+                            Notification.Type.ERROR_MESSAGE);
+                  }
+            }
+        }
+    });
 
     this.vert.addComponent(buttonLayout);
     this.vert.addComponent(help);
@@ -815,7 +888,7 @@ public class LevelComponent extends CustomComponent {
       // d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
-      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(d.getType());
+      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()) + " Folder");
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
@@ -848,7 +921,7 @@ public class LevelComponent extends CustomComponent {
       // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
-      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());
+      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()));
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_file, "File Size").setValue(

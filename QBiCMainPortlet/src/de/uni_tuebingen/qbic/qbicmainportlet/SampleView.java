@@ -18,20 +18,16 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractComponentContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
-import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -57,10 +53,6 @@ public class SampleView extends VerticalLayout implements View {
   private State state;
   private VerticalLayout sampview_content;
   private VerticalLayout buttonLayoutSection;
-  private VerticalLayout biologicalSampleStateSection;
-  private HorizontalLayout stateInjectLayout;
-  private VerticalLayout sampleStateSectionContent;
-  
   private ChangeMetadataComponent changeMetaDataComponent;
 
   //private MSHBiologicalSampleStateMachine stateMachine;
@@ -69,9 +61,6 @@ public class SampleView extends VerticalLayout implements View {
   private FileDownloader fileDownloader;
   private SampleBean currentBean;
   private ToolBar toolbar;
-  private MenuItem downloadCompleteProjectMenuItem;
-  private MenuItem datasetOverviewMenuItem;
-  private MenuItem createBarcodesMenuItem;
   private Label sampleNameLabel;
   private Label sampleTypeLabel;
   private Label sampleParentLabel;
@@ -79,7 +68,6 @@ public class SampleView extends VerticalLayout implements View {
   private Label lastChangedDatasetLabel;
   private Label propertiesLabel;
   private Label experimentalFactorLabel;
-  private Label currentSampleStateName;
   
   private String header;
   public String getHeader() {
@@ -148,7 +136,7 @@ private DatasetComponent datasetComponent;
     changeMetaDataComponent = new ChangeMetadataComponent(datahandler, state, resourceUrl);
     
     sampview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
-    sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.BAR_CHART_O);
+    //sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.BAR_CHART_O);
     sampview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     sampview_tab.addTab(initNoteComponent()).setIcon(FontAwesome.PENCIL);
     sampview_tab.addTab(changeMetaDataComponent).setIcon(FontAwesome.PENCIL_SQUARE_O);
@@ -157,7 +145,12 @@ private DatasetComponent datasetComponent;
     
     sampview_tab.addSelectedTabChangeListener(new SelectedTabChangeListener() {
       
-      @Override
+      /**
+		 * 
+		 */
+		private static final long serialVersionUID = 6899763427531265769L;
+
+	@Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
 
          if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
@@ -189,7 +182,7 @@ private DatasetComponent datasetComponent;
     //updateContentToolBar();
     updateHeadline();
     updateContentDescription();
-    updateContentStatistics();
+    //updateContentStatistics();
     updateContentTable();
     //updateContentButtonLayout();
     //updateMSHBiologicalSampleStateSection();
@@ -326,9 +319,21 @@ private DatasetComponent datasetComponent;
     
     //sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
     sampleTypeLabel = new Label("");
-    sampleDescriptionContent.addComponent(sampleTypeLabel);
     sampleParentLabel = new Label("", ContentMode.HTML);
+    numberOfDatasetsLabel = new Label("");
+    lastChangedDatasetLabel = new Label("");
+    propertiesLabel = new Label("", ContentMode.HTML);
+    propertiesLabel.setCaption("Properties");
+    experimentalFactorLabel = new Label("", ContentMode.HTML);
+    
+    sampleDescriptionContent.addComponent(sampleTypeLabel);
     sampleDescriptionContent.addComponent(sampleParentLabel);
+    sampleDescriptionContent.addComponent(numberOfDatasetsLabel);
+    sampleDescriptionContent.addComponent(lastChangedDatasetLabel);
+    sampleDescriptionContent.addComponent(propertiesLabel);
+    sampleDescriptionContent.addComponent(experimentalFactorLabel);
+    sampleDescriptionContent.setSpacing(true);
+
     sampleDescriptionContent.setMargin(new MarginInfo(true, false, true, true));
     sampleDescription.addComponent(sampleDescriptionContent);
     sampleDescription.setMargin(new MarginInfo(true, false, true, true));
@@ -336,8 +341,31 @@ private DatasetComponent datasetComponent;
   }
 
   void updateContentDescription() {
-    sampleTypeLabel.setValue(String.format("Sample type: %s.", uglyToPretty.getPrettyName(currentBean.getType())));
+    sampleTypeLabel.setValue(String.format("Sample type: %s", uglyToPretty.getPrettyName(currentBean.getType())));
     sampleParentLabel.setValue(currentBean.getParentsFormattedString());
+    
+    int numberOfDatasets = currentBean.getDatasets().size();
+    numberOfDatasetsLabel.setValue(String.format("This sample has %s attached dataset(s) ", numberOfDatasets));
+    if (numberOfDatasets > 0) {
+
+      String lastDataset = "";//"No Datasets available!";
+      if (currentBean.getLastChangedDataset() != null) {
+        lastDataset = currentBean.getLastChangedDataset().toString();
+        lastChangedDatasetLabel.setValue(String.format("Last Change: %s",
+            String.format("Dataset added on %s", lastDataset)));
+      } else {
+        lastChangedDatasetLabel.setValue(lastDataset);
+      }
+    }
+
+    try {
+      propertiesLabel.setValue(currentBean.generatePropertiesFormattedString());
+      experimentalFactorLabel.setValue(currentBean.generateXMLPropertiesFormattedString());
+    } catch (JAXBException e) {
+      LOGGER.error(
+          String.format("failed to parse experimental factors for sample %s", currentBean.getId()),
+          e);
+    }
   }
 
   /**
@@ -357,6 +385,7 @@ private DatasetComponent datasetComponent;
     lastChangedDatasetLabel = new Label("");
     statContent.addComponent(lastChangedDatasetLabel);
     statContent.setMargin(new MarginInfo(true, false, false, true));
+    statContent.setSpacing(true);
     // statContent.setMargin(true);
     // statContent.setSpacing(true);
 

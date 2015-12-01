@@ -2,34 +2,28 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.UglyToPrettyNameMapper;
 import helpers.Utils;
-
-import java.util.ArrayList;
-
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.ExperimentBean;
 
 import org.tepi.filtertable.FilterTable;
+import org.tepi.filtertable.FilterTreeTable;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class ExperimentView extends VerticalLayout implements View {
 
@@ -50,9 +44,6 @@ public class ExperimentView extends VerticalLayout implements View {
   private FileDownloader fileDownloader;
   private ExperimentBean currentBean;
   private ToolBar toolbar;
-  private MenuItem downloadCompleteProjectMenuItem;
-  private MenuItem datasetOverviewMenuItem;
-  private MenuItem createBarcodesMenuItem;
   private Label generalInfoLabel;
   private Label statContentLabel;
   private Label propertiesContentLabel;
@@ -103,17 +94,10 @@ public class ExperimentView extends VerticalLayout implements View {
     expview_content.addComponent(expview_tab);
     
     expview_tab.addTab(initDescription(), "General Information").setIcon(FontAwesome.INFO_CIRCLE);;
-    expview_tab.addTab(initStatistics(), "Statistics").setIcon(FontAwesome.CHECK_CIRCLE);
+    //expview_tab.addTab(initStatistics(), "Statistics").setIcon(FontAwesome.CHECK_CIRCLE);
     expview_tab.addTab(initProperties(), "Metadata").setIcon(FontAwesome.LIST_UL);
     expview_tab.addTab(initTable(), "Samples").setIcon(FontAwesome.TINT);;
    
-    //expview_content.addComponent(initDescription());
-    //expview_content.addComponent(initStatistics());
-    //expview_content.addComponent(initTable());
-    //expview_content.addComponent(initButtonLayout());
-
-    // use the component that is returned by initTable
-    // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
     expview_content.setWidth("100%");
     this.addComponent(expview_content);
   }
@@ -123,7 +107,7 @@ public class ExperimentView extends VerticalLayout implements View {
    */
   public void updateContent() {
     updateContentDescription();
-    updateContentStatistics();
+    //updateContentStatistics();
     updateContentProperties();
     updateContentTable();
     updateContentButtonLayout();
@@ -187,15 +171,14 @@ public class ExperimentView extends VerticalLayout implements View {
   VerticalLayout initDescription() {
     VerticalLayout generalInfo = new VerticalLayout();
     VerticalLayout generalInfoContent = new VerticalLayout();
-    //generalInfoContent.setCaption("General Information");
-    //generalInfoContent.setIcon(FontAwesome.INFO);
     generalInfoLabel = new Label("");
+    statContentLabel = new Label("");
 
     generalInfo.setMargin(new MarginInfo(true, false, true, true));
     generalInfoContent.addComponent(generalInfoLabel);
     generalInfoContent.setMargin(new MarginInfo(true, false, true, true));
-    //generalInfoContent.setMargin(true);
-    //generalInfo.setMargin(true);
+    generalInfoContent.addComponent(statContentLabel);
+    generalInfoContent.setSpacing(true);
 
     generalInfo.addComponent(generalInfoContent);
 
@@ -204,6 +187,7 @@ public class ExperimentView extends VerticalLayout implements View {
 
   void updateContentDescription() {
     generalInfoLabel.setValue(String.format("Stage:\t %s", prettyNameMapper.getPrettyName(currentBean.getType())));
+    statContentLabel.setValue(String.format("This experimental step involves %s sample(s)", currentBean.getSamples().size()));
 
   }
 
@@ -297,7 +281,7 @@ public class ExperimentView extends VerticalLayout implements View {
     //tableSectionContent.setCaption("Registered Samples");
     //tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
-    tableSectionContent.setMargin(new MarginInfo(true, false, false, true));
+    tableSectionContent.setMargin(new MarginInfo(true, true, false, true));
 
     //tableSectionContent.setMargin(true);
     //tableSection.setMargin(true);
@@ -317,7 +301,7 @@ public class ExperimentView extends VerticalLayout implements View {
     buttonLayout.setWidth("100%");
     buttonLayoutSection.setSpacing(true);
     buttonLayoutSection.addComponent(buttonLayout);
-    buttonLayoutSection.setMargin(new MarginInfo(false, false, false, false));
+    buttonLayoutSection.setMargin(new MarginInfo(true, false, true, false));
     buttonLayout.addComponent(this.export);
     
     tableSection.addComponent(buttonLayoutSection);
@@ -354,7 +338,7 @@ public class ExperimentView extends VerticalLayout implements View {
     this.currentBean = experimentBean;
     LOGGER.debug(String.valueOf(experimentBean.getSamples().size()));
     this.table.setContainerDataSource(experimentBean.getSamples());
-    this.table.setVisibleColumns(new Object[] {"code", "type"});
+    this.table.setVisibleColumns(new Object[] {"code", "prettyType"});
 
     int rowNumber = this.table.size();
 
@@ -395,7 +379,7 @@ public class ExperimentView extends VerticalLayout implements View {
     filterTable.setColumnReorderingAllowed(true);
 
     filterTable.setColumnHeader("code", "QBiC ID");
-    filterTable.setColumnHeader("type", "Sample Type");
+    filterTable.setColumnHeader("prettyType", "Sample Type");
 
     return filterTable;
   }
