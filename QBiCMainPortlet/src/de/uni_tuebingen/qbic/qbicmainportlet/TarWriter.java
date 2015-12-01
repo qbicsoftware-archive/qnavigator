@@ -223,7 +223,7 @@ public class TarWriter {
    */
   private long computeTarLength(long[] file_sizes, int tar_record_size, int tar_block_size) {
     // Every file has a header
-    long length_tar_headers = file_sizes.length * tar_record_size * 3;
+    long length_tar_headers = (file_sizes.length + 2) * tar_record_size;
     long total_length_file_sizes = 0;
     long append_zeros = 0;
     for (int i = 0; i < file_sizes.length; i++) {

@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 
 import javax.portlet.PortletSession;
 
@@ -35,8 +35,6 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.event.LayoutEvents.LayoutClickEvent;
-import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -44,39 +42,29 @@ import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
-import com.vaadin.server.ClientConnector.DetachEvent;
-import com.vaadin.server.ClientConnector.DetachListener;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.PopupView;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.PopupView.Content;
-import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
-public class DatasetComponent extends CustomComponent{
-  
+public class DatasetComponent extends CustomComponent {
+
   /**
    * 
    */
@@ -97,21 +85,21 @@ public class DatasetComponent extends CustomComponent{
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select",
-      "File Name", "Dataset Type", "Registration Date", "File Size"};
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "File Name",
+      "Dataset Type", "Registration Date", "File Size"};
 
   private int numberOfDatasets;
-  
+
   private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
 
-  
+
   public DatasetComponent(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
     this.state = state;
-    
+
     this.setCaption("Datasets");
-    
+
     this.initUI();
   }
 
@@ -119,52 +107,53 @@ public class DatasetComponent extends CustomComponent{
     vert = new VerticalLayout();
     table = buildFilterTable();
     mainLayout = new VerticalLayout(vert);
-    
+
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
-  
+
   public void updateUI(String type, String id) {
-    //vert = new VerticalLayout();
-    //this.datasets = dataset;
-    //table = buildFilterTable();
-    //this.buildLayout();
-    //this.setContainerDataSource(this.datasets);
+    // vert = new VerticalLayout();
+    // this.datasets = dataset;
+    // table = buildFilterTable();
+    // this.buildLayout();
+    // this.setContainerDataSource(this.datasets);
     // this.setContent(vert);
-    //mainLayout.addComponent(vert);
-    
-    if(id == null) return;
-    try {      
-          HierarchicalContainer datasetContainer = new HierarchicalContainer();
-          datasetContainer.addContainerProperty("Select", CheckBox.class, null);
-          datasetContainer.addContainerProperty("Project", String.class, null);
-          datasetContainer.addContainerProperty("Sample", String.class, null);
-          //datasetContainer.addContainerProperty("Sample Type", String.class, null);
-          datasetContainer.addContainerProperty("File Name", String.class, null);
-          datasetContainer.addContainerProperty("File Type", String.class, null);
-          datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-          datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
-          datasetContainer.addContainerProperty("Validated", Boolean.class, null);
-          datasetContainer.addContainerProperty("File Size", String.class, null);
-          datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
-          datasetContainer.addContainerProperty("dl_link", String.class, null);
-          datasetContainer.addContainerProperty("CODE", String.class, null);
-          
-          List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = null;
-      
+    // mainLayout.addComponent(vert);
+
+    if (id == null)
+      return;
+    try {
+      HierarchicalContainer datasetContainer = new HierarchicalContainer();
+      datasetContainer.addContainerProperty("Select", CheckBox.class, null);
+      datasetContainer.addContainerProperty("Project", String.class, null);
+      datasetContainer.addContainerProperty("Sample", String.class, null);
+      // datasetContainer.addContainerProperty("Sample Type", String.class, null);
+      datasetContainer.addContainerProperty("File Name", String.class, null);
+      datasetContainer.addContainerProperty("File Type", String.class, null);
+      datasetContainer.addContainerProperty("Dataset Type", String.class, null);
+      datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
+      datasetContainer.addContainerProperty("Validated", Boolean.class, null);
+      datasetContainer.addContainerProperty("File Size", String.class, null);
+      datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
+      datasetContainer.addContainerProperty("dl_link", String.class, null);
+      datasetContainer.addContainerProperty("CODE", String.class, null);
+
+      List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = null;
+
       switch (type) {
         case "project":
           String projectIdentifier = id;
           retrievedDatasets =
-              datahandler.getOpenBisClient()
-                  .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
+              datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(
+                  projectIdentifier);
           break;
 
         case "experiment":
           String experimentIdentifier = id;
           retrievedDatasets =
-              datahandler.getOpenBisClient()
-                  .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
+              datahandler.getOpenBisClient().getDataSetsOfExperimentByCodeWithSearchCriteria(
+                  experimentIdentifier);
           break;
 
         case "sample":
@@ -178,37 +167,34 @@ public class DatasetComponent extends CustomComponent{
               new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
           break;
       }
-      
-          numberOfDatasets = retrievedDatasets.size();
-          if (numberOfDatasets == 0) {
-            new Notification("No datasets available.",
-                "<br/>Please contact the project manager.", Type.WARNING_MESSAGE, true).show(Page
-                .getCurrent());
-          } else {
-            
-            Map<String, String> samples = new HashMap<String, String>();
-                        
-            // project same for all datasets
-            String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
-            for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: retrievedDatasets) {
-              samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);    
-            }
 
-            List<DatasetBean> dsBeans =
-                datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
-            
-            numberOfDatasets = dsBeans.size();
+      numberOfDatasets = retrievedDatasets.size();
+      if (numberOfDatasets == 0) {
+        new Notification("No datasets available.", "<br/>Please contact the project manager.",
+            Type.WARNING_MESSAGE, true).show(Page.getCurrent());
+      } else {
 
-            for (DatasetBean d : dsBeans) {
-              Date date = d.getRegistrationDate();
-              SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-              String dateString = sd.format(date);
-              Timestamp ts = Timestamp.valueOf(dateString);
-              String sampleID = samples.get(d.getCode());
-              
-              registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts,
-                  null);
-            }
+        Map<String, String> samples = new HashMap<String, String>();
+
+        // project same for all datasets
+        String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
+        for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset : retrievedDatasets) {
+          samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);
+        }
+
+        List<DatasetBean> dsBeans = datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
+
+        numberOfDatasets = dsBeans.size();
+
+        for (DatasetBean d : dsBeans) {
+          Date date = d.getRegistrationDate();
+          SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+          String dateString = sd.format(date);
+          Timestamp ts = Timestamp.valueOf(dateString);
+          String sampleID = samples.get(d.getCode());
+
+          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts, null);
+        }
       }
 
       this.setContainerDataSource(datasetContainer);
@@ -233,7 +219,7 @@ public class DatasetComponent extends CustomComponent{
   public HierarchicalContainer getContainerDataSource() {
     return this.datasets;
   }
-  
+
   /**
    * Precondition: {DatasetView#table} has to be initialized. e.g. with
    * {DatasetView#buildFilterTable} If it is not, strange behaviour has to be expected. builds the
@@ -242,21 +228,27 @@ public class DatasetComponent extends CustomComponent{
   private void buildLayout() {
     this.vert.removeAllComponents();
     this.vert.setWidth("100%");
-    
+
     // Table (containing datasets) section
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
 
-    //tableSectionContent.setCaption("Datasets");
-    //tableSectionContent.setIcon(FontAwesome.FLASK);
-    //tableSection.addComponent(new Label(String.format("This project contains %s dataset(s).", numberOfDatasets)));
+    // tableSectionContent.setCaption("Datasets");
+    // tableSectionContent.setIcon(FontAwesome.FLASK);
+    // tableSection.addComponent(new Label(String.format("This project contains %s dataset(s).",
+    // numberOfDatasets)));
     tableSectionContent.setMargin(new MarginInfo(true, false, true, false));
-    tableSection.addComponent(new Label(String.format("This view shows all datasets associated with this project. There are %s registered datasets.", numberOfDatasets), Label.CONTENT_PREFORMATTED));
+    tableSection
+        .addComponent(new Label(
+            String
+                .format(
+                    "This view shows all datasets associated with this project. There are %s registered datasets.",
+                    numberOfDatasets), Label.CONTENT_PREFORMATTED));
     tableSectionContent.addComponent(this.table);
 
     tableSection.setMargin(new MarginInfo(true, false, false, true));
-    //tableSectionContent.setMargin(true);
-    //tableSection.setMargin(true);
+    // tableSectionContent.setMargin(true);
+    // tableSection.setMargin(true);
 
     tableSection.addComponent(tableSectionContent);
     this.vert.addComponent(tableSection);
@@ -264,17 +256,17 @@ public class DatasetComponent extends CustomComponent{
     table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
-    
+
     // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setMargin(new MarginInfo(false, false, true, true));
     buttonLayout.setHeight(null);
-    //buttonLayout.setWidth("100%");
+    // buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
 
     final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
-    	
+
     Button checkAll = new Button("Select all datasets");
     checkAll.addClickListener(new ClickListener() {
 
@@ -297,43 +289,49 @@ public class DatasetComponent extends CustomComponent{
       }
     });
 
-	String content = 
-			"<p> In case of multiple file selections, Project Browser will create a tar archive.</p>" +
-		    "<hr>" +	
-		    "<p> If you need help on extracting a tar archive file, follow the tips below: </p>" +
-		    "<p>" + FontAwesome.WINDOWS.getHtml() + " Windows </p>" +
-		    "<p> To open/extract TAR file on Windows, you can use 7-Zip, Easy 7-Zip, PeaZip.</p>" +
-		   	"<hr>" +
-		   	"<p>" + FontAwesome.APPLE.getHtml() + " MacOS </p>" +
-		   	"<p> To open/extract TAR file on Mac, you can use Mac OS built-in utility Archive Utility,<br> or third-party freeware. </p>" +
-    		"<hr>" +
-    		"<p>" + FontAwesome.LINUX.getHtml() + " Linux </p>" +
-		    "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> " +
-		    "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
-	
-	PopupView tooltip = new PopupView(new helpers.ToolTip(content));
-	tooltip.setHeight("44px");
-	
-	HorizontalLayout help = new HorizontalLayout();
-	help.setSizeFull();
-	HorizontalLayout helpContent = new HorizontalLayout();
-	//helpContent.setSizeFull();
-	
-	help.setMargin(new MarginInfo(false,false,false,true));
-	Label helpText = new Label("Attention: Click here before Download!");
-	helpContent.addComponent(new Label(FontAwesome.QUESTION_CIRCLE.getHtml(), ContentMode.HTML));
-	helpContent.addComponent(helpText);
-	helpContent.addComponent(tooltip);	
-	helpContent.setSpacing(true);
-	
-	help.addComponent(helpContent);
-	help.setComponentAlignment(helpContent, Alignment.TOP_CENTER);
-		
+    String content =
+        "<p> In case of multiple file selections, Project Browser will create a tar archive.</p>"
+            + "<hr>"
+            + "<p> If you need help on extracting a tar archive file, follow the tips below: </p>"
+            + "<p>"
+            + FontAwesome.WINDOWS.getHtml()
+            + " Windows </p>"
+            + "<p> To open/extract TAR file on Windows, you can use 7-Zip, Easy 7-Zip, PeaZip.</p>"
+            + "<hr>"
+            + "<p>"
+            + FontAwesome.APPLE.getHtml()
+            + " MacOS </p>"
+            + "<p> To open/extract TAR file on Mac, you can use Mac OS built-in utility Archive Utility,<br> or third-party freeware. </p>"
+            + "<hr>"
+            + "<p>"
+            + FontAwesome.LINUX.getHtml()
+            + " Linux </p>"
+            + "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> "
+            + "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
+
+    PopupView tooltip = new PopupView(new helpers.ToolTip(content));
+    tooltip.setHeight("44px");
+
+    HorizontalLayout help = new HorizontalLayout();
+    help.setSizeFull();
+    HorizontalLayout helpContent = new HorizontalLayout();
+    // helpContent.setSizeFull();
+
+    help.setMargin(new MarginInfo(false, false, false, true));
+    Label helpText = new Label("Attention: Click here before Download!");
+    helpContent.addComponent(new Label(FontAwesome.QUESTION_CIRCLE.getHtml(), ContentMode.HTML));
+    helpContent.addComponent(helpText);
+    helpContent.addComponent(tooltip);
+    helpContent.setSpacing(true);
+
+    help.addComponent(helpContent);
+    help.setComponentAlignment(helpContent, Alignment.TOP_CENTER);
+
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
     buttonLayout.addComponent(visualize);
     buttonLayout.addComponent(this.download);
-        
+
     /**
      * prepare download.
      */
@@ -386,8 +384,11 @@ public class DatasetComponent extends CustomComponent{
         } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
             && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
           visualize.setEnabled(true);
-        } else if (datasetType.equals("Q_WF_NGS_EPITOPE_PREDICTION_RESULTS") && fileName.endsWith(".tsv"))  {
-            visualize.setEnabled(true);
+        } else if (datasetType.equals("Q_WF_NGS_EPITOPE_PREDICTION_RESULTS")
+            && fileName.endsWith(".tsv")) {
+          visualize.setEnabled(true);
+        } else if (fileName.endsWith(".html")) {
+          visualize.setEnabled(true);
         } else {
           visualize.setEnabled(false);
         }
@@ -423,7 +424,7 @@ public class DatasetComponent extends CustomComponent{
           String space = datahandler.getOpenBisClient().getProjectByCode(project).getSpaceCode();// .getIdentifier().split("/")[1];
           message.add(project);
           message.add((String) table.getItem(next).getItemProperty("Sample").getValue());
-          //message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
+          // message.add((String) table.getItem(next).getItemProperty("Sample Type").getValue());
           message.add((String) table.getItem(next).getItemProperty("dl_link").getValue());
           message.add((String) table.getItem(next).getItemProperty("File Name").getValue());
           message.add(space);
@@ -435,7 +436,7 @@ public class DatasetComponent extends CustomComponent{
 
       }
     });
-        
+
     // TODO get the GV to work here. Together with reverse proxy
     // Assumes that table Value Change listner is enabling or disabling the button if preconditions
     // are not fullfilled
@@ -460,8 +461,8 @@ public class DatasetComponent extends CustomComponent{
             String parentDatasetFileName =
                 (String) table.getItem(parent).getItemProperty("File Name").getValue();
             url =
-                datahandler.getOpenBisClient().getUrlForDataset(datasetCode, parentDatasetFileName + "/"
-                    + datasetFileName);
+                datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                    parentDatasetFileName + "/" + datasetFileName);
           } else {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
@@ -498,34 +499,37 @@ public class DatasetComponent extends CustomComponent{
             streamres.setMIMEType("text/plain");
             res = streamres;
           } else if (datasetType.equals("Q_WF_NGS_EPITOPE_PREDICTION_RESULTS")
-                  &&  datasetFileName.endsWith(".tsv")) {
-                QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-                StreamResource streamres = new StreamResource(re, datasetFileName);
-                streamres.setMIMEType("text/plain");
-                res = streamres;
-                
-                StringWriter writer = new StringWriter();
-                try {
-					IOUtils.copy(streamres.getStream().getStream(), writer, "UTF-8");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-                String theString = writer.toString();
-                //LOGGER.debug(theString);
-                
-                Scanner scannerTest = new Scanner(streamres.getStream().getStream());
-                scannerTest.useDelimiter(System.getProperty("line.separator"));
-                while(scannerTest.hasNext()){
-                    //parse line to get Emp Object
-                	Scanner scanner = new Scanner(scannerTest.next());
-                    scanner.useDelimiter("\\s*\t\\s*");
-                    LOGGER.debug(scanner.next());
-                }
-                scannerTest.close();
-                
+              && datasetFileName.endsWith(".tsv")) {
+            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+            StreamResource streamres = new StreamResource(re, datasetFileName);
+            streamres.setMIMEType("text/plain");
+            res = streamres;
+
+            StringWriter writer = new StringWriter();
+            try {
+              IOUtils.copy(streamres.getStream().getStream(), writer, "UTF-8");
+            } catch (IOException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            String theString = writer.toString();
+
+            Scanner scannerTest = new Scanner(streamres.getStream().getStream());
+            scannerTest.useDelimiter(System.getProperty("line.separator"));
+            while (scannerTest.hasNext()) {
+              // parse line to get Emp Object
+              Scanner scanner = new Scanner(scannerTest.next());
+              scanner.useDelimiter("\\s*\t\\s*");
+            }
+            scannerTest.close();
+
           } else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
+          } else if (datasetFileName.endsWith(".html")) {
+            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+            StreamResource streamres = new StreamResource(re, datasetFileName);
+            streamres.setMIMEType("text/html");
+            res = streamres;
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath = (String) table.getItem(next).getItemProperty("dl_link").getValue();
             filePath = String.format("/store%s", filePath.split("store")[1]);
@@ -533,6 +537,7 @@ public class DatasetComponent extends CustomComponent{
             // fileId = "control.1kg.panel.samples.vcf.gz";
             // UI.getCurrent().getSession().addRequestHandler(rh);
             rhAttached = true;
+
             ThemeDisplay themedisplay =
                 (ThemeDisplay) VaadinService.getCurrentRequest()
                     .getAttribute(WebKeys.THEME_DISPLAY);
@@ -642,12 +647,12 @@ public class DatasetComponent extends CustomComponent{
 
     return filterTable;
   }
-  
+
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
       String project, String sample, Timestamp ts, Object parent) {
-	  
-	  UglyToPrettyNameMapper mapper = new UglyToPrettyNameMapper();
-	  
+
+    UglyToPrettyNameMapper mapper = new UglyToPrettyNameMapper();
+
     if (d.hasChildren()) {
 
       Object new_ds = dataset_container.addItem();
@@ -661,11 +666,12 @@ public class DatasetComponent extends CustomComponent{
 
       dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
-      //dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
-      //    d.getSample().getType());
+      // dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
+      // d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
-      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()) + " Folder");
+      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(
+          prettyNameMapper.getPrettyName(d.getType()) + " Folder");
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
@@ -689,10 +695,11 @@ public class DatasetComponent extends CustomComponent{
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
-      //dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
+      // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
-      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()));
+      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(
+          prettyNameMapper.getPrettyName(d.getType()));
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_file, "File Size").setValue(
@@ -726,7 +733,7 @@ public class DatasetComponent extends CustomComponent{
     public void valueChange(ValueChangeEvent event) {
 
       PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
-      
+
       Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
           (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
               "qbic_download", PortletSession.APPLICATION_SCOPE);
@@ -766,7 +773,7 @@ public class DatasetComponent extends CustomComponent{
      */
     private void valueChange(Object itemId, boolean itemSelected,
         Map<String, SimpleEntry<String, Long>> entries, String fileName) {
-      
+
       ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
           .setValue(itemSelected);
       fileName =
@@ -780,7 +787,7 @@ public class DatasetComponent extends CustomComponent{
         }
       } else if (itemSelected) {
         String datasetCode = (String) table.getItem(itemId).getItemProperty("CODE").getValue();
-        
+
         Long datasetFileSize =
             (Long) table.getItem(itemId).getItemProperty("file_size_bytes").getValue();
 
@@ -791,21 +798,22 @@ public class DatasetComponent extends CustomComponent{
       }
     }
   }
-  
+
   /**
-   * The input should have the following form: type=openbis_type&id=openbis_id e.g. type=sample&id=/ABI_SYSBIO/QMARI117AV
-   * It is specifically designed to be used in the case of datasetView. In other cases there is no guarantee that it will work correctly.
-   * returns a map with two entries:
-   * "type": "openbistype"
-   * "id" : "openbisId"
+   * The input should have the following form: type=openbis_type&id=openbis_id e.g.
+   * type=sample&id=/ABI_SYSBIO/QMARI117AV It is specifically designed to be used in the case of
+   * datasetView. In other cases there is no guarantee that it will work correctly. returns a map
+   * with two entries: "type": "openbistype" "id" : "openbisId"
+   * 
    * @param parameters
    * @return
    */
-  public static Map<String, String> getMap(String parameters){
-    if (parameters == null || parameters.equals("")) return null;
+  public static Map<String, String> getMap(String parameters) {
+    if (parameters == null || parameters.equals(""))
+      return null;
     String[] params = parameters.split("&");
-    //TODO check for length == 2 needed ?
-    //if (params == null || params.length != 2)
+    // TODO check for length == 2 needed ?
+    // if (params == null || params.length != 2)
     if (params == null || params.length > 3)
       return null;
     HashMap<String, String> map = new HashMap<String, String>();
@@ -815,7 +823,7 @@ public class DatasetComponent extends CustomComponent{
         return null;
       map.put(kv[0], kv[1]);
     }
-   return map;
+    return map;
   }
 
 }

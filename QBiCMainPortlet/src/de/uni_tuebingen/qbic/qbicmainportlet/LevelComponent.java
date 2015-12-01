@@ -27,6 +27,7 @@ import model.TestSampleBean;
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
 
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.liferay.portal.kernel.util.WebKeys;
@@ -554,8 +555,7 @@ public class LevelComponent extends CustomComponent {
         } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
             && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
           visualize.setEnabled(true);
-        } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS")
-            && (fileName.endsWith(".html"))) {
+        } else if ((fileName.endsWith(".html"))) {
           visualize.setEnabled(true);
         } else {
           visualize.setEnabled(false);
@@ -628,16 +628,18 @@ public class LevelComponent extends CustomComponent {
         URL url;
         try {
           Object parent = datasetTable.getParent(next);
-          if (parent != null) {
+          if (parent != null) {       
             String parentDatasetFileName =
                 (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
             url =
                 datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
                     parentDatasetFileName + "/" + datasetFileName);
+            
+            DataSet ds = datahandler.getOpenBisClient().getFacade().getDataSet("20151127095122821-38147");
           } else {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
-
+          
           Window subWindow =
               new Window("QC of Sample: "
                   + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
@@ -674,9 +676,14 @@ public class LevelComponent extends CustomComponent {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/html");
+            LOGGER.debug(streamres.toString());
             res = streamres;
-          } else if (datasetType.equals("FASTQC")) {
-            res = new ExternalResource(url);
+          } else if (datasetFileName.endsWith(".html")) {
+            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+            StreamResource streamres = new StreamResource(re, datasetFileName);
+            streamres.setMIMEType("text/html");
+            LOGGER.debug(streamres.toString());
+            res = streamres;
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath =
                 (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
@@ -759,12 +766,14 @@ public class LevelComponent extends CustomComponent {
                   Resource res = null;
                   Object parent = datasetTable.getParent(event.getItemId());
                   if (parent != null) {
+                    LOGGER.debug( (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue());
                     String parentDatasetFileName =
                         (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
                     url =
                         datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
                             parentDatasetFileName + "/" + datasetFileName);
-                  } else {
+                  }
+                  else {
                     url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
                   }
                   
