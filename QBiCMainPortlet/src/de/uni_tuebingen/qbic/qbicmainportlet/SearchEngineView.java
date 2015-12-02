@@ -1,10 +1,15 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
@@ -23,6 +28,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleFetchOption;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleType;
@@ -48,9 +54,11 @@ public class SearchEngineView extends CustomComponent {
 
   Map<String, Map<String, String>> samplePropertiesMapping;
 
+  Set<String> visibleSpaces;
 
   public SearchEngineView(DataHandler datahandler) {
     this.datahandler = datahandler;
+    this.visibleSpaces = listSpacesOnBehalfOfUser();
     initSearchEngine();
     initUI();
   }
@@ -90,18 +98,54 @@ public class SearchEngineView extends CustomComponent {
 
     searchfield.setInputPrompt("search DB");
     // searchfield.setCaption("QSearch");
-    searchfield.setWidth(20.0f, Unit.EM);
+    searchfield.setWidth(30.0f, Unit.EM);
 
     // TODO would be nice to have a autofill or something similar
     searchFieldLayout.addComponent(searchfield);
 
-    NativeSelect navsel = new NativeSelect();
+    final NativeSelect navsel = new NativeSelect();
     navsel.addItem("Whole DB");
+    navsel.addItem("Projects Only");
     navsel.addItem("Experiments Only");
     navsel.addItem("Samples Only");
     navsel.setValue("Whole DB");
     navsel.setWidth(10.0f, Unit.EM);
     navsel.setNullSelectionAllowed(false);
+
+    navsel.addValueChangeListener(new Property.ValueChangeListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -6896454887050432147L;
+
+      @Override
+      public void valueChange(ValueChangeEvent event) {
+        // TODO Auto-generated method stub
+        Notification.show((String) navsel.getValue());
+
+        switch ((String) navsel.getValue()) {
+          case "Whole DB":
+            datahandler.setShowOptions(Arrays.asList("Projects", "Experiments", "Samples"));
+            break;
+          case "Projects Only":
+            datahandler.setShowOptions(Arrays.asList("Projects"));
+            break;
+          case "Experiments Only":
+            datahandler.setShowOptions(Arrays.asList("Experiments"));
+            break;
+          case "Samples Only":
+            datahandler.setShowOptions(Arrays.asList("Samples"));
+            break;
+          default:
+            datahandler.setShowOptions(Arrays.asList("Projects", "Experiments", "Samples"));
+            break;
+        }
+
+
+      }
+    });
+
     searchFieldLayout.addComponent(navsel);
 
     searchbar.addComponent(searchFieldLayout);
@@ -119,7 +163,7 @@ public class SearchEngineView extends CustomComponent {
       public void buttonClick(ClickEvent event) {
         String queryString = (String) searchfield.getValue().toString();
 
-        LOGGER.debug("the query was " + queryString);
+        // LOGGER.debug("the query was " + queryString);
 
         if (searchfield.getValue() == null || searchfield.getValue().toString().equals("")
             || searchfield.getValue().toString().trim().length() == 0) {
@@ -134,6 +178,7 @@ public class SearchEngineView extends CustomComponent {
 
             datahandler.setSampleResults(querySamples(queryString));
             datahandler.setExpResults(queryExperiments(queryString));
+            datahandler.setProjResults(queryProjects(queryString));
             datahandler.setLastQueryString(queryString);
 
 
@@ -143,36 +188,6 @@ public class SearchEngineView extends CustomComponent {
             message.add("view");
             message.add("searchresults");
             state.notifyObservers(message);
-
-            // Window window = new Window("Search results for '" + queryString + "':");
-            // window.center();
-            // window.setWidth("80%");
-            // VerticalLayout winContent = new VerticalLayout();
-            // winContent.setMargin(true);
-            // winContent.setSpacing(true);
-
-
-
-            // Grid testGrid = new Grid();
-
-            // int rowNumber = 1;
-
-
-
-            // System.out.println(beanContainer.getContainerPropertyIds());
-
-
-
-            // window.setContent(winContent);
-            // UI.getCurrent().addWindow(window);
-
-            // datahandler.getOpenBisClient().getLabelsofProperties(test);
-
-            // String identifier = foundSample.getIdentifier();
-
-            String identifier = new String();
-
-
 
           } catch (Exception e) {
             LOGGER.error("after query: ", e);
@@ -224,6 +239,7 @@ public class SearchEngineView extends CustomComponent {
   }
 
 
+
   public List<Experiment> queryExperiments(String queryString) {
     EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
     // SearchCriteria sc1 = new SearchCriteria();
@@ -242,11 +258,70 @@ public class SearchEngineView extends CustomComponent {
     List<Experiment> exps = datahandler.getOpenBisClient().getOpenbisInfoService()
         .searchForExperiments(datahandler.getOpenBisClient().getSessionToken(), sc2);
 
+
+    List<Experiment> expFilteredByUser = new ArrayList<Experiment>();
+
+
+    for (Experiment e : exps) {
+      String[] splitstr = e.getIdentifier().split("/");
+      String spaceCode = splitstr[1];
+
+      if (visibleSpaces.contains(spaceCode)) {
+        expFilteredByUser.add(e);
+      }
+    }
+
     // LOGGER.info("hits: " + samples1.size() + " " + samples2.size());
 
-    return exps;
+    return expFilteredByUser;
   }
 
+  public List<Project> queryProjects(String queryString) {
+    List<Project> result = new ArrayList<Project>();
+
+    List<Project> projects =
+        new ArrayList<Project>(datahandler.getOpenBisClient().getOpenbisInfoService()
+            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
+                LiferayAndVaadinUtils.getUser().getScreenName()));
+
+    for (Project p : projects) {
+      String projectDesc = p.getDescription();
+
+      // sometimes there is no description available (check for null entry)
+      if (projectDesc == null) {
+        continue;
+
+      } else {
+        projectDesc = projectDesc.toLowerCase();
+
+        if (projectDesc.contains(queryString.toLowerCase())) {
+          result.add(p);
+        }
+      }
+    }
+
+    return result;
+  }
+
+
+  public Set<String> listSpacesOnBehalfOfUser() {
+    // first retrieve all projects belonging to the user
+    List<Project> projects =
+        new ArrayList<Project>(datahandler.getOpenBisClient().getOpenbisInfoService()
+            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
+                LiferayAndVaadinUtils.getUser().getScreenName()));
+
+    Set<String> resultSpaceNames = new HashSet<String>();
+
+    for (Project p : projects) {
+      resultSpaceNames.add(p.getSpaceCode());
+      // LOGGER.info(p.getSpaceCode());
+    }
+
+    // LOGGER.info(resultSpaceNames.toString());
+
+    return resultSpaceNames;
+  }
 
 
   public List<String> getSearchResults(String samplecode) {

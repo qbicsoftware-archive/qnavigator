@@ -1,7 +1,5 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.Utils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,33 +9,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import model.NewIvacSampleBean;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-
-import com.google.gwt.validation.client.constraints.NotNullValidator;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.converter.StringToIntegerConverter;
-import com.vaadin.data.validator.IntegerValidator;
-import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -47,18 +32,17 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import helpers.Utils;
+import model.NewIvacSampleBean;
 
 public class AddPatientView extends VerticalLayout implements View {
 
@@ -92,8 +76,8 @@ public class AddPatientView extends VerticalLayout implements View {
   private String header;
 
 
-  private BeanItemContainer sampleOptions = new BeanItemContainer<NewIvacSampleBean>(
-      NewIvacSampleBean.class);
+  private BeanItemContainer sampleOptions =
+      new BeanItemContainer<NewIvacSampleBean>(NewIvacSampleBean.class);
 
   private VerticalLayout optionLayoutSection;
 
@@ -117,7 +101,7 @@ public class AddPatientView extends VerticalLayout implements View {
 
     initView();
   }
-  
+
   public String getHeader() {
     return header;
   }
@@ -141,9 +125,9 @@ public class AddPatientView extends VerticalLayout implements View {
    * init this view. builds the layout skeleton Menubar Description and others Statisitcs Experiment
    * Table Graph
    */
-  void initView() { 
-    header= "";
-    
+  void initView() {
+    header = "";
+
     addPatientViewContent = new VerticalLayout();
 
     addPatientViewContent.addComponent(expSetup);
@@ -162,9 +146,9 @@ public class AddPatientView extends VerticalLayout implements View {
    * @return
    */
   void initOptionLayout() {
-	  optionLayout.removeAllComponents();  
-	  optionLayout.setWidth("100%");
-	  optionLayout.setVisible(false);
+    optionLayout.removeAllComponents();
+    optionLayout.setWidth("100%");
+    optionLayout.setVisible(false);
 
     VerticalLayout optionLayoutContent = new VerticalLayout();
 
@@ -185,23 +169,23 @@ public class AddPatientView extends VerticalLayout implements View {
 
     final Grid optionGrid = new Grid();
     optionGrid.setWidth("80%");
-    // optionGrid.setCaption("Which biological samples are available for the patient(s) and which experiments will be performed?");
-    
+    // optionGrid.setCaption("Which biological samples are available for the patient(s) and which
+    // experiments will be performed?");
+
     gridInfo = new CustomVisibilityComponent(new Label(""));
     ((Label) gridInfo.getInnerComponent()).addStyleName(ValoTheme.LABEL_LARGE);
 
-    Component gridInfoContent =
-        Utils.questionize(
-            gridInfo,
-                "Which biological samples are available for the patient(s) and which experiments will be performed?",
-                "Extracted Samples");
-    
+    Component gridInfoContent = Utils.questionize(gridInfo,
+        "Which biological samples are available for the patient(s) and which experiments will be performed?",
+        "Extracted Samples");
+
     // optionGrid.setSelectionMode(SelectionMode.MULTI);
     optionGrid.setEditorEnabled(true);
 
     optionGrid.setContainerDataSource(sampleOptions);
-    optionGrid.setColumnOrder("type", "secondaryName", "tissue", "amount", "dnaSeq", "rnaSeq", "deepSeq");
-    
+    optionGrid.setColumnOrder("type", "secondaryName", "tissue", "amount", "dnaSeq", "rnaSeq",
+        "deepSeq");
+
     optionLayoutContent.addComponent(gridInfoContent);
     optionLayoutContent.addComponent(optionGrid);
     optionLayoutContent.addComponent(addSample);
@@ -232,7 +216,7 @@ public class AddPatientView extends VerticalLayout implements View {
    */
   VerticalLayout initButtonLayout() {
     registerPatients = new Button("Register Patients");
-    //registerPatients.setWidth("100%");
+    // registerPatients.setWidth("100%");
     registerPatients.setStyleName(ValoTheme.BUTTON_FRIENDLY);
     registerPatients.setVisible(false);
 
@@ -253,11 +237,11 @@ public class AddPatientView extends VerticalLayout implements View {
 
     buttonLayoutSection.addComponent(buttonLayout);
     buttonLayout.addComponent(registerPatients);
-    
+
     return buttonLayoutSection;
   }
-  
-  
+
+
 
   /**
    * initializes the description layout
@@ -275,110 +259,99 @@ public class AddPatientView extends VerticalLayout implements View {
     Set<String> visibleSpaces = new LinkedHashSet<>();
 
     /*
-    for (String space: datahandler.getOpenBisClient().listSpaces()) {
-    	if(space.startsWith("IVAC")) {
-    		
-    	Set<String> users = datahandler.getOpenBisClient().getSpaceMembers(space);
-    	
-    	if(users.contains(LiferayAndVaadinUtils.getUser().getScreenName())) {
-    		visibleSpaces.add(space);
-    	}
-    	}
+     * for (String space: datahandler.getOpenBisClient().listSpaces()) {
+     * if(space.startsWith("IVAC")) {
+     * 
+     * Set<String> users = datahandler.getOpenBisClient().getSpaceMembers(space);
+     * 
+     * if(users.contains(LiferayAndVaadinUtils.getUser().getScreenName())) {
+     * visibleSpaces.add(space); } } }
+     */
+    for (Project project : datahandler.getOpenBisClient().getOpenbisInfoService()
+        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
+            LiferayAndVaadinUtils.getUser().getScreenName())) {
+
+      if (project.getIdentifier().contains("IVAC")) {
+        visibleSpaces.add(project.getSpaceCode());
+      }
     }
-    */
-    
-    for (Project project: datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(
-            datahandler.getOpenBisClient().getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
-    	
-    	if(project.getIdentifier().contains("IVAC")) {
-    		visibleSpaces.add(project.getSpaceCode());
-    	}
-    }
-    
-    //for (Project project : datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName())) {
-    //  if (project.getSpaceCode().startsWith("IVAC")) {
-    //    visibleSpaces.add(project.getSpaceCode());
-     // }
-    //}
-    
+
+    // for (Project project :
+    // datahandler.getOpenBisClient().getOpenbisInfoService().listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
+    // LiferayAndVaadinUtils.getUser().getScreenName())) {
+    // if (project.getSpaceCode().startsWith("IVAC")) {
+    // visibleSpaces.add(project.getSpaceCode());
+    // }
+    // }
+
     projects = new CustomVisibilityComponent(new ComboBox("Select Project", visibleSpaces));
     ((ComboBox) projects.getInnerComponent()).setImmediate(true);
-    
+
     Component context =
-        Utils.questionize(
-            projects,
-                "Add Patient(s) to the following project",
-                "Select Project");
-    
+        Utils.questionize(projects, "Add Patient(s) to the following project", "Select Project");
+
     ((ComboBox) projects.getInnerComponent()).addValueChangeListener(new ValueChangeListener() {
-      
+
       @Override
       public void valueChange(ValueChangeEvent event) {
         numberOfPatients.setVisible(true);
       }
     });
-      
+
     expSetup.addComponent(context);
-    
-    numberOfPatients = new CustomVisibilityComponent(new TextField("Number of Patients"));  
+
+    numberOfPatients = new CustomVisibilityComponent(new TextField("Number of Patients"));
     numberOfPatients.setVisible(false);
     ((TextField) numberOfPatients.getInnerComponent()).setImmediate(true);
 
-    Component numberContext =
-        Utils.questionize(
-            numberOfPatients,
-                "How many patients with the same setup should be registered?",
-                "Number of Patients");
-    
-    ((TextField) numberOfPatients.getInnerComponent()).addTextChangeListener(new TextChangeListener() {
-      
-      @Override
-      public void textChange(TextChangeEvent event) {
-        secondaryNames.setVisible(true);
-      }
-    });
-    
+    Component numberContext = Utils.questionize(numberOfPatients,
+        "How many patients with the same setup should be registered?", "Number of Patients");
+
+    ((TextField) numberOfPatients.getInnerComponent())
+        .addTextChangeListener(new TextChangeListener() {
+
+          @Override
+          public void textChange(TextChangeEvent event) {
+            secondaryNames.setVisible(true);
+          }
+        });
+
     expSetup.addComponent(numberContext);
 
     secondaryNames = new CustomVisibilityComponent(new TextField("Identifiers"));
     ((TextField) secondaryNames.getInnerComponent()).setImmediate(true);
 
     secondaryNames.setVisible(false);
-    Component secondaryContext =
-        Utils.questionize(
-            secondaryNames,
-                "Please provide a list of comma separated IDs.",
-                "Identifiers");
-    
- ((TextField) secondaryNames.getInnerComponent()).addTextChangeListener(new TextChangeListener() {
-      
+    Component secondaryContext = Utils.questionize(secondaryNames,
+        "Please provide a list of comma separated IDs.", "Identifiers");
+
+    ((TextField) secondaryNames.getInnerComponent())
+        .addTextChangeListener(new TextChangeListener() {
+
+          @Override
+          public void textChange(TextChangeEvent event) {
+            description.setVisible(true);
+          }
+        });
+
+    expSetup.addComponent(secondaryContext);
+
+    description = new CustomVisibilityComponent(new TextField("Description"));
+    ((TextField) description.getInnerComponent()).setImmediate(true);
+    description.setVisible(false);
+    Component descriptionContext = Utils.questionize(description,
+        "Please provide a general description for the new patient cases", "Description");
+
+    ((TextField) description.getInnerComponent()).addTextChangeListener(new TextChangeListener() {
+
       @Override
       public void textChange(TextChangeEvent event) {
-        description.setVisible(true);
+        optionLayout.setVisible(true);
+        hlaLayout.setVisible(true);
+        registerPatients.setVisible(true);
       }
     });
- 
- expSetup.addComponent(secondaryContext);
-    
-      description = new CustomVisibilityComponent(new TextField("Description"));  
-      ((TextField) description.getInnerComponent()).setImmediate(true);
-      description.setVisible(false);
-      Component descriptionContext =
-          Utils.questionize(
-              description,
-              "Please provide a general description for the new patient cases",
-                  "Description");
-      
-      ((TextField) description.getInnerComponent()).addTextChangeListener(new TextChangeListener() {
-        
-        @Override
-        public void textChange(TextChangeEvent event) {
-          optionLayout.setVisible(true);
-          hlaLayout.setVisible(true);
-          registerPatients.setVisible(true);
-        }
-      });
-      expSetup.addComponent(descriptionContext);
+    expSetup.addComponent(descriptionContext);
 
   }
 
@@ -396,40 +369,38 @@ public class AddPatientView extends VerticalLayout implements View {
     hlaLayout.setMargin(new MarginInfo(true, false, false, false));
     hlaLayout.setHeight(null);
     hlaLayout.setSpacing(true);
-    
+
     hlaInfo = new CustomVisibilityComponent(new Label("HLA Typing"));
     ((Label) hlaInfo.getInnerComponent()).setHeight("24px");
 
-    Component hlaContext =
-        Utils.questionize(
-            hlaInfo,
-                "Register available HLA typing for this patient (one allele per line)",
-                "HLA Typing");
-    
+    Component hlaContext = Utils.questionize(hlaInfo,
+        "Register available HLA typing for this patient (one allele per line)", "HLA Typing");
+
     hlaLayout.addComponent(hlaContext);
 
     HorizontalLayout hlalayout = new HorizontalLayout();
-    
-    VerticalLayout hlaLayout1 = new VerticalLayout(); 
+
+    VerticalLayout hlaLayout1 = new VerticalLayout();
     hlaLayout1.addComponent(registerHLAI);
     hlaLayout1.addComponent(hlaItypes);
-    
-    VerticalLayout hlaLayout2 = new VerticalLayout(); 
+
+    VerticalLayout hlaLayout2 = new VerticalLayout();
     hlaLayout2.addComponent(registerHLAII);
     hlaLayout2.addComponent(hlaIItypes);
-    
+
     hlalayout.addComponent(hlaLayout1);
     hlalayout.addComponent(hlaLayout2);
-    
+
     hlalayout.setSpacing(true);
 
-    typingMethod.addItems(datahandler.getOpenBisClient().getVocabCodesForVocab("Q_HLA_TYPING_METHODS"));
+    typingMethod
+        .addItems(datahandler.getOpenBisClient().getVocabCodesForVocab("Q_HLA_TYPING_METHODS"));
     hlaLayout.addComponent(typingMethod);
     hlaLayout.addComponent(hlalayout);
   }
 
   public void callPatientRegistration() {
-    
+
     List<String> secondaryIDs = Arrays.asList(secondaryNames.getValue().split("\\s*,\\s*"));
     Map<String, List<String>> hlaTyping = new HashMap<String, List<String>>();
 
@@ -438,7 +409,7 @@ public class AddPatientView extends VerticalLayout implements View {
 
     boolean hlaIvalid = true;
     boolean hlaIIvalid = true;
-    
+
     if (registerHLAI.getValue()) {
       if (hlaItypes.getValue() != null & typingMethod.getValue() != null) {
         hlaTypingI.add(hlaItypes.getValue());
@@ -456,59 +427,63 @@ public class AddPatientView extends VerticalLayout implements View {
         hlaTypingII.add(hlaIItypes.getValue());
         hlaTypingII.add(typingMethod.getValue().toString());
         hlaTyping.put("MHC_CLASS_II", hlaTypingII);
-      }
-      else {
+      } else {
         Notification.show("HLA Typing not fully specified.", Type.ERROR_MESSAGE);
         hlaIIvalid = false;
       }
     }
 
     Integer numberPatients = Integer.parseInt(numberOfPatients.getValue());
-    
+
     // Notification with default settings for a warning
-    Notification sucess = new Notification("Patients successfully registered.", Type.TRAY_NOTIFICATION);
-    Notification failure = new Notification("Registration failed. Number of Patients and secondary IDs has to be the same and tissues have to be fully specified.", Type.ERROR_MESSAGE);
-    
+    Notification sucess =
+        new Notification("Patients successfully registered.", Type.TRAY_NOTIFICATION);
+    Notification failure = new Notification(
+        "Registration failed. Number of Patients and secondary IDs has to be the same and tissues have to be fully specified.",
+        Type.ERROR_MESSAGE);
+
     // Customize it
     sucess.setDelayMsec(20000);
     sucess.setStyleName(ValoTheme.NOTIFICATION_SUCCESS);
     sucess.setPosition(Position.TOP_CENTER);
-    //sucess.setIcon(FontAwesome.CHECK);
-    
+    // sucess.setIcon(FontAwesome.CHECK);
+
     failure.setDelayMsec(20000);
     failure.setStyleName(ValoTheme.NOTIFICATION_FAILURE);
     failure.setPosition(Position.TOP_CENTER);
-             
-    
-    if(numberPatients.equals(secondaryIDs.size()) & checkRegisteredSamplesTable() & hlaIvalid & hlaIIvalid) {
-      datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects.getValue().toString(), description.getValue(), hlaTyping);
+
+
+    if (numberPatients.equals(secondaryIDs.size()) & checkRegisteredSamplesTable() & hlaIvalid
+        & hlaIIvalid) {
+      datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions,
+          projects.getValue().toString(), description.getValue(), hlaTyping);
       sucess.show(Page.getCurrent());
-    }
-    else {
+    } else {
       failure.show(Page.getCurrent());
     }
-    
+
   }
-  
+
   public boolean checkRegisteredSamplesTable() {
     boolean valid = true;
-    
-    if(sampleOptions.size() == 0) {
+
+    if (sampleOptions.size() == 0) {
       return false;
     }
-   
+
 
     for (Iterator iter = sampleOptions.getItemIds().iterator(); iter.hasNext();) {
       boolean expsSpecified = false;
       boolean tissueSpecified = false;
       boolean instrumentSpecified = false;
-      
+
       NewIvacSampleBean sampleBean = (NewIvacSampleBean) iter.next();
- 
-      expsSpecified = ((sampleBean.getDeepSeq() == true) | (sampleBean.getDnaSeq() == true) | (sampleBean.getRnaSeq() == true));
+
+      expsSpecified = ((sampleBean.getDeepSeq() == true) | (sampleBean.getDnaSeq() == true)
+          | (sampleBean.getRnaSeq() == true));
       tissueSpecified = (!sampleBean.getTissue().equals(""));
       instrumentSpecified = (!sampleBean.getSeqDevice().equals(""));
-      
+
       valid = valid & (expsSpecified & tissueSpecified & instrumentSpecified);
     }
 
@@ -528,7 +503,7 @@ public class AddPatientView extends VerticalLayout implements View {
     initExperimentalSetupLayout();
     initOptionLayout();
     hlaTypingLayout();
-    
+
     registerPatients.setVisible(false);
     numberOfPatients.setVisible(false);
     secondaryNames.setVisible(false);

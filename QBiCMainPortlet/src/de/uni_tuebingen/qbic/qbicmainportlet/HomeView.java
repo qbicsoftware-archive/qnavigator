@@ -111,8 +111,8 @@ public class HomeView extends VerticalLayout implements View {
     setExportButton();
 
     this.table.setContainerDataSource(spaceBean.getProjects());
-    this.table.setVisibleColumns(new Object[] {"code", "space", "description",
-        "principalInvestigator"});
+    this.table
+        .setVisibleColumns(new Object[] {"code", "space", "description", "principalInvestigator"});
     this.table.setColumnHeader("code", "Name");
     this.table.setColumnHeader("space", "Project");
     this.table.setColumnHeader("principalInvestigator", "Investigator");
@@ -305,14 +305,9 @@ public class HomeView extends VerticalLayout implements View {
     BeanItemContainer<ProjectBean> projectContainer =
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
-    LOGGER.info("projects load");
     List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
         .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
-    LOGGER.info("projects finsished");
 
-
-    // getProjectsQuicker(
-    // datahandler.getOpenBisClient().getSessionToken(), user);
 
     for (Project project : projects) {
       // if (project.getSpaceCode().contains("IVAC")) {
