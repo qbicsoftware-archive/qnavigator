@@ -125,6 +125,8 @@ public class ProjectView extends VerticalLayout implements View {
 
   private ProjInformationComponent projectInformation;
 
+private VerticalLayout projDescriptionContent;
+
 
   public String getHeaderLabel() {
     return headerLabel;
@@ -196,11 +198,12 @@ public class ProjectView extends VerticalLayout implements View {
     projectview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
 
 
-    // projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+    //projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
-    projectview_tab.addTab(initStatistics()).setIcon(FontAwesome.CHECK_CIRCLE);
+    //projectview_tab.addTab(initStatistics()).setIcon(FontAwesome.CHECK_CIRCLE);
+    
     projectview_tab.addTab(initTable()).setIcon(FontAwesome.FLASK);
     projectview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     projectview_tab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.TINT);
@@ -265,7 +268,7 @@ public class ProjectView extends VerticalLayout implements View {
 
     // updateContentDescription();
     updateContentMemberSection();
-    updateContentStatistics();
+    //updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
 
@@ -307,7 +310,7 @@ public class ProjectView extends VerticalLayout implements View {
    * @return
    */
   ToolBar initMenuBar() {
-    SearchBarView searchBarView = new SearchBarView(datahandler);
+    SearchEngineView searchBarView = new SearchEngineView(datahandler);
     toolbar = new ToolBar(resourceUrl, state, searchBarView);
     toolbar.init();
     return toolbar;
@@ -332,7 +335,7 @@ public class ProjectView extends VerticalLayout implements View {
    */
   VerticalLayout initDescription() {
     VerticalLayout projDescription = new VerticalLayout();
-    VerticalLayout projDescriptionContent = new VerticalLayout();
+    projDescriptionContent = new VerticalLayout();
 
     projDescription.setCaption("");
 
@@ -387,6 +390,7 @@ public class ProjectView extends VerticalLayout implements View {
   }
 
   void updateContentDescription() {
+	  projDescriptionContent.removeAllComponents();
     contact
         .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
             + currentBean.getId()
@@ -396,10 +400,17 @@ public class ProjectView extends VerticalLayout implements View {
     if (!desc.isEmpty()) {
       descContent.setValue(desc);
     }
+    
+    projDescriptionContent.addComponent(new Label(String.format("%s experiment(s),", currentBean
+        .getExperiments().size())));
 
-    // membersSection.removeAllComponents();
-    // membersSection.addComponent(getMembersComponent());
-    // membersSection.setMargin(new MarginInfo(false, false, false, true));
+    //VerticalLayout statusContent =
+      //  this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
+
+    //statusContent.setSpacing(true);
+    //statusContent.setMargin(new MarginInfo(true, false, true, true));
+
+    //projDescriptionContent.addComponent(statusContent);
   }
 
   void updateContentMemberSection() {
@@ -471,17 +482,17 @@ public class ProjectView extends VerticalLayout implements View {
     // statContent.addComponent(new Label(String.format("%s dataset(s).", numOfDatasets)));
 
     status.removeAllComponents();
-    VerticalLayout statusContent =
-        this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
+    //VerticalLayout statusContent =
+     //   this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
     // statusContent.setCaption("Status");
     // statusContent.setIcon(FontAwesome.CLOCK_O);
 
     // TODO
     // statusContent.addComponent(new Label(projectInformation.statusMessage));
-    statusContent.setSpacing(true);
-    statusContent.setMargin(new MarginInfo(true, false, true, true));
+    //statusContent.setSpacing(true);
+    //statusContent.setMargin(new MarginInfo(true, false, true, true));
 
-    status.addComponent(statusContent);
+    //status.addComponent(statusContent);
   }
 
 
@@ -492,7 +503,7 @@ public class ProjectView extends VerticalLayout implements View {
     VerticalLayout tableSection = new VerticalLayout();
     VerticalLayout tableSectionContent = new VerticalLayout();
 
-    tableSection.setCaption("Experiments");
+    tableSection.setCaption("Exp. Steps");
     // tableSectionContent.setCaption("Registered Experiments");
     // tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
@@ -677,11 +688,11 @@ public class ProjectView extends VerticalLayout implements View {
       // Get the current item identifier, which is an integer.
       ExperimentBean item = (ExperimentBean) i.next();
 
-      LOGGER.debug("Status " + item.getStatus());
     }
-    table.setVisibleColumns(new Object[] {"code", "type", "registrationDate", "registrator",
+    table.setVisibleColumns(new Object[] {"code", "prettyType", "registrationDate", "registrator",
         "status"});
 
+    table.setColumnHeader("prettyType", "Type");
     int rowNumber = this.table.size();
 
     if (rowNumber == 0) {
@@ -936,48 +947,6 @@ public class ProjectView extends VerticalLayout implements View {
    * memberString.append(fullname); memberString.append("</a>"); } } synchronized (UI.getCurrent())
    * { processed(); } } } } });
    */
-
-  /**
-   * 
-   * @param statusValues
-   * @return
-   */
-  public VerticalLayout createProjectStatusComponent(Map<String, Integer> statusValues) {
-    VerticalLayout projectStatusContent = new VerticalLayout();
-
-    Iterator<Entry<String, Integer>> it = statusValues.entrySet().iterator();
-    int finishedExperiments = 0;
-
-    while (it.hasNext()) {
-      Map.Entry<String, Integer> pairs = (Map.Entry<String, Integer>) it.next();
-
-      if ((Integer) pairs.getValue() == 0) {
-        Label statusLabel =
-            new Label(pairs.getKey() + ": " + FontAwesome.TIMES.getHtml(), ContentMode.HTML);
-        statusLabel.addStyleName("redicon");
-        projectStatusContent.addComponent(statusLabel);
-      }
-
-      else {
-        Label statusLabel =
-            new Label(pairs.getKey() + ": " + FontAwesome.CHECK.getHtml(), ContentMode.HTML);
-        statusLabel.addStyleName("greenicon");
-
-        if (pairs.getKey().equals("Project Planned")) {
-          projectStatusContent.addComponentAsFirst(statusLabel);
-        } else {
-          projectStatusContent.addComponent(statusLabel);
-
-        }
-        finishedExperiments += (Integer) pairs.getValue();
-      }
-    }
-    // ProgressBar progressBar = new ProgressBar();
-    // progressBar.setValue((float) finishedExperiments / statusValues.keySet().size());
-    // projectStatusContent.addComponent(progressBar);
-
-    return projectStatusContent;
-  }
 
   /**
    * 

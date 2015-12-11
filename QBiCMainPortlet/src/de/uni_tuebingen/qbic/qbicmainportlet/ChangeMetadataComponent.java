@@ -10,6 +10,7 @@ import logging.Log4j2Logger;
 import logging.Logger;
 import model.ExperimentBean;
 import model.ProjectBean;
+import model.PropertyBean;
 import model.SampleBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
@@ -83,7 +84,7 @@ public class ChangeMetadataComponent extends CustomComponent {
 				Collection<Field<?>> registeredFields = fieldGroup.getFields();
 
 				for (Field<?> field : registeredFields) {
-					properties.put(field.getCaption(), field.getValue());
+					properties.put(field.getDescription(), field.getValue());
 				}
 
 				HashMap<String, Object> parameters = new HashMap<String, Object>();
@@ -101,11 +102,12 @@ public class ChangeMetadataComponent extends CustomComponent {
 		properties.addComponent(saveButton);
 	}
 	
-	private Map<String, List<String>> getControlledVocabularies(SampleBean currentBean) {
+	private Map<String, PropertyBean> getControlledVocabularies(SampleBean currentBean) {
 		List<PropertyType> completeProperties =
 		        datahandler.getOpenBisClient().listPropertiesForType(datahandler.getOpenBisClient().getSampleTypeByString(currentBean.getType()));
 	
-	Map<String, List<String>> controlledVocabularies = new HashMap<String, List<String>>();
+	//Map<String, List<String>> controlledVocabularies = new HashMap<String, List<String>>();
+	Map<String,PropertyBean> controlledVocabularies = new HashMap<String, PropertyBean>();
 
     for (PropertyType p : completeProperties) {
       if (p instanceof ControlledVocabularyPropertyType) {
@@ -117,18 +119,24 @@ public class ChangeMetadataComponent extends CustomComponent {
     	      terms.add(term.getCode().toString());
     	    }
     	  
-        controlledVocabularies.put(p.getCode(), terms);
+    	  PropertyBean newVocab = new PropertyBean();
+    	  newVocab.setCode(p.getCode());
+    	  newVocab.setDescription(p.getDescription());
+    	  newVocab.setLabel(p.getLabel());
+    	  newVocab.setVocabularyValues(terms);
+    	  
+        controlledVocabularies.put(p.getCode(), newVocab);
       }
     }
     return controlledVocabularies;
 	}
 
 
-	private Map<String, String> getProperties(SampleBean currentBean) {
+	private Map<String, PropertyBean> getProperties(SampleBean currentBean) {
 		List<PropertyType> completeProperties =
 		        datahandler.getOpenBisClient().listPropertiesForType(datahandler.getOpenBisClient().getSampleTypeByString(currentBean.getType()));
 	
-    Map<String, String> properties = new HashMap<String, String>();
+    Map<String, PropertyBean> properties = new HashMap<String, PropertyBean>();
     // Change that call
     Map<String, String> assignedProperties = currentBean.getProperties();
 
@@ -137,10 +145,11 @@ public class ChangeMetadataComponent extends CustomComponent {
     	continue;  
       }
       else if (assignedProperties.keySet().contains(p.getCode())) {
-          properties.put(p.getCode(), assignedProperties.get(p.getCode()));
+          //properties.put(p.getCode(), assignedProperties.get(p.getCode()));
+    	  properties.put(p.getCode(), new PropertyBean(p.getLabel(), p.getCode(), p.getDescription(), assignedProperties.get(p.getCode())));
         } 
       else {
-        properties.put(p.getCode(), "");
+        properties.put(p.getCode(), new PropertyBean(p.getLabel(), p.getCode(), p.getDescription(), ""));
       }
     }
     return properties;
@@ -151,27 +160,32 @@ public class ChangeMetadataComponent extends CustomComponent {
 		final FieldGroup fieldGroup = new FieldGroup();
 		final FormLayout form2 = new FormLayout();
 		
-		Map<String, List<String>> controlledVocabularies = getControlledVocabularies(sample);
-		Map<String, String> properties = getProperties(sample);
+		Map<String, PropertyBean> controlledVocabularies = getControlledVocabularies(sample);
+		Map<String, PropertyBean> properties = getProperties(sample);
 
 		for (String key : properties.keySet()) {
 			if (controlledVocabularies.keySet().contains(key)) {
-				ComboBox select = new ComboBox(key);
+				ComboBox select = new ComboBox(controlledVocabularies.get(key).getLabel());
 				fieldGroup.bind(select, key);
 
 				// Add items with given item IDs
-				select.addItems(controlledVocabularies.get(key));
+				select.addItems(controlledVocabularies.get(key).getVocabularyValues());
 				
-				for(Object itemID: select.getItemIds()) {
+				/*for(Object itemID: select.getItemIds()) {
 					System.out.println(itemID);
 				}
-				select.setValue(properties.get(key));
+				*/
+				select.setDescription(controlledVocabularies.get(key).getCode());
+				select.setValue(properties.get(key).getValue());
+				
 				form2.addComponent(select);
 				
 			} else {
 				TextField tf = new TextField(key);
 				fieldGroup.bind(tf, key);
-				tf.setValue(properties.get(key));
+				tf.setCaption(properties.get(key).getLabel());
+				tf.setDescription(properties.get(key).getCode());
+				tf.setValue((String) properties.get(key).getValue());
 				form2.addComponent(tf);
 			}
 		}

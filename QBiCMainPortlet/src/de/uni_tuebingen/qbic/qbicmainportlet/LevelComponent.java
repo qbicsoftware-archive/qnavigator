@@ -1,5 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.UglyToPrettyNameMapper;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -25,6 +27,7 @@ import model.TestSampleBean;
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
 
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.liferay.portal.kernel.util.WebKeys;
@@ -34,13 +37,19 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -49,6 +58,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.PopupView;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -90,6 +100,8 @@ public class LevelComponent extends CustomComponent {
   private int numberOfDatasets;
 
   private int numberOfSamples;
+  
+  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
 
   public LevelComponent(DataHandler dh, State state, String resourceurl, String caption) {
     this.datahandler = dh;
@@ -416,7 +428,7 @@ public class LevelComponent extends CustomComponent {
     // this.table.setSizeFull();
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(false, false, true, false));
+    buttonLayout.setMargin(new MarginInfo(true, false, true, true));
     buttonLayout.setHeight(null);
     // buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
@@ -456,6 +468,38 @@ public class LevelComponent extends CustomComponent {
     buttonLayout.addComponent(uncheckAll);
     buttonLayout.addComponent(visualize);
     buttonLayout.addComponent(this.download);
+    
+	String content = 
+			"<p> In case of multiple file selections, Project Browser will create a tar archive.</p>" +
+		    "<hr>" +	
+		    "<p> If you need help on extracting a tar archive file, follow the tips below: </p>" +
+		    "<p>" + FontAwesome.WINDOWS.getHtml() + " Windows </p>" +
+		    "<p> To open/extract TAR file on Windows, you can use 7-Zip, Easy 7-Zip, PeaZip.</p>" +
+		   	"<hr>" +
+		   	"<p>" + FontAwesome.APPLE.getHtml() + " MacOS </p>" +
+		   	"<p> To open/extract TAR file on Mac, you can use Mac OS built-in utility Archive Utility,<br> or third-part freeware. </p>" +
+    		"<hr>" +
+    		"<p>" + FontAwesome.LINUX.getHtml() + " Linux </p>" +
+		    "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> " +
+		    "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
+	
+	PopupView tooltip = new PopupView(new helpers.ToolTip(content));
+	tooltip.setHeight("44px");
+	
+	HorizontalLayout help = new HorizontalLayout();
+	help.setSizeFull();
+	HorizontalLayout helpContent = new HorizontalLayout();
+	//helpContent.setSizeFull();
+	
+	help.setMargin(new MarginInfo(false,false,false,true));
+	Label helpText = new Label("Attention: Click here before Download!");
+	helpContent.addComponent(new Label(FontAwesome.QUESTION_CIRCLE.getHtml(), ContentMode.HTML));
+	helpContent.addComponent(helpText);
+	helpContent.addComponent(tooltip);	
+	helpContent.setSpacing(true);
+	
+	help.addComponent(helpContent);
+	help.setComponentAlignment(helpContent, Alignment.TOP_CENTER);
     
     /**
      * prepare download.
@@ -511,8 +555,7 @@ public class LevelComponent extends CustomComponent {
         } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
             && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
           visualize.setEnabled(true);
-        } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS")
-            && (fileName.endsWith(".html"))) {
+        } else if ((fileName.endsWith(".html"))) {
           visualize.setEnabled(true);
         } else {
           visualize.setEnabled(false);
@@ -585,16 +628,18 @@ public class LevelComponent extends CustomComponent {
         URL url;
         try {
           Object parent = datasetTable.getParent(next);
-          if (parent != null) {
+          if (parent != null) {       
             String parentDatasetFileName =
                 (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
             url =
                 datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
                     parentDatasetFileName + "/" + datasetFileName);
+            
+            DataSet ds = datahandler.getOpenBisClient().getFacade().getDataSet("20151127095122821-38147");
           } else {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
-
+          
           Window subWindow =
               new Window("QC of Sample: "
                   + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
@@ -631,9 +676,14 @@ public class LevelComponent extends CustomComponent {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/html");
+            LOGGER.debug(streamres.toString());
             res = streamres;
-          } else if (datasetType.equals("FASTQC")) {
-            res = new ExternalResource(url);
+          } else if (datasetFileName.endsWith(".html")) {
+            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+            StreamResource streamres = new StreamResource(re, datasetFileName);
+            streamres.setMIMEType("text/html");
+            LOGGER.debug(streamres.toString());
+            res = streamres;
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath =
                 (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
@@ -703,9 +753,78 @@ public class LevelComponent extends CustomComponent {
         }
       }
     });
+    
+    this.datasetTable.addItemClickListener(new ItemClickListener() {
+        @Override
+        public void itemClick(ItemClickEvent event) {
+            if(!event.isDoubleClick()) {
+                String datasetCode = (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
+                String datasetFileName =
+                    (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name").getValue();
+                URL url;
+                try {
+                  Resource res = null;
+                  Object parent = datasetTable.getParent(event.getItemId());
+                  if (parent != null) {
+                    LOGGER.debug( (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue());
+                    String parentDatasetFileName =
+                        (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
+                    url =
+                        datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                            parentDatasetFileName + "/" + datasetFileName);
+                  }
+                  else {
+                    url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
+                  }
+                  
+                  Window subWindow = new Window();                  
+                  VerticalLayout subContent = new VerticalLayout();
+                  subContent.setMargin(true);
+                  subWindow.setContent(subContent);
+                  QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+                  Boolean visualize = false;
+                  
+                  if (datasetFileName.endsWith(".pdf")) {
+                      QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+                      StreamResource streamres = new StreamResource(re, datasetFileName);
+                      streamres.setMIMEType("application/pdf");
+                      res = streamres;
+                      visualize = true;
+                    }
+                  
+                  if(visualize) {
+                  LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
+                  BrowserFrame frame = new BrowserFrame("", res);
+                  
+                  frame.setSizeFull();
+                  subContent.addComponent(frame);
 
-    // this.vert.addComponent(buttonLayout);
-    tableSection.addComponent(buttonLayout);
+                  // Center it in the browser window
+                  subWindow.center();
+                  subWindow.setModal(true);
+                  subWindow.setSizeFull();
+                  
+                  frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
+
+                  // Open it in the UI
+                  ui.addWindow(subWindow);
+                  }
+                  
+                } catch (MalformedURLException e) {
+                    LOGGER.error(String.format(
+                        "Visualization failed because of malformedURL for dataset: %s", datasetCode));
+                    Notification
+                        .show(
+                            "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+                            Notification.Type.ERROR_MESSAGE);
+                  }
+            }
+        }
+    });
+
+    this.vert.addComponent(buttonLayout);
+    this.vert.addComponent(help);
+
   }
 
 
@@ -778,7 +897,7 @@ public class LevelComponent extends CustomComponent {
       // d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
-      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(d.getType());
+      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()) + " Folder");
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
@@ -811,7 +930,7 @@ public class LevelComponent extends CustomComponent {
       // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
-      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());
+      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()));
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_file, "File Size").setValue(

@@ -180,8 +180,11 @@ public class PatientView extends VerticalLayout implements View {
     this.currentBean = projectBean;
 
     registeredExperiments.setContainerDataSource(projectBean.getExperiments());
-    registeredExperiments.setVisibleColumns(new Object[] {"code", "type", "registrationDate",
-        "registrator", "status"});
+    
+    registeredExperiments.setVisibleColumns(new Object[] {"code", "prettyType", "registrationDate", "registrator",
+    "status"});
+
+    registeredExperiments.setColumnHeader("prettyType", "Type");
 
     int rowNumber = projectBean.getExperiments().size();
 
@@ -259,6 +262,9 @@ public class PatientView extends VerticalLayout implements View {
 
       @Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
+    	LOGGER.debug(event.getTabSheet().getSelectedTab().getCaption());
+    	LOGGER.debug(getCurrentBean().getId());
+    	
         if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
           loadGraph();
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
@@ -582,7 +588,7 @@ public class PatientView extends VerticalLayout implements View {
     VerticalLayout tableSection = new VerticalLayout();
     VerticalLayout tableSectionContent = new VerticalLayout();
 
-    tableSection.setCaption("Experiments");
+    tableSection.setCaption("Exp. Steps");
 
     // tableSectionContent.setCaption("Registered Experiments");
     // tableSectionContent.setIcon(FontAwesome.FLASK);
@@ -617,7 +623,7 @@ public class PatientView extends VerticalLayout implements View {
    * @return
    */
   ToolBar initToolBar() {
-    SearchBarView searchBarView = new SearchBarView(datahandler);
+    SearchEngineView searchBarView = new SearchEngineView(datahandler);
     toolbar = new ToolBar(resourceUrl, state, searchBarView);
     toolbar.init();
     toolbar.visibleBarcode(false);

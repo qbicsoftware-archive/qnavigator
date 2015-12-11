@@ -276,7 +276,7 @@ public class WorkflowViewController {
    * @return
    */
   public BeanItemContainer<Workflow> suitableWorkflows(List<String> fileType) {
-    try {
+    try {      
       BeanItemContainer<Workflow> wfs = submitter.getAvailableSuitableWorkflows(fileType);
       for (Workflow wf : wfs.getItemIds()) {
         if (expDesignWfs.contains(wf.getName()))// TODO add other workflows to the list that are

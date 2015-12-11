@@ -205,7 +205,15 @@ public class ParameterComponent extends WorkflowParameterComponent {
   private TextField createParameterField(Parameter param, Validator validator, Converter converter) {
     //TextField field = new TextField(param.getTitle());
     //field.setDescription(param.getDescription());
-	TextField field = new TextField(param.getDescription());
+	    String description;
+	  	if (param.getDescription().contains("#br#")) {
+	  		description = param.getDescription().split("#br#")[0];
+	  	}
+	  	else {
+	  		description = param.getDescription();
+	  	}
+	  	
+	TextField field = new TextField(description);
 	field.setDescription(param.getTitle());
 	field.addValidator(validator);
     field.setImmediate(true);
@@ -213,8 +221,17 @@ public class ParameterComponent extends WorkflowParameterComponent {
     return field;
   }
 
-  private TextField createInputField(Parameter param, Validator validator) {
-    TextField field = new TextField(param.getTitle());
+  private TextField createInputField(Parameter param, Validator validator) {    
+    String description;
+  	if (param.getDescription().contains("#br#")) {
+  		description = param.getDescription().split("#br#")[0];
+  	}
+  	else {
+  		description = param.getDescription();
+  	}
+  	
+    TextField field = new TextField(description);
+  	
     field.setDescription(param.getDescription());
     field.setWidth("50%");
     field.addValidator(validator);
@@ -225,7 +242,15 @@ public class ParameterComponent extends WorkflowParameterComponent {
   private ComboBox createStringSelectionParameterField(StringParameter param) {
     //ComboBox box = new ComboBox(param.getTitle());
     //box.setDescription(param.getDescription());
-	ComboBox box = new ComboBox(param.getDescription());
+	 //for openMS inis
+	  String description;
+	if (param.getDescription().contains("#br#")) {
+		description = param.getDescription().split("#br#")[0];
+	}
+	else {
+		description = param.getDescription();
+	}
+	ComboBox box = new ComboBox(description);
 	box.setDescription(param.getTitle());
 	box.setFilteringMode(FilteringMode.CONTAINS);
     box.addItems(param.getRange());

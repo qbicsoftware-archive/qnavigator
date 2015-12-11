@@ -21,7 +21,8 @@ public class ToolBar extends HorizontalLayout {
    */
   private static final long serialVersionUID = -3673630619072584036L;
   
-  private SearchBarView searchBarView;
+  //private SearchBarView searchBarView;
+  private SearchEngineView searchEngineView;
   private MenuItem downloadwhole;
   private MenuItem datasetoverview;
   private MenuItem manage;
@@ -36,11 +37,17 @@ public class ToolBar extends HorizontalLayout {
     resourceUrl = "javascript";
   }
 
-  public ToolBar(String resourceUrl, State state, SearchBarView searchBarView) {
-    this.searchBarView = searchBarView;
-    this.resourceUrl = resourceUrl;
-    this.state = state;
-  }
+//  public ToolBar(String resourceUrl, State state, SearchBarView searchBarView) {
+//    this.searchBarView = searchBarView;
+//    this.resourceUrl = resourceUrl;
+//    this.state = state;
+//  }
+  
+  public ToolBar(String resourceUrl, State state, SearchEngineView searchEngineView) {
+	    this.searchEngineView = searchEngineView;
+	    this.resourceUrl = resourceUrl;
+	    this.state = state;
+	  }
   
   
   void setCompleteDownloadResourceUrl(String resourceUrl) {
@@ -119,13 +126,13 @@ public class ToolBar extends HorizontalLayout {
     workflows.setEnabled(false);
     
     addComponent(menuBar);
-    menuBar.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f), Unit.PIXELS);
-    searchBarView.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.2f), Unit.PIXELS);
-
-    addComponent(searchBarView);
-    setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
-    setExpandRatio(menuBar, 0.7f);
-    setExpandRatio(searchBarView, 0.3f);
+    //menuBar.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f), Unit.PIXELS);
+    //searchEngineView.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.2f), Unit.PIXELS);
+    //searchEngineView.setWidth("100%");
+    addComponent(searchEngineView);
+    setComponentAlignment(searchEngineView, Alignment.TOP_RIGHT);
+    //setExpandRatio(menuBar, 0.7f);
+    //setExpandRatio(searchEngineView, 0.3f);
   }
 
   void update(final String type, final String id) {

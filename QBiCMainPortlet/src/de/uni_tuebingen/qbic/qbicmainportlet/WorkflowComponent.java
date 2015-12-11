@@ -58,28 +58,30 @@ import fasta.FastaDB;
 
 public class WorkflowComponent extends CustomComponent {
 
-  private static Logger LOGGER = new Log4j2Logger(WorkflowComponent.class);
-  private static final String WORKFKLOW_GRID_DESCRIPTION =
-      "If you want to execute a workflow, click on one of the rows in the table. Then select the parameters, input files database/reference files and click on submit.";
-  private static final String SUBMISSION_CAPTION = "Submission";
-  protected static final String SUBMISSION_FAILED_MESSAGE =
-      "Workflow submission failed due to internal errors! Please try again later or contact your project manager.";
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2235244881205474571L;
 
-  private WorkflowViewController controller;
-  private VerticalLayout viewContent = new VerticalLayout();
-  private VerticalLayout workflows;
-  private Grid availableWorkflows = new Grid();
-  private VerticalLayout submission;
+	private static Logger LOGGER = new Log4j2Logger(WorkflowComponent.class);
+	private static final String WORKFKLOW_GRID_DESCRIPTION = "If you want to execute a workflow, click on one of the rows in the table. Then select the parameters, input files database/reference files and click on submit.";
+	private static final String SUBMISSION_CAPTION = "Submission";
+	protected static final String SUBMISSION_FAILED_MESSAGE = "Workflow submission failed due to internal errors! Please try again later or contact your project manager.";
 
-  // data
-  BeanItemContainer<DatasetBean> datasetBeans;
-  private String type;
-  private String id;
+	private WorkflowViewController controller;
+	private VerticalLayout viewContent = new VerticalLayout();
+	private VerticalLayout workflows;
+	private Grid availableWorkflows = new Grid();
+	private VerticalLayout submission;
+
+	// data
+	BeanItemContainer<DatasetBean> datasetBeans;
+	private String type;
+	private String id;
 
   public WorkflowComponent(WorkflowViewController controller) {
     this.controller = controller;
     this.setCaption("Workflows");
-    LOGGER.debug("new wf component");
     init();
   }
 
@@ -216,8 +218,9 @@ public class WorkflowComponent extends CustomComponent {
   void updateSelection(BeanItemContainer<Workflow> suitableWorkflows) {
     this.submission.setCaption("");
     this.submission.removeAllComponents();
+    
     if (!(suitableWorkflows.size() > 0)) {
-      showNotification("No suitable workflows found. Pleace contact your project manager.");
+      showNotification("No suitable workflows found. Please contact your project manager.");
     }
 
     availableWorkflows.setContainerDataSource(filtergpcontainer(suitableWorkflows));
@@ -306,11 +309,13 @@ public class WorkflowComponent extends CustomComponent {
 
       @Override
       public Component getDetails(RowReference rowReference) {
-        FormLayout main = new FormLayout();
         Workflow w = (Workflow) rowReference.getItemId();
+        
         Label description = new Label(w.getDescription(), ContentMode.HTML);
         description.setCaption("Description");
-        main.addComponent(description);
+        
+        VerticalLayout main = new VerticalLayout(description);
+        main.setMargin(true);
         return main;
       }
     });
@@ -323,13 +328,13 @@ public class WorkflowComponent extends CustomComponent {
         // TODO get path of datasetBean and set it as input ?!
         Workflow selectedWorkflow = (Workflow) event.getItemId();
         if (selectedWorkflow != null) {
-          LOGGER.debug("selected wf");
           updateParameterView(selectedWorkflow, datasetBeans);
           submission.setVisible(true);
 
           // detailed Description should be visible
           availableWorkflows.setDetailsVisible(selectedWorkflow,
               !availableWorkflows.isDetailsVisible(selectedWorkflow));
+          
         } else {
           LOGGER.warn("selected Workflow is null?");
           submission.setVisible(false);
@@ -486,6 +491,7 @@ public class WorkflowComponent extends CustomComponent {
                 "An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
       } catch (IOException | IllegalArgumentException e1) {
         // TODO Auto-generated catch block
+          LOGGER.error("Something went wrong: " + e.getMessage(), e.getStackTrace());
         VaadinService.getCurrentResponse().setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
       }
     } else if (e instanceof RemoteAccessException) {

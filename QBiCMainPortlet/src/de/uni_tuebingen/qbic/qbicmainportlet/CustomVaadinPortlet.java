@@ -42,8 +42,10 @@ import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.UI;
 
 /**
  * 
@@ -185,7 +187,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 
 		  String filename = "qbicdatasets" + timestamp + ".tar";
 
-		  response.setContentType(writer.getContentType());
+		  //response.setContentType(writer.getContentType());
 		  StringBuilder sb = new StringBuilder("attachement; filename=\"");
 		  sb.append(filename);
 		  sb.append("\"");
@@ -193,14 +195,18 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 
 		  long tarFileLength = writer.computeTarLength2(entries);
 		  
+		  LOGGER.debug(String.valueOf(tarFileLength));
+
+		  //Integer fileSize = (int) (long) tarFileLength;
+
 		  // For some reason setContentLength does not work
-		  //response.setProperty("Content-Length", String.valueOf(tarFileLength));
+		  response.setProperty("Content-Length", String.valueOf(tarFileLength));
 		  
 		  // Seems to work with Liferay 6.2, when using setProperty some tarred files are corrupt, unexpected end of file
 		  // Didn't work with Liferay 6.2 either
 		  // However deactivating GzipFilter by setting com.liferay.portal.servlet.filters.gzip.GZipFilter=false seems to fix it
 		  // Probably the Content Length can't be set in the header of this Filter
-		  response.setContentLength((int) tarFileLength);
+//		  response.setContentLength(fileSize);
 
 
 		  try {	
@@ -228,9 +234,6 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 						  .getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
 			  }
 		  }
-		  
-		  //new Notification("Download of tar-archive", "You are downloading datasets compressed as tar-archive. If you need instructions how to unpack the file please follow the instructions on " , Type.TRAY_NOTIFICATION, true)
-	      //        .show(Page.getCurrent());
 		  writer.closeStream();
 		  
 	  } else {
@@ -255,11 +258,11 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 			  sb.append("\"");
 			  response.setProperty("Content-Disposition", sb.toString());
 			  response.setProperty("Content-Type", getPortletContext().getMimeType((splittedFilePath[splittedFilePath.length - 1])));
-			  Integer fileSize = (int) (long) entry.getValue().getValue();
+			  //Integer fileSize = (int) (long) entry.getValue().getValue();
 	 
-			  //response.setProperty("Content-Length", String.valueOf(fileSize));
+			  response.setProperty("Content-Length", String.valueOf(entry.getValue().getValue()));
 
-			  response.setContentLength(fileSize);
+			  //response.setContentLength(fileSize);
 			  
 			  byte[] buffer = new byte[32768];
 			  int bytesRead;
