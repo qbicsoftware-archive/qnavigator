@@ -1,8 +1,12 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.tepi.filtertable.FilterTable;
 
@@ -23,7 +27,9 @@ import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 import helpers.Utils;
 import logging.Log4j2Logger;
 import model.ExperimentBean;
@@ -67,8 +73,7 @@ public class HomeView extends VerticalLayout implements View {
 
   private String user;
 
-  public HomeView(DataHandler datahandler, String caption, String user, State state,
-      String resUrl) {
+  public HomeView(DataHandler datahandler, String caption, String user, State state, String resUrl) {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
     this.datahandler = datahandler;
@@ -111,9 +116,10 @@ public class HomeView extends VerticalLayout implements View {
     setExportButton();
 
     this.table.setContainerDataSource(spaceBean.getProjects());
-    this.table
-        .setVisibleColumns(new Object[] {"code", "space", "description", "principalInvestigator"});
+    this.table.setVisibleColumns(new Object[] {"code", "space", "description",
+        "principalInvestigator"});
     this.table.setColumnHeader("code", "Name");
+//    this.table.setColumnHeader("secondaryName", "Name");
     this.table.setColumnHeader("space", "Project");
     this.table.setColumnHeader("principalInvestigator", "Investigator");
     this.table.setColumnHeader("description", "Description");
@@ -202,8 +208,9 @@ public class HomeView extends VerticalLayout implements View {
       statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
       setHeader(String.format("Total number of Sub-Projects: %s", numberOfProjects));
     } else {
-      statContent = new Label(
-          String.format("You have no projects so far. Please contact your project manager."));
+      statContent =
+          new Label(
+              String.format("You have no projects so far. Please contact your project manager."));
       statContent.addStyleName(ValoTheme.LABEL_FAILURE);
       statContent.addStyleName(ValoTheme.LABEL_LARGE);
     }
@@ -241,8 +248,8 @@ public class HomeView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table
-        .addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table,
+        ProjectView.navigateToLabel));
   }
 
 
@@ -257,7 +264,7 @@ public class HomeView extends VerticalLayout implements View {
     filterTable.setSelectable(true);
     filterTable.setImmediate(true);
 
-    filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
+    // filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
 
     filterTable.setColumnCollapsingAllowed(false);
 
@@ -305,22 +312,43 @@ public class HomeView extends VerticalLayout implements View {
     BeanItemContainer<ProjectBean> projectContainer =
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
-    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
-        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+    List<Project> projects =
+        datahandler.getOpenBisClient().getOpenbisInfoService()
+            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
 
-
+    // get secondary names of sub-projects
+    final long startTime = System.nanoTime();
+//    Map<String, Object> parameters = new HashMap<String, Object>();
+//    List<String> designExperimentIDs = new ArrayList<String>();
+//    for (Project project : projects) {
+//      String projectCode = project.getCode();
+//      String id = project.getIdentifier() + "/" + projectCode + "E1";
+//      if (datahandler.getOpenBisClient().expExists(project.getSpaceCode(), projectCode,
+//          projectCode + "E1"))
+//        designExperimentIDs.add(id);
+//    }
+//    parameters.put("ids", designExperimentIDs);
+//    LOGGER.debug("getting secondary names of projects");
+//    QueryTableModel res =
+//        datahandler.getOpenBisClient().getAggregationService("get-project-names", parameters);
+//    Map<String, String> nameMap = new HashMap<String, String>();
+//    for (Serializable[] row : res.getRows())
+//      nameMap.put((String) row[0], (String) row[1]);
+//    LOGGER.debug("Map of names: " + nameMap);
     for (Project project : projects) {
       // if (project.getSpaceCode().contains("IVAC")) {
       // this.includePatientCreation = true;
       // }
       // datahandler.addOpenbisDtoProject(project);
+
       String projectIdentifier = project.getIdentifier();
       String projectCode = project.getCode();
+      String secondaryName = "None";
+//      if (nameMap.containsKey(projectCode))
+//        secondaryName = nameMap.get(projectCode);
 
       // Project descriptions can be long; truncate the string to provide a brief preview
-
       String desc = project.getDescription();
-
       if (desc == null) {
         desc = "";
       } else if (desc.length() > 0) {
@@ -330,9 +358,10 @@ public class HomeView extends VerticalLayout implements View {
         }
       }
 
-      ProjectBean newProjectBean = new ProjectBean(projectIdentifier, projectCode, desc,
-          project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
-          new ProgressBar(), new Date(), "", "", null, false);
+      ProjectBean newProjectBean =
+          new ProjectBean(projectIdentifier, projectCode, secondaryName, desc,
+              project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
+              new ProgressBar(), new Date(), "", "", null, false);
 
       String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectCode);
 
@@ -342,10 +371,10 @@ public class HomeView extends VerticalLayout implements View {
         newProjectBean.setPrincipalInvestigator(pi);
       }
 
-      // LOGGER.debug("PI? for " + projectCode + " " + pi);
-
       projectContainer.addBean(newProjectBean);
     }
+    final long duration = System.nanoTime() - startTime;
+    LOGGER.debug(Long.toString(duration / 10000000));
     homeSpaceBean.setProjects(projectContainer);
     if (homeSpaceBean.getProjects().size() > 0) {
       this.setContainerDataSource(homeSpaceBean, caption);
