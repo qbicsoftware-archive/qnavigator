@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.ui.Image;
 
 public class ExperimentBean implements Serializable {
 
@@ -34,7 +33,7 @@ public class ExperimentBean implements Serializable {
   private Boolean containsData;
 
   private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
-  
+
   public Map<String, String> getTypeLabels() {
     return typeLabels;
   }
@@ -245,6 +244,7 @@ public class ExperimentBean implements Serializable {
     Iterator<Entry<String, String>> it = this.getProperties().entrySet().iterator();
     while (it.hasNext()) {
       Entry<String, String> pairs = it.next();
+
       if (pairs.getValue().equals("")) {
         continue;
       } else if (pairs.getKey().equals("Q_PERSONS")) {
@@ -272,13 +272,13 @@ public class ExperimentBean implements Serializable {
   public void setContainsData(Boolean containsData) {
     this.containsData = containsData;
   }
-  
+
   public String getPrettyType() {
-		return prettyType;
-	}
-  
-	public void setPrettyType(String prettyType) {
-		this.prettyType = prettyType;
-	}
+    return prettyType;
+  }
+
+  public void setPrettyType(String prettyType) {
+    this.prettyType = prettyType;
+  }
 
 }

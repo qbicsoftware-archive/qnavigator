@@ -7,7 +7,6 @@ import org.tepi.filtertable.FilterGenerator;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Or;
-import com.vaadin.server.Page;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Field;
@@ -62,7 +61,7 @@ public class DatasetViewFilterGenerator implements FilterGenerator, Serializable
     Notification n =
         new Notification("Filter removed from: " + propertyId, Notification.Type.TRAY_NOTIFICATION);
     n.setDelayMsec(800);
-    n.show(Page.getCurrent());
+    // n.show(Page.getCurrent());
   }
 
   @Override
@@ -70,7 +69,7 @@ public class DatasetViewFilterGenerator implements FilterGenerator, Serializable
     Notification n =
         new Notification("Filter added to: " + propertyId, Notification.Type.TRAY_NOTIFICATION);
     n.setDelayMsec(800);
-    n.show(Page.getCurrent());
+    // n.show(Page.getCurrent());
   }
 
   @Override

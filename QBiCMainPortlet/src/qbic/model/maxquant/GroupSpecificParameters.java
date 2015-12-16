@@ -166,18 +166,18 @@ public class GroupSpecificParameters implements Serializable {
     JSONObject param = new JSONObject();
     param.put("enzymeMode", digestionMode.getValue());
     param.put("variableModifications", JsonHelper.fromSet(variableModifications));
-    if(multiplicity.startsWith("1")){
+    if (multiplicity.startsWith("1")) {
       param.put("multiplicity", 1);
-    } else if(multiplicity.startsWith("2")){
+    } else if (multiplicity.startsWith("2")) {
       param.put("multiplicity", 2);
-      
+
       JSONArray labelMods = new JSONArray();
       labelMods.put(JsonHelper.fromSet(lightLabels));
       labelMods.put(JsonHelper.fromSet(heavyLabels));
       param.put("labelMods", labelMods);
-    }else if(multiplicity.startsWith("3")){
+    } else if (multiplicity.startsWith("3")) {
       param.put("multiplicity", 3);
-      
+
       JSONArray labelMods = new JSONArray();
       labelMods.put(JsonHelper.fromSet(lightLabels));
       labelMods.put(JsonHelper.fromSet(mediumLabels));
@@ -186,6 +186,9 @@ public class GroupSpecificParameters implements Serializable {
     }
     param.put("maxMissedCleavages", maxMissedCleavage);
     param.put("matchType", matchType);
+
+    // needed by MaxQuant?
+    param.put("defaults", "default");
     return param;
   }
 }

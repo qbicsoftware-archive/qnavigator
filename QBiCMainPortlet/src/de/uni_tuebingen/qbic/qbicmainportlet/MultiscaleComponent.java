@@ -15,6 +15,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
@@ -27,160 +28,167 @@ import controllers.MultiscaleController;
 
 public class MultiscaleComponent extends CustomComponent {
 
-	/**
+  /**
    * 
    */
-	private static final long serialVersionUID = 4700958245761376884L;
-	private MultiscaleController controller;
-	private VerticalLayout mainlayout;
-	private Grid pastcomments;
-	private Panel commentsPanel;
+  private static final long serialVersionUID = 4700958245761376884L;
+  private MultiscaleController controller;
+  private VerticalLayout mainlayout;
+  private Grid pastcomments;
+  private Panel commentsPanel;
 
-	public MultiscaleComponent(MultiscaleController c) {
-		this.controller = c;
-		initUI();
-	}
+  public MultiscaleComponent(MultiscaleController c) {
+    this.controller = c;
+    initUI();
+  }
 
-	public void initUI() {
-		mainlayout = new VerticalLayout();
-		mainlayout.setWidth(100, Unit.PERCENTAGE);
-		commentsPanel = new Panel();
+  public void initUI() {
+    mainlayout = new VerticalLayout();
+    mainlayout.setWidth(100, Unit.PERCENTAGE);
+    commentsPanel = new Panel();
 
-		Label commentsLabel = new Label("No comments added so far.",
-				ContentMode.HTML);
-		commentsPanel.setContent(commentsLabel);
+    Label commentsLabel = new Label("No comments added so far.", ContentMode.HTML);
+    commentsPanel.setContent(commentsLabel);
 
-		commentsPanel.setImmediate(true);
-		commentsPanel.setWidth(50, Unit.PERCENTAGE);
-		commentsPanel.setHeight(UI.getCurrent().getPage()
-				.getBrowserWindowHeight() * 0.2f, Unit.PIXELS);
+    commentsPanel.setImmediate(true);
+    commentsPanel.setWidth(50, Unit.PERCENTAGE);
+    commentsPanel.setHeight(UI.getCurrent().getPage().getBrowserWindowHeight() * 0.2f, Unit.PIXELS);
 
-		setCompositionRoot(mainlayout);
-	}
+    setCompositionRoot(mainlayout);
+  }
 
-	public void updateUI(String sampleCode) {
-		controller.update(sampleCode);
-		setNotes();
-	}
+  public void updateUI(String sampleCode) {
+    controller.update(sampleCode);
+    setNotes();
+  }
 
-	void buildEmptyComments() {
+  void buildEmptyComments() {
 
-		// add comments
-		VerticalLayout addComment = new VerticalLayout();
-		addComment.setMargin(true);
-		addComment.setWidth(100, Unit.PERCENTAGE);
-		final TextArea comments = new TextArea();
-		comments.setInputPrompt("Write your comment here...");
-		comments.setWidth(50, Unit.PERCENTAGE);
-		comments.setRows(5);
-		addComment.addComponent(comments);
-		Button commentsOk = new Button("Add Comment");
-		commentsOk.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-		commentsOk.addClickListener(new ClickListener() {
-			/**
+    // add comments
+    VerticalLayout addComment = new VerticalLayout();
+    addComment.setMargin(true);
+    addComment.setWidth(100, Unit.PERCENTAGE);
+    final TextArea comments = new TextArea();
+    comments.setInputPrompt("Write your comment here...");
+    comments.setWidth(100, Unit.PERCENTAGE);
+    comments.setRows(2);
+    Button commentsOk = new Button("Add Comment");
+    commentsOk.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+    commentsOk.addClickListener(new ClickListener() {
+      /**
        * 
        */
-			private static final long serialVersionUID = -5369241494545155677L;
+      private static final long serialVersionUID = -5369241494545155677L;
 
-			public void buttonClick(ClickEvent event) {
-				if ("".equals(comments.getValue()))
-					return;
+      public void buttonClick(ClickEvent event) {
+        if ("".equals(comments.getValue()))
+          return;
 
-				String newComment = comments.getValue();
-				// reset comments
-				comments.setValue("");
-				// use some date format
-				Date dNow = new Date();
-				SimpleDateFormat ft = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        String newComment = comments.getValue();
+        // reset comments
+        comments.setValue("");
+        // use some date format
+        Date dNow = new Date();
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
-				Note note = new Note();
-				note.setComment(newComment);
-				note.setUsername(controller.getUser());
-				note.setTime(ft.format(dNow));
+        Note note = new Note();
+        note.setComment(newComment);
+        note.setUsername(controller.getUser());
+        note.setTime(ft.format(dNow));
 
-				// show it now
-				pastcomments.getContainerDataSource().addItem(note);
+        // show it now
+        pastcomments.getContainerDataSource().addItem(note);
 
-				// TODO write back
-				Label commentsLabel = new Label(
-						translateComments((BeanItemContainer<Note>) pastcomments
-								.getContainerDataSource()), ContentMode.HTML);
-				commentsPanel.setContent(commentsLabel);
+        // TODO write back
+        Label commentsLabel =
+            new Label(translateComments((BeanItemContainer<Note>) pastcomments
+                .getContainerDataSource()), ContentMode.HTML);
+        commentsPanel.setContent(commentsLabel);
 
-				// write back to openbis
-				if (!controller.addNote(note)) {
-					Notification
-							.show("Could not add comment to sample. How did you do that?");
-				}
+        // write back to openbis
+        if (!controller.addNote(note)) {
+          Notification.show("Could not add comment to sample. How did you do that?");
+        }
 
-			}
+      }
 
-		});
-		addComment.addComponent(commentsOk);
-		addComment.addComponent(commentsPanel);
-		addComment.setComponentAlignment(comments, Alignment.TOP_CENTER);
-		addComment.setComponentAlignment(commentsOk, Alignment.MIDDLE_CENTER);
-		addComment.setComponentAlignment(commentsPanel, Alignment.TOP_CENTER);
+    });
 
-		mainlayout.addComponent(addComment);
+    HorizontalLayout inputPrompt = new HorizontalLayout();
+    inputPrompt.addComponent(comments);
+    inputPrompt.addComponent(commentsOk);
 
-		// visualize previous comments
-		pastcomments = new Grid();
-		pastcomments.setWidth(100, Unit.PERCENTAGE);
-		// mainlayout.addComponent(pastcomments);
-		Label commentsLabel = new Label("No comments added so far.",
-				ContentMode.HTML);
-		commentsPanel.setContent(commentsLabel);
+    inputPrompt.setWidth(50, Unit.PERCENTAGE);
+    inputPrompt.setComponentAlignment(commentsOk, Alignment.TOP_RIGHT);
+    inputPrompt.setExpandRatio(comments, 1.0f);
 
-		// mainlayout.addComponent(commentsPanel);
-		// mainlayout.setComponentAlignment(commentsPanel,
-		// Alignment.TOP_CENTER);
-	}
 
-	void setNotes() {
-		if (pastcomments == null) {
-			buildEmptyComments();
-		}
-		Label commentsLabel = new Label(
-				translateComments(controller.getContainer()), ContentMode.HTML);
-		commentsPanel.setContent(commentsLabel);
 
-		pastcomments.setContainerDataSource(controller.getContainer());
-		pastcomments.setColumnOrder("time", "username", "comment");
-		pastcomments.setHeightMode(HeightMode.ROW);
-		// pastcomments.setHeightByRows(controller.getContainer().size());
-	}
+    // addComment.addComponent(comments);
+    // addComment.addComponent(commentsOk);
 
-	public void resize(float width, float height) {
-		setWidth(width * 0.8f, Unit.PIXELS);
-		// setHeight(height*0.6f, Unit.PIXELS);
-	}
+    addComment.addComponent(commentsPanel);
+    addComment.addComponent(inputPrompt);
 
-	public String translateComments(BeanItemContainer<Note> notes) {
+    // addComment.setComponentAlignment(comments, Alignment.TOP_CENTER);
+    // addComment.setComponentAlignment(commentsOk, Alignment.MIDDLE_CENTER);
 
-		String lastDay = "";
-		String labelString = "";
-		for (Iterator i = notes.getItemIds().iterator(); i.hasNext();) {
-			Note noteBean = (Note) i.next();
-			String date = noteBean.getTime();
-			String[] datetime = date.split("T");
-			String day = datetime[0];
-			String time = datetime[1].split("\\.")[0];
-			if (!lastDay.equals(day)) {
-				lastDay = day;
-				labelString += String.format("%s\n", "<u>" + day + "</u>");
-			}
-			labelString += String.format(
-					"%s\n%s %s\n",
-					"<p><b>"
-							+ controller.getLiferayUser(noteBean.getUsername())
-							+ "</b>.</p>", noteBean.getComment(),
-					"<p><i><small>" + time + "</small></i>.</p>");
-		}
+    addComment.setComponentAlignment(commentsPanel, Alignment.TOP_CENTER);
+    addComment.setComponentAlignment(inputPrompt, Alignment.MIDDLE_CENTER);
 
-		return labelString;
+    mainlayout.addComponent(addComment);
 
-	}
+    // visualize previous comments
+    pastcomments = new Grid();
+    pastcomments.setWidth(100, Unit.PERCENTAGE);
+    // mainlayout.addComponent(pastcomments);
+    Label commentsLabel = new Label("No comments added so far.", ContentMode.HTML);
+    commentsPanel.setContent(commentsLabel);
+
+    // mainlayout.addComponent(commentsPanel);
+    // mainlayout.setComponentAlignment(commentsPanel,
+    // Alignment.TOP_CENTER);
+  }
+
+  void setNotes() {
+    if (pastcomments == null) {
+      buildEmptyComments();
+    }
+    Label commentsLabel = new Label(translateComments(controller.getContainer()), ContentMode.HTML);
+    commentsPanel.setContent(commentsLabel);
+
+    pastcomments.setContainerDataSource(controller.getContainer());
+    pastcomments.setColumnOrder("time", "username", "comment");
+    pastcomments.setHeightMode(HeightMode.ROW);
+    // pastcomments.setHeightByRows(controller.getContainer().size());
+  }
+
+  public void resize(float width, float height) {
+    setWidth(width * 0.8f, Unit.PIXELS);
+    // setHeight(height*0.6f, Unit.PIXELS);
+  }
+
+  public String translateComments(BeanItemContainer<Note> notes) {
+
+    String lastDay = "";
+    String labelString = "";
+    for (Iterator i = notes.getItemIds().iterator(); i.hasNext();) {
+      Note noteBean = (Note) i.next();
+      String date = noteBean.getTime();
+      String[] datetime = date.split("T");
+      String day = datetime[0];
+      String time = datetime[1].split("\\.")[0];
+      if (!lastDay.equals(day)) {
+        lastDay = day;
+        labelString += String.format("%s\n", "<u>" + day + "</u>");
+      }
+      labelString +=
+          String.format("%s\n%s %s\n", "<p><b>" + controller.getLiferayUser(noteBean.getUsername())
+              + "</b>.</p>", noteBean.getComment(), "<p><i><small>" + time + "</small></i>.</p>");
+    }
+
+    return labelString;
+
+  }
 
 }

@@ -2,6 +2,8 @@ package qbic.vaadincomponents;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ import qbic.model.maxquant.MaxQuantModel;
 import qbic.model.maxquant.RawFilesBean;
 import qbic.utils.JsonHelper;
 import submitter.Workflow;
+import submitter.parameters.InputList;
+import submitter.parameters.ParameterSet;
 
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
@@ -35,19 +39,21 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
+import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.beans.DatasetBean;
-import de.uni_tuebingen.qbic.qbicmainportlet.PatientView;
 import fasta.FastaBean;
 import guse.workflowrepresentation.GuseNode;
 import guse.workflowrepresentation.GuseWorkflowRepresentation;
 import guse.workflowrepresentation.InputPort;
-import guse.workflowrepresentation.InputPort.Type;
 
 public class MaxQuantComponent extends CustomComponent {
   private static final long serialVersionUID = 5876981463933993626L;
@@ -58,11 +64,14 @@ public class MaxQuantComponent extends CustomComponent {
   private final String RAW_FILES_INFO =
       "Select files for analysis. You can edit fraction and group parameters for each selected files by double clicking a selected file in the right table";
   private final String BUTTON_START_CAPTION = "start";
-  private final String RAW_FILES_CAPTION = "Raw files";
+  public final String RAW_FILES_CAPTION = "Raw files";
   private final String AVAILABLE_FILES_CAPTION = "Avaliable files";
+
   private String FASTA_FILES_INFO = "Select fasta files for analysis.";
-  private String AVAILABLE_FASTAS_CAPTION = "Fasta files";
-  private String SELECTED_FASTAS_CAPTION = "Selected";
+  // private String AVAILABLE_FASTAS_CAPTION = "Fasta files";
+  private String AVAILABLE_FASTAS_CAPTION = "Available References";
+  private String SELECTED_FASTAS_CAPTION = "Selected Reference";
+
   private final MaxQuantModel model;
 
   private Button start;
@@ -81,21 +90,28 @@ public class MaxQuantComponent extends CustomComponent {
 
   private Workflow guseWorkflow;
 
+  private WorkflowViewController controller;
 
 
-  public MaxQuantComponent(final MaxQuantModel model) {
+
+  public MaxQuantComponent(final MaxQuantModel model, WorkflowViewController wfController) {
     // model
     this.model = model;
+    controller = wfController;
 
     // view
     VerticalLayout mainLayout = new VerticalLayout();
-    mainLayout.setSpacing(true);
+    // mainLayout.setSpacing(true);
     tabs = new TabSheet();
 
     // http://141.61.102.17/maxquant_doku/doku.php?id=maxquant:manual:beginner
+    // Filter for raw Files
+
+
     rawFiles =
         new SelectFileComponent(RAW_FILES_CAPTION, RAW_FILES_INFO, AVAILABLE_FILES_CAPTION,
             SELECTED_FILES_CAPTION, model.getDatasetBeans(), model.getRawFilesBeans());
+
     rawFiles.getDestination().setEditorEnabled(true);
     rawFiles.getDestination().getColumn("experiment").setEditable(false);
     rawFiles.getDestination().getColumn("file").setEditable(false);
@@ -105,9 +121,12 @@ public class MaxQuantComponent extends CustomComponent {
     groupSpecificParameterComponent = new GroupSpecificParameterComponent();
     tabs.addTab(groupSpecificParameterComponent);
     tabs.addTab(globalParameters());
+
     mainLayout.addComponent(tabs);
+
     start = new Button(BUTTON_START_CAPTION);
     mainLayout.addComponent(start);
+    mainLayout.setWidth("100%");
     this.setCompositionRoot(mainLayout);
 
     // controller
@@ -154,7 +173,7 @@ public class MaxQuantComponent extends CustomComponent {
 
       }
     }
-    //add new groups
+    // add new groups
     HashMap<Integer, Group> groups = new HashMap<Integer, Group>();
     for (RawFilesBean bean : model.getRawFilesBeans().getItemIds()) {
       if (!groups.containsKey(bean.getParameterGroup())) {
@@ -165,9 +184,10 @@ public class MaxQuantComponent extends CustomComponent {
     }
 
   }
-  
+
   /**
    * creates the global parameter component
+   * 
    * @return
    */
   private Component globalParameters() {
@@ -178,27 +198,33 @@ public class MaxQuantComponent extends CustomComponent {
             SELECTED_FASTAS_CAPTION, model.getFastaBeans(), model.getSelectedFastaBeans());
     globalparameters.addComponent(fastaFiles);
     // fixed modifications
-    fixedModifications = new TwinColSelect("fixed modifications");
+    // fixedModifications = new TwinColSelect("fixed modifications");
+    fixedModifications = new TwinColSelect();
 
-    fixedModifications.addItems("Acetyl (L)", "Oxidation (M)", "Ala->Arg");
+    Label fixedInfo = new Label("Fixed Modifications");
+    fixedInfo.addStyleName(ValoTheme.LABEL_COLORED);
+
+    globalparameters.addComponent(fixedInfo);
+    fixedModifications.addItems("Acetyl (Protein N-term)", "Acetyl (K)", "Oxidation (M)",
+        "Ala->Arg", "Carbamidomethyl (C)");
     globalparameters.addComponent(fixedModifications);
     reQuantify = new CheckBox("Requantify");
     globalparameters.addComponent(reQuantify);
-    matchBetweenRuns = new CheckBox("Match between runs");
+    matchBetweenRuns = new CheckBox("Match Between Runs");
     globalparameters.addComponent(matchBetweenRuns);
     return globalparameters;
   }
 
   void bindGlobalParameters() {
     globalParameters = new PropertysetItem();
-    globalParameters.addItemProperty("fixedMods",
+    globalParameters.addItemProperty("fixedModifications",
         new ObjectProperty<LinkedHashSet<String>>(model.getFixedMods()));
     globalParameters.addItemProperty("matchBetweenRuns",
         new ObjectProperty<Boolean>(model.getMatchBetweenRuns()));
     globalParameters.addItemProperty("reQuantify",
         new ObjectProperty<Boolean>(model.getReQuantify()));
     FieldGroup fieldGroup = new FieldGroup(globalParameters);
-    fieldGroup.bind(fixedModifications, "fixedMods");
+    fieldGroup.bind(fixedModifications, "fixedModifications");
     fieldGroup.bind(matchBetweenRuns, "matchBetweenRuns");
     fieldGroup.bind(reQuantify, "reQuantify");
     fieldGroup.setBuffered(false);
@@ -215,7 +241,7 @@ public class MaxQuantComponent extends CustomComponent {
         if (event.getTabSheet().getSelectedTab().getCaption()
             .equals(GroupSpecificParameterComponent.CAPTION)) {
           updateGroups();
-          //update component with new groups
+          // update component with new groups
           groupSpecificParameterComponent.update(model.getGroups());
         }
       }
@@ -235,6 +261,10 @@ public class MaxQuantComponent extends CustomComponent {
           rawFiles.getSource().deselect(o);
         }
         model.selectRawFiles(available);
+
+        for (Grid.Column col : rawFiles.getSelected().getColumns()) {
+          col.setWidthUndefined();
+        }
       }
     });
     // opposite of toRight
@@ -285,6 +315,10 @@ public class MaxQuantComponent extends CustomComponent {
           fastaFiles.getDestination().deselect(o);
         }
         model.unselectFastaFiles(available);
+
+        for (Grid.Column col : fastaFiles.getSelected().getColumns()) {
+          col.setWidthUndefined();
+        }
       }
     });
 
@@ -293,6 +327,7 @@ public class MaxQuantComponent extends CustomComponent {
     // start workflow
     start.addClickListener(new ClickListener() {
       private static final long serialVersionUID = 2728686539720595641L;
+
       @Override
       public void buttonClick(ClickEvent event) {
         updateGroups();
@@ -303,6 +338,7 @@ public class MaxQuantComponent extends CustomComponent {
 
   /**
    * write the content the model to file
+   * 
    * @param filePath
    */
   void writeToFile(String filePath) {
@@ -355,7 +391,13 @@ public class MaxQuantComponent extends CustomComponent {
     JSONArray fastafiles = new JSONArray();
     BeanItemContainer<FastaBean> selected = model.getSelectedFastaBeans();
     for (FastaBean bean : selected.getItemIds()) {
-      fastafiles.put(bean.getName());
+      // shouldn't contain file ending and it should be the file name rather than the name of the
+      // bean
+      Path p = Paths.get(bean.getPath());
+      String file = p.getFileName().toString();
+
+      fastafiles.put(file.split("\\.")[0]);
+      // fastafiles.put(bean.getName());
     }
     JSONObject ret = new JSONObject();
     ret.put("fileNames", fastafiles);
@@ -367,12 +409,11 @@ public class MaxQuantComponent extends CustomComponent {
     JSONObject glparams = new JSONObject();
     for (Object id : globalParameters.getItemPropertyIds()) {
       Object value = globalParameters.getItemProperty(id).getValue();
-      System.out.println(globalParameters.getItemProperty(id).getType());
-      System.out.println(globalParameters.getItemProperty(id).getClass().getGenericSuperclass());
       glparams.put((String) id,
           (value instanceof LinkedHashSet) ? JsonHelper.fromSet((LinkedHashSet<String>) value)
               : value);
     }
+    glparams.put("defaults", "default");
     return glparams;
   }
 
@@ -383,7 +424,8 @@ public class MaxQuantComponent extends CustomComponent {
   public void setWorkflow(Workflow workFlow) {
     guseWorkflow = workFlow;
   }
-  public Workflow getWorkflow(){
+
+  public Workflow getWorkflow() {
     return guseWorkflow;
   }
 
@@ -393,17 +435,56 @@ public class MaxQuantComponent extends CustomComponent {
 
   /**
    * write json to correct workflow parameter!
-   * @throws JSONException 
-   * @throws IllegalArgumentException 
+   * 
+   * @throws JSONException
+   * @throws IllegalArgumentException
    */
   public void writeParametersToWorkflow() throws IllegalArgumentException, JSONException {
-    if(guseWorkflow instanceof GuseWorkflowRepresentation){
+    if (guseWorkflow instanceof GuseWorkflowRepresentation) {
       GuseWorkflowRepresentation w = (GuseWorkflowRepresentation) guseWorkflow;
-      
+
       GuseNode node = w.getNode(INITNODE_CAPTION);
-      InputPort port = node.getPort("PARAM-TXT");
-      port.getParams().get("txt").setValue(toJson().toString(3));
+      InputPort port = node.getPort("WORKFLOW-CTD");
+
+      // port.getParams().get("jsonParams").setValue(toJson().toString(3));
+
+      ParameterSet updated = w.getParameters();
+      updated.getParam("MaxQuant.1.jsonParams").setValue(toJson().toString(3));
+
+      InputList inpList = w.getData();
+
+      // set Reference DB for 'data staging'
+      BeanItemContainer<FastaBean> selected = model.getSelectedFastaBeans();
+      for (FastaBean bean : selected.getItemIds()) {
+        inpList.getData().get("InputFiles.1.db").setValue(bean.getPath());
+      }
+
+      // set input raw files for 'data staging'
+      // Collection<Object> selectionMulti = rawFiles.getDestination().getSelectedRows();
+      // if (selectionMulti == null || selectionMulti.isEmpty()) {
+      // showError("Warning: Nothing selected for multi input parameter " +
+      // rawFiles.getCaption());
+      // return false;
+      // Notification.show("No Input files selected!");
+      // }
+      List<String> selectedPaths = new ArrayList<String>();
+
+      Collection<DatasetBean> selectionMulti = model.selectedDatasets();
+
+      for (Object o : selectionMulti) {
+        DatasetBean selectedBean = (DatasetBean) o;
+
+        try {
+          selectedPaths.add(controller.getDatasetsNfsPath(selectedBean));
+        } catch (Exception e) {
+          LOGGER.error(
+              "could not retrieve nfs path. Using datasetbeans getfullpath instead. "
+                  + e.getMessage(), e.getStackTrace());
+          selectedPaths.add(selectedBean.getFullPath());
+        }
+      }
+      inpList.getData().get("InputFiles.1.input").setValue(selectedPaths);
     }
-    
+
   }
 }

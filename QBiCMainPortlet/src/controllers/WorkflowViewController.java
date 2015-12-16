@@ -22,7 +22,6 @@ import org.apache.commons.lang.NotImplementedException;
 
 import parser.Parser;
 import properties.Factor;
-
 import submitter.SubmitFailedException;
 import submitter.Submitter;
 import submitter.Workflow;
@@ -98,7 +97,8 @@ public class WorkflowViewController {
       // determine if folder or checksum file which should not displayed for workflows
       for (FileInfoDssDTO f : filelist) {
         fileInfo.put(f.getPathInDataSet(),
-            f.isDirectory() | f.getPathInDataSet().endsWith("sha256sum"));
+            f.isDirectory() | f.getPathInDataSet().endsWith("sha256sum")
+                | f.getPathInDataSet().endsWith("origlabfilename"));
       }
 
       dsCodes.add(ds.getCode());
@@ -276,7 +276,7 @@ public class WorkflowViewController {
    * @return
    */
   public BeanItemContainer<Workflow> suitableWorkflows(List<String> fileType) {
-    try {      
+    try {
       BeanItemContainer<Workflow> wfs = submitter.getAvailableSuitableWorkflows(fileType);
       for (Workflow wf : wfs.getItemIds()) {
         if (expDesignWfs.contains(wf.getName()))// TODO add other workflows to the list that are
@@ -428,6 +428,7 @@ public class WorkflowViewController {
 
     LOGGER.info("User: " + user + " is submitting workflow " + workflow.getID() + " openbis id is:"
         + openbisId);
+
     String submit_id = submitter.submit(workflow, openbisId, user);
     LOGGER.info("Workflow has guse id: " + submit_id);
 
@@ -481,9 +482,14 @@ public class WorkflowViewController {
    * @throws IllegalArgumentException
    */
   public String getDatasetsNfsPath(DatasetBean bean) throws IllegalArgumentException {
+    System.out.println(bean.getOpenbisCode());
+
     try {
       DataSet dataset = openbis.getFacade().getDataSet(bean.getOpenbisCode());
+      LOGGER.debug(dataset.getCode());
       String path = dataset.getDataSetDss().tryGetInternalPathInDataStore();
+      LOGGER.debug(path);
+
       if (bean.getFullPath().startsWith("original")) {
         path = Paths.get(path, bean.getFullPath()).toString();
       } else {
@@ -493,10 +499,10 @@ public class WorkflowViewController {
       path = path.replaceFirst("/mnt/" + openbis_dss, "/mnt/nfs/qbic");
       return path;
     } catch (Exception e) {
+      e.printStackTrace();
       throw new IllegalArgumentException("Could not retrieve nfs path for dataset " + bean);
     }
   }
-
 
   public OpenBisClient getOpenbis() {
     return this.openbis;

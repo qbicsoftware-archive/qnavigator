@@ -21,7 +21,6 @@ import logging.Log4j2Logger;
 import logging.Logger;
 import model.DatasetBean;
 
-import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
 
 import com.liferay.portal.kernel.util.WebKeys;
@@ -177,7 +176,7 @@ public class DatasetView extends VerticalLayout implements View {
     final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
     buttonLayout.addComponent(this.download);
     buttonLayout.addComponent(visualize);
-    
+
     Button checkAll = new Button("Select all datasets");
     checkAll.addClickListener(new ClickListener() {
 
@@ -385,15 +384,14 @@ public class DatasetView extends VerticalLayout implements View {
             // UI.getCurrent().getPage().getLocation().getPath() + "?qbicsession=" +
             // UI.getCurrent().getSession().getAttribute("gv-restapi-session") + "&someblabla=" ;
             LOGGER.debug(hostTmp);
-            String host = Base64.encode(hostTmp.getBytes());
-            LOGGER.debug(host);
+            // String host = Base64.encode(hostTmp.getBytes());
             String title = (String) table.getItem(next).getItemProperty("Sample").getValue();
-            res =
-                new ExternalResource(
-                    String
-                        .format(
-                            "http://localhost:7778/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
-                            host, title, fileId, filePath));
+            // res =
+            // new ExternalResource(
+            // String
+            // .format(
+            // "http://localhost:7778/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
+            // host, title, fileId, filePath));
           }
           LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
           BrowserFrame frame = new BrowserFrame("", res);

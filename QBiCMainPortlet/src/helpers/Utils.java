@@ -9,24 +9,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import model.DatasetBean;
-import model.SampleBean;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
+import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupView;
 import com.vaadin.ui.PopupView.Content;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.qbicmainportlet.CustomVisibilityComponent;
 import de.uni_tuebingen.qbic.qbicmainportlet.VisibilityChangeListener;
@@ -177,11 +177,11 @@ public class Utils {
     String header = "";
     Collection<?> i = container.getItemIds();
     String rowString = "";
-    
+
     List<String> exklusionList = new ArrayList<String>();
     exklusionList.add("samples");
     exklusionList.add("properties");
-    exklusionList.add("controlledVocabularies"); 
+    exklusionList.add("controlledVocabularies");
     exklusionList.add("typeLabels");
     exklusionList.add("containsData");
     exklusionList.add("parents");
@@ -198,9 +198,8 @@ public class Utils {
     for (Object o : propertyIDs) {
       if (exklusionList.contains(o.toString())) {
         continue;
-      }
-      else {
-      header += o.toString() + "\t";
+      } else {
+        header += o.toString() + "\t";
       }
     }
 
@@ -212,17 +211,16 @@ public class Utils {
         // Could be extended to an exclusion list if we don't want to show further columns
         if (exklusionList.contains(o.toString())) {
           continue;
-        } //else if (o.toString().equals("status")) {
-          //Image image = (Image) it.getItemProperty(o).getValue();
-          //rowString += image.getCaption() + "\t";
-       // } 
-      else {
+        } // else if (o.toString().equals("status")) {
+          // Image image = (Image) it.getItemProperty(o).getValue();
+          // rowString += image.getCaption() + "\t";
+        // }
+        else {
           Property prop = it.getItemProperty(o);
-          
-          if(prop.getValue() == null) {
+
+          if (prop.getValue() == null) {
             rowString += "-" + "\t";
-          }
-          else {
+          } else {
             rowString += prop.toString() + "\t";
           }
         }
@@ -237,13 +235,13 @@ public class Utils {
       System.out.println(entry.getKey() + ": " + entry.getValue());
     }
   }
-  
+
   public static String getTime() {
     Date dNow = new Date();
     SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZ");
     return ft.format(dNow);
   }
-  
+
   public static HorizontalLayout questionize(Component c, final String info, final String header) {
     final HorizontalLayout res = new HorizontalLayout();
     res.setSpacing(true);
@@ -286,5 +284,24 @@ public class Utils {
     res.addComponent(pv);
 
     return res;
+  }
+
+  public static void Notification(String title, String description, String type) {
+    Notification notify = new Notification(title, description);
+    notify.setPosition(Position.TOP_CENTER);
+    if (type.equals("error")) {
+      notify.setDelayMsec(16000);
+      notify.setIcon(FontAwesome.FROWN_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    } else if (type.equals("success")) {
+      notify.setDelayMsec(8000);
+      notify.setIcon(FontAwesome.SMILE_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    } else {
+      notify.setDelayMsec(8000);
+      notify.setIcon(FontAwesome.MEH_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    }
+    notify.show(Page.getCurrent());
   }
 }

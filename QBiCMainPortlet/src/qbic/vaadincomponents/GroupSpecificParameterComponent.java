@@ -10,13 +10,10 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
-import com.vaadin.ui.VerticalLayout;
 
 
 /**
@@ -76,9 +73,9 @@ public class GroupSpecificParameterComponent extends CustomComponent {
 
         @Override
         public void valueChange(ValueChangeEvent event) {
-          if(event.getProperty() != null && event.getProperty().getValue() != null){
+          if (event.getProperty() != null && event.getProperty().getValue() != null) {
             updateParameters((Integer) event.getProperty().getValue());
-          } 
+          }
         }
       });
     }
@@ -128,9 +125,10 @@ public class GroupSpecificParameterComponent extends CustomComponent {
     parameterLayout.addComponent(labels);
 
     // variable modifications
-    variableModifications = new TwinColSelect("variable modifications");
-    
-    variableModifications.addItems("Acetyl (L)", "Oxidation (M)", "Ala->Arg");
+    variableModifications = new TwinColSelect("Variable Modifications");
+
+    variableModifications.addItems("Acetyl (Protein N-term)", "Acetyl (K)", "Oxidation (M)",
+        "Ala->Arg");
     parameterLayout.addComponent(variableModifications);
     // digestion mode
     digestionMode = new NativeSelect("Digestion mode");
@@ -141,7 +139,7 @@ public class GroupSpecificParameterComponent extends CustomComponent {
     enzyme.addItems("Trypsin/P", "ArgC", "Trypsin", "GluN");
     parameterLayout.addComponent(enzyme);
     // missed cleavage
-    missedcleavage = new TextField("max missed cleavage");
+    missedcleavage = new TextField("Max Missed Cleavage");
     parameterLayout.addComponent(missedcleavage);
     matchType = new NativeSelect("Match type");
     matchType.addItem("MatchFromAndTo");
@@ -153,7 +151,8 @@ public class GroupSpecificParameterComponent extends CustomComponent {
     groupSelection.removeAllItems();
     this.resetParams();
     parameterlayout.setVisible(false);
-    if (groups == null || groups.isEmpty()) return;
+    if (groups == null || groups.isEmpty())
+      return;
     for (Integer key : groups.keySet()) {
       groupSelection.addItem(key);
     }
@@ -185,7 +184,7 @@ public class GroupSpecificParameterComponent extends CustomComponent {
     // update values immediately
     binder.setBuffered(false);
   }
-  
-  
+
+
 
 }

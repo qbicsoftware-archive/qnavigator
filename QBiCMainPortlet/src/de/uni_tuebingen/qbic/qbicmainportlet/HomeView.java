@@ -1,10 +1,19 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
+import helpers.Utils;
+
 import java.util.Date;
 import java.util.List;
 
+import logging.Log4j2Logger;
+import model.ExperimentBean;
+import model.ProjectBean;
+import model.SpaceBean;
+
 import org.tepi.filtertable.FilterTable;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
@@ -22,13 +31,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import helpers.Utils;
-import logging.Log4j2Logger;
-import model.ExperimentBean;
-import model.ProjectBean;
-import model.SpaceBean;
 
 public class HomeView extends VerticalLayout implements View {
 
@@ -67,8 +69,7 @@ public class HomeView extends VerticalLayout implements View {
 
   private String user;
 
-  public HomeView(DataHandler datahandler, String caption, String user, State state,
-      String resUrl) {
+  public HomeView(DataHandler datahandler, String caption, String user, State state, String resUrl) {
     homeview_content = new VerticalLayout();
     this.table = buildFilterTable();
     this.datahandler = datahandler;
@@ -202,8 +203,9 @@ public class HomeView extends VerticalLayout implements View {
       statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
       setHeader(String.format("Total number of Sub-Projects: %s", numberOfProjects));
     } else {
-      statContent = new Label(
-          String.format("You have no projects so far. Please contact your project manager."));
+      statContent =
+          new Label(
+              String.format("You have no projects so far. Please contact your project manager."));
       statContent.addStyleName(ValoTheme.LABEL_FAILURE);
       statContent.addStyleName(ValoTheme.LABEL_LARGE);
     }
@@ -241,8 +243,8 @@ public class HomeView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table
-        .addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table,
+        ProjectView.navigateToLabel));
   }
 
 
@@ -305,10 +307,11 @@ public class HomeView extends VerticalLayout implements View {
     BeanItemContainer<ProjectBean> projectContainer =
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
-    LOGGER.info("projects load");
-    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
-        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
-    LOGGER.info("projects finsished");
+    LOGGER.info("Loading projects...");
+    List<Project> projects =
+        datahandler.getOpenBisClient().getOpenbisInfoService()
+            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+    LOGGER.info("Loading projects...done.");
 
 
     // getProjectsQuicker(
@@ -335,9 +338,10 @@ public class HomeView extends VerticalLayout implements View {
         }
       }
 
-      ProjectBean newProjectBean = new ProjectBean(projectIdentifier, projectCode, desc,
-          project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
-          new ProgressBar(), new Date(), "", "", null, false);
+      ProjectBean newProjectBean =
+          new ProjectBean(projectIdentifier, projectCode, desc, project.getSpaceCode(),
+              new BeanItemContainer<ExperimentBean>(ExperimentBean.class), new ProgressBar(),
+              new Date(), "", "", null, false);
 
       String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectCode);
 

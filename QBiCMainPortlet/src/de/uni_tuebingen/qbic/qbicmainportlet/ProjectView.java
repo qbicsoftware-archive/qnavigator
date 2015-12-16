@@ -17,8 +17,6 @@ import model.ProjectBean;
 
 import org.tepi.filtertable.FilterTable;
 
-import submitter.Submitter;
-
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -35,29 +33,25 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
-import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
-import de.uni_tuebingen.qbic.qbicmainportlet.PatientView.Worker;
 
 @SuppressWarnings("serial")
 public class ProjectView extends VerticalLayout implements View {
@@ -125,7 +119,7 @@ public class ProjectView extends VerticalLayout implements View {
 
   private ProjInformationComponent projectInformation;
 
-private VerticalLayout projDescriptionContent;
+  private VerticalLayout projDescriptionContent;
 
 
   public String getHeaderLabel() {
@@ -198,12 +192,12 @@ private VerticalLayout projDescriptionContent;
     projectview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
 
 
-    //projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
+    // projectview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
-    //projectview_tab.addTab(initStatistics()).setIcon(FontAwesome.CHECK_CIRCLE);
-    
+    // projectview_tab.addTab(initStatistics()).setIcon(FontAwesome.CHECK_CIRCLE);
+
     projectview_tab.addTab(initTable()).setIcon(FontAwesome.FLASK);
     projectview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     projectview_tab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.TINT);
@@ -268,7 +262,7 @@ private VerticalLayout projDescriptionContent;
 
     // updateContentDescription();
     updateContentMemberSection();
-    //updateContentStatistics();
+    // updateContentStatistics();
     updateContentTable();
     updateContentButtonLayout();
 
@@ -390,7 +384,7 @@ private VerticalLayout projDescriptionContent;
   }
 
   void updateContentDescription() {
-	  projDescriptionContent.removeAllComponents();
+    projDescriptionContent.removeAllComponents();
     contact
         .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
             + currentBean.getId()
@@ -400,17 +394,17 @@ private VerticalLayout projDescriptionContent;
     if (!desc.isEmpty()) {
       descContent.setValue(desc);
     }
-    
+
     projDescriptionContent.addComponent(new Label(String.format("%s experiment(s),", currentBean
         .getExperiments().size())));
 
-    //VerticalLayout statusContent =
-      //  this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
+    // VerticalLayout statusContent =
+    // this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
 
-    //statusContent.setSpacing(true);
-    //statusContent.setMargin(new MarginInfo(true, false, true, true));
+    // statusContent.setSpacing(true);
+    // statusContent.setMargin(new MarginInfo(true, false, true, true));
 
-    //projDescriptionContent.addComponent(statusContent);
+    // projDescriptionContent.addComponent(statusContent);
   }
 
   void updateContentMemberSection() {
@@ -482,17 +476,17 @@ private VerticalLayout projDescriptionContent;
     // statContent.addComponent(new Label(String.format("%s dataset(s).", numOfDatasets)));
 
     status.removeAllComponents();
-    //VerticalLayout statusContent =
-     //   this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
+    // VerticalLayout statusContent =
+    // this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
     // statusContent.setCaption("Status");
     // statusContent.setIcon(FontAwesome.CLOCK_O);
 
     // TODO
     // statusContent.addComponent(new Label(projectInformation.statusMessage));
-    //statusContent.setSpacing(true);
-    //statusContent.setMargin(new MarginInfo(true, false, true, true));
+    // statusContent.setSpacing(true);
+    // statusContent.setMargin(new MarginInfo(true, false, true, true));
 
-    //status.addComponent(statusContent);
+    // status.addComponent(statusContent);
   }
 
 
@@ -615,9 +609,8 @@ private VerticalLayout projDescriptionContent;
   }
 
   public void loadGraph() {
-    LOGGER.debug(String.valueOf(graphSectionContent.getComponentCount() == 0));
-    if (graphSectionContent.getComponentCount() > 0)
-      LOGGER.debug(String.valueOf(graphSectionContent.getComponent(0) instanceof Image));
+    // if (graphSectionContent.getComponentCount() > 0)
+    // LOGGER.debug(String.valueOf(graphSectionContent.getComponent(0) instanceof Image));
     if (graphSectionContent.getComponentCount() == 0
         || !(graphSectionContent.getComponent(0) instanceof Image)) {
       ProgressBar progress = new ProgressBar();
@@ -776,8 +769,8 @@ private VerticalLayout projDescriptionContent;
         String webId = PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
         company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
         companyId = company.getCompanyId();
-        LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
-            companyId));
+        // LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
+        // companyId));
       } catch (PortalException | SystemException e) {
         LOGGER.error(
             "liferay error, could not retrieve companyId. Trying default companyId, which is "
@@ -789,7 +782,7 @@ private VerticalLayout projDescriptionContent;
       members = new TreeMap<String, String>();
       memberLetters = new HashMap<String, String>();
 
-      LOGGER.debug(list.toString());
+      // LOGGER.debug(list.toString());
 
       if (list != null) {
         memberString = new StringBuilder();

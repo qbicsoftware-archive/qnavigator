@@ -40,7 +40,6 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.DetailsGenerator;
 import com.vaadin.ui.Grid.RowReference;
@@ -192,31 +191,32 @@ public class WorkflowView extends VerticalLayout implements View {
         }
 
         for (Iterator i = controller.getcontainer("project", id).getItemIds().iterator(); i
-        		.hasNext();) {
-        	DatasetBean datasetBean = (DatasetBean) i.next();
+            .hasNext();) {
+          DatasetBean datasetBean = (DatasetBean) i.next();
 
-        	if (workflowDatasetTypes.contains(datasetBean.getFileType())) {
-        		// only take the file containing the hla typing
-        		if(datasetBean.getFileType().equals("Q_WF_NGS_HLATYPING_RESULTS")) {
-        			if(datasetBean.getFileName().endsWith("alleles")) {
-        				suitableDatasets.addBean(datasetBean);
-        			}
-        		}
+          if (workflowDatasetTypes.contains(datasetBean.getFileType())) {
+            // only take the file containing the hla typing
+            if (datasetBean.getFileType().equals("Q_WF_NGS_HLATYPING_RESULTS")) {
+              if (datasetBean.getFileName().endsWith("alleles")) {
+                suitableDatasets.addBean(datasetBean);
+              }
+            }
 
-        		else if(experiment.equals("Q_WF_NGS_EPITOPE_PREDICTION") & datasetBean.getFileType().equals("Q_NGS_VARIANT_CALLING_DATA")) {
-        			if(datasetBean.getFileName().endsWith("GSvar")) {
-        				suitableDatasets.addBean(datasetBean);
-        			}
-        		}
-        		
-        		else {
-        			suitableDatasets.addBean(datasetBean);
-        		}
-        	}
+            else if (experiment.equals("Q_WF_NGS_EPITOPE_PREDICTION")
+                & datasetBean.getFileType().equals("Q_NGS_VARIANT_CALLING_DATA")) {
+              if (datasetBean.getFileName().endsWith("GSvar")) {
+                suitableDatasets.addBean(datasetBean);
+              }
+            }
+
+            else {
+              suitableDatasets.addBean(datasetBean);
+            }
+          }
         }
-        
+
         datasetBeans = suitableDatasets;
-        
+
         updateSelection(suitableWorkflows);
         break;
 
@@ -250,7 +250,7 @@ public class WorkflowView extends VerticalLayout implements View {
     }
 
     availableWorkflows.setContainerDataSource(filtergpcontainer(suitableWorkflows));
-   // availableWorkflows.setColumnOrder("name", "version", "fileTypes");
+    // availableWorkflows.setColumnOrder("name", "version", "fileTypes");
     availableWorkflows.setColumnOrder("name", "version");
     workflows.setVisible(true);
   }
@@ -303,7 +303,7 @@ public class WorkflowView extends VerticalLayout implements View {
       MaxQuantModel model =
           new MaxQuantModel(rawFilesBeans, projectDatasets, selectedfastas, fastas);
       VaadinSession.getCurrent().setConverterFactory(new MaxquantConverterFactory());
-      MaxQuantComponent maxquantComponent = new MaxQuantComponent(model);
+      MaxQuantComponent maxquantComponent = new MaxQuantComponent(model, controller);
       maxquantComponent.setWorkflow(workFlow);
       maxquantComponent.addSubmissionListener(new MaxQuantSubmissionListener(maxquantComponent));
 
@@ -319,24 +319,24 @@ public class WorkflowView extends VerticalLayout implements View {
   }
 
 
-  
-    private void addComponentListeners() {
 
-        availableWorkflows.setDetailsGenerator(new DetailsGenerator() {
-          private static final long serialVersionUID = 6123522348935657638L;
+  private void addComponentListeners() {
 
-          @Override
-          public Component getDetails(RowReference rowReference) {
-            Workflow w = (Workflow) rowReference.getItemId();
-            
-            Label description = new Label(w.getDescription(), ContentMode.HTML);
-            description.setCaption("Description");
-            
-            VerticalLayout main = new VerticalLayout(description);
-            main.setMargin(true);
-            return main;
-          }
-        });
+    availableWorkflows.setDetailsGenerator(new DetailsGenerator() {
+      private static final long serialVersionUID = 6123522348935657638L;
+
+      @Override
+      public Component getDetails(RowReference rowReference) {
+        Workflow w = (Workflow) rowReference.getItemId();
+
+        Label description = new Label(w.getDescription(), ContentMode.HTML);
+        description.setCaption("Description");
+
+        VerticalLayout main = new VerticalLayout(description);
+        main.setMargin(true);
+        return main;
+      }
+    });
 
     availableWorkflows.addItemClickListener(new ItemClickListener() {
       private static final long serialVersionUID = 3786125825391677177L;
@@ -375,11 +375,12 @@ public class WorkflowView extends VerticalLayout implements View {
       swc.resetParameters();
     }
   }
-  
+
   /**
    * listenes to clicks on submit button. Executes standard workflow.
+   * 
    * @author wojnar
-   *
+   * 
    */
   private class StandardSubmissionListener implements ClickListener {
     private static final long serialVersionUID = 243869502031843198L;
@@ -400,11 +401,12 @@ public class WorkflowView extends VerticalLayout implements View {
       }
     }
   }
- /**
-  * listenes to clicks on submit button. Executes maxquant workflow.
-  * @author wojnar
-  *
-  */
+  /**
+   * listenes to clicks on submit button. Executes maxquant workflow.
+   * 
+   * @author wojnar
+   * 
+   */
   private class MaxQuantSubmissionListener implements ClickListener {
     private static final long serialVersionUID = 1888557742642278371L;
     private MaxQuantComponent maxQuantComponent;
@@ -428,24 +430,27 @@ public class WorkflowView extends VerticalLayout implements View {
     }
 
   }
+
   /**
    * submits workflow with given datasets
-   * @throws SubmitFailedException 
-   * @throws IllegalArgumentException 
-   * @throws ConnectException 
+   * 
+   * @throws SubmitFailedException
+   * @throws IllegalArgumentException
+   * @throws ConnectException
    */
-  void submit(Workflow submittedWf, List<DatasetBean> selectedDatasets) throws ConnectException, IllegalArgumentException, SubmitFailedException{
+  void submit(Workflow submittedWf, List<DatasetBean> selectedDatasets) throws ConnectException,
+      IllegalArgumentException, SubmitFailedException {
     if (submittedWf == null || selectedDatasets.isEmpty()) {
       return;
     }
     // THIS IS THE IMPORTANT LINE IN THAT MESS
-    String openbisId =
-        controller.submitAndRegisterWf(type, id, submittedWf, selectedDatasets );
+    String openbisId = controller.submitAndRegisterWf(type, id, submittedWf, selectedDatasets);
     showNotification("Workflow submitted and saved under " + openbisId);
   }
-  
+
   /**
-   * logs error and shows user that submission failed. Different exceptions yield different error messages
+   * logs error and shows user that submission failed. Different exceptions yield different error
+   * messages
    * 
    * @param e
    */

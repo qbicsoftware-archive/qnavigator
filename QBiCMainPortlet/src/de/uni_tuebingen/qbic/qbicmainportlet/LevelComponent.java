@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 
 import javax.portlet.PortletSession;
 
@@ -46,27 +46,24 @@ import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupView;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.Notification.Type;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -94,13 +91,13 @@ public class LevelComponent extends CustomComponent {
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample", "File Name", "Description",
-      "Dataset Type", "Registration Date", "File Size"};
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample", "File Name",
+      "Description", "Dataset Type", "Registration Date", "File Size"};
 
   private int numberOfDatasets;
 
   private int numberOfSamples;
-  
+
   private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
 
   public LevelComponent(DataHandler dh, State state, String resourceurl, String caption) {
@@ -284,22 +281,22 @@ public class LevelComponent extends CustomComponent {
                 }
               }
             }
-            //numberOfSamples = samplesContainer.size();
-            //samples = samplesContainer;
-            //final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(samples);
-            //gpc.removeContainerProperty("id");
-            //sampleGrid.setContainerDataSource(gpc);
-            //sampleGrid.setColumnReorderingAllowed(true);
-            //sampleGrid.setColumnOrder("code", "type", "secondaryName");
-            //numberOfSamples = samplesContainer.size();
+            // numberOfSamples = samplesContainer.size();
+            // samples = samplesContainer;
+            // final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(samples);
+            // gpc.removeContainerProperty("id");
+            // sampleGrid.setContainerDataSource(gpc);
+            // sampleGrid.setColumnReorderingAllowed(true);
+            // sampleGrid.setColumnOrder("code", "type", "secondaryName");
+            // numberOfSamples = samplesContainer.size();
 
-            //sampleGrid.setCaption("Result Samples");
-            //helpers.GridFunctions.addColumnFilters(sampleGrid, gpc);
+            // sampleGrid.setCaption("Result Samples");
+            // helpers.GridFunctions.addColumnFilters(sampleGrid, gpc);
             sampleGrid.setVisible(false);
             this.datasetTable.setCaption("Result Files");
 
             numberOfDatasets = retrievedDatasets.size();
-           
+
           }
           break;
 
@@ -325,8 +322,11 @@ public class LevelComponent extends CustomComponent {
       numberOfDatasets = retrievedDatasets.size();
 
       if (numberOfDatasets == 0) {
-        new Notification("No datasets available.", "<br/>Please contact the project manager.",
-            Type.WARNING_MESSAGE, true).show(Page.getCurrent());
+        helpers.Utils
+            .Notification(
+                "No datasets available.",
+                "No data is available for this project. Please contact the project manager if this is not expected.",
+                "warning");
       } else {
 
         Map<String, String> samples = new HashMap<String, String>();
@@ -348,21 +348,21 @@ public class LevelComponent extends CustomComponent {
 
           registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts, null);
         }
-        
+
         if (filterFor.equals("measured")) {
-			descriptionLabel = new Label(
-					String.format(
-							"This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
-							numberOfSamples, dsBeans.size()),
-					Label.CONTENT_PREFORMATTED);
-		} else if (filterFor.equals("results")) {
-            descriptionLabel =
-                    new Label(String.format("This project contains %s result datasets.",
-                    		dsBeans.size()), Label.CONTENT_PREFORMATTED);
-		}
+          descriptionLabel =
+              new Label(
+                  String.format(
+                      "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
+                      numberOfSamples, dsBeans.size()), Label.CONTENT_PREFORMATTED);
+        } else if (filterFor.equals("results")) {
+          descriptionLabel =
+              new Label(String.format("This project contains %s result datasets.", dsBeans.size()),
+                  Label.CONTENT_PREFORMATTED);
+        }
 
       }
-      
+
       this.setContainerDataSource(datasetContainer);
 
     } catch (Exception e) {
@@ -436,8 +436,8 @@ public class LevelComponent extends CustomComponent {
     this.download.setEnabled(false);
     final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
     visualize.setEnabled(false);
-   // buttonLayout.addComponent(this.download);
-    //buttonLayout.addComponent(visualize);
+    // buttonLayout.addComponent(this.download);
+    // buttonLayout.addComponent(visualize);
     buttonLayout.setSpacing(true);
 
     Button checkAll = new Button("Select all datasets");
@@ -468,39 +468,45 @@ public class LevelComponent extends CustomComponent {
     buttonLayout.addComponent(uncheckAll);
     buttonLayout.addComponent(visualize);
     buttonLayout.addComponent(this.download);
-    
-	String content = 
-			"<p> In case of multiple file selections, Project Browser will create a tar archive.</p>" +
-		    "<hr>" +	
-		    "<p> If you need help on extracting a tar archive file, follow the tips below: </p>" +
-		    "<p>" + FontAwesome.WINDOWS.getHtml() + " Windows </p>" +
-		    "<p> To open/extract TAR file on Windows, you can use 7-Zip, Easy 7-Zip, PeaZip.</p>" +
-		   	"<hr>" +
-		   	"<p>" + FontAwesome.APPLE.getHtml() + " MacOS </p>" +
-		   	"<p> To open/extract TAR file on Mac, you can use Mac OS built-in utility Archive Utility,<br> or third-part freeware. </p>" +
-    		"<hr>" +
-    		"<p>" + FontAwesome.LINUX.getHtml() + " Linux </p>" +
-		    "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> " +
-		    "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
-	
-	PopupView tooltip = new PopupView(new helpers.ToolTip(content));
-	tooltip.setHeight("44px");
-	
-	HorizontalLayout help = new HorizontalLayout();
-	help.setSizeFull();
-	HorizontalLayout helpContent = new HorizontalLayout();
-	//helpContent.setSizeFull();
-	
-	help.setMargin(new MarginInfo(false,false,false,true));
-	Label helpText = new Label("Attention: Click here before Download!");
-	helpContent.addComponent(new Label(FontAwesome.QUESTION_CIRCLE.getHtml(), ContentMode.HTML));
-	helpContent.addComponent(helpText);
-	helpContent.addComponent(tooltip);	
-	helpContent.setSpacing(true);
-	
-	help.addComponent(helpContent);
-	help.setComponentAlignment(helpContent, Alignment.TOP_CENTER);
-    
+
+    String content =
+        "<p> In case of multiple file selections, Project Browser will create a tar archive.</p>"
+            + "<hr>"
+            + "<p> If you need help on extracting a tar archive file, follow the tips below: </p>"
+            + "<p>"
+            + FontAwesome.WINDOWS.getHtml()
+            + " Windows </p>"
+            + "<p> To open/extract TAR file on Windows, you can use 7-Zip, Easy 7-Zip, PeaZip.</p>"
+            + "<hr>"
+            + "<p>"
+            + FontAwesome.APPLE.getHtml()
+            + " MacOS </p>"
+            + "<p> To open/extract TAR file on Mac, you can use Mac OS built-in utility Archive Utility,<br> or third-part freeware. </p>"
+            + "<hr>"
+            + "<p>"
+            + FontAwesome.LINUX.getHtml()
+            + " Linux </p>"
+            + "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> "
+            + "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
+
+    PopupView tooltip = new PopupView(new helpers.ToolTip(content));
+    tooltip.setHeight("44px");
+
+    HorizontalLayout help = new HorizontalLayout();
+    help.setSizeFull();
+    HorizontalLayout helpContent = new HorizontalLayout();
+    // helpContent.setSizeFull();
+
+    help.setMargin(new MarginInfo(false, false, false, true));
+    Label helpText = new Label("Attention: Click here before Download!");
+    helpContent.addComponent(new Label(FontAwesome.QUESTION_CIRCLE.getHtml(), ContentMode.HTML));
+    helpContent.addComponent(helpText);
+    helpContent.addComponent(tooltip);
+    helpContent.setSpacing(true);
+
+    help.addComponent(helpContent);
+    help.setComponentAlignment(helpContent, Alignment.TOP_CENTER);
+
     /**
      * prepare download.
      */
@@ -628,18 +634,19 @@ public class LevelComponent extends CustomComponent {
         URL url;
         try {
           Object parent = datasetTable.getParent(next);
-          if (parent != null) {       
+          if (parent != null) {
             String parentDatasetFileName =
                 (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
             url =
                 datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
                     parentDatasetFileName + "/" + datasetFileName);
-            
-            DataSet ds = datahandler.getOpenBisClient().getFacade().getDataSet("20151127095122821-38147");
+
+            DataSet ds =
+                datahandler.getOpenBisClient().getFacade().getDataSet("20151127095122821-38147");
           } else {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
-          
+
           Window subWindow =
               new Window("QC of Sample: "
                   + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
@@ -753,73 +760,75 @@ public class LevelComponent extends CustomComponent {
         }
       }
     });
-    
+
     this.datasetTable.addItemClickListener(new ItemClickListener() {
-        @Override
-        public void itemClick(ItemClickEvent event) {
-            if(!event.isDoubleClick()) {
-                String datasetCode = (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
-                String datasetFileName =
-                    (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name").getValue();
-                URL url;
-                try {
-                  Resource res = null;
-                  Object parent = datasetTable.getParent(event.getItemId());
-                  if (parent != null) {
-                    LOGGER.debug( (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue());
-                    String parentDatasetFileName =
-                        (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
-                    url =
-                        datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
-                            parentDatasetFileName + "/" + datasetFileName);
-                  }
-                  else {
-                    url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
-                  }
-                  
-                  Window subWindow = new Window();                  
-                  VerticalLayout subContent = new VerticalLayout();
-                  subContent.setMargin(true);
-                  subWindow.setContent(subContent);
-                  QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
-                  Boolean visualize = false;
-                  
-                  if (datasetFileName.endsWith(".pdf")) {
-                      QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-                      StreamResource streamres = new StreamResource(re, datasetFileName);
-                      streamres.setMIMEType("application/pdf");
-                      res = streamres;
-                      visualize = true;
-                    }
-                  
-                  if(visualize) {
-                  LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
-                  BrowserFrame frame = new BrowserFrame("", res);
-                  
-                  frame.setSizeFull();
-                  subContent.addComponent(frame);
-
-                  // Center it in the browser window
-                  subWindow.center();
-                  subWindow.setModal(true);
-                  subWindow.setSizeFull();
-                  
-                  frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
-
-                  // Open it in the UI
-                  ui.addWindow(subWindow);
-                  }
-                  
-                } catch (MalformedURLException e) {
-                    LOGGER.error(String.format(
-                        "Visualization failed because of malformedURL for dataset: %s", datasetCode));
-                    Notification
-                        .show(
-                            "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
-                            Notification.Type.ERROR_MESSAGE);
-                  }
+      @Override
+      public void itemClick(ItemClickEvent event) {
+        if (!event.isDoubleClick()) {
+          String datasetCode =
+              (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
+          String datasetFileName =
+              (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name")
+                  .getValue();
+          URL url;
+          try {
+            Resource res = null;
+            Object parent = datasetTable.getParent(event.getItemId());
+            if (parent != null) {
+              LOGGER.debug((String) datasetTable.getItem(parent).getItemProperty("File Name")
+                  .getValue());
+              String parentDatasetFileName =
+                  (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
+              url =
+                  datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                      parentDatasetFileName + "/" + datasetFileName);
+            } else {
+              url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
             }
+
+            Window subWindow = new Window();
+            VerticalLayout subContent = new VerticalLayout();
+            subContent.setMargin(true);
+            subWindow.setContent(subContent);
+            QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+            Boolean visualize = false;
+
+            if (datasetFileName.endsWith(".pdf")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("application/pdf");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (visualize) {
+              LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
+              BrowserFrame frame = new BrowserFrame("", res);
+
+              frame.setSizeFull();
+              subContent.addComponent(frame);
+
+              // Center it in the browser window
+              subWindow.center();
+              subWindow.setModal(true);
+              subWindow.setSizeFull();
+
+              frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
+
+              // Open it in the UI
+              ui.addWindow(subWindow);
+            }
+
+          } catch (MalformedURLException e) {
+            LOGGER.error(String.format(
+                "Visualization failed because of malformedURL for dataset: %s", datasetCode));
+            Notification
+                .show(
+                    "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+                    Notification.Type.ERROR_MESSAGE);
+          }
         }
+      }
     });
 
     this.vert.addComponent(buttonLayout);
@@ -881,12 +890,11 @@ public class LevelComponent extends CustomComponent {
 
 
       dataset_container.setChildrenAllowed(new_ds, true);
-      
+
       String secName = d.getProperties().get("Q_SECONDARY_NAME");
       // TODO add User here too
       if (secName != null) {
-        dataset_container.getContainerProperty(new_ds, "Description").setValue(
-            secName);
+        dataset_container.getContainerProperty(new_ds, "Description").setValue(secName);
       }
 
       dataset_container.getContainerProperty(new_ds, "Select").setValue(new CheckBox());
@@ -897,7 +905,8 @@ public class LevelComponent extends CustomComponent {
       // d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
-      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()) + " Folder");
+      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(
+          prettyNameMapper.getPrettyName(d.getType()) + " Folder");
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
@@ -917,12 +926,11 @@ public class LevelComponent extends CustomComponent {
 
       Object new_file = dataset_container.addItem();
       dataset_container.setChildrenAllowed(new_file, false);
-      
+
       String secName = d.getProperties().get("Q_SECONDARY_NAME");
       // TODO add User here too
       if (secName != null) {
-        dataset_container.getContainerProperty(new_file, "Description").setValue(
-            secName);
+        dataset_container.getContainerProperty(new_file, "Description").setValue(secName);
       }
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
@@ -930,7 +938,8 @@ public class LevelComponent extends CustomComponent {
       // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
-      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(prettyNameMapper.getPrettyName(d.getType()));
+      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(
+          prettyNameMapper.getPrettyName(d.getType()));
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_file, "File Size").setValue(

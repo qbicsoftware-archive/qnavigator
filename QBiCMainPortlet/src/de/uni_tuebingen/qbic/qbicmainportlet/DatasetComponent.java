@@ -55,7 +55,6 @@ import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.PopupView;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -170,8 +169,13 @@ public class DatasetComponent extends CustomComponent {
 
       numberOfDatasets = retrievedDatasets.size();
       if (numberOfDatasets == 0) {
-        new Notification("No datasets available.", "<br/>Please contact the project manager.",
-            Type.WARNING_MESSAGE, true).show(Page.getCurrent());
+        helpers.Utils
+            .Notification(
+                "No datasets available.",
+                "No data is available for this project. Please contact the project manager if this is not expected.",
+                "warning");
+        // new Notification("No datasets available.", "<br/>Please contact the project manager.",
+        // Type.WARNING_MESSAGE, true).show(Page.getCurrent());
       } else {
 
         Map<String, String> samples = new HashMap<String, String>();

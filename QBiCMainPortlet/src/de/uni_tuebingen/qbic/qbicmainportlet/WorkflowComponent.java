@@ -10,6 +10,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import logging.Log4j2Logger;
+import logging.Logger;
+
 import org.springframework.remoting.RemoteAccessException;
 
 import qbic.model.maxquant.MaxQuantModel;
@@ -18,38 +21,35 @@ import qbic.model.maxquant.RawFilesBean;
 import qbic.vaadincomponents.MaxQuantComponent;
 import qbic.vaadincomponents.MicroarrayQCComponent;
 import qbic.vaadincomponents.StandardWorkflowComponent;
-import logging.Log4j2Logger;
-import logging.Logger;
 import submitter.SubmitFailedException;
 import submitter.Workflow;
+import submitter.parameters.FileListParameter;
+import submitter.parameters.FileParameter;
+import submitter.parameters.Parameter;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.DetailsGenerator;
 import com.vaadin.ui.Grid.RowReference;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.VerticalLayout;
 
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.beans.DatasetBean;
@@ -58,26 +58,28 @@ import fasta.FastaDB;
 
 public class WorkflowComponent extends CustomComponent {
 
-	/**
+  /**
 	 * 
 	 */
-	private static final long serialVersionUID = -2235244881205474571L;
+  private static final long serialVersionUID = -2235244881205474571L;
 
-	private static Logger LOGGER = new Log4j2Logger(WorkflowComponent.class);
-	private static final String WORKFKLOW_GRID_DESCRIPTION = "If you want to execute a workflow, click on one of the rows in the table. Then select the parameters, input files database/reference files and click on submit.";
-	private static final String SUBMISSION_CAPTION = "Submission";
-	protected static final String SUBMISSION_FAILED_MESSAGE = "Workflow submission failed due to internal errors! Please try again later or contact your project manager.";
+  private static Logger LOGGER = new Log4j2Logger(WorkflowComponent.class);
+  private static final String WORKFKLOW_GRID_DESCRIPTION =
+      "If you want to execute a workflow, click on one of the rows in the table. Then select the parameters, input files database/reference files and click on submit.";
+  private static final String SUBMISSION_CAPTION = "Submission";
+  protected static final String SUBMISSION_FAILED_MESSAGE =
+      "Workflow submission failed due to internal errors! Please try again later or contact your project manager.";
 
-	private WorkflowViewController controller;
-	private VerticalLayout viewContent = new VerticalLayout();
-	private VerticalLayout workflows;
-	private Grid availableWorkflows = new Grid();
-	private VerticalLayout submission;
+  private WorkflowViewController controller;
+  private VerticalLayout viewContent = new VerticalLayout();
+  private VerticalLayout workflows;
+  private Grid availableWorkflows = new Grid();
+  private VerticalLayout submission;
 
-	// data
-	BeanItemContainer<DatasetBean> datasetBeans;
-	private String type;
-	private String id;
+  // data
+  BeanItemContainer<DatasetBean> datasetBeans;
+  private String type;
+  private String id;
 
   public WorkflowComponent(WorkflowViewController controller) {
     this.controller = controller;
@@ -218,15 +220,19 @@ public class WorkflowComponent extends CustomComponent {
   void updateSelection(BeanItemContainer<Workflow> suitableWorkflows) {
     this.submission.setCaption("");
     this.submission.removeAllComponents();
-    
+
     if (!(suitableWorkflows.size() > 0)) {
-      showNotification("No suitable workflows found. Please contact your project manager.");
+      helpers.Utils
+          .Notification(
+              "No suitable workflows available.",
+              "No workflows are shown because no suitable data is available in this project. If this is unexpected please contact your project manager.",
+              "info");
     }
 
     availableWorkflows.setContainerDataSource(filtergpcontainer(suitableWorkflows));
-    //availableWorkflows.setColumnOrder("name", "version", "fileTypes");
+    // availableWorkflows.setColumnOrder("name", "version", "fileTypes");
     availableWorkflows.setColumnOrder("name", "version");
-    
+
     workflows.setVisible(true);
   }
 
@@ -266,7 +272,7 @@ public class WorkflowComponent extends CustomComponent {
   private void updateParameterView(Workflow workFlow, BeanItemContainer<DatasetBean> projectDatasets) {
     this.submission.setCaption(SUBMISSION_CAPTION + ": " + workFlow.getName());
     this.submission.removeAllComponents();
-    LOGGER.debug(workFlow.getName() + " chosen.");
+
     if (workFlow.getName().equals("MaxQuant")) {
       BeanItemContainer<RawFilesBean> rawFilesBeans =
           new BeanItemContainer<RawFilesBean>(RawFilesBean.class);
@@ -276,10 +282,43 @@ public class WorkflowComponent extends CustomComponent {
       FastaDB db = new FastaDB();
       fastas.addAll(db.getAll());
 
-      MaxQuantModel model =
-          new MaxQuantModel(rawFilesBeans, projectDatasets, selectedfastas, fastas);
+      Map<String, Parameter> params = workFlow.getData().getData();
+      BeanItemContainer<DatasetBean> subContainer =
+          new BeanItemContainer<DatasetBean>(DatasetBean.class);
+
+
+      for (Map.Entry<String, Parameter> entry : params.entrySet()) {
+
+        if (entry.getValue() instanceof FileParameter
+            || entry.getValue() instanceof FileListParameter) {
+
+          List<String> associatedDataTypes = new ArrayList<String>();
+
+          if (entry.getValue() instanceof FileParameter) {
+            associatedDataTypes = ((FileParameter) entry.getValue()).getRange();
+          } else if (entry.getValue() instanceof FileListParameter) {
+            associatedDataTypes = ((FileListParameter) entry.getValue()).getRange();
+          }
+
+          if (associatedDataTypes.contains("fasta") || associatedDataTypes.contains("gtf")) {
+            continue;
+          } else {
+            for (java.util.Iterator<DatasetBean> i = projectDatasets.getItemIds().iterator(); i
+                .hasNext();) {
+              DatasetBean dataset = i.next();
+
+              if (associatedDataTypes.contains(dataset.getFileType())) {
+                subContainer.addBean(dataset);
+
+              }
+            }
+          }
+        }
+      }
+
+      MaxQuantModel model = new MaxQuantModel(rawFilesBeans, subContainer, selectedfastas, fastas);
       VaadinSession.getCurrent().setConverterFactory(new MaxquantConverterFactory());
-      MaxQuantComponent maxquantComponent = new MaxQuantComponent(model);
+      MaxQuantComponent maxquantComponent = new MaxQuantComponent(model, controller);
       maxquantComponent.setWorkflow(workFlow);
       maxquantComponent.addSubmissionListener(new MaxQuantSubmissionListener(maxquantComponent));
 
@@ -300,8 +339,6 @@ public class WorkflowComponent extends CustomComponent {
 
   }
 
-
-
   private void addComponentListeners() {
 
     availableWorkflows.setDetailsGenerator(new DetailsGenerator() {
@@ -310,10 +347,10 @@ public class WorkflowComponent extends CustomComponent {
       @Override
       public Component getDetails(RowReference rowReference) {
         Workflow w = (Workflow) rowReference.getItemId();
-        
+
         Label description = new Label(w.getDescription(), ContentMode.HTML);
         description.setCaption("Description");
-        
+
         VerticalLayout main = new VerticalLayout(description);
         main.setMargin(true);
         return main;
@@ -334,7 +371,7 @@ public class WorkflowComponent extends CustomComponent {
           // detailed Description should be visible
           availableWorkflows.setDetailsVisible(selectedWorkflow,
               !availableWorkflows.isDetailsVisible(selectedWorkflow));
-          
+
         } else {
           LOGGER.warn("selected Workflow is null?");
           submission.setVisible(false);
@@ -449,7 +486,8 @@ public class WorkflowComponent extends CustomComponent {
         Collection<DatasetBean> selectedDatasets = maxQuantComponent.getSelectedDatasets();
         submit(submittedWf, new ArrayList<DatasetBean>(selectedDatasets));
       } catch (Exception e) {
-        handleException(e);
+        // handleException(e);
+        e.printStackTrace();
       }
     }
 
@@ -469,7 +507,9 @@ public class WorkflowComponent extends CustomComponent {
     }
     // THIS IS THE IMPORTANT LINE IN THAT MESS
     String openbisId = controller.submitAndRegisterWf(type, id, submittedWf, selectedDatasets);
-    showNotification("Workflow submitted and saved under " + openbisId);
+    helpers.Utils.Notification("Workflow submitted",
+        "Workflow submitted successfully and saved under " + openbisId, "success");
+    // showNotification("Workflow submitted and saved under " + openbisId);
   }
 
   /**
@@ -482,7 +522,11 @@ public class WorkflowComponent extends CustomComponent {
     if (e instanceof ConnectException || e instanceof IllegalArgumentException
         || e instanceof SubmitFailedException) {
       LOGGER.error("Submission failed, probably gUSE. " + e.getMessage(), e.getStackTrace());
-      showNotification(SUBMISSION_FAILED_MESSAGE);
+      helpers.Utils
+          .Notification(
+              "Workflow submission failed",
+              "Requested workflow could not be submitted due to internal errors. Please try again later and contact your project manager if the problem persists.",
+              "error");
       try {
         VaadinService
             .getCurrentResponse()
@@ -491,16 +535,24 @@ public class WorkflowComponent extends CustomComponent {
                 "An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
       } catch (IOException | IllegalArgumentException e1) {
         // TODO Auto-generated catch block
-          LOGGER.error("Something went wrong: " + e.getMessage(), e.getStackTrace());
+        LOGGER.error("Something went wrong: " + e.getMessage(), e.getStackTrace());
         VaadinService.getCurrentResponse().setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
       }
     } else if (e instanceof RemoteAccessException) {
       LOGGER.error("Submission failed, probably openbis. error message: " + e.getMessage(),
           e.getStackTrace());
-      showNotification(SUBMISSION_FAILED_MESSAGE);
+      helpers.Utils
+          .Notification(
+              "Workflow submission failed",
+              "Requested workflow could not be submitted due to internal errors. Please try again later and contact your project manager if the problem persists.",
+              "error");
     } else {
       LOGGER.error("Internal error: " + e.getMessage(), e.getStackTrace());
-      showNotification(SUBMISSION_FAILED_MESSAGE);
+      helpers.Utils
+          .Notification(
+              "Workflow submission failed",
+              "Requested workflow could not be submitted due to internal errors. Please try again later and contact your project manager if the problem persists.",
+              "error");
     }
   }
 }

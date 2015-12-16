@@ -2,14 +2,14 @@ package qbic.model.maxquant;
 
 import java.io.Serializable;
 
-public class RawFilesBean implements Serializable{
+public class RawFilesBean implements Serializable {
   private static final long serialVersionUID = 3975747833269788515L;
-  
+
   private String file;
   private Integer parameterGroup;
   private Integer fraction;
   private String experiment;
-  
+
   public RawFilesBean(String file, Integer parameterGroup, Integer fraction, String experiment) {
     super();
     this.file = file;
@@ -17,12 +17,13 @@ public class RawFilesBean implements Serializable{
     this.fraction = fraction;
     this.experiment = experiment;
   }
-  
- /**
-  * will set fields accordingly. fraction and parameter group will both be set to 1 (standard).
-  * @param file
-  * @param experiment
-  */
+
+  /**
+   * will set fields accordingly. fraction and parameter group will both be set to 1 (standard).
+   * 
+   * @param file
+   * @param experiment
+   */
   public RawFilesBean(String file, String experiment) {
     super();
     this.file = file;
@@ -36,6 +37,9 @@ public class RawFilesBean implements Serializable{
     return file;
   }
 
+  public String generateParamFile() {
+    return file.split("\\.")[0];
+  }
 
   public void setFile(String file) {
     this.file = file;
@@ -70,7 +74,7 @@ public class RawFilesBean implements Serializable{
   public void setExperiment(String experiment) {
     this.experiment = experiment;
   }
- 
+
   @Override
   public String toString() {
     return "RawFilesBean [file=" + file + ", parameterGroup=" + parameterGroup + ", fraction="
@@ -78,19 +82,16 @@ public class RawFilesBean implements Serializable{
   }
 
   /*
-   * uncommented because it causes 
-   * java.lang.IllegalArgumentException: Given item id (RawFilesBean [file=abc, parameterGroup=1, fraction=3, experiment=qbic1233]) does not exist in the container
+   * uncommented because it causes java.lang.IllegalArgumentException: Given item id (RawFilesBean
+   * [file=abc, parameterGroup=1, fraction=3, experiment=qbic1233]) does not exist in the container
    * if one tries to edit values in a grid
-   * @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((experiment == null) ? 0 : experiment.hashCode());
-    result = prime * result + ((file == null) ? 0 : file.hashCode());
-    result = prime * result + ((fraction == null) ? 0 : fraction.hashCode());
-    result = prime * result + ((parameterGroup == null) ? 0 : parameterGroup.hashCode());
-    return result;
-  }*/
+   * 
+   * @Override public int hashCode() { final int prime = 31; int result = 1; result = prime * result
+   * + ((experiment == null) ? 0 : experiment.hashCode()); result = prime * result + ((file == null)
+   * ? 0 : file.hashCode()); result = prime * result + ((fraction == null) ? 0 :
+   * fraction.hashCode()); result = prime * result + ((parameterGroup == null) ? 0 :
+   * parameterGroup.hashCode()); return result; }
+   */
 
   @Override
   public boolean equals(Object obj) {
@@ -123,5 +124,5 @@ public class RawFilesBean implements Serializable{
       return false;
     return true;
   }
-  
+
 }
