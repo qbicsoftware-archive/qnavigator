@@ -29,6 +29,8 @@ import model.TestSampleBean;
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
 
+import qbic.vaadincomponents.TSVDownloadComponent;
+
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
@@ -107,7 +109,7 @@ public class ProjInformationComponent extends CustomComponent {
       "Registration Date"};
 
   private int numberOfDatasets;
-  
+
   private Label investigator;
 
   private Label descContent;
@@ -118,9 +120,11 @@ public class ProjInformationComponent extends CustomComponent {
 
   private ProjectBean projectBean;
 
-private Label experimentLabel;
+  private Label experimentLabel;
 
-private VerticalLayout statusContent;
+  private VerticalLayout statusContent;
+
+  private TSVDownloadComponent tsvDownloadContent;
 
   public ProjInformationComponent(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
@@ -141,9 +145,10 @@ private VerticalLayout statusContent;
     contact = new Label("", ContentMode.HTML);
     patientInformation = new Label("No patient information provided.", ContentMode.HTML);
     mainLayout = new VerticalLayout(vert);
-    
+
     experimentLabel = new Label("");
     statusContent = new VerticalLayout();
+    tsvDownloadContent = new TSVDownloadComponent();
 
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
@@ -154,12 +159,12 @@ private VerticalLayout statusContent;
     if (currentBean.getId() == null)
       return;
     try {
-    	
+
       projectBean = currentBean;
-      
+
       String identifier = currentBean.getId();
       String space = identifier.split("/")[1];
-      
+
       String pi = projectBean.getPrincipalInvestigator();
       investigator.setValue(pi);
 
@@ -173,9 +178,25 @@ private VerticalLayout statusContent;
       if (!desc.isEmpty()) {
         descContent.setValue(desc);
       }
-      
-      experimentLabel.setValue((String.format("This project includes %s experimental step(s)", currentBean.getExperiments().size())));
-      statusContent = datahandler.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
+
+      experimentLabel.setValue((String.format("This project includes %s experimental step(s)",
+          currentBean.getExperiments().size())));
+      statusContent =
+          datahandler.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
+      // TODO can we reuse ids from somewhere else? this might be a bit slower than it needs to be
+      List<String> ids = new ArrayList<String>();
+      for (Sample s : datahandler.getOpenBisClient().getSamplesOfProject(identifier))
+        ids.add(s.getIdentifier());
+      // nothing to download
+      if (ids.size() == 0)
+        tsvDownloadContent.setVisible(false);
+      else {
+        //need to be disabled first so old project tsvs are not downloadable
+        tsvDownloadContent.disableSpreadSheets();
+        tsvDownloadContent.prepareSpreadsheets(ids, space, currentBean.getCode(),
+            datahandler.getOpenBisClient());
+        tsvDownloadContent.setVisible(true);
+      }
 
       HierarchicalContainer datasetContainer = new HierarchicalContainer();
       datasetContainer.addContainerProperty("Select", CheckBox.class, null);
@@ -324,9 +345,11 @@ private VerticalLayout statusContent;
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(experimentLabel);
     projDescriptionContent.addComponent(statusContent);
+    projDescriptionContent.addComponent(tsvDownloadContent);
+
     statusContent.setSpacing(true);
     statusContent.setMargin(new MarginInfo(false, false, false, true));
-    
+
     if (projectType.equals("patient")) {
       String patientInfo = "";
       Boolean available = false;
@@ -364,7 +387,7 @@ private VerticalLayout statusContent;
     }
 
     projDescription.addComponent(projDescriptionContent);
-    
+
     projDescriptionContent.addComponent(contact);
 
     projDescriptionContent.setSpacing(true);
@@ -426,7 +449,7 @@ private VerticalLayout statusContent;
 
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
-    
+
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
     buttonLayout.addComponent(visualize);
@@ -488,8 +511,7 @@ private VerticalLayout statusContent;
         } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS")
             && (fileName.endsWith(".html"))) {
           visualize.setEnabled(true);
-        }
-        else {
+        } else {
           visualize.setEnabled(false);
         }
       }
@@ -536,7 +558,7 @@ private VerticalLayout statusContent;
 
       }
     });
-    
+
 
     // TODO get the GV to work here. Together with reverse proxy
     // Assumes that table Value Change listner is enabling or disabling the button if preconditions
@@ -569,9 +591,9 @@ private VerticalLayout statusContent;
           }
 
           Window subWindow = new Window();
-          //("QC of Sample: "
-          //        + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
-          
+          // ("QC of Sample: "
+          // + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
+
           VerticalLayout subContent = new VerticalLayout();
           subContent.setMargin(true);
           subWindow.setContent(subContent);
@@ -608,8 +630,7 @@ private VerticalLayout statusContent;
             res = streamres;
           } else if (datasetType.equals("FASTQC")) {
             res = new ExternalResource(url);
-          } 
-          else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
+          } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath =
                 (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
             filePath = String.format("/store%s", filePath.split("store")[1]);
@@ -678,72 +699,74 @@ private VerticalLayout statusContent;
         }
       }
     });
-    
-    
+
+
     this.datasetTable.addItemClickListener(new ItemClickListener() {
-        @Override
-        public void itemClick(ItemClickEvent event) {
-            if(!event.isDoubleClick()) {
-                String datasetCode = (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
-                String datasetFileName =
-                    (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name").getValue();
-                URL url;
-                try {
-                  Resource res = null;
-                  Object parent = datasetTable.getParent(event.getItemId());
-                  if (parent != null) {
-                    String parentDatasetFileName =
-                        (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
-                    url =
-                        datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
-                            parentDatasetFileName + "/" + datasetFileName);
-                  } else {
-                    url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
-                  }
-                  
-                  Window subWindow = new Window();                  
-                  VerticalLayout subContent = new VerticalLayout();
-                  subContent.setMargin(true);
-                  subWindow.setContent(subContent);
-                  QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
-                  Boolean visualize = false;
-                  
-                  if (datasetFileName.endsWith(".pdf")) {
-                      QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-                      StreamResource streamres = new StreamResource(re, datasetFileName);
-                      streamres.setMIMEType("application/pdf");
-                      res = streamres;
-                      visualize = true;
-                    }
-                  
-                  if(visualize) {
-                  LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
-                  BrowserFrame frame = new BrowserFrame("", res);
-                  
-                  frame.setSizeFull();
-                  subContent.addComponent(frame);
-
-                  // Center it in the browser window
-                  subWindow.center();
-                  subWindow.setModal(true);
-                  subWindow.setSizeFull();
-                  
-                  frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
-
-                  // Open it in the UI
-                  ui.addWindow(subWindow);
-                  }
-                  
-                } catch (MalformedURLException e) {
-                    LOGGER.error(String.format(
-                        "Visualization failed because of malformedURL for dataset: %s", datasetCode));
-                    Notification
-                        .show(
-                            "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
-                            Notification.Type.ERROR_MESSAGE);
-                  }
+      @Override
+      public void itemClick(ItemClickEvent event) {
+        if (!event.isDoubleClick()) {
+          String datasetCode =
+              (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
+          String datasetFileName =
+              (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name")
+                  .getValue();
+          URL url;
+          try {
+            Resource res = null;
+            Object parent = datasetTable.getParent(event.getItemId());
+            if (parent != null) {
+              String parentDatasetFileName =
+                  (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
+              url =
+                  datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                      parentDatasetFileName + "/" + datasetFileName);
+            } else {
+              url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
             }
+
+            Window subWindow = new Window();
+            VerticalLayout subContent = new VerticalLayout();
+            subContent.setMargin(true);
+            subWindow.setContent(subContent);
+            QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+            Boolean visualize = false;
+
+            if (datasetFileName.endsWith(".pdf")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("application/pdf");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (visualize) {
+              LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
+              BrowserFrame frame = new BrowserFrame("", res);
+
+              frame.setSizeFull();
+              subContent.addComponent(frame);
+
+              // Center it in the browser window
+              subWindow.center();
+              subWindow.setModal(true);
+              subWindow.setSizeFull();
+
+              frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
+
+              // Open it in the UI
+              ui.addWindow(subWindow);
+            }
+
+          } catch (MalformedURLException e) {
+            LOGGER.error(String.format(
+                "Visualization failed because of malformedURL for dataset: %s", datasetCode));
+            Notification
+                .show(
+                    "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+                    Notification.Type.ERROR_MESSAGE);
+          }
         }
+      }
     });
 
 
@@ -957,7 +980,7 @@ private VerticalLayout statusContent;
     }
   }
 
-  //TODO seems this isn't used. can we delete it?
+  // TODO seems this isn't used. can we delete it?
   /**
    * The input should have the following form: type=openbis_type&id=openbis_id e.g.
    * type=sample&id=/ABI_SYSBIO/QMARI117AV It is specifically designed to be used in the case of

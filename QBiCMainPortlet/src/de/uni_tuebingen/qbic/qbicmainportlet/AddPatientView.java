@@ -402,6 +402,7 @@ public class AddPatientView extends VerticalLayout implements View {
 
     typingMethod.addItems(datahandler.getOpenBisClient().getVocabCodesForVocab(
         "Q_HLA_TYPING_METHODS"));
+
     hlaLayout.addComponent(typingMethod);
     hlaLayout.addComponent(hlalayout);
   }
@@ -450,25 +451,6 @@ public class AddPatientView extends VerticalLayout implements View {
 
     Integer numberPatients = Integer.parseInt(numberOfPatients.getValue());
 
-    // Notification with default settings for a warning
-    // Notification sucess =
-    // new Notification("Patients successfully registered.", Type.TRAY_NOTIFICATION);
-    // Notification failure =
-    // new Notification(
-    // "Registration failed. Number of Patients and secondary IDs has to be the same and tissues have to be fully specified.",
-    // Type.ERROR_MESSAGE);
-
-    // Customize it
-    // sucess.setDelayMsec(20000);
-    // sucess.setStyleName(ValoTheme.NOTIFICATION_SUCCESS);
-    // sucess.setPosition(Position.TOP_CENTER);
-    // sucess.setIcon(FontAwesome.CHECK);
-
-    // failure.setDelayMsec(20000);
-    // failure.setStyleName(ValoTheme.NOTIFICATION_FAILURE);
-    // failure.setPosition(Position.TOP_CENTER);
-
-
     if (numberPatients.equals(secondaryIDs.size()) & checkRegisteredSamplesTable() & hlaIvalid
         & hlaIIvalid) {
       datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects
@@ -483,7 +465,6 @@ public class AddPatientView extends VerticalLayout implements View {
               "Registration failed",
               "Number of Patients and secondary IDs has to be the same and tissues have to be fully specified.",
               "error");
-      // failure.show(Page.getCurrent());
     }
 
   }
@@ -506,6 +487,7 @@ public class AddPatientView extends VerticalLayout implements View {
       expsSpecified =
           ((sampleBean.getDeepSeq() == true) | (sampleBean.getDnaSeq() == true) | (sampleBean
               .getRnaSeq() == true));
+
       tissueSpecified = (!sampleBean.getTissue().equals(""));
       instrumentSpecified = (!sampleBean.getSeqDevice().equals(""));
 

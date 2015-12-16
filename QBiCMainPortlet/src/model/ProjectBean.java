@@ -14,6 +14,7 @@ public class ProjectBean implements Serializable {
    */
   private static final long serialVersionUID = -4463436578711695346L;
   private String id;
+  private String secondaryName;
   private String code;
   private String description;
   private String space;
@@ -23,16 +24,17 @@ public class ProjectBean implements Serializable {
   private String registrator;
   private String contact;
   private String principalInvestigator;
-  // TODO userBean ?
   private Set<String> members;
   private Boolean containsData;
 
-  public ProjectBean(String id, String code, String description, String space,
-      BeanItemContainer<ExperimentBean> experiments, ProgressBar progress, Date registrationDate,
-      String registrator, String contact, Set<String> members, Boolean containsData) {
+  public ProjectBean(String id, String code, String secondaryName, String description,
+      String space, BeanItemContainer<ExperimentBean> experiments, ProgressBar progress,
+      Date registrationDate, String registrator, String contact, Set<String> members,
+      Boolean containsData) {
     super();
     this.id = id;
     this.code = code;
+    this.secondaryName = secondaryName;
     this.description = description;
     this.space = space;
     this.experiments = experiments;
@@ -58,6 +60,14 @@ public class ProjectBean implements Serializable {
 
   public String getCode() {
     return code;
+  }
+
+  public void setSecondaryName(String secondaryName) {
+    this.secondaryName = secondaryName;
+  }
+
+  public String getSecondaryName() {
+    return secondaryName;
   }
 
   public void setCode(String code) {
@@ -166,11 +176,11 @@ public class ProjectBean implements Serializable {
     this.containsData = containsData;
   }
 
-public String getPrincipalInvestigator() {
-	return principalInvestigator;
-}
+  public String getPrincipalInvestigator() {
+    return principalInvestigator;
+  }
 
-public void setPrincipalInvestigator(String principalInvestigator) {
-	this.principalInvestigator = principalInvestigator;
-}
+  public void setPrincipalInvestigator(String principalInvestigator) {
+    this.principalInvestigator = principalInvestigator;
+  }
 }

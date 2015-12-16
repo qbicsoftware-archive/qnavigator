@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -86,8 +87,11 @@ public class DataHandler implements Serializable {
 
   // store search result containers here
   List<Sample> sampleResults = new ArrayList<Sample>();
-
   List<Experiment> expResults = new ArrayList<Experiment>();
+  List<Project> projResults = new ArrayList<Project>();
+
+  List<String> showOptions = Arrays.asList("Projects", "Experiments", "Samples");
+
 
   String lastQueryString = new String();
 
@@ -131,6 +135,24 @@ public class DataHandler implements Serializable {
 
   public void setExpResults(List<Experiment> expResults) {
     this.expResults = expResults;
+  }
+
+  public List<Project> getProjResults() {
+    return projResults;
+  }
+
+
+  public void setProjResults(List<Project> projResults) {
+    this.projResults = projResults;
+  }
+
+  public List<String> getShowOptions() {
+    return showOptions;
+  }
+
+
+  public void setShowOptions(List<String> showOptions) {
+    this.showOptions = showOptions;
   }
 
   public String getLastQueryString() {
