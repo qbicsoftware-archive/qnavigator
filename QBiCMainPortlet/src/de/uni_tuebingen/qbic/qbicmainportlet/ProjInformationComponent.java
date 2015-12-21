@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -185,13 +186,17 @@ public class ProjInformationComponent extends CustomComponent {
           datahandler.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
       // TODO can we reuse ids from somewhere else? this might be a bit slower than it needs to be
       List<String> ids = new ArrayList<String>();
+      List<String> types =
+          new ArrayList<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE",
+              "Q_TEST_SAMPLE"));
       for (Sample s : datahandler.getOpenBisClient().getSamplesOfProject(identifier))
-        ids.add(s.getIdentifier());
+        if (!types.contains(s.getSampleTypeCode()))
+          ids.add(s.getIdentifier());
       // nothing to download
       if (ids.size() == 0)
         tsvDownloadContent.setVisible(false);
       else {
-        //need to be disabled first so old project tsvs are not downloadable
+        // need to be disabled first so old project tsvs are not downloadable
         tsvDownloadContent.disableSpreadSheets();
         tsvDownloadContent.prepareSpreadsheets(ids, space, currentBean.getCode(),
             datahandler.getOpenBisClient());
