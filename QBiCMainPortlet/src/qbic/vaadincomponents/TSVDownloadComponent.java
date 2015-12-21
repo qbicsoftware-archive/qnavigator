@@ -23,6 +23,11 @@ import com.vaadin.ui.themes.ValoTheme;
 
 public class TSVDownloadComponent extends VerticalLayout {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 6140141377721355605L;
+
   private HorizontalLayout downloads;
   // private ProgressBar bar;
 
