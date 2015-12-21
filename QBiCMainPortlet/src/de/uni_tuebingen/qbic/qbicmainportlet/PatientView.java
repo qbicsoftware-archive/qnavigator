@@ -45,7 +45,6 @@ import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -180,9 +179,9 @@ public class PatientView extends VerticalLayout implements View {
     this.currentBean = projectBean;
 
     registeredExperiments.setContainerDataSource(projectBean.getExperiments());
-    
-    registeredExperiments.setVisibleColumns(new Object[] {"code", "prettyType", "registrationDate", "registrator",
-    "status"});
+
+    registeredExperiments.setVisibleColumns(new Object[] {"code", "prettyType", "registrationDate",
+        "registrator", "status"});
 
     registeredExperiments.setColumnHeader("prettyType", "Type");
 
@@ -262,9 +261,7 @@ public class PatientView extends VerticalLayout implements View {
 
       @Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
-    	LOGGER.debug(event.getTabSheet().getSelectedTab().getCaption());
-    	LOGGER.debug(getCurrentBean().getId());
-    	
+
         if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
           loadGraph();
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
@@ -283,9 +280,9 @@ public class PatientView extends VerticalLayout implements View {
           args.put("type", "project");
           workflowComponent.update(args);
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Upload Files")) {
-          //(get space from currentBean)
-          uploadComponent.updateUI(manager, getCurrentBean().getCode(), currentBean.getId().split("/")[1], datahandler
-              .getOpenBisClient());
+          // (get space from currentBean)
+          uploadComponent.updateUI(manager, getCurrentBean().getCode(),
+              currentBean.getId().split("/")[1], datahandler.getOpenBisClient());
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("")) {
           projectInformation.updateUI(getCurrentBean(), "patient");
         }
@@ -303,23 +300,10 @@ public class PatientView extends VerticalLayout implements View {
     setHeaderLabel("Patient " + getCurrentBean().getCode());
 
     // updateContentToolBar();
-    long startTime = System.nanoTime();
     updateHLALayout();
-    long endTime = System.nanoTime();
-    LOGGER.info(String.format("updateHLALayout took %f s", ((endTime - startTime) / 1000000000.0)));
 
-    startTime = System.nanoTime();
-    // updateContentDescription();
-    endTime = System.nanoTime();
-    LOGGER.info(String.format("updateContentDescription took %f s",
-        ((endTime - startTime) / 1000000000.0)));
-
-    startTime = System.nanoTime();
     // updateProjectStatus();
     statusComponent.updateUI(this.currentBean);
-    endTime = System.nanoTime();
-    LOGGER.info(String.format("updateProjectStatus took %f s",
-        ((endTime - startTime) / 1000000000.0)));
     updateContentMemberSection();
 
     projectInformation.updateUI(getCurrentBean(), "patient");

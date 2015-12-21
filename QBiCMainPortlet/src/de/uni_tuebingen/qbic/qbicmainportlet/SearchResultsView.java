@@ -5,7 +5,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import logging.Log4j2Logger;
+import model.SearchResultsExperimentBean;
+import model.SearchResultsProjectBean;
+import model.SearchResultsSampleBean;
+
 import org.tepi.filtertable.FilterTable;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
@@ -23,14 +32,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import logging.Log4j2Logger;
-import model.SearchResultsExperimentBean;
-import model.SearchResultsProjectBean;
-import model.SearchResultsSampleBean;
 
 public class SearchResultsView extends VerticalLayout implements View {
 
@@ -148,8 +149,9 @@ public class SearchResultsView extends VerticalLayout implements View {
       projCollection.add(tmpProjectBean);
     }
 
-    projBeanContainer = new BeanItemContainer<SearchResultsProjectBean>(
-        SearchResultsProjectBean.class, projCollection);
+    projBeanContainer =
+        new BeanItemContainer<SearchResultsProjectBean>(SearchResultsProjectBean.class,
+            projCollection);
 
 
     // get the experiment search result data
@@ -169,8 +171,9 @@ public class SearchResultsView extends VerticalLayout implements View {
 
     }
 
-    expBeanContainer = new BeanItemContainer<SearchResultsExperimentBean>(
-        SearchResultsExperimentBean.class, expCollection);
+    expBeanContainer =
+        new BeanItemContainer<SearchResultsExperimentBean>(SearchResultsExperimentBean.class,
+            expCollection);
 
     // get the sample search result data
     Collection<SearchResultsSampleBean> sampleCollection = new ArrayList<SearchResultsSampleBean>();
@@ -186,8 +189,9 @@ public class SearchResultsView extends VerticalLayout implements View {
 
     }
 
-    sampleBeanContainer = new BeanItemContainer<SearchResultsSampleBean>(
-        SearchResultsSampleBean.class, sampleCollection);
+    sampleBeanContainer =
+        new BeanItemContainer<SearchResultsSampleBean>(SearchResultsSampleBean.class,
+            sampleCollection);
 
   }
 
@@ -240,20 +244,22 @@ public class SearchResultsView extends VerticalLayout implements View {
   }
 
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
-    this.setMargin(new MarginInfo(false, true, false, false));
+    this.setMargin(new MarginInfo(true, true, false, false));
     // clean up first
     searchResultsLayout.removeAllComponents();
     searchResultsLayout.setWidth("100%");
     searchResultsLayout.setSpacing(true);
 
-    Label header = new Label("Search results for query '" + queryString + "':");
-    searchResultsLayout.addComponent(header);
+    searchResultsLayout.setCaption("Search results for query '" + queryString + "'");
+    // Label header = new Label("Search results for query '" + queryString + "':");
+    // searchResultsLayout.addComponent(header);
 
     updateView(browserWidth, browserWidth, browser);
 
     VerticalLayout viewContent = new VerticalLayout();
     viewContent.setWidth("100%");
     viewContent.setSpacing(true);
+    viewContent.setMargin(new MarginInfo(true, false, false, false));
 
     List<String> showOptions = datahandler.getShowOptions();
 
@@ -275,9 +281,10 @@ public class SearchResultsView extends VerticalLayout implements View {
           String cellType = new String(event.getPropertyId().toString());
 
           if (cellType.equals("projectID")) {
-            String cellContent = new String(
-                projBeanContainer.getContainerProperty(event.getItemId(), event.getPropertyId())
-                    .getValue().toString());
+            String cellContent =
+                new String(projBeanContainer
+                    .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
+                    .toString());
 
             Notification.show("Loading project " + cellContent);
 
@@ -324,9 +331,10 @@ public class SearchResultsView extends VerticalLayout implements View {
           String cellType = new String(event.getPropertyId().toString());
 
           if (cellType.equals("experimentID")) {
-            String cellContent = new String(
-                expBeanContainer.getContainerProperty(event.getItemId(), event.getPropertyId())
-                    .getValue().toString());
+            String cellContent =
+                new String(expBeanContainer
+                    .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
+                    .toString());
 
             Notification.show("Loading experiment " + cellContent);
 
@@ -371,9 +379,10 @@ public class SearchResultsView extends VerticalLayout implements View {
           String cellType = new String(event.getPropertyId().toString());
 
           if (cellType.equals("sampleID")) {
-            String cellContent = new String(
-                sampleBeanContainer.getContainerProperty(event.getItemId(), event.getPropertyId())
-                    .getValue().toString());
+            String cellContent =
+                new String(sampleBeanContainer
+                    .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
+                    .toString());
 
             Notification.show("Loading sample " + cellContent);
 
@@ -412,8 +421,8 @@ public class SearchResultsView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table
-        .addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
+    this.table.addValueChangeListener(new ViewTablesClickListener(table,
+        ProjectView.navigateToLabel));
   }
 
 

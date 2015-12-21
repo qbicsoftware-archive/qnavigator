@@ -8,24 +8,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import concurrency.UpdateProgressBar;
-
 import logging.Log4j2Logger;
 import main.OpenBisClient;
-
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 import com.vaadin.server.FileDownloader;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class TSVDownloadComponent extends VerticalLayout {
 
-  private VerticalLayout downloads;
+  private HorizontalLayout downloads;
   // private ProgressBar bar;
 
   private Button dlEntities;
@@ -46,12 +44,22 @@ public class TSVDownloadComponent extends VerticalLayout {
     // addComponent(info);
     // addComponent(bar);
 
-    downloads = new VerticalLayout();
-    downloads.setCaption("Download Spreadsheets:");
+    downloads = new HorizontalLayout();
+    downloads.setCaption("Spreadsheets");
     downloads.setSpacing(true);
     dlEntities = new Button("Sample Sources");
     dlExtracts = new Button("Sample Extracts");
     dlPreps = new Button("Sample Preparations");
+
+    dlEntities.setStyleName(ValoTheme.BUTTON_LINK);
+    dlEntities.setIcon(FontAwesome.DOWNLOAD);
+
+    dlExtracts.setStyleName(ValoTheme.BUTTON_LINK);
+    dlExtracts.setIcon(FontAwesome.DOWNLOAD);
+
+    dlPreps.setStyleName(ValoTheme.BUTTON_LINK);
+    dlPreps.setIcon(FontAwesome.DOWNLOAD);
+
     dlEntities.setEnabled(false);
     dlExtracts.setEnabled(false);
     dlPreps.setEnabled(false);

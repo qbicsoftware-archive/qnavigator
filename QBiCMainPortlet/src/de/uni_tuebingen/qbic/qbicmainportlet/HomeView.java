@@ -369,8 +369,7 @@ public class HomeView extends VerticalLayout implements View {
 
       projectContainer.addBean(newProjectBean);
     }
-    final long duration = System.nanoTime() - startTime;
-    LOGGER.debug(Long.toString(duration / 10000000));
+
     homeSpaceBean.setProjects(projectContainer);
     if (homeSpaceBean.getProjects().size() > 0) {
       this.setContainerDataSource(homeSpaceBean, caption);
