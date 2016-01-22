@@ -16,11 +16,9 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchCl
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -51,7 +49,7 @@ public class SearchBarView extends CustomComponent {
     this.datahandler = datahandler;
     initUI();
   }
-  
+
   public void initUI() {
     mainlayout = new Panel();
     mainlayout.addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -61,7 +59,7 @@ public class SearchBarView extends CustomComponent {
     // info.setValue(infotext);
     // info.setStyleName(ValoTheme.LABEL_LIGHT);
     // info.setStyleName(ValoTheme.LABEL_H4);
-    //mainlayout.addComponent(info);
+    // mainlayout.addComponent(info);
 
     // Search bar
     // *----------- search text field .... search button-----------*
@@ -70,7 +68,7 @@ public class SearchBarView extends CustomComponent {
     final TextField searchfield = new TextField();
     searchfield.setHeight("44px");
     searchfield.setImmediate(true);
-    
+
     searchfield.setInputPrompt("search for sample");
     // TODO would be nice to have a autofill or something similar
     searchbar.addComponent(searchfield);
@@ -78,107 +76,97 @@ public class SearchBarView extends CustomComponent {
     searchOk.addStyleName(ValoTheme.BUTTON_BORDERLESS);
     searchOk.setIcon(FontAwesome.SEARCH);
     searchOk.addClickListener(new ClickListener() {
-		private static final long serialVersionUID = -2409450448301908214L;
+      private static final long serialVersionUID = -2409450448301908214L;
 
-	@Override
+      @Override
       public void buttonClick(ClickEvent event) {
-	  //TODO how to deal with entities
-	    Pattern pattern = Pattern.compile("Q[A-Z0-9]{4}[0-9]{3}[A-Z0-9]{2}");
-	    Pattern pattern2 = Pattern.compile("Q[A-Z0-9]{4}ENTITY-[0-9]+");
-	    
-        LOGGER.info("searching for sample: " + (String)searchfield.getValue());
-        
+        // TODO how to deal with entities
+        Pattern pattern = Pattern.compile("Q[A-Z0-9]{4}[0-9]{3}[A-Z0-9]{2}");
+        Pattern pattern2 = Pattern.compile("Q[A-Z0-9]{4}ENTITY-[0-9]+");
+
+        LOGGER.info("searching for sample: " + (String) searchfield.getValue());
+
         if (searchfield.getValue() == null || searchfield.getValue().toString().equals("")) {
-					Notification.show(
-							"Please provide a Barcode before clicking GoTo.",
-							Type.WARNING_MESSAGE);
-				}
+          Notification.show("Please provide a Barcode before clicking GoTo.", Type.WARNING_MESSAGE);
+        }
 
-				else {
-					String entity = (String) searchfield.getValue().toString();
+        else {
+          String entity = (String) searchfield.getValue().toString();
 
-					Matcher matcher = pattern.matcher(entity);
-					Matcher matcher2 = pattern2.matcher(entity);
+          Matcher matcher = pattern.matcher(entity);
+          Matcher matcher2 = pattern2.matcher(entity);
 
-					LOGGER.debug(entity);
-					Boolean patternFound1 = matcher.find();
-					Boolean patternFound2 = matcher2.find();
+          Boolean patternFound1 = matcher.find();
+          Boolean patternFound2 = matcher2.find();
 
-					LOGGER.debug(patternFound1.toString());
-					LOGGER.debug(patternFound2.toString());
+          if (patternFound1) {
+            try {
+              Sample foundSample =
+                  datahandler.getOpenBisClient().getSampleByIdentifier(matcher.group(0).toString());
+              String identifier = foundSample.getIdentifier();
 
-					if (patternFound1) {
-						try {
-							Sample foundSample = datahandler.getOpenBisClient()
-									.getSampleByIdentifier(
-											matcher.group(0).toString());
-							String identifier = foundSample.getIdentifier();
+              State state = (State) UI.getCurrent().getSession().getAttribute("state");
+              ArrayList<String> message = new ArrayList<String>();
+              message.add("clicked");
+              message.add(identifier);
+              message.add("sample");
+              state.notifyObservers(message);
+            } catch (Exception e) {
+              Notification.show("No Sample found for given barcode.", Type.WARNING_MESSAGE);
+            }
+          }
 
-							State state = (State) UI.getCurrent().getSession()
-									.getAttribute("state");
-							ArrayList<String> message = new ArrayList<String>();
-							message.add("clicked");
-							message.add(identifier);
-							message.add("sample");
-							state.notifyObservers(message);
-						} catch (Exception e) {
-							Notification.show(
-									"No Sample found for given barcode.",
-									Type.WARNING_MESSAGE);
-						}
-					}
+          else if (patternFound2) {
+            try {
+              Sample foundSample =
+                  datahandler.getOpenBisClient()
+                      .getSampleByIdentifier(matcher2.group(0).toString());
+              String identifier = foundSample.getIdentifier();
 
-					else if (patternFound2) {
-						try {
-							Sample foundSample = datahandler.getOpenBisClient()
-									.getSampleByIdentifier(
-											matcher2.group(0).toString());
-							String identifier = foundSample.getIdentifier();
-
-							State state = (State) UI.getCurrent().getSession()
-									.getAttribute("state");
-							ArrayList<String> message = new ArrayList<String>();
-							message.add("clicked");
-							message.add(identifier);
-							message.add("sample");
-							state.notifyObservers(message);
-						} catch (Exception e) {
-							Notification.show(
-									"No Sample found for given barcode.",
-									Type.WARNING_MESSAGE);
-						}
-					} else {
-						Notification.show(
-								"Please provide a valid Sample Barcode.",
-								Type.WARNING_MESSAGE);
-					}
-				}
-			}
+              State state = (State) UI.getCurrent().getSession().getAttribute("state");
+              ArrayList<String> message = new ArrayList<String>();
+              message.add("clicked");
+              message.add(identifier);
+              message.add("sample");
+              state.notifyObservers(message);
+            } catch (Exception e) {
+              Notification.show("No Sample found for given barcode.", Type.WARNING_MESSAGE);
+            }
+          } else {
+            Notification.show("Please provide a valid Sample Barcode.", Type.WARNING_MESSAGE);
+          }
+        }
+      }
     });
-    
+
     // setClickShortcut() would add global shortcut, instead we
     // 'scope' the shortcut to the panel:
     mainlayout.addAction(new com.vaadin.ui.Button.ClickShortcut(searchOk, KeyCode.ENTER));
-    //searchfield.addItems(this.getSearchResults("Q"));
+    // searchfield.addItems(this.getSearchResults("Q"));
     searchfield.setDescription(infotext);
     searchfield.addValidator(new NullValidator("Field must not be empty", false));
     searchfield.setValidationVisible(false);
-    
+
     searchbar.addComponent(searchOk);
-    //searchbar.setMargin(new MarginInfo(true, false, true, false));
+    // searchbar.setMargin(new MarginInfo(true, false, true, false));
     mainlayout.setContent(searchbar);
-    //mainlayout.setComponentAlignment(searchbar, Alignment.MIDDLE_RIGHT);
-    //mainlayout.setWidth(100, Unit.PERCENTAGE);
+    // mainlayout.setComponentAlignment(searchbar, Alignment.MIDDLE_RIGHT);
+    // mainlayout.setWidth(100, Unit.PERCENTAGE);
     setCompositionRoot(mainlayout);
   }
-  
+
   public List<String> getSearchResults(String samplecode) {
     java.util.EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
     SearchCriteria sc = new SearchCriteria();
     sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, samplecode + "*"));
-    List<Sample> samples = datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc, fetchOptions,LiferayAndVaadinUtils.getUser().getScreenName());
+    List<Sample> samples =
+        datahandler
+            .getOpenBisClient()
+            .getOpenbisInfoService()
+            .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc,
+                fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
     List<String> ret = new ArrayList<String>(samples.size());
-    for(Sample sample : samples){
+    for (Sample sample : samples) {
       ret.add(sample.getCode());
     }
     return ret;
