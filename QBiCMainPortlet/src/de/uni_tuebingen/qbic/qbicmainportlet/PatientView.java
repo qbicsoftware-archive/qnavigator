@@ -244,7 +244,7 @@ public class PatientView extends VerticalLayout implements View {
     patientViewTab.addTab(statusComponent).setIcon(FontAwesome.CHECK_CIRCLE);
     patientViewTab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     patientViewTab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
-    patientViewTab.addTab(initHLALayout()).setIcon(FontAwesome.BARCODE);
+    // patientViewTab.addTab(initHLALayout()).setIcon(FontAwesome.BARCODE);
     patientViewTab.addTab(initTable()).setIcon(FontAwesome.FLASK);
     patientViewTab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     patientViewTab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.TINT);
@@ -301,7 +301,7 @@ public class PatientView extends VerticalLayout implements View {
     setHeaderLabel("Patient " + getCurrentBean().getCode());
 
     // updateContentToolBar();
-    updateHLALayout();
+    // updateHLALayout();
 
     // updateProjectStatus();
     statusComponent.updateUI(this.currentBean);

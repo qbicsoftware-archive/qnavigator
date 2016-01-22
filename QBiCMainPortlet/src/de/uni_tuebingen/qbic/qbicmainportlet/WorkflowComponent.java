@@ -167,15 +167,9 @@ public class WorkflowComponent extends CustomComponent {
 
       case "workflowExperimentType":
         String experiment = map.get("experiment");
-        LOGGER.debug(experiment);
 
         BeanItemContainer<Workflow> suitableWorkflows =
             controller.suitableWorkflowsByExperimentType(experiment);
-
-        for (Iterator i = suitableWorkflows.getItemIds().iterator(); i.hasNext();) {
-          LOGGER.debug(i.next().toString());
-        }
-
 
         BeanItemContainer<DatasetBean> suitableDatasets =
             new BeanItemContainer<DatasetBean>(DatasetBean.class);
