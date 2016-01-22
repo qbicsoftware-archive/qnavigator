@@ -362,6 +362,7 @@ public class QbicmainportletUI extends UI {
     header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
     labelLayout.addComponent(header);
+    labelLayout.setWidth(null);
 
     // SearchBarView searchBarView = new SearchBarView(datahandler);
     SearchEngineView searchBarView = new SearchEngineView(datahandler);
@@ -372,10 +373,11 @@ public class QbicmainportletUI extends UI {
     headerView.setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
     // headerView.setComponentAlignment(homeButton, Alignment.TOP_LEFT);
 
-    headerView.setExpandRatio(buttonLayout, 1);
-    headerView.setExpandRatio(labelLayout, 1);
-    headerView.setExpandRatio(searchBarView, 2);
+    // headerView.setExpandRatio(buttonLayout, 1.0f);
+    // headerView.setExpandRatio(labelLayout, 1.0f);
+    // headerView.setExpandRatio(searchBarView, 1.0f);
 
+    searchBarView.setSizeUndefined();
 
     treeViewAndLevelView.addComponent(navigatorContent);
     mainLayout.addComponent(headerView);

@@ -171,7 +171,7 @@ public class HomeView extends VerticalLayout implements View {
   }
 
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
-    this.setMargin(new MarginInfo(false, true, false, false));
+    this.setMargin(new MarginInfo(false, false, false, false));
     // clean up first
     homeview_content.removeAllComponents();
     homeview_content.setWidth("100%");
@@ -208,13 +208,7 @@ public class HomeView extends VerticalLayout implements View {
       statContent.addStyleName(ValoTheme.LABEL_FAILURE);
       statContent.addStyleName(ValoTheme.LABEL_LARGE);
     }
-    // statistics.addComponent(statContent);
 
-    // statistics.setMargin(new MarginInfo(false,false,false,true));
-    // statistics.setWidth(100.0f, Unit.PERCENTAGE);
-
-    // homeViewDescription.addComponent(statistics);
-    // MhomeViewDescription.setMargin(true);
     homeViewDescription.setWidth("100%");
     homeview_content.addComponent(homeViewDescription);
 
@@ -227,8 +221,7 @@ public class HomeView extends VerticalLayout implements View {
     tableSectionContent.setIcon(FontAwesome.TABLE);
     tableSectionContent.addComponent(this.table);
 
-    // tableSectionContent.setMargin(true);
-    tableSection.setMargin(new MarginInfo(false, true, false, false));
+    tableSection.setMargin(new MarginInfo(false, false, false, false));
 
     this.table.setWidth("100%");
     tableSection.setWidth("100%");

@@ -2,8 +2,10 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.UglyToPrettyNameMapper;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -321,11 +323,17 @@ public class LevelComponent extends CustomComponent {
 
       numberOfDatasets = retrievedDatasets.size();
 
-      if (numberOfDatasets == 0) {
+      if (numberOfDatasets == 0 & filterFor.equals("measured")) {
         helpers.Utils
             .Notification(
-                "No datasets available.",
-                "No data is available for this project. Please contact the project manager if this is not expected.",
+                "No raw data available.",
+                "No raw data is available for this project. Please contact the project manager if this is not expected.",
+                "warning");
+      } else if (numberOfDatasets == 0 & filterFor.equals("results")) {
+        helpers.Utils
+            .Notification(
+                "No results available.",
+                "No result data is available for this project. Please contact the project manager if this is not expected.",
                 "warning");
       } else {
 
@@ -691,6 +699,12 @@ public class LevelComponent extends CustomComponent {
             streamres.setMIMEType("text/html");
             LOGGER.debug(streamres.toString());
             res = streamres;
+          } else if (datasetType.equals("Q_MA_CHIP_IMAGE")) {
+            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+            StreamResource streamres = new StreamResource(re, datasetFileName);
+            streamres.setMIMEType("application/png");
+            LOGGER.debug(streamres.toString());
+            res = streamres;
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath =
                 (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
@@ -770,7 +784,7 @@ public class LevelComponent extends CustomComponent {
           String datasetFileName =
               (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name")
                   .getValue();
-          URL url;
+          URL url = null;
           try {
             Resource res = null;
             Object parent = datasetTable.getParent(event.getItemId());
@@ -779,11 +793,23 @@ public class LevelComponent extends CustomComponent {
                   .getValue());
               String parentDatasetFileName =
                   (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
-              url =
-                  datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
-                      parentDatasetFileName + "/" + datasetFileName);
+              try {
+                url =
+                    datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                        parentDatasetFileName + "/" + URLEncoder.encode(datasetFileName, "UTF-8"));
+              } catch (UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+              }
             } else {
-              url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
+              try {
+                url =
+                    datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                        URLEncoder.encode(datasetFileName, "UTF-8"));
+              } catch (UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+              }
             }
 
             Window subWindow = new Window();
@@ -797,6 +823,23 @@ public class LevelComponent extends CustomComponent {
               QcMlOpenbisSource re = new QcMlOpenbisSource(url);
               StreamResource streamres = new StreamResource(re, datasetFileName);
               streamres.setMIMEType("application/pdf");
+              res = streamres;
+              visualize = true;
+            }
+
+            LOGGER.debug(datasetFileName);
+            if (datasetFileName.endsWith(".png")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("application/png");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (datasetFileName.endsWith(".qcML")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/xml");
               res = streamres;
               visualize = true;
             }

@@ -35,6 +35,8 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -603,10 +605,88 @@ public class DatasetComponent extends CustomComponent {
       }
     });
 
+    this.table.addItemClickListener(new ItemClickListener() {
+      @Override
+      public void itemClick(ItemClickEvent event) {
+        if (!event.isDoubleClick()) {
+          String datasetCode =
+              (String) table.getItem(event.getItemId()).getItemProperty("CODE").getValue();
+          String datasetFileName =
+              (String) table.getItem(event.getItemId()).getItemProperty("File Name").getValue();
+          URL url;
+          try {
+            Resource res = null;
+            Object parent = table.getParent(event.getItemId());
+            if (parent != null) {
+              LOGGER.debug((String) table.getItem(parent).getItemProperty("File Name").getValue());
+              String parentDatasetFileName =
+                  (String) table.getItem(parent).getItemProperty("File Name").getValue();
+              url =
+                  datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                      parentDatasetFileName + "/" + datasetFileName);
+            } else {
+              url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
+            }
+
+            Window subWindow = new Window();
+            VerticalLayout subContent = new VerticalLayout();
+            subContent.setMargin(true);
+            subWindow.setContent(subContent);
+            QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+            Boolean visualize = false;
+
+            if (datasetFileName.endsWith(".pdf")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("application/pdf");
+              res = streamres;
+              visualize = true;
+            }
+
+            LOGGER.debug(datasetFileName);
+            if (datasetFileName.endsWith(".png")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              // streamres.setMIMEType("application/png");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (visualize) {
+              LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
+              BrowserFrame frame = new BrowserFrame("", res);
+
+              frame.setSizeFull();
+              subContent.addComponent(frame);
+
+              // Center it in the browser window
+              subWindow.center();
+              subWindow.setModal(true);
+              subWindow.setSizeFull();
+
+              frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
+
+              // Open it in the UI
+              ui.addWindow(subWindow);
+            }
+
+          } catch (MalformedURLException e) {
+            LOGGER.error(String.format(
+                "Visualization failed because of malformedURL for dataset: %s", datasetCode));
+            Notification
+                .show(
+                    "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+                    Notification.Type.ERROR_MESSAGE);
+          }
+        }
+      }
+    });
+
     this.vert.addComponent(buttonLayout);
     this.vert.addComponent(help);
 
   }
+
 
 
   private void setCheckedBox(Object itemId, String parentFolder) {

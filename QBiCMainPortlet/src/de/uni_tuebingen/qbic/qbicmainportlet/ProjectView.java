@@ -162,7 +162,7 @@ public class ProjectView extends VerticalLayout implements View {
    */
   void initView() {
     projectview_content = new VerticalLayout();
-    projectview_content.setMargin(new MarginInfo(true, true, false, false));
+    projectview_content.setMargin(new MarginInfo(true, false, false, false));
 
     // labelContent = new VerticalLayout();
     // labelContent.setMargin(new MarginInfo(true, false, true, false));

@@ -214,7 +214,7 @@ public class PatientView extends VerticalLayout implements View {
    */
   void initView() {
     patientViewContent = new VerticalLayout();
-    patientViewContent.setMargin(new MarginInfo(true, true, false, false));
+    patientViewContent.setMargin(new MarginInfo(true, false, false, false));
     // patientViewContent.setMargin(true);
 
     headerLabel = "";
@@ -261,6 +261,7 @@ public class PatientView extends VerticalLayout implements View {
 
       @Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
+        TabSheet tab = (TabSheet) event.getSource();
 
         if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
           loadGraph();
@@ -540,10 +541,6 @@ public class PatientView extends VerticalLayout implements View {
         addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
       }
 
-      if (!(sample.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
-        addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
-      }
-
       labelContent +=
           String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ", lastOne,
               sample.getProperties().get("Q_HLA_TYPING"), addInformation);
@@ -651,7 +648,7 @@ public class PatientView extends VerticalLayout implements View {
       members = new TreeMap<String, String>();
       memberLetters = new HashMap<String, String>();
 
-      LOGGER.debug(list.toString());
+      // LOGGER.debug(list.toString());
 
       if (list != null) {
         memberString = new StringBuilder();
@@ -1033,7 +1030,7 @@ public class PatientView extends VerticalLayout implements View {
   }
 
   public void loadGraph() {
-    LOGGER.debug(String.valueOf(graphSectionContent.getComponentCount() == 0));
+    // LOGGER.debug(String.valueOf(graphSectionContent.getComponentCount() == 0));
     if (graphSectionContent.getComponentCount() > 0)
       LOGGER.debug(String.valueOf(graphSectionContent.getComponent(0) instanceof Image));
     if (graphSectionContent.getComponentCount() == 0
@@ -1146,9 +1143,9 @@ public class PatientView extends VerticalLayout implements View {
     ProjectBean pbean = datahandler.getProjectIvac(currentValue);
     long endTime = System.nanoTime();
     registeredExperiments.unselect(registeredExperiments.getValue());
-    LOGGER.info(String.format("getProject took %f s", ((endTime - startTime) / 1000000000.0)));
+    // LOGGER.info(String.format("getProject took %f s", ((endTime - startTime) / 1000000000.0)));
     // if the new project bean is different than reset the graph.
-    LOGGER.debug(String.valueOf(currentBean == null));
+    // LOGGER.debug(String.valueOf(currentBean == null));
 
     // if (currentBean != null)
     // LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
@@ -1160,8 +1157,8 @@ public class PatientView extends VerticalLayout implements View {
     startTime = System.nanoTime();
     this.setContainerDataSource(pbean);
     endTime = System.nanoTime();
-    LOGGER.info(String.format("setContainerDataSource took %f s",
-        ((endTime - startTime) / 1000000000.0)));
+    // LOGGER.info(String.format("setContainerDataSource took %f s",
+    // ((endTime - startTime) / 1000000000.0)));
 
     updateContent();
 
@@ -1171,6 +1168,22 @@ public class PatientView extends VerticalLayout implements View {
 
   public ProjectBean getCurrentBean() {
     return currentBean;
+  }
+
+  public TabSheet getPatientViewTab() {
+    return patientViewTab;
+  }
+
+  public void setPatientViewTab(TabSheet patientViewTab) {
+    this.patientViewTab = patientViewTab;
+  }
+
+  public WorkflowComponent getWorkflowComponent() {
+    return workflowComponent;
+  }
+
+  public void setWorkflowComponent(WorkflowComponent workflowComponent) {
+    this.workflowComponent = workflowComponent;
   }
 
 }

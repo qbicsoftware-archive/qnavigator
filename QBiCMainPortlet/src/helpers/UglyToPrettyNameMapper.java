@@ -121,13 +121,13 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("NGS_QUANT", "NGS Quantification Sample (deprecated)");
 
     // openBIS dataset types translated
+    namesMapping.put("Q_NGS_HLATYPING_DATA", "HLA Typing Results");
     namesMapping.put("UNKNOWN", "Unknown Sample");
     namesMapping.put("Q_EXT_MS_QUALITYCONTROL_RESULTS",
         "Mass Spectrometry Quality Control (External)");
     namesMapping.put("Q_EXT_NGS_QUALITYCONTROL_RESULTS", "NGS Quality Control (External)");
     namesMapping.put("Q_MA_RAW_DATA", "Microarray Raw Data");
     namesMapping.put("Q_MS_RAW_DATA", "Mass Spectrometry Raw Data");
-    namesMapping.put("Q_NGS_HLATYPING_DATA", "HLA Typing Results");
     namesMapping.put("Q_NGS_IMMUNE_MONITORING_DATA", "Immune Monitoring Data");
     namesMapping.put("Q_NGS_MAPPING_DATA", "Mapped NGS Reads");
     namesMapping.put("Q_NGS_RAW_DATA", "NGS Raw Data");
@@ -144,8 +144,8 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_QUALITYCONTROL_RESULTS", "Mass Spectrometry Quality Control Results");
     namesMapping.put("Q_WF_NGS_EPITOPE_PREDICTION_LOGS", "Epitope Prediction Logs");
     namesMapping.put("Q_WF_NGS_EPITOPE_PREDICTION_RESULTS", "Epitope Prediction Results");
-    namesMapping.put("Q_WF_NGS_HLATYPING_LOGS", "HLA Typing Logs");
-    namesMapping.put("Q_WF_NGS_HLATYPING_RESULTS", "HLA Typing Results");
+    namesMapping.put("Q_WF_NGS_HLATYPING_LOGS", "HLA Typing Workflow Logs");
+    namesMapping.put("Q_WF_NGS_HLATYPING_RESULTS", "HLA Typing Workflow Results");
     namesMapping.put("Q_WF_NGS_QUALITYCONTROL_RESULTS", "NGS Quality Control Results");
     namesMapping.put("Q_WF_NGS_QUALITYCONTROL_LOGS", "NGS Quality Control Logs");
     namesMapping.put("Q_WF_NGS_RNAEXPRESSIONANALYSIS_LOGS", "Gene Expression Analysis Logs");
@@ -156,8 +156,12 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_NGS_VARIANT_CALLING_RESULTS", "Variant Calling Results");
     namesMapping.put("MZML", "Mass Spectrometry Raw Data (MZML)");
     namesMapping.put("Q_MS_MZML_DATA", "Mass Spectrometry Raw Data (MZML)");
-    namesMapping.put("Q_WF_INDIVIDUALIZED_PROTEOME_RESULTS", "Individualized Proteins Results");
-    namesMapping.put("Q_WF_INDIVIDUALIZED_PROTEOME_LOGS", "Individualized Proteins Logs");
+    namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME_RESULTS", "Individualized Proteins Results");
+    namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME_LOGS", "Individualized Proteins Logs");
+    namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_LOGS", "Ligandomics Quality Control Workflow Logs");
+    namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_RESULTS",
+        "Ligandomics Quality Control Workflow Results");
+
 
 
     // deprecated dataset types

@@ -1820,11 +1820,13 @@ public class DataHandler implements Serializable {
           "/" + space + "/" + newProjectCode + "/" + newExperimentalDesignCode;
       numberOfRegisteredExperiments += 1;
 
-      String newBiologicalEntitiyCode =
-          newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "H";
-      String newBiologicalEntitiyID =
-          "/" + space + "/" + newBiologicalEntitiyCode
-              + helpers.BarcodeFunctions.checksum(newBiologicalEntitiyCode);
+      // String newBiologicalEntitiyCode =
+      // newProjectCode + Utils.createCountString(numberOfRegisteredSamples, 3) + "H";
+      // String newBiologicalEntitiyID =
+      // "/" + space + "/" + newBiologicalEntitiyCode
+      // + helpers.BarcodeFunctions.checksum(newBiologicalEntitiyCode);
+      String newBiologicalEntitiyID = String.format("%sENTITY-1", newProjectCode);
+
       numberOfRegisteredSamples += 1;
 
       // register first level of new patient

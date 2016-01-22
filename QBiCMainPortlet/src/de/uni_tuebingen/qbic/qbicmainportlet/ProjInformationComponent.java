@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,72 +14,55 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 
 import javax.portlet.PortletSession;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import model.BiologicalEntitySampleBean;
-import model.BiologicalSampleBean;
 import model.DatasetBean;
 import model.ProjectBean;
-import model.SampleBean;
 import model.TestSampleBean;
 
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
 
 import qbic.vaadincomponents.TSVDownloadComponent;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.event.SelectionEvent;
-import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
-import com.vaadin.server.ClientConnector.DetachEvent;
-import com.vaadin.server.ClientConnector.DetachListener;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.Grid;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
-import com.vaadin.ui.Notification.Type;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -122,6 +106,8 @@ public class ProjInformationComponent extends CustomComponent {
 
   private Label experimentLabel;
 
+  private Label hlaTypeLabel;
+
   private VerticalLayout statusContent;
 
   private TSVDownloadComponent tsvDownloadContent;
@@ -149,6 +135,8 @@ public class ProjInformationComponent extends CustomComponent {
     experimentLabel = new Label("");
     statusContent = new VerticalLayout();
     tsvDownloadContent = new TSVDownloadComponent();
+    hlaTypeLabel = new Label("Not available.", ContentMode.HTML);
+    hlaTypeLabel.setStyleName("patientview");
 
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
@@ -191,7 +179,7 @@ public class ProjInformationComponent extends CustomComponent {
       if (ids.size() == 0)
         tsvDownloadContent.setVisible(false);
       else {
-        //need to be disabled first so old project tsvs are not downloadable
+        // need to be disabled first so old project tsvs are not downloadable
         tsvDownloadContent.disableSpreadSheets();
         tsvDownloadContent.prepareSpreadsheets(ids, space, currentBean.getCode(),
             datahandler.getOpenBisClient());
@@ -345,7 +333,6 @@ public class ProjInformationComponent extends CustomComponent {
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(experimentLabel);
     projDescriptionContent.addComponent(statusContent);
-    projDescriptionContent.addComponent(tsvDownloadContent);
 
     statusContent.setSpacing(true);
     statusContent.setMargin(new MarginInfo(false, false, false, true));
@@ -378,14 +365,21 @@ public class ProjInformationComponent extends CustomComponent {
           }
         }
       }
+
+
+
       if (available) {
         patientInformation.setValue(patientInfo);
       } else {
         patientInformation.setValue("No patient information provided.");
       }
+
+      updateHLALayout();
       projDescriptionContent.addComponent(patientInformation);
+      projDescriptionContent.addComponent(hlaTypeLabel);
     }
 
+    projDescriptionContent.addComponent(tsvDownloadContent);
     projDescription.addComponent(projDescriptionContent);
 
     projDescriptionContent.addComponent(contact);
@@ -1006,6 +1000,100 @@ public class ProjInformationComponent extends CustomComponent {
       map.put(kv[0], kv[1]);
     }
     return map;
+  }
+
+  void updateHLALayout() {
+
+    String labelContent = "<head> <title></title> </head> <body> ";
+
+    Boolean available = false;
+
+    SearchCriteria sc = new SearchCriteria();
+    sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_NGS_HLATYPING.name()));
+    SearchCriteria projectSc = new SearchCriteria();
+    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
+        projectBean.getCode()));
+    sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
+
+    SearchCriteria experimentSc = new SearchCriteria();
+    experimentSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_NGS_HLATYPING.name()));
+    sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc));
+
+
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> samples =
+        datahandler.getOpenBisClient().getFacade().searchForSamples(sc);
+
+    SearchCriteria sc2 = new SearchCriteria();
+    sc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
+    SearchCriteria projectSc2 = new SearchCriteria();
+    projectSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
+        projectBean.getCode()));
+    sc2.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc2));
+
+    SearchCriteria experimentSc2 = new SearchCriteria();
+    experimentSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
+        model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
+    sc2.addSubCriteria(SearchSubCriteria.createExperimentCriteria(experimentSc2));
+
+    List<Experiment> wfExperiments =
+        datahandler.getOpenBisClient().getFacade().searchForExperiments(sc2);
+
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample> wfSamples =
+        new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample>();
+
+    for (Experiment exp : wfExperiments) {
+      if (exp.getCode().contains(projectBean.getCode())) {
+        wfSamples
+            .addAll(datahandler.getOpenBisClient().getSamplesofExperiment(exp.getIdentifier()));
+      }
+    }
+
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples) {
+      available = true;
+      String classString = sample.getProperties().get("Q_HLA_CLASS");
+      String[] splitted = classString.split("_");
+      String lastOne = splitted[splitted.length - 1];
+      String addInformation = "";
+
+      if (!(sample.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
+        addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
+      }
+
+      labelContent +=
+          String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ", lastOne,
+              sample.getProperties().get("Q_HLA_TYPING"), addInformation);
+    }
+
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : wfSamples) {
+      available = true;
+
+
+      if (!(sample.getProperties().get("Q_HLA_TYPING") == null)) {
+        labelContent +=
+            String.format("<u>Computational Typing (OptiType)</u>" + "<p> %s </p> ", sample
+                .getProperties().get("Q_HLA_TYPING"));
+      }
+    }
+
+    labelContent += "</body>";
+    if (available) {
+      hlaTypeLabel.setValue(labelContent);
+    }
+
+    else {
+      hlaTypeLabel.setValue("HLA typing not available.");
+    }
+  }
+
+  public Label getHlaTypeLabel() {
+    return hlaTypeLabel;
+  }
+
+  public void setHlaTypeLabel(Label hlaTypeLabel) {
+    this.hlaTypeLabel = hlaTypeLabel;
   }
 
 }

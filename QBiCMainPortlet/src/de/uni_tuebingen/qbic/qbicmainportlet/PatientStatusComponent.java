@@ -1,12 +1,12 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
-import java.util.ArrayList;
-import java.util.Iterator;
 
-import org.apache.logging.log4j.core.Logger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import model.ExperimentStatusBean;
 import model.ProjectBean;
-import views.WorkflowView;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
@@ -20,9 +20,10 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
@@ -30,7 +31,7 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.ProgressBarRenderer;
 
 
-public class PatientStatusComponent extends CustomComponent{
+public class PatientStatusComponent extends CustomComponent {
   private DataHandler datahandler;
   private String resourceUrl;
   private State state;
@@ -41,20 +42,20 @@ public class PatientStatusComponent extends CustomComponent{
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
     this.state = state;
-    
+
     this.setCaption("Status");
-    
+
     this.initUI();
   }
 
   private void initUI() {
     status = new VerticalLayout();
     status.setWidth(100.0f, Unit.PERCENTAGE);
-    
+
     status.setMargin(new MarginInfo(true, false, false, true));
     status.setSpacing(true);
 
-    //status.setSizeFull();
+    // status.setSizeFull();
 
     VerticalLayout projectStatus = new VerticalLayout();
     projectStatus.setMargin(new MarginInfo(true, false, true, true));
@@ -63,22 +64,22 @@ public class PatientStatusComponent extends CustomComponent{
     experiments = new Grid();
     experiments.setReadOnly(true);
     experiments.setWidth(100.0f, Unit.PERCENTAGE);
-    //experiments.setHeightMode(HeightMode.ROW);
+    // experiments.setHeightMode(HeightMode.ROW);
     status.addComponent(experiments);
 
     ProgressBar progressBar = new ProgressBar();
     progressBar.setValue(0f);
     status.addComponent(progressBar);
     projectStatus.addComponent(status);
-    
+
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.85f, Unit.PIXELS);
     this.setCompositionRoot(projectStatus);
   }
-  
+
   public void updateUI(final ProjectBean currentBean) {
     BeanItemContainer<ExperimentStatusBean> experimentstatusBeans =
         datahandler.computeIvacPatientStatus(currentBean);
-    
+
     int finishedExperiments = 0;
     status.removeAllComponents();
     status.setWidth(100.0f, Unit.PERCENTAGE);
@@ -115,89 +116,96 @@ public class PatientStatusComponent extends CustomComponent{
     gpc.removeContainerProperty("identifier");
 
     experiments.setContainerDataSource(gpc);
-    //experiments.setHeaderVisible(false);
-    //experiments.setHeightMode(HeightMode.ROW);
+    // experiments.setHeaderVisible(false);
+    // experiments.setHeightMode(HeightMode.ROW);
     experiments.setHeightByRows(gpc.size());
     experiments.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.6f, Unit.PIXELS);
-    
-    
+
+
 
     experiments.getColumn("status").setRenderer(new ProgressBarRenderer());
-    //experiments.setColumnOrder("started", "code", "description", "status", "download",
-    //    "runWorkflow");
-        experiments.setColumnOrder("started", "code", "description", "status", 
-            "workflow");
+    // experiments.setColumnOrder("started", "code", "description", "status", "download",
+    // "runWorkflow");
+    experiments.setColumnOrder("started", "code", "description", "status", "workflow");
 
-    experiments.getColumn("workflow").setRenderer(
-        new ButtonRenderer(new RendererClickListener() {
-          @Override
-          public void click(RendererClickEvent event) {
-            ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
+    experiments.getColumn("workflow").setRenderer(new ButtonRenderer(new RendererClickListener() {
+      @Override
+      public void click(RendererClickEvent event) {
+        ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
+        TabSheet parent = (TabSheet) getParent();
+        PatientView pv = (PatientView) parent.getParent().getParent();
+        WorkflowComponent wp = pv.getWorkflowComponent();
 
-            // TODO idea get description of item to navigate to the correct workflow ?!
-            if (esb.getDescription().equals("Barcode Generation")) {
-              ArrayList<String> message = new ArrayList<String>();
-              message.add("clicked");
-              message.add(currentBean.getId());
-              message.add(BarcodeView.navigateToLabel);
-              state.notifyObservers(message);
-            } 
-            else if (esb.getDescription().equals("Variant Annotation")) {
-              ArrayList<String> message = new ArrayList<String>();
-              message.add("clicked");
-              StringBuilder sb = new StringBuilder("type=");
-              sb.append("workflowExperimentType");
-              sb.append("&");
-              sb.append("id=");
-              sb.append(currentBean.getId());
-              sb.append("&");
-              sb.append("experiment=");
-              sb.append("Q_WF_NGS_VARIANT_ANNOTATION");
-              message.add(sb.toString());
-              message.add(WorkflowView.navigateToLabel);
-              state.notifyObservers(message);
-            }
-            else if (esb.getDescription().equals("Epitope Prediction")) {
-                ArrayList<String> message = new ArrayList<String>();
-                message.add("clicked");
-                StringBuilder sb = new StringBuilder("type=");
-                sb.append("workflowExperimentType");
-                sb.append("&");
-                sb.append("id=");
-                sb.append(currentBean.getId());
-                sb.append("&");
-                sb.append("experiment=");
-                sb.append("Q_WF_NGS_EPITOPE_PREDICTION");
-                message.add(sb.toString());
-                message.add(WorkflowView.navigateToLabel);
-                state.notifyObservers(message);
-            }
-            else if (esb.getDescription().equals("HLA Typing")){
-              ArrayList<String> message = new ArrayList<String>();
-              message.add("clicked");
-              StringBuilder sb = new StringBuilder("type=");
-              sb.append("workflowExperimentType");
-              sb.append("&");
-              sb.append("id=");
-              sb.append(currentBean.getId());
-              sb.append("&");
-              sb.append("experiment=");
-              sb.append("Q_WF_NGS_HLATYPING");
-              message.add(sb.toString());
-              message.add(WorkflowView.navigateToLabel);
-              state.notifyObservers(message);
-            }
-            
-            else {
-              Notification notif = new Notification("Workflow not (yet) available.", Type.TRAY_NOTIFICATION);
-              // Customize it
-              notif.setDelayMsec(60000);
-              notif.setPosition(Position.MIDDLE_CENTER);
-              // Show it in the page
-              notif.show(Page.getCurrent());
-            }
-          }
-        }));
+        // TODO idea get description of item to navigate to the correct workflow ?!
+        if (esb.getDescription().equals("Barcode Generation")) {
+          ArrayList<String> message = new ArrayList<String>();
+          message.add("clicked");
+          message.add(currentBean.getId());
+          message.add(BarcodeView.navigateToLabel);
+          state.notifyObservers(message);
+        } else if (esb.getDescription().equals("Variant Annotation")) {
+          // ArrayList<String> message = new ArrayList<String>();
+          // message.add("clicked");
+          // StringBuilder sb = new StringBuilder("type=");
+          // sb.append("workflowExperimentType");
+          // sb.append("&");
+          // sb.append("id=");
+          // sb.append(currentBean.getId());
+          // sb.append("&");
+          // sb.append("experiment=");
+          // sb.append("Q_WF_NGS_VARIANT_ANNOTATION");
+          // message.add(sb.toString());
+          // message.add(WorkflowView.navigateToLabel);
+          // state.notifyObservers(message);
+
+          Map<String, String> args = new HashMap<String, String>();
+          args.put("id", currentBean.getId());
+          args.put("type", "workflowExperimentType");
+          args.put("experiment", "Q_WF_NGS_VARIANT_ANNOTATION");
+          parent.setSelectedTab(10);
+          wp.update(args);
+        } else if (esb.getDescription().equals("Epitope Prediction")) {
+          /*
+           * ArrayList<String> message = new ArrayList<String>(); message.add("clicked");
+           * StringBuilder sb = new StringBuilder("type="); sb.append("workflowExperimentType");
+           * sb.append("&"); sb.append("id="); sb.append(currentBean.getId()); sb.append("&");
+           * sb.append("experiment="); sb.append("Q_WF_NGS_EPITOPE_PREDICTION");
+           * message.add(sb.toString()); message.add(WorkflowView.navigateToLabel);
+           * state.notifyObservers(message);
+           */
+          Map<String, String> args = new HashMap<String, String>();
+          args.put("id", currentBean.getId());
+          args.put("type", "workflowExperimentType");
+          args.put("experiment", "Q_WF_NGS_EPITOPE_PREDICTION");
+          parent.setSelectedTab(10);
+          wp.update(args);
+        } else if (esb.getDescription().equals("HLA Typing")) {
+          /*
+           * ArrayList<String> message = new ArrayList<String>(); message.add("clicked");
+           * StringBuilder sb = new StringBuilder("type="); sb.append("workflowExperimentType");
+           * sb.append("&"); sb.append("id="); sb.append(currentBean.getId()); sb.append("&");
+           * sb.append("experiment="); sb.append("Q_WF_NGS_HLATYPING"); message.add(sb.toString());
+           * message.add(WorkflowView.navigateToLabel); state.notifyObservers(message);
+           */
+          Map<String, String> args = new HashMap<String, String>();
+          args.put("id", currentBean.getId());
+          args.put("type", "workflowExperimentType");
+          args.put("experiment", "Q_WF_NGS_HLATYPING");
+          parent.setSelectedTab(10);
+          wp.update(args);
+        }
+
+        else {
+          Notification notif =
+              new Notification("Workflow not (yet) available.", Type.TRAY_NOTIFICATION);
+          // Customize it
+          notif.setDelayMsec(60000);
+          notif.setPosition(Position.MIDDLE_CENTER);
+          // Show it in the page
+          notif.show(Page.getCurrent());
+        }
+      }
+    }));
 
     experiments.getColumn("started").setRenderer(new HtmlRenderer());
 
@@ -225,12 +233,12 @@ public class PatientStatusComponent extends CustomComponent{
 
       finishedExperiments += statusBean.getStatus();
 
-     // statusBean.setDownload("Download");
+      // statusBean.setDownload("Download");
       statusBean.setWorkflow("Run");
     }
 
 
     progressBar.setValue((float) finishedExperiments / experimentstatusBeans.size());
   }
-  
+
 }
