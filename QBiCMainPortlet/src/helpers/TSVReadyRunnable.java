@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import logging.Log4j2Logger;
+
 import parser.Parser;
 import properties.Factor;
 import qbic.vaadincomponents.TSVDownloadComponent;
@@ -23,6 +25,7 @@ public class TSVReadyRunnable implements Runnable {
   TSVDownloadComponent layout;
   QueryTableModel table;
   String project;
+  logging.Logger logger = new Log4j2Logger(TSVReadyRunnable.class);
 
   public TSVReadyRunnable(TSVDownloadComponent layout, QueryTableModel table, String project) {
     this.layout = layout;

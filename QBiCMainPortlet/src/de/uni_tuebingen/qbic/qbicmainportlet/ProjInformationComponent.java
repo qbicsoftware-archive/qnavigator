@@ -178,7 +178,7 @@ public class ProjInformationComponent extends CustomComponent {
           new ArrayList<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE",
               "Q_TEST_SAMPLE"));
       for (Sample s : datahandler.getOpenBisClient().getSamplesOfProject(identifier))
-        if (!types.contains(s.getSampleTypeCode()))
+        if (types.contains(s.getSampleTypeCode()))
           ids.add(s.getIdentifier());
       // nothing to download
       if (ids.size() == 0)
