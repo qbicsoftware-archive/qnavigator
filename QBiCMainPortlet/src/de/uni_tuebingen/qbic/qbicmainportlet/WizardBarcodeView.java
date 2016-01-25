@@ -1,4 +1,21 @@
+/*******************************************************************************
+ * QBiC Project Wizard enables users to create hierarchical experiments including different study
+ * conditions using factorial design. Copyright (C) "2016" Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
+
+import helpers.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,29 +23,28 @@ import java.util.Collection;
 import java.util.List;
 
 import qbic.vaadincomponents.BarcodePreviewComponent;
+import qbic.vaadincomponents.SheetOptionComponent;
 
+import logging.Log4j2Logger;
 import model.ExperimentBarcodeSummaryBean;
 import model.ExperimentBean;
+import model.SampleToBarcodeFieldTranslator;
 import model.SortBy;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.PopupView;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.PopupView.Content;
 import com.vaadin.ui.themes.ValoTheme;
+
+import controllers.BarcodeController;
 
 /**
  * View class for the Sample Sheet and Barcode pdf creation
@@ -38,6 +54,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class WizardBarcodeView extends VerticalLayout {
 
+  logging.Logger logger = new Log4j2Logger(WizardBarcodeView.class);
   /**
    * 
    */
@@ -45,18 +62,17 @@ public class WizardBarcodeView extends VerticalLayout {
   private ComboBox spaceBox;
   private ComboBox projectBox;
   private Table experimentTable;
-  private BarcodePreviewComponent preview;
-  private Button prepareButton;
+  private Component tabsTab;
+  private TabSheet tabs;
+
+  private BarcodePreviewComponent tubePreview;
+
+  private SheetOptionComponent sheetPreview;
+  private Button prepareBarcodes;
+
   private ProgressBar bar;
   private Label info;
-  private Button sheetDownloadButton;
-  private Button pdfDownloadButton;
-  private OptionGroup prepSelect;
-  private CheckBox overwrite;
-  
-  public static String boxTheme = ValoTheme.COMBOBOX_SMALL;
-
-  // private OptionGroup comparators;
+  private Button download;
 
   /**
    * Creates a new component view for barcode creation
@@ -64,131 +80,120 @@ public class WizardBarcodeView extends VerticalLayout {
    * @param spaces List of available openBIS spaces
    */
   public WizardBarcodeView(List<String> spaces) {
+    SampleToBarcodeFieldTranslator translator = new SampleToBarcodeFieldTranslator();
     setSpacing(true);
     setMargin(true);
 
     spaceBox = new ComboBox("Project", spaces);
-    spaceBox.setStyleName(boxTheme);
+    // spaceBox.setStyleName(ProjectwizardUI.boxTheme);
     spaceBox.setNullSelectionAllowed(false);
     spaceBox.setImmediate(true);
 
     projectBox = new ComboBox("Sub-Project");
-    projectBox.setStyleName(boxTheme);
+    // projectBox.setStyleName(ProjectwizardUI.boxTheme);
     projectBox.setEnabled(false);
     projectBox.setImmediate(true);
     projectBox.setNullSelectionAllowed(false);
 
-    addComponent(questionize(spaceBox, "Name of the project", "Project Name"));
-    addComponent(questionize(projectBox, "QBiC 5 letter project code",
-        "Sub-Project"));
+    addComponent(Utils.questionize(spaceBox, "Name of the project", "Project Name"));
+    addComponent(Utils.questionize(projectBox, "QBiC 5 letter project code", "Sub-Project"));
 
     experimentTable = new Table("Sample Overview");
     experimentTable.setStyleName(ValoTheme.TABLE_SMALL);
     experimentTable.setPageLength(1);
-    experimentTable.setContainerDataSource(new BeanItemContainer<ExperimentBean>(
-        ExperimentBean.class));
+    experimentTable.setContainerDataSource(new BeanItemContainer<ExperimentBarcodeSummaryBean>(
+        ExperimentBarcodeSummaryBean.class));
     experimentTable.setSelectable(true);
     experimentTable.setMultiSelect(true);
-    addComponent(questionize(experimentTable,
+    mapCols();
+    addComponent(Utils.questionize(experimentTable,
         "This table gives an overview of tissue samples and extracted materials"
             + " for which barcodes can be printed. You can select one or multiple rows.",
         "Sample Overview"));
 
-    prepSelect = new OptionGroup("Prepare");
-    prepSelect.setStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-    prepSelect.addItems(Arrays.asList("Sample Sheet Barcodes", "Sample Tube Barcodes"));
-    prepSelect.setMultiSelect(true);
-    addComponent(questionize(prepSelect,
-        "Prepare barcodes for the A4 sample sheet and/or qr codes for sample tubes.",
-        "Barcode Preparation"));
+    sheetPreview = new SheetOptionComponent(translator);
+    tubePreview = new BarcodePreviewComponent(translator);
 
-    overwrite = new CheckBox("Overwrite existing Tube Barcode Files");
-    addComponent(questionize(overwrite,
-        "Overwrites existing files of barcode stickers. This is useful when "
-            + "the design was changed after creating them.", "Overwrite Sticker Files"));
-
-    preview = new BarcodePreviewComponent();
-    addComponent(preview);
-
-    // comparators = new OptionGroup("Sort Sheet by");
-    // comparators.setStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-    // comparators.addItems(SortBy.values());
-    // comparators.setValue(SortBy.ID);
-    // addComponent(comparators);
-
-    prepareButton = new Button("Prepare Barcodes");
-    prepareButton.setEnabled(false);
-    addComponent(prepareButton);
+    tabs = new TabSheet();
+    tabs.setStyleName(ValoTheme.TABSHEET_FRAMED);
+    tabs.addTab(sheetPreview, "Sample Sheet");
+    tabs.addTab(tubePreview, "Barcode Stickers");
+    tabsTab = new CustomVisibilityComponent(tabs);
+    tabsTab.setVisible(false);
+    addComponent(Utils.questionize(tabsTab,
+        "Prepare an A4 sample sheet or qr codes for sample tubes.", "Barcode Preparation"));
 
     info = new Label();
     bar = new ProgressBar();
+    bar.setVisible(false);
     addComponent(info);
     addComponent(bar);
 
-    sheetDownloadButton = new Button("Download Sheet");
-    sheetDownloadButton.setEnabled(false);
-    pdfDownloadButton = new Button("Download Barcodes");
-    pdfDownloadButton.setEnabled(false);
+    prepareBarcodes = new Button("Prepare Barcodes");
+    prepareBarcodes.setEnabled(false);
+    addComponent(prepareBarcodes);
 
-    HorizontalLayout dlBox = new HorizontalLayout();
-    dlBox.addComponent(sheetDownloadButton);
-    dlBox.addComponent(pdfDownloadButton);
-    dlBox.addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-    dlBox.setSpacing(true);
-    addComponent(dlBox);
+    download = new Button("Download");
+    download.setEnabled(false);
+    addComponent(download);
+  }
+
+  private void mapCols() {
+    experimentTable.setColumnHeader("amount", "Samples");
+    experimentTable.setColumnHeader("bio_Type", "Type");
+    experimentTable.setColumnHeader("experiment", "Experiment");
   }
 
   public WizardBarcodeView() {
-    experimentTable = new Table("Experiments");
+    SampleToBarcodeFieldTranslator translator = new SampleToBarcodeFieldTranslator();
+    setSpacing(true);
+    setMargin(true);
+    
+    spaceBox = new ComboBox();
+    projectBox = new ComboBox();
+
+    experimentTable = new Table("Sample Overview");
     experimentTable.setStyleName(ValoTheme.TABLE_SMALL);
     experimentTable.setPageLength(1);
-    experimentTable.setContainerDataSource(new BeanItemContainer<ExperimentBean>(
-        ExperimentBean.class));
+    experimentTable.setContainerDataSource(new BeanItemContainer<ExperimentBarcodeSummaryBean>(
+        ExperimentBarcodeSummaryBean.class));
     experimentTable.setSelectable(true);
     experimentTable.setMultiSelect(true);
-    addComponent(experimentTable);
-    
-    spaceBox = new ComboBox("");
-    projectBox = new ComboBox("");
+    mapCols();
+    addComponent(Utils.questionize(experimentTable,
+        "This table gives an overview of tissue samples and extracted materials"
+            + " for which barcodes can be created. You can select one or multiple rows.",
+        "Sample Overview"));
 
-    prepSelect = new OptionGroup("Prepare");
-    prepSelect.setStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-    prepSelect.addItems(Arrays.asList("Sample Sheet Barcodes", "Sample Tube Barcodes"));
-    prepSelect.setMultiSelect(true);
-    addComponent(prepSelect);
+    sheetPreview = new SheetOptionComponent(translator);
+    tubePreview = new BarcodePreviewComponent(translator);
 
-    overwrite = new CheckBox("Overwrite existing Tube Barcode Files");
-    addComponent(questionize(overwrite,
-        "Overwrites existing files of barcode stickers. This is useful when "
-            + "the design was changed after creating them.", "Overwrite Sticker Files"));
-
-    preview = new BarcodePreviewComponent();
-    addComponent(preview);
-
-    prepareButton = new Button("Prepare Barcodes");
-    prepareButton.setEnabled(false);
-    addComponent(prepareButton);
+    tabs = new TabSheet();
+    tabs.setStyleName(ValoTheme.TABSHEET_FRAMED);
+    tabs.addTab(sheetPreview, "Sample Sheet");
+    tabs.addTab(tubePreview, "Barcode Stickers");
+    tabsTab = new CustomVisibilityComponent(tabs);
+    tabsTab.setVisible(false);
+    addComponent(Utils.questionize(tabsTab,
+        "Prepare an A4 sample sheet or qr codes for sample tubes.", "Barcode Preparation"));
 
     info = new Label();
     bar = new ProgressBar();
+    bar.setVisible(false);
     addComponent(info);
     addComponent(bar);
 
-    sheetDownloadButton = new Button("Download Sheet");
-    sheetDownloadButton.setEnabled(false);
-    pdfDownloadButton = new Button("Download Barcodes");
-    pdfDownloadButton.setEnabled(false);
+    prepareBarcodes = new Button("Prepare Barcodes");
+    prepareBarcodes.setEnabled(false);
+    addComponent(prepareBarcodes);
 
-    HorizontalLayout dlBox = new HorizontalLayout();
-    dlBox.addComponent(sheetDownloadButton);
-    dlBox.addComponent(pdfDownloadButton);
-    dlBox.addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-    dlBox.setSpacing(true);
-    addComponent(dlBox);
+    download = new Button("Download");
+    download.setEnabled(false);
+    addComponent(download);
   }
 
   public boolean getOverwrite() {
-    return overwrite.getValue();
+    return tubePreview.overwrite();
   }
 
   public void enableExperiments(boolean enable) {
@@ -199,16 +204,14 @@ public class WizardBarcodeView extends VerticalLayout {
     enableExperiments(false);
     spaceBox.setEnabled(false);
     projectBox.setEnabled(false);
-    prepareButton.setEnabled(false);
-    prepSelect.setEnabled(false);
+    prepareBarcodes.setEnabled(false);
   }
 
   public void reset() {
-    sheetDownloadButton.setEnabled(false);
-    pdfDownloadButton.setEnabled(false);
+    info.setValue("");
+    download.setEnabled(false);
     spaceBox.setEnabled(true);
     projectBox.setEnabled(true);
-    prepSelect.setEnabled(true);
   }
 
   public void resetProjects() {
@@ -220,9 +223,7 @@ public class WizardBarcodeView extends VerticalLayout {
   public void resetExperiments() {
     experimentTable.setPageLength(1);
     experimentTable.removeAllItems();
-    prepareButton.setEnabled(false);
-    prepSelect.setEnabled(true);
-    preview.setVisible(false);
+    tabsTab.setVisible(false);
   }
 
   public String getSpaceCode() {
@@ -237,39 +238,6 @@ public class WizardBarcodeView extends VerticalLayout {
     return spaceBox;
   }
 
-  public static HorizontalLayout questionize(Component c, final String info, final String header) {
-    final HorizontalLayout res = new HorizontalLayout();
-    res.setSpacing(true);
-
-    res.setVisible(c.isVisible());
-    res.setCaption(c.getCaption());
-    c.setCaption(null);
-    res.addComponent(c);
-
-    PopupView pv = new PopupView(new Content() {
-
-      @Override
-      public Component getPopupComponent() {
-        Label l = new Label(info, ContentMode.HTML);
-        l.setCaption(header);
-        l.setIcon(FontAwesome.INFO);
-        l.setWidth("250px");
-        l.addStyleName("info");
-        return new VerticalLayout(l);
-      }
-
-      @Override
-      public String getMinimizedValueAsHTML() {
-        return "[?]";
-      }
-    });
-    pv.setHideOnMouseOut(false);
-
-    res.addComponent(pv);
-
-    return res;
-  }
-  
   public ComboBox getProjectBox() {
     return projectBox;
   }
@@ -299,7 +267,7 @@ public class WizardBarcodeView extends VerticalLayout {
   }
 
   public List<Button> getButtons() {
-    return new ArrayList<Button>(Arrays.asList(this.prepareButton));
+    return new ArrayList<Button>(Arrays.asList(this.prepareBarcodes));
   }
 
   public ProgressBar getProgressBar() {
@@ -311,41 +279,25 @@ public class WizardBarcodeView extends VerticalLayout {
   }
 
   public void enablePrep(boolean enable) {
-    prepareButton.setEnabled(enable);
-  }
-
-  public void enableOtherButtons(boolean enable) {
-    sheetDownloadButton.setEnabled(!enable);
-    pdfDownloadButton.setEnabled(!enable);
+    prepareBarcodes.setEnabled(enable);
+    tabsTab.setVisible(enable);
   }
 
   public SortBy getSorter() {
-    return SortBy.ID;
-    // return (SortBy) comparators.getValue(); //TODO ?
-  }
-
-  public Button getButtonTube() {
-    return pdfDownloadButton;
-  }
-
-  public Button getButtonSheet() {
-    return sheetDownloadButton;
-  }
-
-  public OptionGroup getPrepOptionGroup() {
-    return prepSelect;
+    return sheetPreview.getSorter();
   }
 
   public void creationDone() {
     enableExperiments(true);
+    bar.setVisible(false);
   }
 
   public void sheetReady() {
-    sheetDownloadButton.setEnabled(true);
+    download.setEnabled(true);
   }
 
   public void tubesReady() {
-    pdfDownloadButton.setEnabled(true);
+    download.setEnabled(true);
   }
 
   public void resetSpace() {
@@ -353,23 +305,48 @@ public class WizardBarcodeView extends VerticalLayout {
   }
 
   public void disablePreview() {
-    preview.setVisible(false);
+    tubePreview.setVisible(false);
   }
 
   public void enablePreview(Sample sample) {
-    preview.setExample(sample);
-    preview.setVisible(true);
+    tubePreview.setExample(sample);
+    tubePreview.setVisible(true);
   }
 
   public String getCodedString(Sample s) {
-    return preview.getCodeString(s);
+    if (tabs.getSelectedTab() instanceof BarcodePreviewComponent)
+      return tubePreview.getCodeString(s);
+    else
+      return s.getCode();
   }
 
-  public String getInfo1(Sample s) {
-    return preview.getInfo1(s);
+  public String getInfo1(Sample s, String parents) {
+    if (tabs.getSelectedTab() instanceof BarcodePreviewComponent)
+      return tubePreview.getInfo1(s);
+    else
+      return sheetPreview.getInfo1(s, parents);
   }
 
-  public String getInfo2(Sample s) {
-    return preview.getInfo2(s);
+  public String getInfo2(Sample s, String parents) {
+    if (tabs.getSelectedTab() instanceof BarcodePreviewComponent)
+      return tubePreview.getInfo2(s);
+    else
+      return sheetPreview.getInfo2(s, parents);
+  }
+
+  public TabSheet getTabs() {
+    return tabs;
+  }
+
+  public Button getDownloadButton() {
+    return download;
+  }
+
+  public List<String> getHeaders() {
+    return sheetPreview.getHeaders();
+  }
+
+  public void initControl(BarcodeController barcodeController) {
+    barcodeController.init(this);
   }
 }
