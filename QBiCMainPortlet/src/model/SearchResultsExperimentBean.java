@@ -33,7 +33,7 @@ public class SearchResultsExperimentBean implements Comparable<Object>, Serializ
 
 
   public SearchResultsExperimentBean(Experiment e, String query) {
-    experimentID = e.getCode();
+    experimentID = e.getIdentifier();
     experimentName = this.extractSampleProperty(e, "Q_SECONDARY_NAME");
     queryString = query;
     matchedField = findMatchedFields(e);

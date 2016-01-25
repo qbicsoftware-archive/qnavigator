@@ -29,7 +29,6 @@ import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -286,8 +285,6 @@ public class SearchResultsView extends VerticalLayout implements View {
                     .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
                     .toString());
 
-            Notification.show("Loading project " + cellContent);
-
             State state = (State) UI.getCurrent().getSession().getAttribute("state");
             ArrayList<String> message = new ArrayList<String>();
             message.add("clicked");
@@ -336,7 +333,6 @@ public class SearchResultsView extends VerticalLayout implements View {
                     .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
                     .toString());
 
-            Notification.show("Loading experiment " + cellContent);
 
             State state = (State) UI.getCurrent().getSession().getAttribute("state");
             ArrayList<String> message = new ArrayList<String>();
@@ -375,7 +371,6 @@ public class SearchResultsView extends VerticalLayout implements View {
       sampleGrid.addItemClickListener(new ItemClickListener() {
         @Override
         public void itemClick(ItemClickEvent event) {
-          System.out.println(event.getItemId() + " ::: " + event.getPropertyId());
           String cellType = new String(event.getPropertyId().toString());
 
           if (cellType.equals("sampleID")) {
@@ -383,8 +378,6 @@ public class SearchResultsView extends VerticalLayout implements View {
                 new String(sampleBeanContainer
                     .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
                     .toString());
-
-            Notification.show("Loading sample " + cellContent);
 
             State state = (State) UI.getCurrent().getSession().getAttribute("state");
             ArrayList<String> message = new ArrayList<String>();

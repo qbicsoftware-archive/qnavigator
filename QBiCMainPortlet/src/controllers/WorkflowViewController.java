@@ -486,9 +486,7 @@ public class WorkflowViewController {
 
     try {
       DataSet dataset = openbis.getFacade().getDataSet(bean.getOpenbisCode());
-      LOGGER.debug(dataset.getCode());
       String path = dataset.getDataSetDss().tryGetInternalPathInDataStore();
-      LOGGER.debug(path);
 
       if (bean.getFullPath().startsWith("original")) {
         path = Paths.get(path, bean.getFullPath()).toString();

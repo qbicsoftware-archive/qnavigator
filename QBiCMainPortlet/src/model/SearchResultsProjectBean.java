@@ -18,7 +18,7 @@ public class SearchResultsProjectBean implements Comparable<Object>, Serializabl
 
 
   public SearchResultsProjectBean(Project p, String query) {
-    projectID = p.getCode();
+    projectID = p.getIdentifier();
     description = p.getDescription();
     queryString = query;
   }

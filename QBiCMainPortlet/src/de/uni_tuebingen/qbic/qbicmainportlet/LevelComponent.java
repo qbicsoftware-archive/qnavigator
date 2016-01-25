@@ -691,19 +691,16 @@ public class LevelComponent extends CustomComponent {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/html");
-            LOGGER.debug(streamres.toString());
             res = streamres;
           } else if (datasetFileName.endsWith(".html")) {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("text/html");
-            LOGGER.debug(streamres.toString());
             res = streamres;
           } else if (datasetType.equals("Q_MA_CHIP_IMAGE")) {
             QcMlOpenbisSource re = new QcMlOpenbisSource(url);
             StreamResource streamres = new StreamResource(re, datasetFileName);
             streamres.setMIMEType("application/png");
-            LOGGER.debug(streamres.toString());
             res = streamres;
           } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
             String filePath =
@@ -724,9 +721,7 @@ public class LevelComponent extends CustomComponent {
             // String hostTmp = themedisplay.getURLPortal() +
             // UI.getCurrent().getPage().getLocation().getPath() + "?qbicsession=" +
             // UI.getCurrent().getSession().getAttribute("gv-restapi-session") + "&someblabla=" ;
-            LOGGER.debug(hostTmp);
             String host = Base64.encode(hostTmp.getBytes());
-            LOGGER.debug(host);
             String title = (String) datasetTable.getItem(next).getItemProperty("Sample").getValue();
             res =
                 new ExternalResource(
@@ -735,7 +730,6 @@ public class LevelComponent extends CustomComponent {
                             "http://localhost:7778/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
                             host, title, fileId, filePath));
           }
-          LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
           BrowserFrame frame = new BrowserFrame("", res);
           if (rhAttached) {
             frame.addDetachListener(new DetachListener() {
@@ -789,8 +783,7 @@ public class LevelComponent extends CustomComponent {
             Resource res = null;
             Object parent = datasetTable.getParent(event.getItemId());
             if (parent != null) {
-              LOGGER.debug((String) datasetTable.getItem(parent).getItemProperty("File Name")
-                  .getValue());
+
               String parentDatasetFileName =
                   (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
               try {
@@ -827,7 +820,6 @@ public class LevelComponent extends CustomComponent {
               visualize = true;
             }
 
-            LOGGER.debug(datasetFileName);
             if (datasetFileName.endsWith(".png")) {
               QcMlOpenbisSource re = new QcMlOpenbisSource(url);
               StreamResource streamres = new StreamResource(re, datasetFileName);
@@ -844,8 +836,23 @@ public class LevelComponent extends CustomComponent {
               visualize = true;
             }
 
+            if (datasetFileName.endsWith(".alleles")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/plain");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (datasetFileName.endsWith(".tsv")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/plain");
+              res = streamres;
+              visualize = true;
+            }
+
             if (visualize) {
-              LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
               BrowserFrame frame = new BrowserFrame("", res);
 
               frame.setSizeFull();

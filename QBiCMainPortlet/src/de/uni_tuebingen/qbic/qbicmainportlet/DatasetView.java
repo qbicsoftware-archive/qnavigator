@@ -383,7 +383,6 @@ public class DatasetView extends VerticalLayout implements View {
             // String hostTmp = themedisplay.getURLPortal() +
             // UI.getCurrent().getPage().getLocation().getPath() + "?qbicsession=" +
             // UI.getCurrent().getSession().getAttribute("gv-restapi-session") + "&someblabla=" ;
-            LOGGER.debug(hostTmp);
             // String host = Base64.encode(hostTmp.getBytes());
             String title = (String) table.getItem(next).getItemProperty("Sample").getValue();
             // res =
@@ -393,7 +392,6 @@ public class DatasetView extends VerticalLayout implements View {
             // "http://localhost:7778/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
             // host, title, fileId, filePath));
           }
-          LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
           BrowserFrame frame = new BrowserFrame("", res);
           if (rhAttached) {
             frame.addDetachListener(new DetachListener() {
