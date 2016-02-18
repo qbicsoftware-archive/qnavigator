@@ -164,6 +164,7 @@ public class ProjInformationComponent extends CustomComponent {
         subWindow.setModal(true);
         subWindow.setIcon(FontAwesome.PENCIL);
         subWindow.setHeight("75%");
+        subWindow.setResizable(false);
         // subWindow.setSizeFull();
 
         QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();

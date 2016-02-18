@@ -285,6 +285,7 @@ public class LevelComponent extends CustomComponent {
                     subWindow.setModal(true);
                     subWindow.setIcon(FontAwesome.PENCIL);
                     subWindow.setHeight("75%");
+                    subWindow.setResizable(false);
                     // subWindow.setSizeFull();
 
                     QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
@@ -950,6 +951,7 @@ public class LevelComponent extends CustomComponent {
               subWindow.setSizeUndefined();
               subWindow.setHeight("75%");
               subWindow.setWidth("75%");
+              subWindow.setResizable(false);
 
               frame.setSizeFull();
               frame.setHeight("100%");

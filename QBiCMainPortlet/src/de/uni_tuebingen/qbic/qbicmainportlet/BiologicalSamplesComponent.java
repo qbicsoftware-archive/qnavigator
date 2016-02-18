@@ -368,6 +368,7 @@ public class BiologicalSamplesComponent extends CustomComponent {
         // Center it in the browser window
         subWindow.center();
         subWindow.setModal(true);
+        subWindow.setResizable(false);
         // subWindow.setSizeFull();
 
         QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();

@@ -694,6 +694,7 @@ public class DatasetComponent extends CustomComponent {
               subWindow.setSizeUndefined();
               subWindow.setHeight("75%");
               subWindow.setWidth("75%");
+              subWindow.setResizable(false);
 
               frame.setSizeFull();
               frame.setHeight("100%");

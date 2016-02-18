@@ -122,6 +122,8 @@ public class PatientView extends VerticalLayout implements View {
 
   private String headerLabel;
 
+  private ExperimentComponent experimentComponent;
+
   public String getHeaderLabel() {
     return headerLabel;
   }
@@ -234,6 +236,7 @@ public class PatientView extends VerticalLayout implements View {
     workflowComponent = new WorkflowComponent(wfController);
     uploadComponent = new UploadComponent();
     projectInformation = new ProjInformationComponent(datahandler, state, resourceUrl);
+    experimentComponent = new ExperimentComponent(datahandler, state, resourceUrl);
 
     patientViewTab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     patientViewTab.addStyleName(ValoTheme.TABSHEET_FRAMED);
@@ -245,7 +248,9 @@ public class PatientView extends VerticalLayout implements View {
     patientViewTab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
     patientViewTab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
     // patientViewTab.addTab(initHLALayout()).setIcon(FontAwesome.BARCODE);
-    patientViewTab.addTab(initTable()).setIcon(FontAwesome.FLASK);
+    // patientViewTab.addTab(initTable()).setIcon(FontAwesome.FLASK);
+
+    patientViewTab.addTab(experimentComponent).setIcon(FontAwesome.FLASK);
     patientViewTab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     patientViewTab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.TINT);
     patientViewTab.addTab(measuredSamplesComponent).setIcon(FontAwesome.SIGNAL);
@@ -265,6 +270,8 @@ public class PatientView extends VerticalLayout implements View {
 
         if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
           loadGraph();
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Exp. Steps")) {
+          experimentComponent.updateUI(getCurrentBean());
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
           datasetComponent.updateUI("project", getCurrentBean().getId());
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Measured Samples")) {
@@ -1140,10 +1147,9 @@ public class PatientView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    long startTime = System.nanoTime();
     ProjectBean pbean = datahandler.getProjectIvac(currentValue);
-    long endTime = System.nanoTime();
-    registeredExperiments.unselect(registeredExperiments.getValue());
+
+    // registeredExperiments.unselect(registeredExperiments.getValue());
     // LOGGER.info(String.format("getProject took %f s", ((endTime - startTime) / 1000000000.0)));
     // if the new project bean is different than reset the graph.
     // LOGGER.debug(String.valueOf(currentBean == null));
@@ -1154,10 +1160,9 @@ public class PatientView extends VerticalLayout implements View {
       LOGGER.debug("reseting graph");
       resetGraph();
     }
+    this.currentBean = pbean;
 
-    startTime = System.nanoTime();
-    this.setContainerDataSource(pbean);
-    endTime = System.nanoTime();
+    // this.setContainerDataSource(pbean);
     // LOGGER.info(String.format("setContainerDataSource took %f s",
     // ((endTime - startTime) / 1000000000.0)));
 

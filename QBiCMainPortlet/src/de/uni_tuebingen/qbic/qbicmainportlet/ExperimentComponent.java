@@ -183,6 +183,7 @@ public class ExperimentComponent extends CustomComponent {
         subWindow.setSizeUndefined();
         subWindow.setIcon(FontAwesome.PENCIL);
         subWindow.setHeight("75%");
+        subWindow.setResizable(false);
 
         QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
         ui.addWindow(subWindow);
@@ -191,7 +192,7 @@ public class ExperimentComponent extends CustomComponent {
     }));
 
     experiments.getColumn("edit").setWidth(70);
-    experiments.setColumnOrder("edit", "Type");
+    experiments.setColumnOrder("edit", "prettyType");
     experiments.getColumn("edit").setHeaderCaption("");
 
     if (fileDownloader != null)
