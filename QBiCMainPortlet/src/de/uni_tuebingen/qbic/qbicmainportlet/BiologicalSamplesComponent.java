@@ -222,7 +222,7 @@ public class BiologicalSamplesComponent extends CustomComponent {
     gpcEntity.removeContainerProperty("id");
     gpcEntity.removeContainerProperty("type");
     gpcEntity.removeContainerProperty("organismName");
-
+    gpcEntity.removeContainerProperty("organism");
 
     sampleEntityGrid.setContainerDataSource(gpcEntity);
     sampleEntityGrid.setColumnReorderingAllowed(true);
@@ -249,7 +249,6 @@ public class BiologicalSamplesComponent extends CustomComponent {
     });
 
     sampleEntityGrid.getColumn("Organism").setRenderer(new HtmlRenderer());
-    sampleEntityGrid.setColumnOrder("secondaryName", "code", "Organism");
 
     final GeneratedPropertyContainer gpcBio = new GeneratedPropertyContainer(samplesBio);
     gpcBio.removeContainerProperty("id");
@@ -328,8 +327,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
     }));
     sampleEntityGrid.getColumn("edit").setWidth(70);
     sampleEntityGrid.getColumn("edit").setHeaderCaption("");
-    sampleEntityGrid.setColumnOrder("edit");
-
+    sampleEntityGrid.setColumnOrder("edit", "secondaryName", "Organism", "properties", "code",
+        "additionalInfo", "gender", "externalDB");
 
     sampleBioGrid.addItemClickListener(new ItemClickListener() {
 
@@ -378,7 +377,10 @@ public class BiologicalSamplesComponent extends CustomComponent {
 
     sampleBioGrid.getColumn("edit").setWidth(70);
     sampleBioGrid.getColumn("edit").setHeaderCaption("");
-    sampleBioGrid.setColumnOrder("edit");
+    sampleBioGrid.setColumnOrder("edit", "secondaryName", "primaryTissue", "properties",
+        "tissueDetailed", "code", "additionalInfo", "biologicalEntity", "externalDB");
+
+    sampleBioGrid.getColumn("biologicalEntity").setHeaderCaption("Source");
 
     helpers.GridFunctions.addColumnFilters(sampleBioGrid, gpcBio);
     helpers.GridFunctions.addColumnFilters(sampleEntityGrid, gpcEntity);

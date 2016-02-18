@@ -233,7 +233,6 @@ public class LevelComponent extends CustomComponent {
             gpc.removeContainerProperty("type");
             sampleGrid.setContainerDataSource(gpc);
             sampleGrid.setColumnReorderingAllowed(true);
-            sampleGrid.setColumnOrder("code", "secondaryName", "sampleType");
 
             gpc.addGeneratedProperty("edit", new PropertyValueGenerator<String>() {
               @Override
@@ -294,7 +293,8 @@ public class LevelComponent extends CustomComponent {
                 }));
             sampleGrid.getColumn("edit").setHeaderCaption("");
             sampleGrid.getColumn("edit").setWidth(70);
-            sampleGrid.setColumnOrder("edit");
+            sampleGrid.setColumnOrder("edit", "secondaryName", "sampleType", "code", "properties",
+                "additionalInfo", "externalDB");
 
             helpers.GridFunctions.addColumnFilters(sampleGrid, gpc);
             numberOfSamples = samplesContainer.size();
