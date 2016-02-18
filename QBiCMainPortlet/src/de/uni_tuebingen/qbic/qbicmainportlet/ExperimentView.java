@@ -2,12 +2,14 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.UglyToPrettyNameMapper;
 import helpers.Utils;
+
+import javax.xml.bind.JAXBException;
+
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.ExperimentBean;
 
 import org.tepi.filtertable.FilterTable;
-import org.tepi.filtertable.FilterTreeTable;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -50,6 +52,8 @@ public class ExperimentView extends VerticalLayout implements View {
 
   private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
   private TabSheet expview_tab;
+  private Label experimentalFactorLabel;
+  private Label idLabel;
 
   public ExperimentView(DataHandler datahandler, State state, String resourceurl) {
     this(datahandler, state);
@@ -73,7 +77,7 @@ public class ExperimentView extends VerticalLayout implements View {
    * @param browser
    */
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-	    setWidth((browserWidth * 0.85f), Unit.PIXELS);
+    setWidth((browserWidth * 0.85f), Unit.PIXELS);
   }
 
   /**
@@ -84,20 +88,20 @@ public class ExperimentView extends VerticalLayout implements View {
 
     expview_content = new VerticalLayout();
     expview_content.setMargin(new MarginInfo(true, true, false, false));
-    
+
     expview_tab = new TabSheet();
-    
+
     expview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     expview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
     expview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
 
     expview_content.addComponent(expview_tab);
-    
+
     expview_tab.addTab(initDescription(), "General Information").setIcon(FontAwesome.INFO_CIRCLE);;
-    //expview_tab.addTab(initStatistics(), "Statistics").setIcon(FontAwesome.CHECK_CIRCLE);
+    // expview_tab.addTab(initStatistics(), "Statistics").setIcon(FontAwesome.CHECK_CIRCLE);
     expview_tab.addTab(initProperties(), "Metadata").setIcon(FontAwesome.LIST_UL);
     expview_tab.addTab(initTable(), "Samples").setIcon(FontAwesome.TINT);;
-   
+
     expview_content.setWidth("100%");
     this.addComponent(expview_content);
   }
@@ -107,7 +111,7 @@ public class ExperimentView extends VerticalLayout implements View {
    */
   public void updateContent() {
     updateContentDescription();
-    //updateContentStatistics();
+    updateContentStatistics();
     updateContentProperties();
     updateContentTable();
     updateContentButtonLayout();
@@ -171,9 +175,11 @@ public class ExperimentView extends VerticalLayout implements View {
   VerticalLayout initDescription() {
     VerticalLayout generalInfo = new VerticalLayout();
     VerticalLayout generalInfoContent = new VerticalLayout();
+    idLabel = new Label("");
     generalInfoLabel = new Label("");
     statContentLabel = new Label("");
 
+    generalInfoContent.addComponent(idLabel);
     generalInfo.setMargin(new MarginInfo(true, false, true, true));
     generalInfoContent.addComponent(generalInfoLabel);
     generalInfoContent.setMargin(new MarginInfo(true, false, true, true));
@@ -186,8 +192,11 @@ public class ExperimentView extends VerticalLayout implements View {
   }
 
   void updateContentDescription() {
-    generalInfoLabel.setValue(String.format("Stage:\t %s", prettyNameMapper.getPrettyName(currentBean.getType())));
-    statContentLabel.setValue(String.format("This experimental step involves %s sample(s)", currentBean.getSamples().size()));
+    idLabel.setValue(String.format("Identifier: %s", currentBean.getId()));
+    generalInfoLabel.setValue(String.format("Stage:\t %s",
+        prettyNameMapper.getPrettyName(currentBean.getType())));
+    statContentLabel.setValue(String.format("This experimental step involves %s sample(s)",
+        currentBean.getSamples().size()));
 
   }
 
@@ -200,8 +209,8 @@ public class ExperimentView extends VerticalLayout implements View {
     VerticalLayout statistics = new VerticalLayout();
 
     HorizontalLayout statContent = new HorizontalLayout();
-    //statContent.setCaption("Statistics");
-    //statContent.setIcon(FontAwesome.BAR_CHART_O);
+    // statContent.setCaption("Statistics");
+    // statContent.setIcon(FontAwesome.BAR_CHART_O);
 
 
     // int numberOfDatasets = dh.datasetMap.get(experimentBean.getId()).size();
@@ -211,9 +220,9 @@ public class ExperimentView extends VerticalLayout implements View {
     statContent.setMargin(new MarginInfo(true, false, true, true));
 
     // statContent.addComponent(new Label(String.format("%s dataset(s).",numberOfDatasets )));
-    //statContent.setMargin(true);
-    //statContent.setMargin(new MarginInfo(false, false, false, true));
-    //statContent.setSpacing(true);
+    // statContent.setMargin(true);
+    // statContent.setMargin(new MarginInfo(false, false, false, true));
+    // statContent.setSpacing(true);
 
     /*
      * if (numberOfDatasets > 0) {
@@ -227,72 +236,83 @@ public class ExperimentView extends VerticalLayout implements View {
 
 
     statistics.addComponent(statContent);
-    //statistics.setMargin(true);
+    // statistics.setMargin(true);
 
     // Properties of experiment
-    //VerticalLayout properties = new VerticalLayout();
-    //VerticalLayout propertiesContent = new VerticalLayout();
-    //propertiesContent.setCaption("Properties");
-    //propertiesContent.setIcon(FontAwesome.LIST_UL);
-    //propertiesContentLabel = new Label("", ContentMode.HTML);
-    //propertiesContent.addComponent(propertiesContentLabel);
-    //properties.addComponent(propertiesContent);
-    //propertiesContent.setMargin(new MarginInfo(true, false, false, true));
+    // VerticalLayout properties = new VerticalLayout();
+    // VerticalLayout propertiesContent = new VerticalLayout();
+    // propertiesContent.setCaption("Properties");
+    // propertiesContent.setIcon(FontAwesome.LIST_UL);
+    // propertiesContentLabel = new Label("", ContentMode.HTML);
+    // propertiesContent.addComponent(propertiesContentLabel);
+    // properties.addComponent(propertiesContent);
+    // propertiesContent.setMargin(new MarginInfo(true, false, false, true));
 
-    //properties.setMargin(true);
-    //statistics.addComponent(properties);
+    // properties.setMargin(true);
+    // statistics.addComponent(properties);
 
     statistics.setMargin(new MarginInfo(true, false, true, true));
     statistics.setSpacing(true);
 
     return statistics;
   }
-  
+
   /**
    * 
    */
   void updateContentStatistics() {
     statContentLabel.setValue(String.format("%s sample(s),", currentBean.getSamples().size()));
   }
-  
+
   VerticalLayout initProperties() {
     // Properties of experiment
     VerticalLayout properties = new VerticalLayout();
     VerticalLayout propertiesContent = new VerticalLayout();
-    //propertiesContent.setCaption("Properties");
-    //propertiesContent.setIcon(FontAwesome.LIST_UL);
+    // propertiesContent.setCaption("Properties");
+    // propertiesContent.setIcon(FontAwesome.LIST_UL);
     propertiesContentLabel = new Label("", ContentMode.HTML);
+    propertiesContentLabel.setCaption("Properties");
+    experimentalFactorLabel = new Label("", ContentMode.HTML);
+
     propertiesContent.addComponent(propertiesContentLabel);
+    propertiesContent.addComponent(experimentalFactorLabel);
+
     properties.addComponent(propertiesContent);
     propertiesContent.setMargin(new MarginInfo(true, false, true, true));
-    
+
     return properties;
   }
 
-   void updateContentProperties() {
-     propertiesContentLabel.setValue(currentBean.generatePropertiesFormattedString());
-   }
+  void updateContentProperties() {
+    try {
+      propertiesContentLabel.setValue(currentBean.generatePropertiesFormattedString());
+      experimentalFactorLabel.setValue(currentBean.generateXMLPropertiesFormattedString());
+    } catch (JAXBException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
   VerticalLayout initTable() {
     this.table = this.buildFilterTable();
     this.tableClickChangeTreeView();
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
-    //tableSectionContent.setCaption("Registered Samples");
-    //tableSectionContent.setIcon(FontAwesome.FLASK);
+    // tableSectionContent.setCaption("Registered Samples");
+    // tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
     tableSectionContent.setMargin(new MarginInfo(true, true, false, true));
 
-    //tableSectionContent.setMargin(true);
-    //tableSection.setMargin(true);
+    // tableSectionContent.setMargin(true);
+    // tableSection.setMargin(true);
     tableSection.setMargin(new MarginInfo(true, false, false, true));
 
-    //this.table.setWidth("100%");
+    // this.table.setWidth("100%");
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
 
     tableSection.addComponent(tableSectionContent);
-    
+
     this.export = new Button("Export as TSV");
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -303,7 +323,7 @@ public class ExperimentView extends VerticalLayout implements View {
     buttonLayoutSection.addComponent(buttonLayout);
     buttonLayoutSection.setMargin(new MarginInfo(true, false, true, false));
     buttonLayout.addComponent(this.export);
-    
+
     tableSection.addComponent(buttonLayoutSection);
 
     return tableSection;
@@ -336,7 +356,6 @@ public class ExperimentView extends VerticalLayout implements View {
    */
   public void setContainerDataSource(ExperimentBean experimentBean) {
     this.currentBean = experimentBean;
-    LOGGER.debug(String.valueOf(experimentBean.getSamples().size()));
     this.table.setContainerDataSource(experimentBean.getSamples());
     this.table.setVisibleColumns(new Object[] {"code", "prettyType"});
 
@@ -344,12 +363,11 @@ public class ExperimentView extends VerticalLayout implements View {
 
     if (rowNumber == 0) {
       this.table.setVisible(false);
-    }
-    else {
+    } else {
       this.table.setVisible(true);
       this.table.setPageLength(Math.min(rowNumber, 10));
     }
-    
+
 
 
   }
@@ -357,7 +375,8 @@ public class ExperimentView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table, SampleView.navigateToLabel));
+    this.table
+        .addValueChangeListener(new ViewTablesClickListener(table, SampleView.navigateToLabel));
   }
 
   private FilterTable buildFilterTable() {

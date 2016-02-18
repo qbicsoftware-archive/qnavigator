@@ -29,16 +29,18 @@ import model.TestSampleBean;
 import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
 
-import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
@@ -57,7 +59,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -66,6 +67,9 @@ import com.vaadin.ui.PopupView;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -90,6 +94,7 @@ public class LevelComponent extends CustomComponent {
   private DataHandler datahandler;
   private State state;
   private String resourceUrl;
+  private ChangeSampleMetadataComponent changeMetadata;
   private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
       ""));
 
@@ -106,6 +111,8 @@ public class LevelComponent extends CustomComponent {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
     this.state = state;
+
+    changeMetadata = new ChangeSampleMetadataComponent(dh, state, resourceurl);
 
     this.setCaption(caption);
 
@@ -227,6 +234,67 @@ public class LevelComponent extends CustomComponent {
             sampleGrid.setContainerDataSource(gpc);
             sampleGrid.setColumnReorderingAllowed(true);
             sampleGrid.setColumnOrder("code", "secondaryName", "sampleType");
+
+            gpc.addGeneratedProperty("edit", new PropertyValueGenerator<String>() {
+              @Override
+              public String getValue(Item item, Object itemId, Object propertyId) {
+                return "Edit";
+              }
+
+              @Override
+              public Class<String> getType() {
+                return String.class;
+              }
+            });
+
+            sampleGrid.addItemClickListener(new ItemClickListener() {
+
+              @Override
+              public void itemClick(ItemClickEvent event) {
+
+                BeanItem selected = (BeanItem) samples.getItem(event.getItemId());
+                TestSampleBean selectedExp = (TestSampleBean) selected.getBean();
+
+                State state = (State) UI.getCurrent().getSession().getAttribute("state");
+                ArrayList<String> message = new ArrayList<String>();
+                message.add("clicked");
+                message.add(selectedExp.getId());
+                message.add("sample");
+                state.notifyObservers(message);
+              }
+            });
+
+            sampleGrid.getColumn("edit").setRenderer(
+                new ButtonRenderer(new RendererClickListener() {
+
+                  @Override
+                  public void click(RendererClickEvent event) {
+                    BeanItem selected = (BeanItem) samples.getItem(event.getItemId());
+                    TestSampleBean selectedSample = (TestSampleBean) selected.getBean();
+
+                    LOGGER.debug("clicked");
+                    Window subWindow = new Window("Edit Metadata");
+
+                    changeMetadata.updateUI(selectedSample.getId(), selectedSample.getType());
+                    VerticalLayout subContent = new VerticalLayout();
+                    subContent.setMargin(true);
+                    subContent.addComponent(changeMetadata);
+                    subWindow.setContent(subContent);
+                    // Center it in the browser window
+                    subWindow.center();
+                    subWindow.setModal(true);
+                    subWindow.setIcon(FontAwesome.PENCIL);
+                    subWindow.setHeight("75%");
+                    // subWindow.setSizeFull();
+
+                    QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+                    ui.addWindow(subWindow);
+                  }
+                }));
+            sampleGrid.getColumn("edit").setHeaderCaption("");
+            sampleGrid.getColumn("edit").setWidth(70);
+            sampleGrid.setColumnOrder("edit");
+
             helpers.GridFunctions.addColumnFilters(sampleGrid, gpc);
             numberOfSamples = samplesContainer.size();
 
@@ -324,12 +392,22 @@ public class LevelComponent extends CustomComponent {
       numberOfDatasets = retrievedDatasets.size();
 
       if (numberOfDatasets == 0 & filterFor.equals("measured")) {
+        descriptionLabel =
+            new Label(
+                String.format(
+                    "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
+                    numberOfSamples, 0), Label.CONTENT_PREFORMATTED);
+
         helpers.Utils
             .Notification(
                 "No raw data available.",
                 "No raw data is available for this project. Please contact the project manager if this is not expected.",
                 "warning");
       } else if (numberOfDatasets == 0 & filterFor.equals("results")) {
+        descriptionLabel =
+            new Label(String.format("This project contains %s result datasets.", 0),
+                Label.CONTENT_PREFORMATTED);
+
         helpers.Utils
             .Notification(
                 "No results available.",
@@ -649,8 +727,6 @@ public class LevelComponent extends CustomComponent {
                 datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
                     parentDatasetFileName + "/" + datasetFileName);
 
-            DataSet ds =
-                datahandler.getOpenBisClient().getFacade().getDataSet("20151127095122821-38147");
           } else {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
@@ -808,6 +884,7 @@ public class LevelComponent extends CustomComponent {
             Window subWindow = new Window();
             VerticalLayout subContent = new VerticalLayout();
             subContent.setMargin(true);
+            subContent.setSizeFull();
             subWindow.setContent(subContent);
             QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
             Boolean visualize = false;
@@ -852,6 +929,15 @@ public class LevelComponent extends CustomComponent {
               visualize = true;
             }
 
+            if (datasetFileName.endsWith(".log")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/plain");
+              res = streamres;
+              visualize = true;
+            }
+
+
             if (visualize) {
               BrowserFrame frame = new BrowserFrame("", res);
 
@@ -861,9 +947,13 @@ public class LevelComponent extends CustomComponent {
               // Center it in the browser window
               subWindow.center();
               subWindow.setModal(true);
-              subWindow.setSizeFull();
+              subWindow.setSizeUndefined();
+              subWindow.setHeight("75%");
+              subWindow.setWidth("75%");
 
-              frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
+              frame.setSizeFull();
+              frame.setHeight("100%");
+              // frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
 
               // Open it in the UI
               ui.addWindow(subWindow);
@@ -917,7 +1007,7 @@ public class LevelComponent extends CustomComponent {
     filterTable.setImmediate(true);
     filterTable.setMultiSelect(true);
 
-    filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
+    // filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
 
     filterTable.setColumnCollapsingAllowed(true);
 

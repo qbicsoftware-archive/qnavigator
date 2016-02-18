@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import parser.Parser;
+import parser.XMLParser;
 import properties.Qproperties;
 
 public class BiologicalEntitySampleBean {
@@ -17,9 +17,9 @@ public class BiologicalEntitySampleBean {
   private String id;
   private String code;
   private String type;
-  
+
   private String organism;
-  
+
   private String organismName;
 
   private String gender;
@@ -27,14 +27,16 @@ public class BiologicalEntitySampleBean {
   private String secondaryName;
   private String additionalInfo;
   private String externalDB;
-  
-  private String properties;
-  
-  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
-  
-  
 
-  public BiologicalEntitySampleBean(String id, String code, String type, String organism, String organismName, String gender, String secondaryName, String additionalInfo, String externalDB, String properties) {
+  private String properties;
+
+  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
+
+
+
+  public BiologicalEntitySampleBean(String id, String code, String type, String organism,
+      String organismName, String gender, String secondaryName, String additionalInfo,
+      String externalDB, String properties) {
     super();
     this.id = id;
     this.code = code;
@@ -46,7 +48,7 @@ public class BiologicalEntitySampleBean {
     this.additionalInfo = additionalInfo;
     this.externalDB = externalDB;
     this.properties = properties;
-    
+
   }
 
   public BiologicalEntitySampleBean() {
@@ -86,7 +88,7 @@ public class BiologicalEntitySampleBean {
 
 
   public void setType(String type) {
-    this.type = prettyNameMapper.getPrettyName(type);
+    this.type = type;
   }
 
 
@@ -108,7 +110,7 @@ public class BiologicalEntitySampleBean {
   public int hashCode() {
     return id.hashCode();
   }
-  
+
   public String getSecondaryName() {
     return secondaryName;
   }
@@ -132,13 +134,13 @@ public class BiologicalEntitySampleBean {
   public void setExternalDB(String externalDB) {
     this.externalDB = externalDB;
   }
-  
+
 
   public String getProperties() {
     return properties;
   }
 
-  public void setProperties(Map<String,String> properties) {
+  public void setProperties(Map<String, String> properties) {
     try {
       this.properties = generateXMLPropertiesFormattedString(properties);
     } catch (JAXBException e) {
@@ -146,16 +148,17 @@ public class BiologicalEntitySampleBean {
       e.printStackTrace();
     }
   }
-  
 
-  public String generateXMLPropertiesFormattedString(Map<String,String> properties) throws JAXBException {
+
+  public String generateXMLPropertiesFormattedString(Map<String, String> properties)
+      throws JAXBException {
 
     String xmlPropertiesString = "";
     Iterator<Entry<String, String>> it = properties.entrySet().iterator();
     while (it.hasNext()) {
       Map.Entry pairs = (Map.Entry) it.next();
       if (pairs.getKey().equals("Q_PROPERTIES")) {
-        Parser xmlParser = new Parser();
+        XMLParser xmlParser = new XMLParser();
         JAXBElement<Qproperties> xmlProperties =
             xmlParser.parseXMLString(pairs.getValue().toString());
         Map<String, String> xmlPropertiesMap = xmlParser.getMap(xmlProperties);
@@ -164,9 +167,7 @@ public class BiologicalEntitySampleBean {
         while (itProperties.hasNext()) {
           Map.Entry pairsProperties = (Map.Entry) itProperties.next();
 
-          xmlPropertiesString +=
-                  pairsProperties.getKey() + ": "
-                      + pairsProperties.getValue() + " ";
+          xmlPropertiesString += pairsProperties.getKey() + ": " + pairsProperties.getValue() + " ";
         }
         break;
       }
@@ -181,7 +182,7 @@ public class BiologicalEntitySampleBean {
   public void setOrganism(String organism) {
     this.organism = organism;
   }
-  
+
   public String getOrganismName() {
     return organismName;
   }

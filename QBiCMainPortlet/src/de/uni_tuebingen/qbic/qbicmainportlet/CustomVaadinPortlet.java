@@ -648,7 +648,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     StringBuilder sb = new StringBuilder(db.getCode());
     sb.append("/");
     sb.append(db.getName());
-    if (db.isDirectory()) {
+    if (db.getIsDirectory()) {
       for (DatasetBean child : db.getChildren()) {
         addChildrensEntry(child, entries, sb.toString());
       }
@@ -672,7 +672,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     StringBuilder sb = new StringBuilder(name);
     sb.append("/");
     sb.append(db.getName());
-    if (db.isDirectory()) {
+    if (db.getIsDirectory()) {
       for (DatasetBean child : db.getChildren()) {
         addChildrensEntry(child, entries, sb.toString());
       }

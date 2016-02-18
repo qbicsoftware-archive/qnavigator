@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+
+import parser.XMLParser;
+import properties.Qproperties;
+
 import com.vaadin.data.util.BeanItemContainer;
 
 public class ExperimentBean implements Serializable {
@@ -237,30 +243,49 @@ public class ExperimentBean implements Serializable {
     return true;
   }
 
-  public String generatePropertiesFormattedString() {
-    String propertiesHeader = "<ul>";
-    String propertiesBottom = "";
+  public String generatePropertiesFormattedString() throws JAXBException {
+    String propertiesBottom = "<ul> ";
 
     Iterator<Entry<String, String>> it = this.getProperties().entrySet().iterator();
     while (it.hasNext()) {
-      Entry<String, String> pairs = it.next();
-
-      if (pairs.getValue().equals("")) {
-        continue;
-      } else if (pairs.getKey().equals("Q_PERSONS")) {
+      Map.Entry pairs = (Map.Entry) it.next();
+      if (pairs.getKey().equals("Q_PROPERTIES") || pairs.getKey().equals("Q_NOTES")) {
         continue;
       } else {
         propertiesBottom +=
             "<li><b>" + (typeLabels.get(pairs.getKey()) + ":</b> " + pairs.getValue() + "</li>");
-        // propertiesBottom +=
-        // "<li><b>"
-        // + (pairs.getKey().toString() + ":</b> "
-        // + pairs.getValue() + "</li>");
       }
     }
     propertiesBottom += "</ul>";
 
-    return propertiesHeader + propertiesBottom;
+    return propertiesBottom;
+  }
+
+  public String generateXMLPropertiesFormattedString() throws JAXBException {
+
+    String xmlPropertiesBottom = "<ul> ";
+
+    Iterator<Entry<String, String>> it = this.getProperties().entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry pairs = (Map.Entry) it.next();
+      if (pairs.getKey().equals("Q_PROPERTIES")) {
+        XMLParser xmlParser = new XMLParser();
+        JAXBElement<Qproperties> xmlProperties =
+            xmlParser.parseXMLString(pairs.getValue().toString());
+        Map<String, String> xmlPropertiesMap = xmlParser.getMap(xmlProperties);
+
+        Iterator itProperties = xmlPropertiesMap.entrySet().iterator();
+        while (itProperties.hasNext()) {
+          Map.Entry pairsProperties = (Map.Entry) itProperties.next();
+
+          xmlPropertiesBottom += "<li><b>"
+          // + (typeLabels.get(pairsProperties.getKey()) + ":</b> "
+              + (pairsProperties.getKey() + ":</b> " + pairsProperties.getValue() + "</li>");
+        }
+        break;
+      }
+    }
+    return xmlPropertiesBottom;
   }
 
 

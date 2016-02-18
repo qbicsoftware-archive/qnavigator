@@ -73,7 +73,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "1.1.7";
-  private String revision = "5b3707f";
+  private String revision = "12fbb81";
   private String resUrl;
   protected View currentView;
 
@@ -247,6 +247,8 @@ public class QbicmainportletUI extends UI {
     // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
+    final VaccineDesignerView vaccineDesignerView =
+        new VaccineDesignerView(datahandler, state, resUrl);
 
     final SearchResultsView searchResultsView =
         new SearchResultsView(datahandler, "Search results", user, state, resUrl);
@@ -288,6 +290,7 @@ public class QbicmainportletUI extends UI {
     navigator.addView(SearchResultsView.navigateToLabel, searchResultsView);
 
     navigator.addView(WorkflowView.navigateToLabel, workflowView);
+    // navigator.addView(VaccineDesignerView.navigateToLabel, vaccineDesignerView);
 
     setNavigator(navigator);
 

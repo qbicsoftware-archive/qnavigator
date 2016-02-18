@@ -1,5 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +16,11 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.CustomComponent;
@@ -24,7 +28,12 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 
@@ -45,6 +54,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
   private Grid sampleBioGrid;
   private Grid sampleEntityGrid;
 
+  private ChangeSampleMetadataComponent changeMetadata;
+
   VerticalLayout vert;
 
   private DataHandler datahandler;
@@ -63,6 +74,7 @@ public class BiologicalSamplesComponent extends CustomComponent {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
     this.state = state;
+    changeMetadata = new ChangeSampleMetadataComponent(dh, state, resourceurl);
 
     this.setCaption(caption);
 
@@ -197,6 +209,7 @@ public class BiologicalSamplesComponent extends CustomComponent {
         }
       }
     }
+
     numberOfBioSamples = samplesBioContainer.size();
     numberOfEntitySamples = samplesEntityContainer.size();
 
@@ -245,6 +258,126 @@ public class BiologicalSamplesComponent extends CustomComponent {
     sampleBioGrid.setContainerDataSource(gpcBio);
     sampleBioGrid.setColumnReorderingAllowed(true);
     sampleBioGrid.setColumnOrder("secondaryName", "code");
+
+    gpcEntity.addGeneratedProperty("edit", new PropertyValueGenerator<String>() {
+      @Override
+      public String getValue(Item item, Object itemId, Object propertyId) {
+        return "Edit";
+      }
+
+      @Override
+      public Class<String> getType() {
+        return String.class;
+      }
+    });
+
+    gpcBio.addGeneratedProperty("edit", new PropertyValueGenerator<String>() {
+      @Override
+      public String getValue(Item item, Object itemId, Object propertyId) {
+        return "Edit";
+      }
+
+      @Override
+      public Class<String> getType() {
+        return String.class;
+      }
+    });
+
+    sampleEntityGrid.addItemClickListener(new ItemClickListener() {
+
+      @Override
+      public void itemClick(ItemClickEvent event) {
+
+        BeanItem selected = (BeanItem) samplesEntity.getItem(event.getItemId());
+        BiologicalEntitySampleBean selectedExp = (BiologicalEntitySampleBean) selected.getBean();
+
+        State state = (State) UI.getCurrent().getSession().getAttribute("state");
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        message.add(selectedExp.getId());
+        message.add("sample");
+        state.notifyObservers(message);
+      }
+    });
+
+    sampleEntityGrid.getColumn("edit").setRenderer(new ButtonRenderer(new RendererClickListener() {
+
+      @Override
+      public void click(RendererClickEvent event) {
+        BeanItem selected = (BeanItem) samplesEntity.getItem(event.getItemId());
+        BiologicalEntitySampleBean selectedSample = (BiologicalEntitySampleBean) selected.getBean();
+
+        LOGGER.debug("clicked");
+        Window subWindow = new Window("Edit Metadata");
+
+        changeMetadata.updateUI(selectedSample.getId(), selectedSample.getType());
+        VerticalLayout subContent = new VerticalLayout();
+        subContent.setMargin(true);
+        subContent.addComponent(changeMetadata);
+        subWindow.setContent(subContent);
+        // Center it in the browser window
+        subWindow.center();
+        subWindow.setModal(true);
+        subWindow.setIcon(FontAwesome.PENCIL);
+        subWindow.setHeight("75%");
+        // subWindow.setSizeFull();
+
+        QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+        ui.addWindow(subWindow);
+      }
+    }));
+    sampleEntityGrid.getColumn("edit").setWidth(70);
+    sampleEntityGrid.getColumn("edit").setHeaderCaption("");
+    sampleEntityGrid.setColumnOrder("edit");
+
+
+    sampleBioGrid.addItemClickListener(new ItemClickListener() {
+
+      @Override
+      public void itemClick(ItemClickEvent event) {
+
+        BeanItem selected = (BeanItem) samplesBio.getItem(event.getItemId());
+        BiologicalSampleBean selectedExp = (BiologicalSampleBean) selected.getBean();
+
+        State state = (State) UI.getCurrent().getSession().getAttribute("state");
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        message.add(selectedExp.getId());
+        message.add("sample");
+        state.notifyObservers(message);
+      }
+    });
+
+    sampleBioGrid.getColumn("edit").setRenderer(new ButtonRenderer(new RendererClickListener() {
+
+      @Override
+      public void click(RendererClickEvent event) {
+        BeanItem selected = (BeanItem) samplesBio.getItem(event.getItemId());
+        BiologicalSampleBean selectedSample = (BiologicalSampleBean) selected.getBean();
+
+        LOGGER.debug("clicked");
+        Window subWindow = new Window();
+
+        LOGGER.debug(selectedSample.getId());
+        LOGGER.debug(selectedSample.getType());
+        changeMetadata.updateUI(selectedSample.getId(), selectedSample.getType());
+        VerticalLayout subContent = new VerticalLayout();
+        subContent.setMargin(true);
+        subContent.addComponent(changeMetadata);
+        subWindow.setContent(subContent);
+        // Center it in the browser window
+        subWindow.center();
+        subWindow.setModal(true);
+        // subWindow.setSizeFull();
+
+        QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+        ui.addWindow(subWindow);
+      }
+    }));
+
+    sampleBioGrid.getColumn("edit").setWidth(70);
+    sampleBioGrid.getColumn("edit").setHeaderCaption("");
+    sampleBioGrid.setColumnOrder("edit");
 
     helpers.GridFunctions.addColumnFilters(sampleBioGrid, gpcBio);
     helpers.GridFunctions.addColumnFilters(sampleEntityGrid, gpcEntity);

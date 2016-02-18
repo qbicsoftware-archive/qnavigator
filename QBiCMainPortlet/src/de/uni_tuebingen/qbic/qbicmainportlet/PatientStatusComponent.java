@@ -136,6 +136,9 @@ public class PatientStatusComponent extends CustomComponent {
         PatientView pv = (PatientView) parent.getParent().getParent();
         WorkflowComponent wp = pv.getWorkflowComponent();
 
+        // TODO WATCH OUT NUMBER OF WORKFLOW TAB IS HARDCODED AT THE MOMENT, NO BETTER SOLUTION
+        // FOUND SO FAR, e.g. get Tab by Name ?
+
         // TODO idea get description of item to navigate to the correct workflow ?!
         if (esb.getDescription().equals("Barcode Generation")) {
           ArrayList<String> message = new ArrayList<String>();
@@ -144,26 +147,22 @@ public class PatientStatusComponent extends CustomComponent {
           message.add(BarcodeView.navigateToLabel);
           state.notifyObservers(message);
         } else if (esb.getDescription().equals("Variant Annotation")) {
-          // ArrayList<String> message = new ArrayList<String>();
-          // message.add("clicked");
-          // StringBuilder sb = new StringBuilder("type=");
-          // sb.append("workflowExperimentType");
-          // sb.append("&");
-          // sb.append("id=");
-          // sb.append(currentBean.getId());
-          // sb.append("&");
-          // sb.append("experiment=");
-          // sb.append("Q_WF_NGS_VARIANT_ANNOTATION");
-          // message.add(sb.toString());
-          // message.add(WorkflowView.navigateToLabel);
-          // state.notifyObservers(message);
+          /*
+           * ArrayList<String> message = new ArrayList<String>(); message.add("clicked");
+           * StringBuilder sb = new StringBuilder("type="); sb.append("workflowExperimentType");
+           * sb.append("&"); sb.append("id="); sb.append(currentBean.getId()); sb.append("&");
+           * sb.append("experiment="); sb.append("Q_WF_NGS_VARIANT_ANNOTATION");
+           * message.add(sb.toString()); message.add(WorkflowView.navigateToLabel);
+           * state.notifyObservers(message);
+           */
 
           Map<String, String> args = new HashMap<String, String>();
           args.put("id", currentBean.getId());
           args.put("type", "workflowExperimentType");
           args.put("experiment", "Q_WF_NGS_VARIANT_ANNOTATION");
-          parent.setSelectedTab(10);
+          parent.setSelectedTab(9);
           wp.update(args);
+
         } else if (esb.getDescription().equals("Epitope Prediction")) {
           /*
            * ArrayList<String> message = new ArrayList<String>(); message.add("clicked");
@@ -177,7 +176,7 @@ public class PatientStatusComponent extends CustomComponent {
           args.put("id", currentBean.getId());
           args.put("type", "workflowExperimentType");
           args.put("experiment", "Q_WF_NGS_EPITOPE_PREDICTION");
-          parent.setSelectedTab(10);
+          parent.setSelectedTab(9);
           wp.update(args);
         } else if (esb.getDescription().equals("HLA Typing")) {
           /*
@@ -191,7 +190,7 @@ public class PatientStatusComponent extends CustomComponent {
           args.put("id", currentBean.getId());
           args.put("type", "workflowExperimentType");
           args.put("experiment", "Q_WF_NGS_HLATYPING");
-          parent.setSelectedTab(10);
+          parent.setSelectedTab(9);
           wp.update(args);
         }
 

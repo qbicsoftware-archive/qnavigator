@@ -44,6 +44,7 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
@@ -51,19 +52,20 @@ import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 
@@ -97,6 +99,8 @@ public class ProjInformationComponent extends CustomComponent {
 
   private Label investigator;
 
+  // private EditableLabel descContent;
+
   private Label descContent;
 
   private Label contact;
@@ -113,10 +117,16 @@ public class ProjInformationComponent extends CustomComponent {
 
   private TSVDownloadComponent tsvDownloadContent;
 
+  private HorizontalLayout horz;
+
+  private ChangeProjectMetadataComponent changeMetadata;
+
   public ProjInformationComponent(DataHandler dh, State state, String resourceurl) {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
     this.state = state;
+
+    changeMetadata = new ChangeProjectMetadataComponent(dh, state, resourceurl);
 
     this.setCaption("");
 
@@ -125,10 +135,47 @@ public class ProjInformationComponent extends CustomComponent {
 
   private void initUI() {
     vert = new VerticalLayout();
+    horz = new HorizontalLayout();
     datasetTable = buildFilterTable();
-    descContent = new Label("");
+
     investigator = new Label("", ContentMode.PREFORMATTED);
     investigator.setCaption("Investigator");
+
+    horz.setWidth("100%");
+    horz.addComponent(investigator);
+
+    Button edit = new Button("Edit");
+    edit.setIcon(FontAwesome.PENCIL);
+    edit.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+
+    edit.addClickListener(new ClickListener() {
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        changeMetadata.updateUI(projectBean);
+        VerticalLayout subContent = new VerticalLayout();
+        subContent.setMargin(true);
+        subContent.addComponent(changeMetadata);
+
+        Window subWindow = new Window("Edit Metadata");
+        subWindow.setContent(subContent);
+        // Center it in the browser window
+        subWindow.center();
+        subWindow.setModal(true);
+        subWindow.setIcon(FontAwesome.PENCIL);
+        subWindow.setHeight("75%");
+        // subWindow.setSizeFull();
+
+        QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+        ui.addWindow(subWindow);
+      }
+    });
+
+    horz.addComponent(edit);
+    horz.setComponentAlignment(edit, Alignment.TOP_RIGHT);
+    horz.setExpandRatio(investigator, 0.8f);
+    horz.setExpandRatio(edit, 0.2f);
+
     contact = new Label("", ContentMode.HTML);
     patientInformation = new Label("No patient information provided.", ContentMode.HTML);
     mainLayout = new VerticalLayout(vert);
@@ -139,6 +186,7 @@ public class ProjInformationComponent extends CustomComponent {
     hlaTypeLabel = new Label("Not available.", ContentMode.HTML);
     hlaTypeLabel.setStyleName("patientview");
 
+    // horz.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
@@ -156,7 +204,8 @@ public class ProjInformationComponent extends CustomComponent {
 
       String pi = projectBean.getPrincipalInvestigator();
       investigator.setValue(pi);
-
+      descContent = new Label("");
+      // new EditableLabel("");
 
       contact
           .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
@@ -217,7 +266,7 @@ public class ProjInformationComponent extends CustomComponent {
           new HashMap<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>>();
 
 
-      String projectIdentifier = currentBean.getId();
+      final String projectIdentifier = currentBean.getId();
       retrievedDatasetsAll =
           datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(
               projectIdentifier);
@@ -252,6 +301,26 @@ public class ProjInformationComponent extends CustomComponent {
           }
         }
       }
+
+      /*
+       * descContent.getTextField().addValueChangeListener(new ValueChangeListener() {
+       * 
+       * @Override public void valueChange(ValueChangeEvent event) { LOGGER.debug("Event fired");
+       * LOGGER.debug(descContent.getTextField().getValue().toString()); String newDescriptionValue
+       * = descContent.getTextField().getValue().toString();
+       * 
+       * // Utils.Notification("Project Description Update", //
+       * String.format("Project description has been changed to '%s'.", newDescriptionValue), //
+       * "success"); projectBean.setDescription(newDescriptionValue); HashMap<String, Object>
+       * parameters = new HashMap<String, Object>(); parameters.put("identifier",
+       * projectIdentifier); parameters.put("description", newDescriptionValue);
+       * parameters.put("user", LiferayAndVaadinUtils.getUser().getScreenName());
+       * 
+       * // datahandler.getOpenBisClient().triggerIngestionService("update-project-metadata", //
+       * parameters); }
+       * 
+       * });
+       */
 
       this.datasetTable.setCaption("Project Data");
       // descriptionLabel = new Label(String.format("This project contains %s result datasets.",
@@ -334,7 +403,8 @@ public class ProjInformationComponent extends CustomComponent {
 
     projDescription.setCaption("");
 
-    projDescriptionContent.addComponent(investigator);
+    // projDescriptionContent.addComponent(investigator);
+    projDescriptionContent.addComponent(horz);
     projDescriptionContent.addComponent(descContent);
     projDescriptionContent.addComponent(experimentLabel);
     projDescriptionContent.addComponent(statusContent);
@@ -382,7 +452,29 @@ public class ProjInformationComponent extends CustomComponent {
       updateHLALayout();
       projDescriptionContent.addComponent(patientInformation);
       projDescriptionContent.addComponent(hlaTypeLabel);
+
+      // Vaccine Designer
+      /*
+       * Button vaccineDesigner = new Button("Vaccine Designer");
+       * vaccineDesigner.setStyleName(ValoTheme.BUTTON_PRIMARY);
+       * vaccineDesigner.setIcon(FontAwesome.CUBES);
+       * 
+       * vaccineDesigner.addClickListener(new ClickListener() {
+       * 
+       * @Override public void buttonClick(ClickEvent event) {
+       * 
+       * ArrayList<String> message = new ArrayList<String>(); message.add("clicked"); StringBuilder
+       * sb = new StringBuilder("type="); sb.append("vaccinedesign"); sb.append("&");
+       * sb.append("id="); sb.append(projectBean.getId()); message.add(sb.toString());
+       * message.add(VaccineDesignerView.navigateToLabel); state.notifyObservers(message);
+       * 
+       * // UI.getCurrent().getNavigator() //
+       * .navigateTo(String.format(VaccineDesignerView.navigateToLabel)); } });
+       * 
+       * projDescriptionContent.addComponent(vaccineDesigner);
+       */
     }
+
 
     projDescriptionContent.addComponent(tsvDownloadContent);
     projDescription.addComponent(projDescriptionContent);
@@ -777,7 +869,6 @@ public class ProjInformationComponent extends CustomComponent {
     }
   }
 
-
   private void setCheckedBox(Object itemId, String parentFolder) {
     CheckBox itemCheckBox =
         (CheckBox) this.datasetTable.getItem(itemId).getItemProperty("Select").getValue();
@@ -808,7 +899,7 @@ public class ProjInformationComponent extends CustomComponent {
     filterTable.setImmediate(true);
     filterTable.setMultiSelect(true);
 
-    filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
+    // filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
 
     filterTable.setColumnCollapsingAllowed(true);
 

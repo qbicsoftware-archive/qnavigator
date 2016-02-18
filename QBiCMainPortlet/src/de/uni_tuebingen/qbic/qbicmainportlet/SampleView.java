@@ -55,7 +55,7 @@ public class SampleView extends VerticalLayout implements View {
   private VerticalLayout buttonLayoutSection;
   private ChangeMetadataComponent changeMetaDataComponent;
 
-  //private MSHBiologicalSampleStateMachine stateMachine;
+  // private MSHBiologicalSampleStateMachine stateMachine;
   private UglyToPrettyNameMapper uglyToPretty = new UglyToPrettyNameMapper();
 
   private FileDownloader fileDownloader;
@@ -68,8 +68,9 @@ public class SampleView extends VerticalLayout implements View {
   private Label lastChangedDatasetLabel;
   private Label propertiesLabel;
   private Label experimentalFactorLabel;
-  
+
   private String header;
+
   public String getHeader() {
     return header;
   }
@@ -86,13 +87,14 @@ public class SampleView extends VerticalLayout implements View {
 
   private TabSheet sampview_tab;
 
-private HorizontalLayout tableSectionContent;
+  private HorizontalLayout tableSectionContent;
 
-private Label sampleExtId;
+  private Label sampleExtId;
 
-private DatasetComponent datasetComponent;
+  private DatasetComponent datasetComponent;
 
-  public SampleView(DataHandler datahandler, State state, String resourceurl, MultiscaleController controller) {
+  public SampleView(DataHandler datahandler, State state, String resourceurl,
+      MultiscaleController controller) {
     this(datahandler, state, controller);
     this.resourceUrl = resourceurl;
   }
@@ -124,54 +126,54 @@ private DatasetComponent datasetComponent;
   void initView() {
     sampview_content = new VerticalLayout();
     sampview_content.setMargin(new MarginInfo(true, true, false, false));
-    
+
     sampview_tab = new TabSheet();
     sampview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
     sampview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     sampview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
-    
+
     header = "";
-    
+
     datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
     changeMetaDataComponent = new ChangeMetadataComponent(datahandler, state, resourceUrl);
-    
+
     sampview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
-    //sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.BAR_CHART_O);
+    // sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.BAR_CHART_O);
     sampview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     sampview_tab.addTab(initNoteComponent()).setIcon(FontAwesome.PENCIL);
-    sampview_tab.addTab(changeMetaDataComponent).setIcon(FontAwesome.PENCIL_SQUARE_O);
+    // sampview_tab.addTab(changeMetaDataComponent).setIcon(FontAwesome.PENCIL_SQUARE_O);
 
     sampview_tab.setImmediate(true);
-    
+
     sampview_tab.addSelectedTabChangeListener(new SelectedTabChangeListener() {
-      
+
       /**
 		 * 
 		 */
-		private static final long serialVersionUID = 6899763427531265769L;
+      private static final long serialVersionUID = 6899763427531265769L;
 
-	@Override
+      @Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
 
-         if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
+        if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
           datasetComponent.updateUI(navigateToLabel, getCurrentBean().getId());
         }
       }
     });
-      
-    
-    //sampview_content.addComponent(initToolBar());
-    //sampview_content.addComponent(initHeadline());
+
+
+    // sampview_content.addComponent(initToolBar());
+    // sampview_content.addComponent(initHeadline());
     sampview_content.addComponent(sampview_tab);
-    //sampview_content.addComponent(initDescription());
-    //sampview_content.addComponent(initStatistics());
-    //sampview_content.addComponent(initTable());
-    //sampview_content.addComponent(initButtonLayout());
-    //sampview_content.addComponent(initMSHBiologicalSampleStateSection());
+    // sampview_content.addComponent(initDescription());
+    // sampview_content.addComponent(initStatistics());
+    // sampview_content.addComponent(initTable());
+    // sampview_content.addComponent(initButtonLayout());
+    // sampview_content.addComponent(initMSHBiologicalSampleStateSection());
 
     // use the component that is returned by initTable
     // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    //sampview_content.setWidth("100%");
+    // sampview_content.setWidth("100%");
     this.addComponent(sampview_content);
   }
 
@@ -179,16 +181,16 @@ private DatasetComponent datasetComponent;
    * This function should be called each time currentBean is changed
    */
   public void updateContent() {
-    //updateContentToolBar();
+    // updateContentToolBar();
     updateHeadline();
     updateContentDescription();
-    //updateContentStatistics();
+    // updateContentStatistics();
     updateContentTable();
-    //updateContentButtonLayout();
-    //updateMSHBiologicalSampleStateSection();
+    // updateContentButtonLayout();
+    // updateMSHBiologicalSampleStateSection();
     updateNoteComponent();
     changeMetaDataComponent.updateUI(this.currentBean);
-    
+
   }
 
   /**
@@ -243,49 +245,53 @@ private DatasetComponent datasetComponent;
   boolean containsDatasets() {
     return currentBean.getDatasets() != null && currentBean.getDatasets().size() > 0;
   }
-  
+
   /**
    * initializes the sampleview header (mainly name of sample)
+   * 
    * @return
    */
   VerticalLayout initHeadline() {
     VerticalLayout headline = new VerticalLayout();
     headline.setMargin(new MarginInfo(true, false, true, false));
-    
+
     sampleNameLabel = new Label("");
     sampleExtId = new Label("");
     sampleExtId.addStyleName("qlabel-huge");
     sampleNameLabel.addStyleName("qlabel-large");
-    
+
     headline.addComponent(sampleExtId);
     headline.addComponent(sampleNameLabel);
     headline.setMargin(true);
-    
+
     return headline;
   }
-  
+
   void updateHeadline() {
-	if(currentBean.getProperties().containsKey("Q_EXTERNALDB_ID") && !"".equals(currentBean.getProperties().get("Q_EXTERNALDB_ID"))){
-	  header = String.format("%s\n%s",currentBean.getProperties().get("Q_EXTERNALDB_ID"), currentBean.getCode());
-		//sampleExtId.setValue(currentBean.getProperties().get("Q_EXTERNALDB_ID"));
-		//sampleNameLabel.setValue(currentBean.getCode());
-		//sampleExtId.setVisible(true);
-	}else{
-	  header = String.format("%s", currentBean.getCode());
-		//sampleNameLabel.setValue(currentBean.getCode());
-		//sampleExtId.setVisible(false);		
-	}
+    if (currentBean.getProperties().containsKey("Q_EXTERNALDB_ID")
+        && !"".equals(currentBean.getProperties().get("Q_EXTERNALDB_ID"))) {
+      header =
+          String.format("%s\n%s", currentBean.getProperties().get("Q_EXTERNALDB_ID"),
+              currentBean.getCode());
+      // sampleExtId.setValue(currentBean.getProperties().get("Q_EXTERNALDB_ID"));
+      // sampleNameLabel.setValue(currentBean.getCode());
+      // sampleExtId.setVisible(true);
+    } else {
+      header = String.format("%s", currentBean.getCode());
+      // sampleNameLabel.setValue(currentBean.getCode());
+      // sampleExtId.setVisible(false);
+    }
   }
-  
+
   VerticalLayout initNoteComponent() {
     VerticalLayout notesLayout = new VerticalLayout();
     VerticalLayout notesLayoutContent = new VerticalLayout();
 
     notesContent = new VerticalLayout();
-    
+
     notesContent.setIcon(FontAwesome.NAVICON);
     notesContent.setCaption("Sample Notes");
-   
+
     noteComponent = new MultiscaleComponent(controller);
     notesContent.addComponent(noteComponent);
     notesContent.setMargin(new MarginInfo(true, false, false, true));
@@ -294,10 +300,10 @@ private DatasetComponent datasetComponent;
 
     notesLayout.addComponent(notesContent);
     notesLayout.setMargin(new MarginInfo(false, false, true, true));
-    
+
     return notesContent;
   }
-  
+
   void updateNoteComponent() {
     noteComponent.updateUI(currentBean.getCode());
     notesContent.removeAllComponents();
@@ -312,12 +318,12 @@ private DatasetComponent datasetComponent;
   VerticalLayout initDescription() {
     VerticalLayout sampleDescription = new VerticalLayout();
     VerticalLayout sampleDescriptionContent = new VerticalLayout();
-    
-    
+
+
     // sampleDescriptionContent.setMargin(true);
     sampleDescription.setCaption("");
-    
-    //sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
+
+    // sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
     sampleTypeLabel = new Label("");
     sampleParentLabel = new Label("", ContentMode.HTML);
     numberOfDatasetsLabel = new Label("");
@@ -325,7 +331,7 @@ private DatasetComponent datasetComponent;
     propertiesLabel = new Label("", ContentMode.HTML);
     propertiesLabel.setCaption("Properties");
     experimentalFactorLabel = new Label("", ContentMode.HTML);
-    
+
     sampleDescriptionContent.addComponent(sampleTypeLabel);
     sampleDescriptionContent.addComponent(sampleParentLabel);
     sampleDescriptionContent.addComponent(numberOfDatasetsLabel);
@@ -341,14 +347,16 @@ private DatasetComponent datasetComponent;
   }
 
   void updateContentDescription() {
-    sampleTypeLabel.setValue(String.format("Sample type: %s", uglyToPretty.getPrettyName(currentBean.getType())));
+    sampleTypeLabel.setValue(String.format("Sample type: %s",
+        uglyToPretty.getPrettyName(currentBean.getType())));
     sampleParentLabel.setValue(currentBean.getParentsFormattedString());
-    
+
     int numberOfDatasets = currentBean.getDatasets().size();
-    numberOfDatasetsLabel.setValue(String.format("This sample has %s attached dataset(s) ", numberOfDatasets));
+    numberOfDatasetsLabel.setValue(String.format("This sample has %s attached dataset(s) ",
+        numberOfDatasets));
     if (numberOfDatasets > 0) {
 
-      String lastDataset = "";//"No Datasets available!";
+      String lastDataset = "";// "No Datasets available!";
       if (currentBean.getLastChangedDataset() != null) {
         lastDataset = currentBean.getLastChangedDataset().toString();
         lastChangedDatasetLabel.setValue(String.format("Last Change: %s",
@@ -379,7 +387,7 @@ private DatasetComponent datasetComponent;
     VerticalLayout statistics = new VerticalLayout();
     HorizontalLayout statContent = new HorizontalLayout();
     statistics.setCaption("Statistics");
-    //statContent.setIcon(FontAwesome.BAR_CHART_O);
+    // statContent.setIcon(FontAwesome.BAR_CHART_O);
     numberOfDatasetsLabel = new Label("");
     statContent.addComponent(numberOfDatasetsLabel);
     lastChangedDatasetLabel = new Label("");
@@ -396,8 +404,8 @@ private DatasetComponent datasetComponent;
     // Properties of sample
     VerticalLayout properties = new VerticalLayout();
     VerticalLayout propertiesContent = new VerticalLayout();
-   // propertiesContent.setCaption("Properties");
-   // propertiesContent.setIcon(FontAwesome.LIST_UL);
+    // propertiesContent.setCaption("Properties");
+    // propertiesContent.setIcon(FontAwesome.LIST_UL);
     propertiesLabel = new Label("", ContentMode.HTML);
 
     propertiesContent.addComponent(propertiesLabel);
@@ -410,8 +418,8 @@ private DatasetComponent datasetComponent;
     // Experimental factors of sample
     VerticalLayout experimentalFactors = new VerticalLayout();
     VerticalLayout experimentalFactorsContent = new VerticalLayout();
-    //experimentalFactorsContent.setCaption("Experimental Factors");
-    //experimentalFactorsContent.setIcon(FontAwesome.TH);
+    // experimentalFactorsContent.setCaption("Experimental Factors");
+    // experimentalFactorsContent.setIcon(FontAwesome.TH);
     experimentalFactorLabel = new Label("", ContentMode.HTML);
     experimentalFactorsContent.addComponent(experimentalFactorLabel);
     experimentalFactorsContent.setMargin(new MarginInfo(true, false, true, true));
@@ -434,7 +442,7 @@ private DatasetComponent datasetComponent;
     numberOfDatasetsLabel.setValue(String.format("%s dataset(s). ", numberOfDatasets));
     if (numberOfDatasets > 0) {
 
-      String lastDataset = "";//"No Datasets available!";
+      String lastDataset = "";// "No Datasets available!";
       if (currentBean.getLastChangedDataset() != null) {
         lastDataset = currentBean.getLastChangedDataset().toString();
         lastChangedDatasetLabel.setValue(String.format("Last Change: %s",
@@ -462,8 +470,8 @@ private DatasetComponent datasetComponent;
     VerticalLayout tableSectionContent = new VerticalLayout();
 
     tableSection.setCaption("Experiments");
-    //tableSectionContent.setCaption("Registered Experiments");
-    //tableSectionContent.setIcon(FontAwesome.FLASK);
+    // tableSectionContent.setCaption("Registered Experiments");
+    // tableSectionContent.setIcon(FontAwesome.FLASK);
     tableSectionContent.addComponent(this.table);
 
     tableSectionContent.setMargin(new MarginInfo(true, false, false, true));
@@ -473,7 +481,7 @@ private DatasetComponent datasetComponent;
     tableSectionContent.setWidth("100%");
 
     tableSection.addComponent(tableSectionContent);
-    
+
     this.export = new Button("Export as TSV");
     buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -509,7 +517,7 @@ private DatasetComponent datasetComponent;
   }
 
   public void setContainerDataSource(SampleBean sampleBean) {
-    //this.currentBean = sampleBean;
+    // this.currentBean = sampleBean;
 
     this.table.setContainerDataSource(sampleBean.getDatasets());
     this.table.setVisibleColumns(new Object[] {"name", "type", "registrationDate", "fileSize"});
@@ -518,15 +526,15 @@ private DatasetComponent datasetComponent;
 
     if (rowNumber == 0) {
       this.table.setVisible(false);
-     // this.export.setVisible(false);
+      // this.export.setVisible(false);
       tableSectionContent.removeAllComponents();
       tableSectionContent.addComponent(new Label("No datasets registered."));
     } else {
       tableSectionContent.removeAllComponents();
       tableSectionContent.addComponent(table);
       this.table.setVisible(true);
-      //this.export.setVisible(true);
-      this.table.setPageLength(Math.min(rowNumber+1, 10));
+      // this.export.setVisible(true);
+      this.table.setPageLength(Math.min(rowNumber + 1, 10));
     }
   }
 
@@ -563,73 +571,63 @@ private DatasetComponent datasetComponent;
   }
 
   /*
-  VerticalLayout initMSHBiologicalSampleStateSection() {
-    stateMachine = new MSHBiologicalSampleStateMachine(datahandler.getOpenBisClient(), this);
-
-    // initialize with wrong state (will be updated immediately)
-    stateMachine.setState("MSH_WRONG_STATE");
-    currentSampleStateName =
-        new Label("<b>Current sample process status:</b> <font color=\"green\">"
-            + uglyToPretty.getPrettyName(stateMachine.getState().name()) + "</font>",
-            ContentMode.HTML);
-
-    biologicalSampleStateSection = new VerticalLayout();
-    sampleStateSectionContent = new VerticalLayout();
-
-
-    sampleStateSectionContent.setCaption("MultiscaleHCC sample status");
-    sampleStateSectionContent.setIcon(FontAwesome.AMBULANCE);
-    sampleStateSectionContent.addComponent(currentSampleStateName);
-    // sampleStateSectionContent.setMargin(new MarginInfo(false, false, false, true));
-
-    stateInjectLayout = stateMachine.getCurrentInterface();
-
-
-
-    sampleStateSectionContent.addComponent(stateInjectLayout);
-
-    biologicalSampleStateSection.addComponent(sampleStateSectionContent);
-    biologicalSampleStateSection.setMargin(new MarginInfo(true, false, false, true));
-
-    return biologicalSampleStateSection;
-  }
-*/
+   * VerticalLayout initMSHBiologicalSampleStateSection() { stateMachine = new
+   * MSHBiologicalSampleStateMachine(datahandler.getOpenBisClient(), this);
+   * 
+   * // initialize with wrong state (will be updated immediately)
+   * stateMachine.setState("MSH_WRONG_STATE"); currentSampleStateName = new
+   * Label("<b>Current sample process status:</b> <font color=\"green\">" +
+   * uglyToPretty.getPrettyName(stateMachine.getState().name()) + "</font>", ContentMode.HTML);
+   * 
+   * biologicalSampleStateSection = new VerticalLayout(); sampleStateSectionContent = new
+   * VerticalLayout();
+   * 
+   * 
+   * sampleStateSectionContent.setCaption("MultiscaleHCC sample status");
+   * sampleStateSectionContent.setIcon(FontAwesome.AMBULANCE);
+   * sampleStateSectionContent.addComponent(currentSampleStateName); //
+   * sampleStateSectionContent.setMargin(new MarginInfo(false, false, false, true));
+   * 
+   * stateInjectLayout = stateMachine.getCurrentInterface();
+   * 
+   * 
+   * 
+   * sampleStateSectionContent.addComponent(stateInjectLayout);
+   * 
+   * biologicalSampleStateSection.addComponent(sampleStateSectionContent);
+   * biologicalSampleStateSection.setMargin(new MarginInfo(true, false, false, true));
+   * 
+   * return biologicalSampleStateSection; }
+   */
   /*
-  void updateMSHBiologicalSampleStateSection() {
-    String fullSampleIdentifier = currentBean.getId();
-    String sampleType = currentBean.getType();
-
-    // update the sampleID of the state machine before retrieving info from openBIS
-    stateMachine.setSampleID(fullSampleIdentifier);
-    String currentStateTmp = stateMachine.retrieveCurrentStateFromOpenBIS();
-    stateMachine.setState(currentStateTmp);
-    stateMachine.buildCurrentInterface();
-
-    // sampleStateSectionContent.removeAllComponents();
-    currentSampleStateName.setValue("<b>Current sample process status:</b> <font color=\"green\">"
-        + uglyToPretty.getPrettyName(stateMachine.getState().name()) + "</font>");
-
-    sampleStateSectionContent.removeComponent(stateInjectLayout);
-    stateInjectLayout = stateMachine.getCurrentInterface();
-    sampleStateSectionContent.addComponent(stateInjectLayout);
-
-
-    if (fullSampleIdentifier.startsWith("/MULTISCALEHCC/")
-        && sampleType.equals("Q_BIOLOGICAL_SAMPLE")) {
-      biologicalSampleStateSection.setVisible(true);
-    } else {
-      biologicalSampleStateSection.setVisible(false);
-    }
-  }
-*/
+   * void updateMSHBiologicalSampleStateSection() { String fullSampleIdentifier =
+   * currentBean.getId(); String sampleType = currentBean.getType();
+   * 
+   * // update the sampleID of the state machine before retrieving info from openBIS
+   * stateMachine.setSampleID(fullSampleIdentifier); String currentStateTmp =
+   * stateMachine.retrieveCurrentStateFromOpenBIS(); stateMachine.setState(currentStateTmp);
+   * stateMachine.buildCurrentInterface();
+   * 
+   * // sampleStateSectionContent.removeAllComponents();
+   * currentSampleStateName.setValue("<b>Current sample process status:</b> <font color=\"green\">"
+   * + uglyToPretty.getPrettyName(stateMachine.getState().name()) + "</font>");
+   * 
+   * sampleStateSectionContent.removeComponent(stateInjectLayout); stateInjectLayout =
+   * stateMachine.getCurrentInterface(); sampleStateSectionContent.addComponent(stateInjectLayout);
+   * 
+   * 
+   * if (fullSampleIdentifier.startsWith("/MULTISCALEHCC/") &&
+   * sampleType.equals("Q_BIOLOGICAL_SAMPLE")) { biologicalSampleStateSection.setVisible(true); }
+   * else { biologicalSampleStateSection.setVisible(false); } }
+   */
 
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
     // TODO updateContent only if currentExperiment is not equal to newExperiment
-    //this.table.unselect(this.table.getValue());
-    //this.setContainerDataSource(datahandler.getSample(currentValue));
-    
+    // this.table.unselect(this.table.getValue());
+    // this.setContainerDataSource(datahandler.getSample(currentValue));
+
     this.currentBean = datahandler.getSample(currentValue);
     updateContent();
   }

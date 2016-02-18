@@ -20,7 +20,7 @@ import main.OpenBisClient;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import parser.Parser;
+import parser.XMLParser;
 import properties.Factor;
 import submitter.SubmitFailedException;
 import submitter.Submitter;
@@ -342,7 +342,7 @@ public class WorkflowViewController {
     Map<String, String> fileProps = new HashMap<String, String>();
 
     // XML Parser
-    Parser p = new Parser();
+    XMLParser p = new XMLParser();
 
     Set<String> secondaryNames = new HashSet<String>();
 
@@ -495,6 +495,7 @@ public class WorkflowViewController {
         path = path + "/original/" + filelist[0].getPathInListing();
       }
       path = path.replaceFirst("/mnt/" + openbis_dss, "/mnt/nfs/qbic");
+      path = path.replaceFirst("/mnt/DSS_icgc", "/mnt/glusterfs/DSS_icgc");
       return path;
     } catch (Exception e) {
       e.printStackTrace();

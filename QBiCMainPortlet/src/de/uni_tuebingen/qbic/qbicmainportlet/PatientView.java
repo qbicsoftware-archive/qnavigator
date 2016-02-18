@@ -292,6 +292,7 @@ public class PatientView extends VerticalLayout implements View {
 
     patientViewContent.addComponent(patientViewTab);
     this.addComponent(patientViewContent);
+
   }
 
   /**

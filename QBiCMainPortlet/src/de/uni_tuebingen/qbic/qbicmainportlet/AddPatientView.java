@@ -502,7 +502,6 @@ public class AddPatientView extends VerticalLayout implements View {
     String currentValue = event.getParameters();
     // this.setContainerDataSource(datahandler.getProject(currentValue));
     updateContent();
-
   }
 
   private void updateContent() {

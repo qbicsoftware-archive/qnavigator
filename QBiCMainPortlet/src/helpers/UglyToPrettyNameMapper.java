@@ -39,6 +39,9 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION", "Variant Annotation Workflow");
     namesMapping.put("Q_WF_NGS_VARIANT_CALLING", "Variant Calling Workflow");
     namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME", "Individualized Proteins Workflow");
+    namesMapping.put("Q_WF_MS_LIGANDOMICS_ID", "Ligandomics Identification Workflow");
+    namesMapping.put("Q_WF_MS_LIGANDOMICS_QC", "Ligandomics Quality Control Workflow");
+
 
     // deprecated experiment types
     namesMapping.put("INFO_EXPERIMENT", "Info (deprecated)");
@@ -89,6 +92,9 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION_RUN", "Variant Annotation Workflow Run");
     namesMapping.put("Q_WF_NGS_VARIANT_CALLING_RUN", "Variant Calling Workflow Run");
     namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME_RUN", "Individualized Proteins Workflow Run");
+    namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_RUN", "Ligandomics Identification Workflow Run");
+    namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_RUN", "Ligandomics Quality Control Workflow Run");
+
 
     // deprecated sample types
     namesMapping.put("BIOLOGICAL", "Biological Sample (deprecated)");
@@ -161,6 +167,9 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_LOGS", "Ligandomics Quality Control Workflow Logs");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_RESULTS",
         "Ligandomics Quality Control Workflow Results");
+    namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_LOGS", "Ligandomics Identification Workflow Logs");
+    namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_RESULTS",
+        "Ligandomics Identification Workflow Results");
 
 
 

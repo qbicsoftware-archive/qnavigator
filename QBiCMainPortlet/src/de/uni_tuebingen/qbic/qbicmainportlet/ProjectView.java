@@ -121,6 +121,8 @@ public class ProjectView extends VerticalLayout implements View {
 
   private VerticalLayout projDescriptionContent;
 
+  private ExperimentComponent experimentComponent;
+
 
   public String getHeaderLabel() {
     return headerLabel;
@@ -185,6 +187,7 @@ public class ProjectView extends VerticalLayout implements View {
     workflowComponent = new WorkflowComponent(wfController);
     uploadComponent = new UploadComponent();
     projectInformation = new ProjInformationComponent(datahandler, state, resourceUrl);
+    experimentComponent = new ExperimentComponent(datahandler, state, resourceUrl);
 
     // projectview_tab.addStyleName(ValoTheme.TABSHEET_ICONS_ON_TOP);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
@@ -198,7 +201,8 @@ public class ProjectView extends VerticalLayout implements View {
     projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
     // projectview_tab.addTab(initStatistics()).setIcon(FontAwesome.CHECK_CIRCLE);
 
-    projectview_tab.addTab(initTable()).setIcon(FontAwesome.FLASK);
+    // projectview_tab.addTab(initTable()).setIcon(FontAwesome.FLASK);
+    projectview_tab.addTab(experimentComponent).setIcon(FontAwesome.FLASK);
     projectview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     projectview_tab.addTab(biologicalSamplesComponent).setIcon(FontAwesome.TINT);
     projectview_tab.addTab(measuredSamplesComponent).setIcon(FontAwesome.SIGNAL);
@@ -215,6 +219,8 @@ public class ProjectView extends VerticalLayout implements View {
       public void selectedTabChange(SelectedTabChangeEvent event) {
         if (event.getTabSheet().getSelectedTab().getCaption().equals("Project Graph")) {
           loadGraph();
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Exp. Steps")) {
+          experimentComponent.updateUI(getCurrentBean());
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
           datasetComponent.updateUI(navigateToLabel, getCurrentBean().getId());
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Measured Samples")) {
@@ -264,7 +270,8 @@ public class ProjectView extends VerticalLayout implements View {
     updateContentMemberSection();
     // updateContentStatistics();
     updateContentTable();
-    updateContentButtonLayout();
+
+    // updateContentButtonLayout();
 
     projectInformation.updateUI(getCurrentBean(), "project");
   }
@@ -948,14 +955,14 @@ public class ProjectView extends VerticalLayout implements View {
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
     // TODO updateContent only if currentProject is not equal to newProject
-    this.table.unselect(this.table.getValue());
+    // this.table.unselect(this.table.getValue());
     ProjectBean pbean = datahandler.getProject2(currentValue);
     // if the new project bean is different than reset the graph.
     if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
-      LOGGER.debug("reseting graph");
       resetGraph();
     }
-    this.setContainerDataSource(pbean);
+    this.currentBean = pbean;
+    // this.setContainerDataSource(pbean);
     updateContent();
 
     projectview_tab.setSelectedTab(0);

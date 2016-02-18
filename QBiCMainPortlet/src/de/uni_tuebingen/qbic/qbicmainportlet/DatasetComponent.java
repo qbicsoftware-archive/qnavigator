@@ -53,7 +53,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -589,7 +588,7 @@ public class DatasetComponent extends CustomComponent {
           // Center it in the browser window
           subWindow.center();
           subWindow.setModal(true);
-          subWindow.setSizeFull();
+          subWindow.setHeight("75%");
 
           frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.8), Unit.PIXELS);
           // Open it in the UI
@@ -618,7 +617,6 @@ public class DatasetComponent extends CustomComponent {
             Resource res = null;
             Object parent = table.getParent(event.getItemId());
             if (parent != null) {
-              LOGGER.debug((String) table.getItem(parent).getItemProperty("File Name").getValue());
               String parentDatasetFileName =
                   (String) table.getItem(parent).getItemProperty("File Name").getValue();
               url =
@@ -631,6 +629,7 @@ public class DatasetComponent extends CustomComponent {
             Window subWindow = new Window();
             VerticalLayout subContent = new VerticalLayout();
             subContent.setMargin(true);
+            subContent.setSizeFull();
             subWindow.setContent(subContent);
             QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
             Boolean visualize = false;
@@ -643,7 +642,6 @@ public class DatasetComponent extends CustomComponent {
               visualize = true;
             }
 
-            LOGGER.debug(datasetFileName);
             if (datasetFileName.endsWith(".png")) {
               QcMlOpenbisSource re = new QcMlOpenbisSource(url);
               StreamResource streamres = new StreamResource(re, datasetFileName);
@@ -652,19 +650,54 @@ public class DatasetComponent extends CustomComponent {
               visualize = true;
             }
 
+            if (datasetFileName.endsWith(".qcML")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/xml");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (datasetFileName.endsWith(".alleles")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/plain");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (datasetFileName.endsWith(".tsv")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/plain");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (datasetFileName.endsWith(".log")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/plain");
+              res = streamres;
+              visualize = true;
+            }
+
             if (visualize) {
               LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
               BrowserFrame frame = new BrowserFrame("", res);
 
-              frame.setSizeFull();
               subContent.addComponent(frame);
 
               // Center it in the browser window
               subWindow.center();
               subWindow.setModal(true);
-              subWindow.setSizeFull();
+              subWindow.setSizeUndefined();
+              subWindow.setHeight("75%");
+              subWindow.setWidth("75%");
 
-              frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
+              frame.setSizeFull();
+              frame.setHeight("100%");
+              // frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.9), Unit.PIXELS);
 
               // Open it in the UI
               ui.addWindow(subWindow);
@@ -719,7 +752,7 @@ public class DatasetComponent extends CustomComponent {
     filterTable.setImmediate(true);
     filterTable.setMultiSelect(true);
 
-    filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
+    // filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
 
     filterTable.setColumnCollapsingAllowed(false);
 

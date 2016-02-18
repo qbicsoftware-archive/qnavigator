@@ -11,11 +11,9 @@ import java.util.Map;
 import javax.xml.bind.JAXBException;
 
 import logging.Log4j2Logger;
-
-import parser.Parser;
+import parser.XMLParser;
 import properties.Factor;
 import qbic.vaadincomponents.TSVDownloadComponent;
-
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 import com.vaadin.server.StreamResource;
@@ -79,27 +77,13 @@ public class TSVReadyRunnable implements Runnable {
   }
 
   private String getTSVString(List<Serializable[]> table) {
-    Parser p = new Parser();
+    XMLParser p = new XMLParser();
     StringBuilder tsv =
         new StringBuilder("QBiC ID\tSecondary Name\tSample Source\tExternal ID\tExtract Type");
-    String xml = (String) table.get(0)[5];
-    List<Factor> factors = new ArrayList<Factor>();
-    if (!xml.isEmpty()) {
-      try {
-        factors = p.getFactorsFromXML(xml);
-      } catch (JAXBException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      for (Factor f : factors) {
-        tsv.append("\t" + f.getLabel());
-      }
-    }
-    for (Serializable[] ss : table) {
-      StringBuilder line =
-          new StringBuilder("\n" + ss[0] + "\t" + ss[1] + "\t" + ss[2] + "\t" + ss[3] + "\t"
-              + ss[4]);
-      xml = (String) ss[5];
+
+    if (table != null) {
+      String xml = (String) table.get(0)[5];
+      List<Factor> factors = new ArrayList<Factor>();
       if (!xml.isEmpty()) {
         try {
           factors = p.getFactorsFromXML(xml);
@@ -108,13 +92,31 @@ public class TSVReadyRunnable implements Runnable {
           e.printStackTrace();
         }
         for (Factor f : factors) {
-          line.append("\t" + f.getValue());
-          if (f.hasUnit())
-            line.append(f.getUnit());
+          tsv.append("\t" + f.getLabel());
         }
       }
-      tsv.append(line);
+      for (Serializable[] ss : table) {
+        StringBuilder line =
+            new StringBuilder("\n" + ss[0] + "\t" + ss[1] + "\t" + ss[2] + "\t" + ss[3] + "\t"
+                + ss[4]);
+        xml = (String) ss[5];
+        if (!xml.isEmpty()) {
+          try {
+            factors = p.getFactorsFromXML(xml);
+          } catch (JAXBException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          for (Factor f : factors) {
+            line.append("\t" + f.getValue());
+            if (f.hasUnit())
+              line.append(f.getUnit());
+          }
+        }
+        tsv.append(line);
+      }
     }
+
     return tsv.toString();
   }
 

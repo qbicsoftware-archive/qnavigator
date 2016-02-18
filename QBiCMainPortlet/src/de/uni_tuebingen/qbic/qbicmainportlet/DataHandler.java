@@ -657,7 +657,10 @@ public class DataHandler implements Serializable {
             .listVocabularyTermsForProperty(p));
       }
 
-      if (p.getDataType().toString().equals("MATERIAL")) {
+      if (p.getDataType().toString().equals("MATERIAL")
+          && (assignedProperties.get(p.getCode()) != null)) {
+        LOGGER.debug(p.getCode());
+        LOGGER.debug(assignedProperties.get(p.getCode()));
         String[] splitted = assignedProperties.get(p.getCode()).split("\\(");
 
         String materialType = splitted[1].replace(")", "").replace(" ", "");
@@ -1825,7 +1828,8 @@ public class DataHandler implements Serializable {
       // String newBiologicalEntitiyID =
       // "/" + space + "/" + newBiologicalEntitiyCode
       // + helpers.BarcodeFunctions.checksum(newBiologicalEntitiyCode);
-      String newBiologicalEntitiyID = String.format("%sENTITY-1", newProjectCode);
+      String newBiologicalEntitiyID =
+          String.format("/" + space + "/" + "%sENTITY-1", newProjectCode);
 
       numberOfRegisteredSamples += 1;
 

@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import parser.Parser;
+import parser.XMLParser;
 import properties.Qproperties;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
@@ -36,7 +36,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
   private Date lastChangedDataset;
   private Map<String, String> properties;
   private Map<String, String> typeLabels;
-  
+
   private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
 
 
@@ -183,7 +183,8 @@ public class SampleBean implements Comparable<Object>, Serializable {
     } else {
       for (Sample sample : this.getParents()) {
         parentsBottom +=
-            "<li><b>" + sample.getCode() + "</b> (" + prettyNameMapper.getPrettyName(sample.getSampleTypeCode()) + ") </li>";
+            "<li><b>" + sample.getCode() + "</b> ("
+                + prettyNameMapper.getPrettyName(sample.getSampleTypeCode()) + ") </li>";
       }
       parentsBottom += "</ul>";
 
@@ -217,7 +218,7 @@ public class SampleBean implements Comparable<Object>, Serializable {
     while (it.hasNext()) {
       Map.Entry pairs = (Map.Entry) it.next();
       if (pairs.getKey().equals("Q_PROPERTIES")) {
-        Parser xmlParser = new Parser();
+        XMLParser xmlParser = new XMLParser();
         JAXBElement<Qproperties> xmlProperties =
             xmlParser.parseXMLString(pairs.getValue().toString());
         Map<String, String> xmlPropertiesMap = xmlParser.getMap(xmlProperties);
@@ -226,11 +227,9 @@ public class SampleBean implements Comparable<Object>, Serializable {
         while (itProperties.hasNext()) {
           Map.Entry pairsProperties = (Map.Entry) itProperties.next();
 
-          xmlPropertiesBottom +=
-              "<li><b>"
-                  //+ (typeLabels.get(pairsProperties.getKey()) + ":</b> "
-                  + (pairsProperties.getKey() + ":</b> "
-                      + pairsProperties.getValue() + "</li>");
+          xmlPropertiesBottom += "<li><b>"
+          // + (typeLabels.get(pairsProperties.getKey()) + ":</b> "
+              + (pairsProperties.getKey() + ":</b> " + pairsProperties.getValue() + "</li>");
         }
         break;
       }
@@ -245,14 +244,14 @@ public class SampleBean implements Comparable<Object>, Serializable {
   public void setChildren(List<Sample> children) {
     this.children = children;
   }
-  
-  public String getPrettyType() {
-		return prettyType;
-	}
 
-	public void setPrettyType(String prettyType) {
-		this.prettyType = prettyType;
-	}
+  public String getPrettyType() {
+    return prettyType;
+  }
+
+  public void setPrettyType(String prettyType) {
+    this.prettyType = prettyType;
+  }
 
 
 }

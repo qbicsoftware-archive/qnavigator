@@ -8,9 +8,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import logging.Log4j2Logger;
+
 import org.apache.commons.lang.NotImplementedException;
 
-import logging.Log4j2Logger;
 import submitter.Workflow;
 import submitter.parameters.FileListParameter;
 import submitter.parameters.FileParameter;
@@ -18,12 +19,10 @@ import submitter.parameters.InputList;
 import submitter.parameters.Parameter;
 import submitter.parameters.ParameterSet;
 
-import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Grid.SingleSelectionModel;
@@ -32,7 +31,6 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.WorkflowViewController;
@@ -86,27 +84,28 @@ public class InputFilesComponent extends WorkflowParameterComponent {
 
   /**
    * DAVID
+   * 
    * @param wfparameters
    * @param datasets
    */
-  public void buildLayout(Map<String,Parameter> wfparameters, BeanItemContainer<DatasetBean> datasets){
+  public void buildLayout(Map<String, Parameter> wfparameters,
+      BeanItemContainer<DatasetBean> datasets) {
     wfmap = wfparameters;
-    for(Map.Entry<String, Parameter> entry : wfmap.entrySet()){ 
+    for (Map.Entry<String, Parameter> entry : wfmap.entrySet()) {
       GeneratedPropertyContainer gpcontainer = null;
       Grid newGrid = new Grid(gpcontainer);
-      if (entry.getValue() instanceof FileParameter || entry.getValue() instanceof FileListParameter) {
+      if (entry.getValue() instanceof FileParameter
+          || entry.getValue() instanceof FileListParameter) {
         List<String> range = getRange(entry.getValue());
-        
+
         if (range.contains("fasta") || range.contains("gtf")) {
           gpcontainer = fastaContainer();
-        }
-        else{
+        } else {
           gpcontainer = filter(datasets, range);
         }
         newGrid.setContainerDataSource(gpcontainer);
         newGrid.setSelectionMode(getSelectionMode(entry.getValue()));
-      }
-      else {
+      } else {
         showError(String.format("Invalid Inputfile Parameter!", entry.getKey()));
       }
       HorizontalLayout layout = new HorizontalLayout();
@@ -125,74 +124,71 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       inputFileForm.addTab(layout, entry.getKey());
     }
   }
-  
+
   private SelectionMode getSelectionMode(Parameter param) {
-    if (param instanceof FileParameter){
+    if (param instanceof FileParameter) {
       return SelectionMode.SINGLE;
-    }
-    else if(param instanceof FileListParameter) {
+    } else if (param instanceof FileListParameter) {
       return SelectionMode.MULTI;
-    }
-    else{
+    } else {
       return SelectionMode.NONE;
     }
   }
 
   private List<String> getRange(Parameter param) {
-    if (param instanceof FileParameter){
-      return ((FileParameter)param).getRange();
-    }
-    else if(param instanceof FileListParameter) {
-      return ((FileListParameter)param).getRange();
-    }
-    else{
+    if (param instanceof FileParameter) {
+      return ((FileParameter) param).getRange();
+    } else if (param instanceof FileListParameter) {
+      return ((FileListParameter) param).getRange();
+    } else {
       return new ArrayList<String>();
     }
-   
+
   }
 
-  public GeneratedPropertyContainer fastaContainer(){
-    BeanItemContainer<FastaBean> subContainer =
-        new BeanItemContainer<FastaBean>(FastaBean.class);
+  public GeneratedPropertyContainer fastaContainer() {
+    BeanItemContainer<FastaBean> subContainer = new BeanItemContainer<FastaBean>(FastaBean.class);
     FastaDB db = new FastaDB();
     subContainer.addAll(db.getAll());
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
     gpcontainer.removeContainerProperty("path");
     return gpcontainer;
   }
-  
+
   /**
    * filters all DataSetBeans which are NOT in the filter and returns a new Container
+   * 
    * @param datasets
    * @param filter
    * @return
    */
-  public GeneratedPropertyContainer filter(BeanItemContainer<DatasetBean> datasets, List<String> filter){
+  public GeneratedPropertyContainer filter(BeanItemContainer<DatasetBean> datasets,
+      List<String> filter) {
     BeanItemContainer<DatasetBean> subContainer =
         new BeanItemContainer<DatasetBean>(DatasetBean.class);
-    
+
     for (java.util.Iterator<DatasetBean> i = datasets.getItemIds().iterator(); i.hasNext();) {
       DatasetBean dataset = i.next();
 
-      if (filter.contains(dataset.getFileType().toLowerCase()) | filter.contains(dataset.getFileType())) {
+      if (filter.contains(dataset.getFileType().toLowerCase())
+          | filter.contains(dataset.getFileType())) {
         subContainer.addBean(dataset);
       }
     }
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
     gpcontainer.removeContainerProperty("fullPath");
     gpcontainer.removeContainerProperty("openbisCode");
-    
-    
+
+
     return gpcontainer;
   }
-  
 
-/*  public void buildLayout(Set<Entry<String, Parameter>> wfparameters,
-      BeanItemContainer<DatasetBean> datasets) {
-    this.wfparameters = wfparameters;
-    buildForm(wfparameters, datasets);
-  }
-*/
+
+  /*
+   * public void buildLayout(Set<Entry<String, Parameter>> wfparameters,
+   * BeanItemContainer<DatasetBean> datasets) { this.wfparameters = wfparameters;
+   * buildForm(wfparameters, datasets); }
+   */
   public void buildForm(Set<Entry<String, Parameter>> wfparameters,
       BeanItemContainer<DatasetBean> datasets) {
 
@@ -291,12 +287,12 @@ public class InputFilesComponent extends WorkflowParameterComponent {
   // TODO
   public void resetInputList() {
     throw new NotImplementedException();
-  /*  Collection<Field<?>> registeredFields = inputFileFieldGroup.getFields();
-
-    for (Field<?> field : registeredFields) {
-      TextField fieldToReset = (TextField) field;
-      fieldToReset.setValue(wfmap.get(field.getCaption()).getValue().toString());
-    }*/
+    /*
+     * Collection<Field<?>> registeredFields = inputFileFieldGroup.getFields();
+     * 
+     * for (Field<?> field : registeredFields) { TextField fieldToReset = (TextField) field;
+     * fieldToReset.setValue(wfmap.get(field.getCaption()).getValue().toString()); }
+     */
   }
 
   /**
@@ -330,11 +326,13 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     }
     return selectedDatasets;
   }
+
   /**
    * returns true if at least one dataset was selected for each tab
+   * 
    * @return
    */
-  boolean hasDastasetSelected(){
+  boolean hasDastasetSelected() {
     java.util.Iterator<Component> tabs = inputFileForm.iterator();
     while (tabs.hasNext()) {
       Tab tab = inputFileForm.getTab(tabs.next());
@@ -342,12 +340,15 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       java.util.Iterator<Component> grids = current.iterator();
       while (grids.hasNext()) {
         Grid currentGrid = (Grid) grids.next();
-        // getSelectedRows returns one (in single-selection mode) or all (in multi-selection mode) selected items
-        if(currentGrid.getSelectedRows().size() == 0) return false;
+        // getSelectedRows returns one (in single-selection mode) or all (in multi-selection mode)
+        // selected items
+        if (currentGrid.getSelectedRows().size() == 0)
+          return false;
       }
     }
-    return true;  
+    return true;
   }
+
   /**
    * updates workflow parameters with the currently selected datasets and databases. Be aware that
    * it is not checked, whether the correct workflow is given as parameter
@@ -359,7 +360,7 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     if (wf == null || wf.getData() == null || wf.getData().getData() == null
         || wf.getData().getData().isEmpty())
       return false;
-    
+
     java.util.Iterator<Component> i = inputFileForm.iterator();
     InputList inpList = wf.getData();
     while (i.hasNext()) {
@@ -375,14 +376,14 @@ public class InputFilesComponent extends WorkflowParameterComponent {
         if (currentGrid.getSelectionModel() instanceof SingleSelectionModel) {
           Object selectionSingle = currentGrid.getSelectedRow();
           // Quick solution
-          //TODO 
+          // TODO
           if (selectionSingle == null) {
-            if(caption.equals("InputFiles.1.Germline Mutations")) {
-            	continue;
-            }
-            else {
-        	  showError("Warning: Nothing selected for single input parameter " + caption);
-            return false;
+            if (caption.equals("InputFiles.1.Germline Mutations")
+                || caption.equals("InputFiles.1.bam")) {
+              continue;
+            } else {
+              showError("Warning: Nothing selected for single input parameter " + caption);
+              return false;
             }
           }
           if (selectionSingle instanceof FastaBean) {
@@ -401,7 +402,8 @@ public class InputFilesComponent extends WorkflowParameterComponent {
 
         } else {
           Collection<Object> selectionMulti = currentGrid.getSelectedRows();
-          if (selectionMulti == null || selectionMulti.isEmpty()) {
+          if ((selectionMulti == null || selectionMulti.isEmpty())
+              && (!caption.equals("InputFiles.1.fastq"))) {
             showError("Warning: Nothing selected for multi input parameter " + caption);
             return false;
           }
@@ -423,14 +425,15 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     }
     return true;
   }
-  
-  
-  
+
+
+
   /**
    * returns the number of file parameters
+   * 
    * @return
    */
-  public int size(){
+  public int size() {
     return this.wfmap.size();
   }
 

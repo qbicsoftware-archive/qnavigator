@@ -20,20 +20,20 @@ public class State extends Observable implements Serializable {
 
   public void notifyObservers(ArrayList<String> message) {
 
-    try{
+    try {
       String message2 = message.get(2).toLowerCase();
       if (message.get(1).contains("IVAC") && (message2.equals("project"))) {
-        LOGGER.debug("navigate to: " + message.get(1) + " " + message2);
         UI.getCurrent().getNavigator()
             .navigateTo(String.format("ivac%s/%s", message2, message.get(1)));
       } else {
-        UI.getCurrent().getNavigator()
-            .navigateTo(String.format("%s/%s", message2, message.get(1)));
+        UI.getCurrent().getNavigator().navigateTo(String.format("%s/%s", message2, message.get(1)));
       }
       this.setChanged();
-      super.notifyObservers(message);     
-    }catch(IllegalArgumentException e){
-      LOGGER.error(String.format("message1: %s, message2: %s, current View: %s.",message.get(1),message.get(2),"not available"),e.getStackTrace() ); 
+      super.notifyObservers(message);
+    } catch (IllegalArgumentException e) {
+      LOGGER.error(
+          String.format("message1: %s, message2: %s, current View: %s.", message.get(1),
+              message.get(2), "not available"), e.getStackTrace());
     }
   }
 

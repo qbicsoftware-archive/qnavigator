@@ -159,7 +159,7 @@ public DatasetBean(CheckBox isSelected, ProjectBean project, SampleBean sample,
     this.dssPath = dssPath;
   }
 
-  public boolean isDirectory() {
+  public boolean getIsDirectory() {
     return isDirectory;
   }
 
