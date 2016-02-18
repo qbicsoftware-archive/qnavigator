@@ -1,11 +1,8 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import java.util.List;
-
 import com.vaadin.ui.Component;
 
 import main.OpenBisClient;
-import model.ExperimentBarcodeSummaryBean;
 import controllers.BarcodeController;
 
 public class StandaloneBarcodeUI {
@@ -14,9 +11,14 @@ public class StandaloneBarcodeUI {
   BarcodeController bc;
 
   public StandaloneBarcodeUI(OpenBisClient openbis, String scripts, String path) {
+//    old
+//    this.bw = new WizardBarcodeViewOld();
+    bc = new BarcodeController(openbis, scripts, path);
+//    bc.init();
+    
+    //new
     this.bw = new WizardBarcodeView();
-    bc = new BarcodeController(bw, openbis, scripts, path);
-    bc.init();
+    bw.initControl(bc);
   }
 
   public void setExperiments() {}
