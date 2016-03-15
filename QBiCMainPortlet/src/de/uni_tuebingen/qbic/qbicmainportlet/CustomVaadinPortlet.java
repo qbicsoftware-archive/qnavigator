@@ -1,7 +1,6 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -31,21 +30,14 @@ import model.ExperimentBean;
 import model.ProjectBean;
 import model.SampleBean;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
-import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.vaadin.server.DeploymentConfiguration;
-import com.vaadin.server.Page;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.VaadinPortlet;
 import com.vaadin.server.VaadinPortletService;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.Position;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
 
 /**
  * 
@@ -181,104 +173,103 @@ public class CustomVaadinPortlet extends VaadinPortlet {
   private void serveEntries(HashMap<String, SimpleEntry<String, Long>> entries, TarWriter writer,
       ResourceResponse response, OpenBisClient openbisClient) {
 
-	  if(entries.keySet().size() > 1) {
+    if (entries.keySet().size() > 1) {
 
-		  String timestamp = new SimpleDateFormat("yyyyMMddhhmm").format(new Date());
+      String timestamp = new SimpleDateFormat("yyyyMMddhhmm").format(new Date());
 
-		  String filename = "qbicdatasets" + timestamp + ".tar";
+      String filename = "qbicdatasets" + timestamp + ".tar";
 
-		  //response.setContentType(writer.getContentType());
-		  StringBuilder sb = new StringBuilder("attachement; filename=\"");
-		  sb.append(filename);
-		  sb.append("\"");
-		  response.setProperty("Content-Disposition", sb.toString());
+      // response.setContentType(writer.getContentType());
+      StringBuilder sb = new StringBuilder("attachement; filename=\"");
+      sb.append(filename);
+      sb.append("\"");
+      response.setProperty("Content-Disposition", sb.toString());
 
-		  long tarFileLength = writer.computeTarLength2(entries);
-		  
-		  LOGGER.debug(String.valueOf(tarFileLength));
+      long tarFileLength = writer.computeTarLength2(entries);
 
-		  //Integer fileSize = (int) (long) tarFileLength;
+      LOGGER.debug(String.valueOf(tarFileLength));
 
-		  // For some reason setContentLength does not work
-		  response.setProperty("Content-Length", String.valueOf(tarFileLength));
-		  
-		  // Seems to work with Liferay 6.2, when using setProperty some tarred files are corrupt, unexpected end of file
-		  // Didn't work with Liferay 6.2 either
-		  // However deactivating GzipFilter by setting com.liferay.portal.servlet.filters.gzip.GZipFilter=false seems to fix it
-		  // Probably the Content Length can't be set in the header of this Filter
-//		  response.setContentLength(fileSize);
+      // Integer fileSize = (int) (long) tarFileLength;
+
+      // For some reason setContentLength does not work
+      response.setProperty("Content-Length", String.valueOf(tarFileLength));
+
+      // Seems to work with Liferay 6.2, when using setProperty some tarred files are corrupt,
+      // unexpected end of file
+      // Didn't work with Liferay 6.2 either
+      // However deactivating GzipFilter by setting
+      // com.liferay.portal.servlet.filters.gzip.GZipFilter=false seems to fix it
+      // Probably the Content Length can't be set in the header of this Filter
+      // response.setContentLength(fileSize);
 
 
-		  try {	
-			  writer.setOutputStream(response.getPortletOutputStream());
+      try {
+        writer.setOutputStream(response.getPortletOutputStream());
 
-		  } catch (IOException e) {
-			  // TODO Auto-generated catch block
-			  e.printStackTrace();
-		  }
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
 
-		  Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
-		  Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
-		  while (it.hasNext()) {
-			  Entry<String, SimpleEntry<String, Long>> entry = it.next();
-			  String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
-			  String[] splittedFilePath = entryKey.split("/");
+      Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+      Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
+      while (it.hasNext()) {
+        Entry<String, SimpleEntry<String, Long>> entry = it.next();
+        String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+        String[] splittedFilePath = entryKey.split("/");
 
-			  if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
-				  //writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(),
-				  writer.writeEntry(entry.getKey(),
-						  openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
-			  } else {
-				  //writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(), openbisClient
-				  writer.writeEntry(splittedFilePath[splittedFilePath.length-1], openbisClient
-						  .getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
-			  }
-		  }
-		  writer.closeStream();
-		  
-	  } else {
-		  Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries
-				  .entrySet();
-		  Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet
-				  .iterator();
+        if ((splittedFilePath.length == 0) || (splittedFilePath == null)) {
+          // writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(),
+          writer.writeEntry(entry.getKey(), openbisClient.getDatasetStream(entry.getValue()
+              .getKey()), entry.getValue().getValue());
+        } else {
+          // writer.writeEntry(entry.getValue().getKey() + "/" + entry.getKey(), openbisClient
+          writer.writeEntry(splittedFilePath[splittedFilePath.length - 1], openbisClient
+              .getDatasetStream(entry.getValue().getKey(), entryKey), entry.getValue().getValue());
+        }
+      }
+      writer.closeStream();
 
-		  //response.setContentType(writer.getContentType());
+    } else {
+      Set<Entry<String, SimpleEntry<String, Long>>> entrySet = entries.entrySet();
+      Iterator<Entry<String, SimpleEntry<String, Long>>> it = entrySet.iterator();
 
-		  while (it.hasNext()) {
-			  Entry<String, SimpleEntry<String, Long>> entry = it.next();
-			  String entryKey = entry.getKey().replaceFirst(
-					  entry.getValue().getKey() + "/", "");
-			  String[] splittedFilePath = entryKey.split("/");
+      // response.setContentType(writer.getContentType());
 
-			  InputStream datasetStream = openbisClient.getDatasetStream(
-					  entry.getValue().getKey(), entryKey);
+      while (it.hasNext()) {
+        Entry<String, SimpleEntry<String, Long>> entry = it.next();
+        String entryKey = entry.getKey().replaceFirst(entry.getValue().getKey() + "/", "");
+        String[] splittedFilePath = entryKey.split("/");
 
-			  StringBuilder sb = new StringBuilder("attachement; filename=\"");
-			  sb.append(splittedFilePath[splittedFilePath.length - 1]);
-			  sb.append("\"");
-			  response.setProperty("Content-Disposition", sb.toString());
-			  response.setProperty("Content-Type", getPortletContext().getMimeType((splittedFilePath[splittedFilePath.length - 1])));
-			  //Integer fileSize = (int) (long) entry.getValue().getValue();
-	 
-			  response.setProperty("Content-Length", String.valueOf(entry.getValue().getValue()));
+        InputStream datasetStream =
+            openbisClient.getDatasetStream(entry.getValue().getKey(), entryKey);
 
-			  //response.setContentLength(fileSize);
-			  
-			  byte[] buffer = new byte[32768];
-			  int bytesRead;
-			  try {
-				  while ((bytesRead = datasetStream.read(buffer)) != -1) {
-					  response.getPortletOutputStream().write(buffer, 0,
-							  bytesRead);
-				  }
+        StringBuilder sb = new StringBuilder("attachement; filename=\"");
+        sb.append(splittedFilePath[splittedFilePath.length - 1]);
+        sb.append("\"");
+        response.setProperty("Content-Disposition", sb.toString());
+        response.setProperty("Content-Type",
+            getPortletContext().getMimeType((splittedFilePath[splittedFilePath.length - 1])));
+        // Integer fileSize = (int) (long) entry.getValue().getValue();
 
-			  } catch (IOException e) {
-				  // TODO Auto-generated catch block
-				  e.printStackTrace();
-			  }
-			  
-		  }
-	  }
+        response.setProperty("Content-Length", String.valueOf(entry.getValue().getValue()));
+
+        // response.setContentLength(fileSize);
+
+        byte[] buffer = new byte[32768];
+        int bytesRead;
+        try {
+          while ((bytesRead = datasetStream.read(buffer)) != -1) {
+            response.getPortletOutputStream().write(buffer, 0, bytesRead);
+          }
+
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+
+      }
+    }
   }
 
   void serveProject2(ProjectBean bean, TarWriter writer, ResourceResponse response,
@@ -288,20 +279,23 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     List<DataSet> datasets =
         openbisClient.getClientDatasetsOfProjectByIdentifierWithSearchCriteria(bean.getId());
     long endTime = System.nanoTime();
-    LOGGER.debug(String.format("getClientDatasetsOfProjectByIdentifierWithSearchCriteria took %f s", ((endTime - startTime) / 1000000000.0)));
+    LOGGER.debug(String.format(
+        "getClientDatasetsOfProjectByIdentifierWithSearchCriteria took %f s",
+        ((endTime - startTime) / 1000000000.0)));
     startTime = System.nanoTime();
     List<String> codes = new ArrayList<String>();
-    for(DataSet dataset: datasets) {
+    for (DataSet dataset : datasets) {
       codes.add(dataset.getCode());
-    }   
+    }
     Map<String, List<String>> params = new HashMap<String, List<String>>();
     params.put("codes", codes);
     QueryTableModel res = openbisClient.queryFileInformation(params);
     endTime = System.nanoTime();
-    LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
+    LOGGER.debug(String.format("getAggregationService took %f s",
+        ((endTime - startTime) / 1000000000.0)));
     download(res, writer, response, openbisClient, bean.getCode());
   }
-  
+
   void serveExperiment2(ExperimentBean bean, TarWriter writer, ResourceResponse response,
       OpenBisClient openbisClient) {
     long startTime = System.nanoTime();
@@ -309,54 +303,60 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> datasets =
         openbisClient.getDataSetsOfExperimentByCodeWithSearchCriteria(bean.getCode());
     long endTime = System.nanoTime();
-    LOGGER.debug(String.format("getDataSetsOfExperimentByCodeWithSearchCriteria took %f s", ((endTime - startTime) / 1000000000.0)));
-    
+    LOGGER.debug(String.format("getDataSetsOfExperimentByCodeWithSearchCriteria took %f s",
+        ((endTime - startTime) / 1000000000.0)));
+
     startTime = System.nanoTime();
     List<String> codes = new ArrayList<String>();
-    for(ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset: datasets) {
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset : datasets) {
       codes.add(dataset.getCode());
-    }   
+    }
     Map<String, List<String>> params = new HashMap<String, List<String>>();
     params.put("codes", codes);
     QueryTableModel res = openbisClient.queryFileInformation(params);
     endTime = System.nanoTime();
-    LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
-    
+    LOGGER.debug(String.format("getAggregationService took %f s",
+        ((endTime - startTime) / 1000000000.0)));
+
     download(res, writer, response, openbisClient, bean.getCode());
   }
+
   void serveSample2(SampleBean bean, TarWriter writer, ResourceResponse response,
       OpenBisClient openbisClient) {
     long startTime = System.nanoTime();
 
-    List<DataSet> datasets =
-        openbisClient.getDataSetsOfSampleByIdentifier(bean.getId());
+    List<DataSet> datasets = openbisClient.getDataSetsOfSampleByIdentifier(bean.getId());
     long endTime = System.nanoTime();
-    LOGGER.debug(String.format("getDataSetsOfProjectByIdentifier took %f s", ((endTime - startTime) / 1000000000.0)));
+    LOGGER.debug(String.format("getDataSetsOfProjectByIdentifier took %f s",
+        ((endTime - startTime) / 1000000000.0)));
     startTime = System.nanoTime();
     List<String> codes = new ArrayList<String>();
-    for(DataSet dataset: datasets) {
+    for (DataSet dataset : datasets) {
       codes.add(dataset.getCode());
-    }   
+    }
     Map<String, List<String>> params = new HashMap<String, List<String>>();
     params.put("codes", codes);
     QueryTableModel res = openbisClient.queryFileInformation(params);
     endTime = System.nanoTime();
-    LOGGER.debug(String.format("getAggregationService took %f s", ((endTime - startTime) / 1000000000.0)));
+    LOGGER.debug(String.format("getAggregationService took %f s",
+        ((endTime - startTime) / 1000000000.0)));
     download(res, writer, response, openbisClient, bean.getCode());
   }
-  
-  
-  
+
+
 
   void download(QueryTableModel res, TarWriter writer, ResourceResponse response,
-      OpenBisClient openbisClient, String openbisCode){
-    Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertQueryTabelModelToEntries(res);
+      OpenBisClient openbisClient, String openbisCode) {
+    Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
+        convertQueryTabelModelToEntries(res);
     String filename = openbisCode + ".tar";
-    writeToClient(response, writer, filename, entries, openbisClient, openbisCode);  
+    writeToClient(response, writer, filename, entries, openbisClient, openbisCode);
   }
-  
-  
-  void writeToClient(ResourceResponse response, TarWriter writer, String filename, Map<String, AbstractMap.SimpleEntry<String, Long>> entries, OpenBisClient openbisClient, String openbisCode){
+
+
+  void writeToClient(ResourceResponse response, TarWriter writer, String filename,
+      Map<String, AbstractMap.SimpleEntry<String, Long>> entries, OpenBisClient openbisClient,
+      String openbisCode) {
     response.setContentType(writer.getContentType());
     StringBuilder sb = new StringBuilder("attachement; filename=\"");
     sb.append(filename);
@@ -386,23 +386,24 @@ public class CustomVaadinPortlet extends VaadinPortlet {
         writer.writeEntry(openbisCode + "/" + entry.getKey(),
             openbisClient.getDatasetStream(entry.getValue().getKey()), entry.getValue().getValue());
       } else {
-        writer.writeEntry(openbisCode + "/" + entry.getKey(), openbisClient.getDatasetStream(
-            entry.getValue().getKey(), entryKey), entry.getValue().getValue());
+        writer.writeEntry(openbisCode + "/" + entry.getKey(), openbisClient.getDatasetStream(entry
+            .getValue().getKey(), entryKey), entry.getValue().getValue());
       }
     }
     writer.closeStream();
   }
-  
-  
+
+
   private Map<String, SimpleEntry<String, Long>> convertQueryTabelModelToEntries(QueryTableModel res) {
     Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
-        new HashMap<String, AbstractMap.SimpleEntry<String, Long>>(); 
+        new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
     for (Serializable[] ss : res.getRows()) {
-        String filePath = (String)ss[1];
-        if(filePath.startsWith("original")){
-          filePath = filePath.substring(9);
-        }
-        entries.put(filePath, new AbstractMap.SimpleEntry<String, Long>((String)ss[0]/*code*/,(Long)ss[3] /*filelentgth*/ ));
+      String filePath = (String) ss[1];
+      if (filePath.startsWith("original")) {
+        filePath = filePath.substring(9);
+      }
+      entries.put(filePath, new AbstractMap.SimpleEntry<String, Long>((String) ss[0]/* code */,
+          (Long) ss[3] /* filelentgth */));
     }
     return entries;
   }
@@ -475,7 +476,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     sb.append("\"");
     response.setProperty("Content-Disposition", sb.toString());
     Map<String, AbstractMap.SimpleEntry<String, Long>> entries = convertBeanToEntries(bean);
-    if(!entries.isEmpty()){
+    if (!entries.isEmpty()) {
       LOGGER.debug(entries.entrySet().iterator().next().getKey());
     }
     long tarFileLength = writer.computeTarLength2(entries);

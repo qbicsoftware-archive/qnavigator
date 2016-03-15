@@ -8,6 +8,7 @@ import qbic.model.maxquant.GroupSpecificParameters;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
@@ -49,6 +50,8 @@ public class GroupSpecificParameterComponent extends CustomComponent {
 
   private NativeSelect matchType;
 
+  private CheckBox labelfreequant;
+
   public GroupSpecificParameterComponent() {
 
     this.setCaption(CAPTION);
@@ -89,6 +92,11 @@ public class GroupSpecificParameterComponent extends CustomComponent {
   private FormLayout initParameters() {
     // select the type
     FormLayout parameterLayout = new FormLayout();
+
+    labelfreequant = new CheckBox();
+    labelfreequant.setCaption("Label-Free Quantification");
+    parameterLayout.addComponent(labelfreequant);
+
     typeSelect = new NativeSelect();
     typeSelect.setCaption("Type");
     typeSelect.addItem("Standard");
@@ -169,6 +177,7 @@ public class GroupSpecificParameterComponent extends CustomComponent {
     BeanFieldGroup<GroupSpecificParameters> binder =
         new BeanFieldGroup<GroupSpecificParameters>(GroupSpecificParameters.class);
     binder.setItemDataSource(groups.get(value).getParameters());
+    binder.bind(labelfreequant, "lfqMode");
     binder.bind(typeSelect, "type");
     binder.bind(multiplicitySelect, "multiplicity");
     binder.bind(variableModifications, "variableModifications");

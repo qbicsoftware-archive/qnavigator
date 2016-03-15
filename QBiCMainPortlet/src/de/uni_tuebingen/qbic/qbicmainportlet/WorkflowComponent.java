@@ -20,6 +20,7 @@ import qbic.model.maxquant.MaxquantConverterFactory;
 import qbic.model.maxquant.RawFilesBean;
 import qbic.vaadincomponents.MaxQuantComponent;
 import qbic.vaadincomponents.MicroarrayQCComponent;
+import qbic.vaadincomponents.NGSMappingComponent;
 import qbic.vaadincomponents.StandardWorkflowComponent;
 import submitter.SubmitFailedException;
 import submitter.Workflow;
@@ -330,6 +331,12 @@ public class WorkflowComponent extends CustomComponent {
       qcComp.addResetListener(new MicroarrayQCResetListener(qcComp));
       qcComp.addSubmissionListener(new MicroarrayQCSubmissionListener(qcComp));
       this.submission.addComponent(qcComp);
+    } else if (workFlow.getName().contains("NGS Read Alignment")) {
+      NGSMappingComponent mappComp = new NGSMappingComponent(controller);
+      mappComp.update(workFlow, projectDatasets);
+      mappComp.addResetListener(new NGSMappingResetListener(mappComp));
+      mappComp.addSubmissionListener(new NGSMappingSubmissionListener(mappComp));
+      this.submission.addComponent(mappComp);
     } else {
       StandardWorkflowComponent standardComponent = new StandardWorkflowComponent(controller);
       standardComponent.update(workFlow, projectDatasets);
@@ -394,6 +401,50 @@ public class WorkflowComponent extends CustomComponent {
     @Override
     public void buttonClick(ClickEvent event) {
       swc.resetParameters();
+    }
+  }
+  /**
+   * 
+   * @author mohr
+   * 
+   */
+  public class NGSMappingResetListener implements ClickListener {
+    private static final long serialVersionUID = -127474228749885664L;
+    private NGSMappingComponent qcc;
+
+    public NGSMappingResetListener(NGSMappingComponent wfComp) {
+      qcc = wfComp;
+    }
+
+    @Override
+    public void buttonClick(ClickEvent event) {
+      qcc.resetParameters();
+    }
+  }
+
+  /**
+   * 
+   * @author mohr
+   * 
+   */
+  private class NGSMappingSubmissionListener implements ClickListener {
+    private static final long serialVersionUID = 24386950203184318L;
+    private NGSMappingComponent comp;
+
+    public NGSMappingSubmissionListener(NGSMappingComponent comp) {
+      this.comp = comp;
+    }
+
+    @Override
+    public void buttonClick(ClickEvent event) {
+      try {
+        List<DatasetBean> selectedDatasets = comp.getSelectedDatasets();
+        comp.writeParametersToWorkflow();
+        Workflow submittedWf = comp.getWorkflow();
+        submit(submittedWf, new ArrayList<DatasetBean>(selectedDatasets));
+      } catch (Exception e) {
+        handleException(e);
+      }
     }
   }
 

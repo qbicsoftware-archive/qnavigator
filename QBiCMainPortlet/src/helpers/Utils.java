@@ -1,13 +1,22 @@
 package helpers;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import model.ProjectBean;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -23,6 +32,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupView;
 import com.vaadin.ui.PopupView.Content;
 import com.vaadin.ui.VerticalLayout;
@@ -303,5 +313,46 @@ public class Utils {
       notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
     }
     notify.show(Page.getCurrent());
+  }
+
+  public static Panel createInfoBox(String caption, String description) {
+    Panel panel = new Panel(caption);
+    panel.setIcon(FontAwesome.INFO);
+    panel.setStyleName(ValoTheme.PANEL_BORDERLESS);
+    HorizontalLayout layout = new HorizontalLayout();
+    Label label = new Label();
+    label.setValue(description);
+    layout.addComponent(label);
+
+    panel.setContent(layout);
+    return panel;
+  }
+
+  public void generateProjectReport(ProjectBean projectBean) {
+    Writer report = null;
+    try {
+      report =
+          new BufferedWriter(new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"),
+              "utf-8"));
+
+      // write tex file header
+      report.write("\\documentclass[ngerman]{scrartcl} \n");
+      report.write("\\begin{document} \n");
+      report.write(String.format("\\section{Project Report %s} \n", projectBean.getCode()));
+
+      report.write("\\subsection{General Information} \n");
+      report.write("");
+
+      report.write("\\end{document}");
+    } catch (UnsupportedEncodingException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 }

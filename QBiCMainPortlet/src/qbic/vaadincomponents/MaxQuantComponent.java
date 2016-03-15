@@ -331,7 +331,6 @@ public class MaxQuantComponent extends CustomComponent {
       @Override
       public void buttonClick(ClickEvent event) {
         updateGroups();
-        writeToFile("/tmp/test.json");
       }
     });
   }

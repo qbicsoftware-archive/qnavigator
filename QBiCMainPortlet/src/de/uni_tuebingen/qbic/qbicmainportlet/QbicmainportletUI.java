@@ -16,7 +16,6 @@ import model.DBManager;
 import submitter.Submitter;
 import submitter.WorkflowSubmitterFactory;
 import submitter.WorkflowSubmitterFactory.Type;
-import views.WorkflowView;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.liferay.portal.kernel.util.WebKeys;
@@ -66,17 +65,19 @@ public class QbicmainportletUI extends UI {
 
   }
 
-
   private OpenBisClient openBisConnection;
   private DataHandler datahandler;
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "1.1.7";
-  private String revision = "12fbb81";
+  private String version = "1.2";
+  private String revision = "d1cc0b3";
   private String resUrl;
   protected View currentView;
 
+  /**
+   * 
+   */
   @Override
   protected void init(VaadinRequest request) {
     if (LiferayAndVaadinUtils.getUser() == null) {
@@ -106,7 +107,9 @@ public class QbicmainportletUI extends UI {
     }
   }
 
-
+  /**
+ * 
+ */
   void errorMessageIfIsProduction() {
     if (isInProductionMode())
       try {
@@ -117,6 +120,10 @@ public class QbicmainportletUI extends UI {
       }
   }
 
+  /**
+   * 
+   * @return
+   */
   private boolean isInProductionMode() {
     return VaadinService.getCurrent().getDeploymentConfiguration().isProductionMode();
   }
@@ -226,10 +233,20 @@ public class QbicmainportletUI extends UI {
     }
   }
 
+  /**
+   * 
+   * @return
+   */
   public static QbicmainportletUI getCurrent() {
     return (QbicmainportletUI) UI.getCurrent();
   }
 
+  /**
+   * 
+   * @param datahandler
+   * @param request
+   * @param user
+   */
   public void buildMainLayout(DataHandler datahandler, VaadinRequest request, String user) {
     State state = (State) UI.getCurrent().getSession().getAttribute("state");
     MultiscaleController multiscaleController =
@@ -247,8 +264,10 @@ public class QbicmainportletUI extends UI {
     // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
-    final VaccineDesignerView vaccineDesignerView =
-        new VaccineDesignerView(datahandler, state, resUrl);
+
+    // Not yet production ready
+    // final VaccineDesignerView vaccineDesignerView =
+    // new VaccineDesignerView(datahandler, state, resUrl);
 
     final SearchResultsView searchResultsView =
         new SearchResultsView(datahandler, "Search results", user, state, resUrl);
@@ -257,39 +276,29 @@ public class QbicmainportletUI extends UI {
     try {
       submitter = WorkflowSubmitterFactory.getSubmitter(Type.guseSubmitter, manager);
     } catch (Exception e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
 
     WorkflowViewController controller =
         new WorkflowViewController(submitter, datahandler.getOpenBisClient(), user);
 
-    final WorkflowView workflowView = new WorkflowView(controller);
     final ProjectView projectView =
         new ProjectView(datahandler, state, resUrl, controller, manager);
     final PatientView patientView =
         new PatientView(datahandler, state, resUrl, controller, manager);
 
-
     VerticalLayout navigatorContent = new VerticalLayout();
-
     final Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
 
     navigator.addView(DatasetView.navigateToLabel, datasetView);
     navigator.addView(SampleView.navigateToLabel, sampleView);
     navigator.addView("", homeView);
-
     navigator.addView(ProjectView.navigateToLabel, projectView);
     navigator.addView(BarcodeView.navigateToLabel, barcodeView);
     navigator.addView(ExperimentView.navigateToLabel, experimentView);
-    // navigator.addView(ChangePropertiesView.navigateToLabel, changepropertiesView);
-
     navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateToLabel, addPatientView);
-
     navigator.addView(SearchResultsView.navigateToLabel, searchResultsView);
-
-    navigator.addView(WorkflowView.navigateToLabel, workflowView);
     // navigator.addView(VaccineDesignerView.navigateToLabel, vaccineDesignerView);
 
     setNavigator(navigator);
@@ -329,8 +338,6 @@ public class QbicmainportletUI extends UI {
 
     buttonLayout.addComponent(homeButton);
     Boolean includePatientCreation = false;
-
-
 
     List<Project> projects =
         datahandler.getOpenBisClient().getOpenbisInfoService()
@@ -407,8 +414,6 @@ public class QbicmainportletUI extends UI {
           projectView.updateView(height, width, browser);
         } else if (currentView instanceof ExperimentView) {
           experimentView.updateView(height, width, browser);
-        } else if (currentView instanceof WorkflowView) {
-          workflowView.updateView(height, width, browser);
         } else if (currentView instanceof PatientView) {
           patientView.updateView(height, width, browser);
         } else if (currentView instanceof AddPatientView) {
@@ -439,8 +444,6 @@ public class QbicmainportletUI extends UI {
         }
         if (currentView instanceof SampleView) {
           sampleView.updateView(height, width, browser);
-        } else if (currentView instanceof WorkflowView) {
-          workflowView.updateView(height, width, browser);
         } else if (currentView instanceof PatientView) {
           patientView.updateView(height, width, browser);
         } else if (currentView instanceof AddPatientView) {
@@ -552,6 +555,11 @@ public class QbicmainportletUI extends UI {
      */
   }
 
+
+  /**
+   * 
+   * @return
+   */
   public PortletSession getPortletSession() {
     UI.getCurrent().getSession().getService();
     VaadinRequest vaadinRequest = VaadinService.getCurrentRequest();
@@ -560,6 +568,9 @@ public class QbicmainportletUI extends UI {
     return wrappedPortletSession.getPortletSession();
   }
 
+  /**
+   * 
+   */
   private void initSessionAttributes() {
     if (this.openBisConnection == null) {
       this.initConnection();
@@ -575,6 +586,9 @@ public class QbicmainportletUI extends UI {
         PortletSession.APPLICATION_SCOPE);
   }
 
+  /**
+   * 
+   */
   private void initConnection() {
     this.openBisConnection =
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),

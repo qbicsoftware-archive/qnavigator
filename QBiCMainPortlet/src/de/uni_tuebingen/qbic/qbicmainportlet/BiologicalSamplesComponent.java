@@ -1,6 +1,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,8 +9,9 @@ import logging.Log4j2Logger;
 import logging.Logger;
 import model.BiologicalEntitySampleBean;
 import model.BiologicalSampleBean;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Vocabulary;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
@@ -31,6 +33,8 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Window.CloseEvent;
+import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
@@ -70,6 +74,15 @@ public class BiologicalSamplesComponent extends CustomComponent {
 
   private BeanItemContainer<BiologicalEntitySampleBean> samplesEntity;
 
+  private String currentID;
+
+  /**
+   * 
+   * @param dh
+   * @param state
+   * @param resourceurl
+   * @param caption
+   */
   public BiologicalSamplesComponent(DataHandler dh, State state, String resourceurl, String caption) {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
@@ -81,6 +94,9 @@ public class BiologicalSamplesComponent extends CustomComponent {
     this.initUI();
   }
 
+  /**
+   * 
+   */
   private void initUI() {
     vert = new VerticalLayout();
     sampleBioGrid = new Grid();
@@ -114,7 +130,13 @@ public class BiologicalSamplesComponent extends CustomComponent {
     this.setCompositionRoot(mainLayout);
   }
 
+  /**
+   * 
+   * @param id
+   */
   public void updateUI(String id) {
+
+    currentID = id;
     sampleBioGrid = new Grid();
     sampleEntityGrid = new Grid();
 
@@ -148,7 +170,9 @@ public class BiologicalSamplesComponent extends CustomComponent {
     BeanItemContainer<BiologicalEntitySampleBean> samplesEntityContainer =
         new BeanItemContainer<BiologicalEntitySampleBean>(BiologicalEntitySampleBean.class);
 
-    List<Sample> allSamples = datahandler.getOpenBisClient().getSamplesOfProject(id);
+    List<Sample> allSamples = datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(id);
+    List<VocabularyTerm> terms = null;
+    Map<String, String> termsMap = new HashMap<String, String>();
 
     for (Sample sample : allSamples) {
 
@@ -160,27 +184,42 @@ public class BiologicalSamplesComponent extends CustomComponent {
         newEntityBean.setCode(sample.getCode());
         newEntityBean.setId(sample.getIdentifier());
         newEntityBean.setType(sample.getSampleTypeCode());
-        newEntityBean.setAdditionalInfo(sampleProperties.get("Q_ADDIIONAL_INFO"));
+        newEntityBean.setAdditionalInfo(sampleProperties.get("Q_ADDITIONAL_INFO"));
         newEntityBean.setExternalDB(sampleProperties.get("Q_EXTERNALDB_ID"));
         newEntityBean.setSecondaryName(sampleProperties.get("Q_SECONDARY_NAME"));
 
         String organismID = sampleProperties.get("Q_NCBI_ORGANISM");
         newEntityBean.setOrganism(organismID);
 
-        List<PropertyType> bioSampleProperties =
-            datahandler.getOpenBisClient().listPropertiesForType(
-                datahandler.getOpenBisClient().getSampleTypeByString(
-                    sampleTypes.Q_BIOLOGICAL_ENTITY.toString()));
-
-        for (PropertyType pType : bioSampleProperties) {
-          if (pType.getCode().equals("Q_NCBI_ORGANISM")) {
-            newEntityBean.setOrganismName(datahandler.getOpenBisClient().getCVLabelForProperty(
-                pType, organismID));
+        if (terms != null) {
+          if (termsMap.containsKey(organismID)) {
+            newEntityBean.setOrganismName(termsMap.get(organismID));
+          } else {
+            for (VocabularyTerm term : terms) {
+              if (term.getCode().equals(organismID)) {
+                newEntityBean.setOrganismName(term.getLabel());
+                break;
+              }
+            }
+          }
+        } else {
+          for (Vocabulary vocab : datahandler.getOpenBisClient().getFacade().listVocabularies()) {
+            if (vocab.getCode().equals("Q_NCBI_TAXONOMY")) {
+              terms = vocab.getTerms();
+              for (VocabularyTerm term : vocab.getTerms()) {
+                if (term.getCode().equals(organismID)) {
+                  newEntityBean.setOrganismName(term.getLabel());
+                  termsMap.put(organismID, term.getLabel());
+                  break;
+                }
+              }
+              break;
+            }
           }
         }
+
         newEntityBean.setProperties(sampleProperties);
         newEntityBean.setGender(sampleProperties.get("Q_GENDER"));
-
         samplesEntityContainer.addBean(newEntityBean);
 
         for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
@@ -199,7 +238,7 @@ public class BiologicalSamplesComponent extends CustomComponent {
             newBean.setTissueDetailed(sampleBioProperties.get("Q_TISSUE_DETAILED"));
             newBean.setBiologicalEntity(sample.getCode());
 
-            newBean.setAdditionalInfo(sampleBioProperties.get("Q_ADDIIONAL_INFO"));
+            newBean.setAdditionalInfo(sampleBioProperties.get("Q_ADDITIONAL_INFO"));
             newBean.setExternalDB(sampleBioProperties.get("Q_EXTERNALDB_ID"));
             newBean.setSecondaryName(sampleBioProperties.get("Q_SECONDARY_NAME"));
             newBean.setProperties(sampleBioProperties);
@@ -209,6 +248,7 @@ public class BiologicalSamplesComponent extends CustomComponent {
         }
       }
     }
+
 
     numberOfBioSamples = samplesBioContainer.size();
     numberOfEntitySamples = samplesEntityContainer.size();
@@ -319,7 +359,19 @@ public class BiologicalSamplesComponent extends CustomComponent {
         subWindow.setModal(true);
         subWindow.setIcon(FontAwesome.PENCIL);
         subWindow.setHeight("75%");
-        // subWindow.setSizeFull();
+
+        subWindow.addCloseListener(new CloseListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = -1329152609834711109L;
+
+          @Override
+          public void windowClose(CloseEvent e) {
+            LOGGER.debug("OMG window is closes");
+            updateUI(currentID);
+          }
+        });
 
         QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
         ui.addWindow(subWindow);
@@ -368,7 +420,18 @@ public class BiologicalSamplesComponent extends CustomComponent {
         subWindow.center();
         subWindow.setModal(true);
         subWindow.setResizable(false);
-        // subWindow.setSizeFull();
+
+        subWindow.addCloseListener(new CloseListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = -1329152609834711109L;
+
+          @Override
+          public void windowClose(CloseEvent e) {
+            updateUI(currentID);
+          }
+        });
 
         QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
         ui.addWindow(subWindow);

@@ -1157,8 +1157,8 @@ public class PatientView extends VerticalLayout implements View {
     // if (currentBean != null)
     // LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
     if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
-      LOGGER.debug("reseting graph");
       resetGraph();
+      patientViewTab.setSelectedTab(0);
     }
     this.currentBean = pbean;
 
@@ -1168,7 +1168,7 @@ public class PatientView extends VerticalLayout implements View {
 
     updateContent();
 
-    patientViewTab.setSelectedTab(0);
+    // patientViewTab.setSelectedTab(0);
 
   }
 

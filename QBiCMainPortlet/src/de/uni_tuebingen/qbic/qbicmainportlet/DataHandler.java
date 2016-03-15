@@ -407,6 +407,89 @@ public class DataHandler implements Serializable {
   }
 
   /**
+   * Method to get Bean from either openbis identifier or openbis object. Does NOT check if
+   * corresponding bean is already stored in datahandler map. Should be used if project instance has
+   * been modified from session
+   * 
+   * @param
+   * @return
+   */
+  public ProjectBean getProjectFromDB(String projectIdentifier) {
+    List<Experiment> experiments =
+        this.getOpenBisClient().getExperimentsForProject2(projectIdentifier);
+
+    float projectStatus = this.getOpenBisClient().computeProjectStatus(experiments);
+
+    Project project = getOpenBisClient().getProjectByIdentifier(projectIdentifier);
+    dtoProjects.put(projectIdentifier, project);
+
+    ProjectBean newProjectBean = new ProjectBean();
+
+    ProgressBar progressBar = new ProgressBar();
+    progressBar.setValue(projectStatus);
+
+    Date registrationDate = project.getRegistrationDetails().getRegistrationDate();
+
+    String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+
+    if (pi.equals("")) {
+      newProjectBean.setPrincipalInvestigator("No information provided.");
+    } else {
+      newProjectBean.setPrincipalInvestigator(pi);
+    }
+
+    newProjectBean.setId(project.getIdentifier());
+    newProjectBean.setCode(project.getCode());
+    String desc = project.getDescription();
+    if (desc == null)
+      desc = "";
+    newProjectBean.setDescription(desc);
+    newProjectBean.setRegistrationDate(registrationDate);
+    newProjectBean.setProgress(progressBar);
+    newProjectBean.setRegistrator(project.getRegistrationDetails().getUserId());
+    newProjectBean.setContact(project.getRegistrationDetails().getUserEmail());
+
+    BeanItemContainer<ExperimentBean> experimentBeans =
+        new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
+
+    for (Experiment experiment : experiments) {
+      ExperimentBean newExperimentBean = new ExperimentBean();
+      String status = "";
+
+      Map<String, String> assignedProperties = experiment.getProperties();
+
+      if (assignedProperties.keySet().contains("Q_CURRENT_STATUS")) {
+        status = assignedProperties.get("Q_CURRENT_STATUS");
+      }
+
+      else if (assignedProperties.keySet().contains("Q_WF_STATUS")) {
+        status = assignedProperties.get("Q_WF_STATUS");
+      }
+
+      // Image statusColor = new Image(status, this.setExperimentStatusColor(status));
+      // statusColor.setWidth("15px");
+      // statusColor.setHeight("15px");
+      // statusColor.setCaption(status);
+
+      newExperimentBean.setId(experiment.getIdentifier());
+      newExperimentBean.setCode(experiment.getCode());
+      newExperimentBean.setType(experiment.getExperimentTypeCode());
+      newExperimentBean.setStatus(status);
+      newExperimentBean.setRegistrator(experiment.getRegistrationDetails().getUserId());
+      newExperimentBean.setRegistrationDate(experiment.getRegistrationDetails()
+          .getRegistrationDate());
+      experimentBeans.addBean(newExperimentBean);
+    }
+
+    newProjectBean.setContainsData(this.getOpenBisClient()
+        .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier).size() != 0);
+
+    newProjectBean.setExperiments(experimentBeans);
+    newProjectBean.setMembers(new HashSet<String>());
+    return newProjectBean;
+  }
+
+  /**
    * Method to get Bean from either openbis identifier or openbis object. Checks if corresponding
    * bean is already stored in datahandler map.
    * 
@@ -1042,7 +1125,7 @@ public class DataHandler implements Serializable {
     newSampleBean.setCode(sample.getCode());
     newSampleBean.setType(sample.getSampleTypeCode());
     newSampleBean.setProperties(properties);
-    newSampleBean.setParents(this.getOpenBisClient().getParents(sample.getCode()));
+    newSampleBean.setParents(this.getOpenBisClient().getParentsBySearchService(sample.getCode()));
     newSampleBean.setChildren(this.getOpenBisClient().getFacade()
         .listSamplesOfSample(sample.getPermId()));
 
@@ -1745,7 +1828,7 @@ public class DataHandler implements Serializable {
     }
 
     for (Sample s : samplesOfSpace) {
-      List<Sample> parents = this.getOpenBisClient().getParents(s.getCode());
+      List<Sample> parents = this.getOpenBisClient().getParentsBySearchService(s.getCode());
       Map<String, String> labelMap =
           this.getOpenBisClient().getLabelsofProperties(
               this.getOpenBisClient().getSampleTypeByString(s.getSampleTypeCode()));
