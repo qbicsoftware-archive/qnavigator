@@ -3,6 +3,8 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import helpers.UglyToPrettyNameMapper;
 import helpers.Utils;
 
+import java.util.ArrayList;
+
 import javax.xml.bind.JAXBException;
 
 import logging.Log4j2Logger;
@@ -21,6 +23,8 @@ import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import com.vaadin.ui.HorizontalLayout;
@@ -28,6 +32,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -93,6 +98,8 @@ public class SampleView extends VerticalLayout implements View {
 
   private DatasetComponent datasetComponent;
 
+  private Button parentButton;
+
   public SampleView(DataHandler datahandler, State state, String resourceurl,
       MultiscaleController controller) {
     this(datahandler, state, controller);
@@ -141,7 +148,6 @@ public class SampleView extends VerticalLayout implements View {
     // sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.BAR_CHART_O);
     sampview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
     sampview_tab.addTab(initNoteComponent()).setIcon(FontAwesome.PENCIL);
-    // sampview_tab.addTab(changeMetaDataComponent).setIcon(FontAwesome.PENCIL_SQUARE_O);
 
     sampview_tab.setImmediate(true);
 
@@ -161,19 +167,7 @@ public class SampleView extends VerticalLayout implements View {
       }
     });
 
-
-    // sampview_content.addComponent(initToolBar());
-    // sampview_content.addComponent(initHeadline());
     sampview_content.addComponent(sampview_tab);
-    // sampview_content.addComponent(initDescription());
-    // sampview_content.addComponent(initStatistics());
-    // sampview_content.addComponent(initTable());
-    // sampview_content.addComponent(initButtonLayout());
-    // sampview_content.addComponent(initMSHBiologicalSampleStateSection());
-
-    // use the component that is returned by initTable
-    // projectview_content.setComponentAlignment(this.table, Alignment.TOP_CENTER);
-    // sampview_content.setWidth("100%");
     this.addComponent(sampview_content);
   }
 
@@ -267,6 +261,9 @@ public class SampleView extends VerticalLayout implements View {
     return headline;
   }
 
+  /**
+   * 
+   */
   void updateHeadline() {
     if (currentBean.getProperties().containsKey("Q_EXTERNALDB_ID")
         && !"".equals(currentBean.getProperties().get("Q_EXTERNALDB_ID"))) {
@@ -326,6 +323,11 @@ public class SampleView extends VerticalLayout implements View {
     // sampleDescriptionContent.setIcon(FontAwesome.FILE_TEXT_O);
     sampleTypeLabel = new Label("");
     sampleParentLabel = new Label("", ContentMode.HTML);
+
+    parentButton = new Button("");
+    parentButton.setStyleName(ValoTheme.BUTTON_LINK);
+    parentButton.setIcon(FontAwesome.ARROW_CIRCLE_RIGHT);
+
     numberOfDatasetsLabel = new Label("");
     lastChangedDatasetLabel = new Label("");
     propertiesLabel = new Label("", ContentMode.HTML);
@@ -334,8 +336,9 @@ public class SampleView extends VerticalLayout implements View {
 
     sampleDescriptionContent.addComponent(sampleTypeLabel);
     sampleDescriptionContent.addComponent(sampleParentLabel);
-    sampleDescriptionContent.addComponent(numberOfDatasetsLabel);
-    sampleDescriptionContent.addComponent(lastChangedDatasetLabel);
+    sampleDescriptionContent.addComponent(parentButton);
+    // sampleDescriptionContent.addComponent(numberOfDatasetsLabel);
+    // sampleDescriptionContent.addComponent(lastChangedDatasetLabel);
     sampleDescriptionContent.addComponent(propertiesLabel);
     sampleDescriptionContent.addComponent(experimentalFactorLabel);
     sampleDescriptionContent.setSpacing(true);
@@ -346,14 +349,44 @@ public class SampleView extends VerticalLayout implements View {
     return sampleDescription;
   }
 
+  /**
+   * 
+   */
   void updateContentDescription() {
     sampleTypeLabel.setValue(String.format("Sample type: %s",
         uglyToPretty.getPrettyName(currentBean.getType())));
-    sampleParentLabel.setValue(currentBean.getParentsFormattedString());
+    // sampleParentLabel.setValue(currentBean.getParentsFormattedString());
+
+    // check if it does have parents !
+    if (currentBean.getParents() == null || currentBean.getParents().isEmpty()) {
+      parentButton.setVisible(false);
+    } else if (currentBean.getParents().size() > 1) {
+      sampleParentLabel.setValue(currentBean.getParentsFormattedString());
+      parentButton.setVisible(false);
+    } else {
+      sampleParentLabel.setValue("This sample has been derived from ");
+      parentButton.setCaption(currentBean.getParents().get(0).getCode());
+      parentButton.setVisible(true);
+
+      // Navigate to parent sample given by caption of button
+      parentButton.addClickListener(new ClickListener() {
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+          State state = (State) UI.getCurrent().getSession().getAttribute("state");
+          ArrayList<String> message = new ArrayList<String>();
+          message.add("clicked");
+          message.add(currentBean.getParents().get(0).getIdentifier());
+          message.add("sample");
+          state.notifyObservers(message);
+        }
+      });
+    }
+
 
     int numberOfDatasets = currentBean.getDatasets().size();
-    numberOfDatasetsLabel.setValue(String.format("This sample has %s attached dataset(s) ",
-        numberOfDatasets));
+    // numberOfDatasetsLabel.setValue(String.format("This sample has %s attached dataset(s) ",
+    // numberOfDatasets));
     if (numberOfDatasets > 0) {
 
       String lastDataset = "";// "No Datasets available!";
@@ -439,7 +472,7 @@ public class SampleView extends VerticalLayout implements View {
    */
   void updateContentStatistics() {
     int numberOfDatasets = currentBean.getDatasets().size();
-    numberOfDatasetsLabel.setValue(String.format("%s dataset(s). ", numberOfDatasets));
+    // numberOfDatasetsLabel.setValue(String.format("%s dataset(s). ", numberOfDatasets));
     if (numberOfDatasets > 0) {
 
       String lastDataset = "";// "No Datasets available!";
@@ -630,6 +663,7 @@ public class SampleView extends VerticalLayout implements View {
 
     this.currentBean = datahandler.getSample(currentValue);
     updateContent();
+    sampview_tab.setSelectedTab(0);
   }
 
   public SampleBean getCurrentBean() {

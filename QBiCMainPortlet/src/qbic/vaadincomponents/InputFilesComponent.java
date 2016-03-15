@@ -100,6 +100,8 @@ public class InputFilesComponent extends WorkflowParameterComponent {
 
         if (range.contains("fasta") || range.contains("gtf")) {
           gpcontainer = fastaContainer();
+        } else if (range.contains("bwaIndex")) {
+          gpcontainer = fastaContainerFiltered("bwa");
         } else {
           gpcontainer = filter(datasets, range);
         }
@@ -150,6 +152,21 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     BeanItemContainer<FastaBean> subContainer = new BeanItemContainer<FastaBean>(FastaBean.class);
     FastaDB db = new FastaDB();
     subContainer.addAll(db.getAll());
+    GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
+    gpcontainer.removeContainerProperty("path");
+    return gpcontainer;
+  }
+
+  // Function to retrieve only specific references, e.g. bwa for BWA indices, could be used for
+  // proteomics as well
+  public GeneratedPropertyContainer fastaContainerFiltered(String filter) {
+    BeanItemContainer<FastaBean> subContainer = new BeanItemContainer<FastaBean>(FastaBean.class);
+    FastaDB db = new FastaDB();
+
+    if (filter.equals("bwa")) {
+      subContainer.addAll(db.getBWAIndices());
+    }
+
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
     gpcontainer.removeContainerProperty("path");
     return gpcontainer;

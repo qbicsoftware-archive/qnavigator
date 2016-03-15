@@ -26,6 +26,7 @@ public class GroupSpecificParameters implements Serializable {
   // maxMissedCleavages
   private int maxMissedCleavage;
   private String matchType;
+  private boolean lfqMode;
   private LinkedHashSet<String> lightLabels;
   private LinkedHashSet<String> mediumLabels;
   private LinkedHashSet<String> heavyLabels;
@@ -161,11 +162,11 @@ public class GroupSpecificParameters implements Serializable {
   }
 
 
-
   public JSONObject toJson() throws JSONException {
     JSONObject param = new JSONObject();
     param.put("enzymeMode", digestionMode.getValue());
     param.put("variableModifications", JsonHelper.fromSet(variableModifications));
+    param.put("lfqMode", (lfqMode ? 1 : 0));
     if (multiplicity.startsWith("1")) {
       param.put("multiplicity", 1);
     } else if (multiplicity.startsWith("2")) {
@@ -190,5 +191,17 @@ public class GroupSpecificParameters implements Serializable {
     // needed by MaxQuant?
     param.put("defaults", "default");
     return param;
+  }
+
+
+
+  public boolean isLfqMode() {
+    return lfqMode;
+  }
+
+
+
+  public void setLfqMode(boolean lfqMode) {
+    this.lfqMode = lfqMode;
   }
 }

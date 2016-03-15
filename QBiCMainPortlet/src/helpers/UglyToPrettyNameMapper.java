@@ -41,6 +41,7 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME", "Individualized Proteins Workflow");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID", "Ligandomics Identification Workflow");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC", "Ligandomics Quality Control Workflow");
+    namesMapping.put("Q_MHC_LIGAND_EXTRACTION", "MHC Ligand Extraction");
 
 
     // deprecated experiment types
@@ -94,6 +95,7 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME_RUN", "Individualized Proteins Workflow Run");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_RUN", "Ligandomics Identification Workflow Run");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_RUN", "Ligandomics Quality Control Workflow Run");
+    namesMapping.put("Q_MHC_LIGAND_EXTRACT", "MHC Ligand Extract");
 
 
     // deprecated sample types

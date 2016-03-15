@@ -25,7 +25,7 @@ public class QcMlOpenbisSource implements StreamResource.StreamSource {
     u = sourceURL;
   }
 
-  /*
+  /**
    * We need to implement this method that returns the resource as a stream.
    */
   public InputStream getStream() {

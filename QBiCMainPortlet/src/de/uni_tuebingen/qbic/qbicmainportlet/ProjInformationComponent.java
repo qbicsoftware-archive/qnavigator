@@ -65,6 +65,8 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Window.CloseEvent;
+import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.util.DashboardUtil;
@@ -108,6 +110,7 @@ public class ProjInformationComponent extends CustomComponent {
   private Label patientInformation;
 
   private ProjectBean projectBean;
+  private String projectType;
 
   private Label experimentLabel;
 
@@ -167,6 +170,20 @@ public class ProjInformationComponent extends CustomComponent {
         subWindow.setResizable(false);
         // subWindow.setSizeFull();
 
+        subWindow.addCloseListener(new CloseListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = -1329152609834711109L;
+
+          @Override
+          public void windowClose(CloseEvent e) {
+            LOGGER.debug("OMG window is closes");
+            ProjectBean updatedBean = datahandler.getProjectFromDB(projectBean.getId());
+            updateUI(updatedBean, projectType);
+          }
+        });
+
         QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
         ui.addWindow(subWindow);
       }
@@ -197,7 +214,7 @@ public class ProjInformationComponent extends CustomComponent {
     if (currentBean.getId() == null)
       return;
     try {
-
+      this.projectType = projectType;
       projectBean = currentBean;
 
       String identifier = currentBean.getId();
@@ -227,7 +244,7 @@ public class ProjInformationComponent extends CustomComponent {
       List<String> types =
           new ArrayList<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE",
               "Q_TEST_SAMPLE"));
-      for (Sample s : datahandler.getOpenBisClient().getSamplesOfProject(identifier))
+      for (Sample s : datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(identifier))
         if (types.contains(s.getSampleTypeCode()))
           ids.add(s.getIdentifier());
       // nothing to download
@@ -285,7 +302,7 @@ public class ProjInformationComponent extends CustomComponent {
       }
 
       List<Sample> allSamples =
-          datahandler.getOpenBisClient().getSamplesOfProject(projectIdentifier);
+          datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(projectIdentifier);
 
       for (Sample sample : allSamples) {
         if (sample.getSampleTypeCode().equals("Q_ATTACHMENT_SAMPLE")) {
@@ -455,25 +472,34 @@ public class ProjInformationComponent extends CustomComponent {
       projDescriptionContent.addComponent(hlaTypeLabel);
 
       // Vaccine Designer
-      /*
-       * Button vaccineDesigner = new Button("Vaccine Designer");
-       * vaccineDesigner.setStyleName(ValoTheme.BUTTON_PRIMARY);
-       * vaccineDesigner.setIcon(FontAwesome.CUBES);
-       * 
-       * vaccineDesigner.addClickListener(new ClickListener() {
-       * 
-       * @Override public void buttonClick(ClickEvent event) {
-       * 
-       * ArrayList<String> message = new ArrayList<String>(); message.add("clicked"); StringBuilder
-       * sb = new StringBuilder("type="); sb.append("vaccinedesign"); sb.append("&");
-       * sb.append("id="); sb.append(projectBean.getId()); message.add(sb.toString());
-       * message.add(VaccineDesignerView.navigateToLabel); state.notifyObservers(message);
-       * 
-       * // UI.getCurrent().getNavigator() //
-       * .navigateTo(String.format(VaccineDesignerView.navigateToLabel)); } });
-       * 
-       * projDescriptionContent.addComponent(vaccineDesigner);
-       */
+
+      Button vaccineDesigner = new Button("Vaccine Designer");
+      vaccineDesigner.setStyleName(ValoTheme.BUTTON_PRIMARY);
+      vaccineDesigner.setIcon(FontAwesome.CUBES);
+
+      vaccineDesigner.addClickListener(new ClickListener() {
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+
+          ArrayList<String> message = new ArrayList<String>();
+          message.add("clicked");
+          StringBuilder sb = new StringBuilder("type=");
+          sb.append("vaccinedesign");
+          sb.append("&");
+          sb.append("id=");
+          sb.append(projectBean.getId());
+          message.add(sb.toString());
+          message.add(VaccineDesignerView.navigateToLabel);
+          state.notifyObservers(message);
+
+          // UI.getCurrent().getNavigator()
+          // .navigateTo(String.format(VaccineDesignerView.navigateToLabel));
+        }
+      });
+
+      // projDescriptionContent.addComponent(vaccineDesigner);
+
     }
 
 
