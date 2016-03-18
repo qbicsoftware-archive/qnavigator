@@ -328,6 +328,21 @@ public class SampleView extends VerticalLayout implements View {
     parentButton.setStyleName(ValoTheme.BUTTON_LINK);
     parentButton.setIcon(FontAwesome.ARROW_CIRCLE_RIGHT);
 
+    // Navigate to parent sample given by caption of button
+    parentButton.addClickListener(new ClickListener() {
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        State state = (State) UI.getCurrent().getSession().getAttribute("state");
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        message.add(currentBean.getParents().get(0).getIdentifier());
+        message.add("sample");
+        state.notifyObservers(message);
+      }
+    });
+
+
     numberOfDatasetsLabel = new Label("");
     lastChangedDatasetLabel = new Label("");
     propertiesLabel = new Label("", ContentMode.HTML);
@@ -366,21 +381,8 @@ public class SampleView extends VerticalLayout implements View {
     } else {
       sampleParentLabel.setValue("This sample has been derived from ");
       parentButton.setCaption(currentBean.getParents().get(0).getCode());
+
       parentButton.setVisible(true);
-
-      // Navigate to parent sample given by caption of button
-      parentButton.addClickListener(new ClickListener() {
-
-        @Override
-        public void buttonClick(ClickEvent event) {
-          State state = (State) UI.getCurrent().getSession().getAttribute("state");
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          message.add(currentBean.getParents().get(0).getIdentifier());
-          message.add("sample");
-          state.notifyObservers(message);
-        }
-      });
     }
 
 

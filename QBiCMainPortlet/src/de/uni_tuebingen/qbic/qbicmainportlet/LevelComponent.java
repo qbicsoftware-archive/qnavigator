@@ -769,6 +769,14 @@ public class LevelComponent extends CustomComponent {
               visualize = true;
             }
 
+            if (datasetFileName.endsWith(".GSvar")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/plain");
+              res = streamres;
+              visualize = true;
+            }
+
 
             if (visualize) {
               BrowserFrame frame = new BrowserFrame("", res);

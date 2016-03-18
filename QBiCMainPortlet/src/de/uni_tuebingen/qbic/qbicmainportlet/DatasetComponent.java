@@ -12,8 +12,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.portlet.PortletSession;
 
@@ -105,13 +107,6 @@ public class DatasetComponent extends CustomComponent {
   }
 
   public void updateUI(String type, String id) {
-    // vert = new VerticalLayout();
-    // this.datasets = dataset;
-    // table = buildFilterTable();
-    // this.buildLayout();
-    // this.setContainerDataSource(this.datasets);
-    // this.setContent(vert);
-    // mainLayout.addComponent(vert);
 
     if (id == null)
       return;
@@ -154,10 +149,11 @@ public class DatasetComponent extends CustomComponent {
               new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
 
           Sample start = datahandler.getOpenBisClient().getSampleByIdentifier(sampleIdentifier);
-          List<Sample> startList = new ArrayList<Sample>();
-          List<Sample> allChildren = getAllChildren(startList, start);
+          Set<Sample> startList = new HashSet<Sample>();
+          Set<Sample> allChildren = getAllChildren(startList, start);
 
           for (Sample samp : allChildren) {
+            LOGGER.debug(samp.getIdentifier());
             retrievedDatasets.addAll(datahandler.getOpenBisClient().getDataSetsOfSample(
                 samp.getCode()));
           }
@@ -207,6 +203,7 @@ public class DatasetComponent extends CustomComponent {
         String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
         for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset : retrievedDatasets) {
           samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);
+          LOGGER.debug(dataset.toString());
         }
 
         List<DatasetBean> dsBeans = datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
@@ -446,6 +443,14 @@ public class DatasetComponent extends CustomComponent {
             }
 
             if (datasetFileName.endsWith(".tsv")) {
+              QcMlOpenbisSource re = new QcMlOpenbisSource(url);
+              StreamResource streamres = new StreamResource(re, datasetFileName);
+              streamres.setMIMEType("text/plain");
+              res = streamres;
+              visualize = true;
+            }
+
+            if (datasetFileName.endsWith(".GSvar")) {
               QcMlOpenbisSource re = new QcMlOpenbisSource(url);
               StreamResource streamres = new StreamResource(re, datasetFileName);
               streamres.setMIMEType("text/plain");
@@ -731,7 +736,7 @@ public class DatasetComponent extends CustomComponent {
     return map;
   }
 
-  public List<Sample> getAllChildren(List<Sample> found, Sample sample) {
+  public Set<Sample> getAllChildren(Set<Sample> found, Sample sample) {
     List<Sample> current = datahandler.getOpenBisClient().getChildrenSamples(sample);
 
     if (current.size() == 0) {
