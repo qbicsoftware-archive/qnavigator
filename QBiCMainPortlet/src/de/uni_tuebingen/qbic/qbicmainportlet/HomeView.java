@@ -111,9 +111,9 @@ public class HomeView extends VerticalLayout implements View {
 
     this.table.setContainerDataSource(spaceBean.getProjects());
     this.table.setVisibleColumns(new Object[] {"code", "space", "description",
-        "principalInvestigator"});
-    this.table.setColumnHeader("code", "Name");
-    // this.table.setColumnHeader("secondaryName", "Name");
+        "principalInvestigator", "secondaryName"});
+    this.table.setColumnHeader("code", "Code");
+    this.table.setColumnHeader("secondaryName", "Name");
     this.table.setColumnHeader("space", "Project");
     this.table.setColumnHeader("principalInvestigator", "Investigator");
     this.table.setColumnHeader("description", "Description");
@@ -332,7 +332,6 @@ public class HomeView extends VerticalLayout implements View {
 
       String projectIdentifier = project.getIdentifier();
       String projectCode = project.getCode();
-      String secondaryName = "None";
       // if (nameMap.containsKey(projectCode))
       // secondaryName = nameMap.get(projectCode);
 
@@ -347,12 +346,18 @@ public class HomeView extends VerticalLayout implements View {
         }
       }
 
+      // TODO isn't this slow in this fashion? what about SELECT * and creating a map?
+      String secondaryName = datahandler.getDatabaseManager().getProjectName(projectIdentifier);
+      if (secondaryName.isEmpty())
+        secondaryName = "None";
+
       ProjectBean newProjectBean =
           new ProjectBean(projectIdentifier, projectCode, secondaryName, desc,
               project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
               new ProgressBar(), new Date(), "", "", null, false);
 
-      String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectCode);
+      // TODO isn't this slow in this fashion? what about SELECT * and creating a map?
+      String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectIdentifier);
 
       if (pi.equals("")) {
         newProjectBean.setPrincipalInvestigator("No information provided.");
