@@ -430,7 +430,8 @@ public class DataHandler implements Serializable {
 
     Date registrationDate = project.getRegistrationDetails().getRegistrationDate();
 
-    String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+    // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+    String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
 
     if (pi.equals("")) {
       newProjectBean.setPrincipalInvestigator("No information provided.");
@@ -514,7 +515,8 @@ public class DataHandler implements Serializable {
 
     Date registrationDate = project.getRegistrationDetails().getRegistrationDate();
 
-    String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+    // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+    String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
 
     if (pi.equals("")) {
       newProjectBean.setPrincipalInvestigator("No information provided.");
@@ -601,7 +603,8 @@ public class DataHandler implements Serializable {
     newProjectBean.setRegistrator(project.getRegistrationDetails().getUserId());
     newProjectBean.setContact(project.getRegistrationDetails().getUserEmail());
 
-    String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+    // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
+    String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
 
     if (pi.equals("")) {
       newProjectBean.setPrincipalInvestigator("No information provided.");
