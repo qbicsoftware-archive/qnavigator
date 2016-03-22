@@ -135,6 +135,7 @@ public class SampleView extends VerticalLayout implements View {
     sampview_content.setMargin(new MarginInfo(true, true, false, false));
 
     sampview_tab = new TabSheet();
+    sampview_tab.setWidth("100%");
     sampview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
     sampview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     sampview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);

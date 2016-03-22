@@ -333,7 +333,7 @@ public class WorkflowViewController {
   private void mapExperimentalProperties(String id, List<String> fileNames) {
     Map<String, Object> params = new HashMap<String, Object>();
     List<String> codes = new ArrayList<String>();
-    for (Sample s : openbis.getSamplesOfProject(id))
+    for (Sample s : openbis.getSamplesOfProjectBySearchService(id))
       codes.add(s.getCode());
     params.put("codes", codes);
     QueryTableModel res = openbis.getAggregationService("get-property-tsv", params);
