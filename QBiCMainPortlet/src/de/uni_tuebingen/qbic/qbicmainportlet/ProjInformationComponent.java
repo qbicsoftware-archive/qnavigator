@@ -100,6 +100,7 @@ public class ProjInformationComponent extends CustomComponent {
   private int numberOfDatasets;
 
   private Label investigator;
+  private Label contactPerson;
 
   // private EditableLabel descContent;
 
@@ -144,8 +145,12 @@ public class ProjInformationComponent extends CustomComponent {
     investigator = new Label("", ContentMode.PREFORMATTED);
     investigator.setCaption("Investigator");
 
+    contactPerson = new Label("", ContentMode.PREFORMATTED);
+    contactPerson.setCaption("Contact");
+
     horz.setWidth("100%");
     horz.addComponent(investigator);
+    horz.addComponent(contactPerson);
 
     Button edit = new Button("Edit");
     edit.setIcon(FontAwesome.PENCIL);
@@ -191,7 +196,8 @@ public class ProjInformationComponent extends CustomComponent {
 
     horz.addComponent(edit);
     horz.setComponentAlignment(edit, Alignment.TOP_RIGHT);
-    horz.setExpandRatio(investigator, 0.8f);
+    horz.setExpandRatio(investigator, 0.4f);
+    horz.setExpandRatio(contactPerson, 0.4f);
     horz.setExpandRatio(edit, 0.2f);
 
     contact = new Label("", ContentMode.HTML);
@@ -222,6 +228,10 @@ public class ProjInformationComponent extends CustomComponent {
 
       String pi = projectBean.getPrincipalInvestigator();
       investigator.setValue(pi);
+
+      String cp = projectBean.getContactPerson();
+      contactPerson.setValue(cp);
+
       descContent = new Label("");
       // new EditableLabel("");
 
