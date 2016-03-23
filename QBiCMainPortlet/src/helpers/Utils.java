@@ -309,7 +309,7 @@ public class Utils {
       notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
     } else {
       notify.setDelayMsec(8000);
-      notify.setIcon(FontAwesome.MEH_O);
+      notify.setIcon(FontAwesome.COMMENT);
       notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
     }
     notify.show(Page.getCurrent());
