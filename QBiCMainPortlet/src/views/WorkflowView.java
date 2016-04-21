@@ -157,8 +157,6 @@ public class WorkflowView extends VerticalLayout implements View {
 
     switch (type) {
       case "project":
-        LOGGER.debug(type);
-        LOGGER.debug(id);
         datasetBeans = controller.getcontainer(type, id);
         List<String> datasetTypesInProject = new ArrayList<String>();
 

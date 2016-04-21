@@ -84,7 +84,7 @@ public class NGSMappingComponent extends CustomComponent {
     if (parameterComponent.getWorkflow() instanceof GuseWorkflowRepresentation) {
       GuseWorkflowRepresentation w = (GuseWorkflowRepresentation) parameterComponent.getWorkflow();
 
-      String header = "Group\tfile";
+      String header = "group\tfile";
 
       StringBuilder tsv = new StringBuilder(header);
 

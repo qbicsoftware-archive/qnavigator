@@ -483,30 +483,24 @@ public class ProjInformationComponent extends CustomComponent {
 
       // Vaccine Designer
 
-      Button vaccineDesigner = new Button("Vaccine Designer");
-      vaccineDesigner.setStyleName(ValoTheme.BUTTON_PRIMARY);
-      vaccineDesigner.setIcon(FontAwesome.CUBES);
-
-      vaccineDesigner.addClickListener(new ClickListener() {
-
-        @Override
-        public void buttonClick(ClickEvent event) {
-
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          StringBuilder sb = new StringBuilder("type=");
-          sb.append("vaccinedesign");
-          sb.append("&");
-          sb.append("id=");
-          sb.append(projectBean.getId());
-          message.add(sb.toString());
-          message.add(VaccineDesignerView.navigateToLabel);
-          state.notifyObservers(message);
-
-          // UI.getCurrent().getNavigator()
-          // .navigateTo(String.format(VaccineDesignerView.navigateToLabel));
-        }
-      });
+      /*
+       * Button vaccineDesigner = new Button("Vaccine Designer");
+       * vaccineDesigner.setStyleName(ValoTheme.BUTTON_PRIMARY);
+       * vaccineDesigner.setIcon(FontAwesome.CUBES);
+       * 
+       * vaccineDesigner.addClickListener(new ClickListener() {
+       * 
+       * @Override public void buttonClick(ClickEvent event) {
+       * 
+       * ArrayList<String> message = new ArrayList<String>(); message.add("clicked"); StringBuilder
+       * sb = new StringBuilder("type="); sb.append("vaccinedesign"); sb.append("&");
+       * sb.append("id="); sb.append(projectBean.getId()); message.add(sb.toString());
+       * message.add(VaccineDesignerView.navigateToLabel); state.notifyObservers(message);
+       */
+      // UI.getCurrent().getNavigator()
+      // .navigateTo(String.format(VaccineDesignerView.navigateToLabel));
+      // }
+      // });
 
       // projDescriptionContent.addComponent(vaccineDesigner);
 
@@ -1187,8 +1181,15 @@ public class ProjInformationComponent extends CustomComponent {
     for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : samples) {
       available = true;
       String classString = sample.getProperties().get("Q_HLA_CLASS");
-      String[] splitted = classString.split("_");
-      String lastOne = splitted[splitted.length - 1];
+
+      String lastOne = "";
+      if (classString != null) {
+        String[] splitted = classString.split("_");
+        lastOne = splitted[splitted.length - 1];
+      } else {
+        lastOne = "unknown";
+      }
+
       String addInformation = "";
 
       if (!(sample.getProperties().get("Q_ADDITIONAL_INFO") == null)) {
