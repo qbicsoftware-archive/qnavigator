@@ -80,8 +80,8 @@ public class TSVDownloadComponent extends VerticalLayout {
     dlPreps.setEnabled(false);
   }
   
-  public void prepareSpreadsheets(List<String> sampleTypes, String space,
-      final String project, OpenBisClient openbis) {
+  public void prepareSpreadsheets(final List<String> sampleTypes, String space,
+      final String project, final OpenBisClient openbis) {
 
     final TSVDownloadComponent layout = this;
 
