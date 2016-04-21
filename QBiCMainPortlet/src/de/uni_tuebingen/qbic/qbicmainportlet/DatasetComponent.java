@@ -148,7 +148,15 @@ public class DatasetComponent extends CustomComponent {
           retrievedDatasets =
               new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
 
-          Sample start = datahandler.getOpenBisClient().getSampleByIdentifier(sampleIdentifier);
+          // Sample start = datahandler.getOpenBisClient().getSampleByIdentifier(sampleIdentifier);
+
+          String code = id.split("/")[2];
+          Sample start =
+              datahandler.getOpenBisClient().getSamplesWithParentsAndChildren(code).get(0);
+
+          retrievedDatasets.addAll(datahandler.getOpenBisClient().getDataSetsOfSample(
+              start.getCode()));
+
           Set<Sample> startList = new HashSet<Sample>();
           Set<Sample> allChildren = getAllChildren(startList, start);
 
@@ -737,7 +745,8 @@ public class DatasetComponent extends CustomComponent {
   }
 
   public Set<Sample> getAllChildren(Set<Sample> found, Sample sample) {
-    List<Sample> current = datahandler.getOpenBisClient().getChildrenSamples(sample);
+    // List<Sample> current = datahandler.getOpenBisClient().getChildrenSamples(sample);
+    List<Sample> current = sample.getChildren();
 
     if (current.size() == 0) {
       return found;

@@ -182,9 +182,13 @@ public class LevelComponent extends CustomComponent {
             BeanItemContainer<TestSampleBean> samplesContainer =
                 new BeanItemContainer<TestSampleBean>(TestSampleBean.class);
 
+            // List<Sample> allSamples =
+            // datahandler.getOpenBisClient()
+            // .getSamplesOfProjectBySearchService(projectIdentifier);
+
             List<Sample> allSamples =
                 datahandler.getOpenBisClient()
-                    .getSamplesOfProjectBySearchService(projectIdentifier);
+                    .getSamplesWithParentsAndChildrenOfProjectBySearchService(id);
 
             for (Sample sample : allSamples) {
               if (sample.getSampleTypeCode().equals("Q_TEST_SAMPLE")) {
@@ -214,7 +218,8 @@ public class LevelComponent extends CustomComponent {
 
                 // for (Sample child :
                 // datahandler.openBisClient.getFacade().listSamplesOfSample(sample.getPermId())) {
-                for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
+                // for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
+                for (Sample child : sample.getChildren()) {
                   foundDataset = datasetFilter.get(child.getIdentifier());
                   if (foundDataset != null) {
                     retrievedDatasets.addAll(foundDataset);
@@ -249,7 +254,8 @@ public class LevelComponent extends CustomComponent {
 
                 // for (Sample child :
                 // datahandler.openBisClient.getFacade().listSamplesOfSample(sample.getPermId())) {
-                for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
+                // for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
+                for (Sample child : sample.getChildren()) {
                   foundDataset = datasetFilter.get(child.getIdentifier());
                   if (foundDataset != null) {
                     retrievedDatasets.addAll(foundDataset);
@@ -351,7 +357,8 @@ public class LevelComponent extends CustomComponent {
 
             List<Sample> allSamples =
                 datahandler.getOpenBisClient()
-                    .getSamplesOfProjectBySearchService(projectIdentifier);
+                    .getSamplesWithParentsAndChildrenOfProjectBySearchService(projectIdentifier);
+
 
             for (Sample sample : allSamples) {
               if (!sample.getSampleTypeCode().equals("Q_TEST_SAMPLE")

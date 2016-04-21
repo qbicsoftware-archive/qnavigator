@@ -697,9 +697,10 @@ public class ProjectView extends VerticalLayout implements View {
     try {
 
       GraphGenerator graphFrame =
-          new GraphGenerator(datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(
-              currentBean.getId()), datahandler.getOpenBisClient().getSampleTypes(),
-              datahandler.getOpenBisClient(), currentBean.getId());
+          new GraphGenerator(datahandler.getOpenBisClient()
+              .getSamplesWithParentsAndChildrenOfProjectBySearchService(currentBean.getId()),
+              datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(),
+              currentBean.getId());
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());

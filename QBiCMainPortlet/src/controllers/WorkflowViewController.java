@@ -285,8 +285,8 @@ public class WorkflowViewController {
       }
       return wfs;
     } catch (Exception e) {
-      // e.printStackTrace();
-      LOGGER.debug("No suitable workflows founds.");
+      e.printStackTrace();
+      // LOGGER.debug("No suitable workflows founds.");
       return new BeanItemContainer<Workflow>(Workflow.class);
     }
   }
@@ -482,7 +482,6 @@ public class WorkflowViewController {
    * @throws IllegalArgumentException
    */
   public String getDatasetsNfsPath(DatasetBean bean) throws IllegalArgumentException {
-    System.out.println(bean.getOpenbisCode());
 
     try {
       DataSet dataset = openbis.getFacade().getDataSet(bean.getOpenbisCode());

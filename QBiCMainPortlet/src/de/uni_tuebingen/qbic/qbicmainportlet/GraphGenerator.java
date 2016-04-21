@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +18,7 @@ import javax.imageio.ImageIO;
 import javax.swing.SwingConstants;
 
 import main.OpenBisClient;
-import model.ExperimentBean;
 import model.ProjectBean;
-import model.SampleBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleType;
@@ -94,29 +91,35 @@ public class GraphGenerator {
 
       // List<Sample> all_project_samples = dh.openBisClient.getSamplesOfProject(p.getCode());
       // List<Sample> all_project_samples = dh.project_to_samples.get(p.getId());
-      List<SampleBean> all_project_samples = new ArrayList<SampleBean>();
 
-      for (Iterator i = projectBean.getExperiments().getItemIds().iterator(); i.hasNext();) {
-        // Get the current item identifier, which is an integer.
-        ExperimentBean exp = (ExperimentBean) i.next();
+      // List<SampleBean> all_project_samples = new ArrayList<SampleBean>();
 
-        for (Iterator j = exp.getSamples().getItemIds().iterator(); j.hasNext();) {
-          SampleBean samp = (SampleBean) j.next();
 
-          all_project_samples.add(samp);
-        }
-      }
+      List<Sample> all_project_samples =
+          openBisClient.getSamplesWithParentsAndChildrenOfProjectBySearchService(projectBean
+              .getId());
+
+      /*
+       * for (Iterator i = projectBean.getExperiments().getItemIds().iterator(); i.hasNext();) { //
+       * Get the current item identifier, which is an integer. ExperimentBean exp = (ExperimentBean)
+       * i.next();
+       * 
+       * for (Iterator j = exp.getSamples().getItemIds().iterator(); j.hasNext();) { SampleBean samp
+       * = (SampleBean) j.next();
+       * 
+       * all_project_samples.add(samp); } }
+       */
 
 
       // count the different sample types
       Integer num_measurement_samples = new Integer(0);
 
-      List<SampleBean> samps = new ArrayList<SampleBean>();
+      List<Sample> samps = new ArrayList<Sample>();
 
-      for (SampleBean s : all_project_samples) {
+      for (Sample s : all_project_samples) {
         // System.out.println(s);
         // String key = s.getSampleTypeCode();
-        String key = s.getType();
+        String key = s.getSampleTypeCode();
 
         if (sample_count.containsKey(key)) {
 
@@ -172,8 +175,6 @@ public class GraphGenerator {
         }
       }
 
-
-
       List<PropertyType> bioSampleProperties =
           openBisClient.listPropertiesForType(openBisClient
               .getSampleTypeByString("Q_BIOLOGICAL_SAMPLE"));
@@ -181,7 +182,7 @@ public class GraphGenerator {
           openBisClient.listPropertiesForType(openBisClient.getSampleTypeByString("Q_TEST_SAMPLE"));
 
 
-      for (SampleBean s : samps) {
+      for (Sample s : samps) {
         String species =
             (s.getProperties().containsKey("Q_NCBI_ORGANISM")) ? s.getProperties().get(
                 "Q_NCBI_ORGANISM") : "";
@@ -198,8 +199,9 @@ public class GraphGenerator {
 
 
         Object mother_node =
-            graph.insertVertex(parent, s.getId(), String.format("%s\n%s", s.getCode(), species),
-                20, 20, width, height, "ROUNDED;strokeColor=#ffffff;fillColor=#0365C0");
+            graph.insertVertex(parent, s.getIdentifier(),
+                String.format("%s\n%s", s.getCode(), species), 20, 20, width, height,
+                "ROUNDED;strokeColor=#ffffff;fillColor=#0365C0");
         // subtree_vertices.add(mother_node);
         List<Sample> children = new ArrayList<Sample>();
 
@@ -244,7 +246,7 @@ public class GraphGenerator {
 
             // grandchildren.addAll(this.open_client.getFacade().listSamplesOfSample(c.getPermId()));
             // grandchildren.addAll(openBisClient.getFacade().listSamplesOfSample(c.getPermId()));
-            grandchildren.addAll(openBisClient.getChildrenSamples(c));
+            grandchildren.addAll(c.getChildren());
 
             for (Sample gc : grandchildren) {
               if (gc.getSampleTypeCode().equals("Q_TEST_SAMPLE")) {
@@ -255,11 +257,8 @@ public class GraphGenerator {
                   if (pType.getCode().equals("Q_SAMPLE_TYPE")) {
                     testSampleType =
                         openBisClient.openBIScodeToString(openBisClient.getCVLabelForProperty(
-                            pType, openBisClient.getSampleByIdentifier(gc.getIdentifier())
-                                .getProperties().get("Q_SAMPLE_TYPE")));
-                    testSecID =
-                        openBisClient.getSampleByIdentifier(gc.getIdentifier()).getProperties()
-                            .get("Q_SECONDARY_NAME");
+                            pType, gc.getProperties().get("Q_SAMPLE_TYPE")));
+                    testSecID = gc.getProperties().get("Q_SECONDARY_NAME");
                     if (testSecID != null) {
                       testSecID = testSecID.replace("nan", "");
                     }
@@ -278,14 +277,12 @@ public class GraphGenerator {
                 // grandgrandchildren.addAll(this.open_client.getFacade().listSamplesOfSample(gc.getPermId()));
                 // grandgrandchildren.addAll(openBisClient.getFacade().listSamplesOfSample(
                 // gc.getPermId()));
-                grandgrandchildren.addAll(openBisClient.getChildrenSamples(gc));
+                grandgrandchildren.addAll(gc.getChildren());
 
                 for (Sample ggc : grandgrandchildren) {
 
                   String measuredSecID = "";
-                  measuredSecID =
-                      openBisClient.getSampleByIdentifier(ggc.getIdentifier()).getProperties()
-                          .get("Q_SECONDARY_NAME");
+                  measuredSecID = gc.getProperties().get("Q_SECONDARY_NAME");
                   if (measuredSecID != null) {
                     measuredSecID = measuredSecID.replace("nan", "");
                   }
@@ -386,8 +383,6 @@ public class GraphGenerator {
     Double width = new Double(120.0);
     Double height = new Double(40.0);
 
-
-
     try {
 
       // could be done more efficiently with SearchCriteria (at least I hope so)
@@ -412,7 +407,7 @@ public class GraphGenerator {
         }
 
         if (key.equals("Q_TEST_SAMPLE")) {
-          List<Sample> tmp = openBisClient.getParentsBySearchService(s.getCode());
+          List<Sample> tmp = s.getChildren();
           num_measurement_samples += tmp.size();
         }
 
@@ -452,17 +447,10 @@ public class GraphGenerator {
 
               graph.insertEdge(parent, null, "", dummy_node_level3, dummy_node_level4,
                   "strokeWidth=0;strokeColor=#FFFFFF");
-
             }
-
           }
-
-
-
         }
       }
-
-
 
       List<PropertyType> bioSampleProperties =
           OpenBisFunctions.listPropertiesForType(types.get("Q_BIOLOGICAL_SAMPLE"));
@@ -496,7 +484,7 @@ public class GraphGenerator {
         // children.addAll(this.open_client.getFacade().listSamplesOfSample(s.getPermId()));
         // children.addAll(dh.openBisClient.getFacade().listSamplesOfSample(s.getPermId()));
 
-        children.addAll(openBisClient.getChildrenSamples(s));
+        children.addAll(s.getChildren());
 
 
         // Object group_node = graph.insertVertex(parent, null, "Entities", 20, 20, width, height);
@@ -510,16 +498,12 @@ public class GraphGenerator {
             for (PropertyType pType : bioSampleProperties) {
               if (pType.getCode().equals("Q_PRIMARY_TISSUE")) {
                 primaryTissue =
-                    OpenBisFunctions.getCVLabelForProperty(
-                        pType,
-                        openBisClient.getSampleByIdentifier(c.getIdentifier()).getProperties()
-                            .get("Q_PRIMARY_TISSUE"));
+                    OpenBisFunctions.getCVLabelForProperty(pType,
+                        c.getProperties().get("Q_PRIMARY_TISSUE"));
               }
             }
 
-            String secID =
-                openBisClient.getSampleByIdentifier(c.getIdentifier()).getProperties()
-                    .get("Q_SECONDARY_NAME");
+            String secID = c.getProperties().get("Q_SECONDARY_NAME");
             if (secID != null) {
               secondaryName = secID.replace("nan", "");
             }
@@ -535,7 +519,7 @@ public class GraphGenerator {
             // grandchildren.addAll(this.open_client.getFacade().listSamplesOfSample(c.getPermId()));
             // grandchildren.addAll(openBisClient.getFacade().listSamplesOfSample(c.getPermId()));
 
-            grandchildren.addAll(openBisClient.getChildrenSamples(c));
+            grandchildren.addAll(c.getChildren());
             for (Sample gc : grandchildren) {
               if (gc.getSampleTypeCode().equals("Q_TEST_SAMPLE")) {
 
@@ -545,14 +529,10 @@ public class GraphGenerator {
                   if (pType.getCode().equals("Q_SAMPLE_TYPE")) {
                     testSampleType =
                         OpenBisFunctions.openBIScodeToString(OpenBisFunctions
-                            .getCVLabelForProperty(pType,
-                                openBisClient.getSampleByIdentifier(gc.getIdentifier())
-                                    .getProperties().get("Q_SAMPLE_TYPE")));
+                            .getCVLabelForProperty(pType, gc.getProperties().get("Q_SAMPLE_TYPE")));
                   }
                 }
-                testSecID =
-                    openBisClient.getSampleByIdentifier(gc.getIdentifier()).getProperties()
-                        .get("Q_SECONDARY_NAME");
+                testSecID = gc.getProperties().get("Q_SECONDARY_NAME");
                 if (testSecID != null) {
                   testSecID = testSecID.replace("nan", "");
                 }
@@ -569,14 +549,12 @@ public class GraphGenerator {
                 // grandgrandchildren.addAll(openBisClient.getFacade().listSamplesOfSample(
                 // gc.getPermId()));
 
-                grandgrandchildren.addAll(openBisClient.getChildrenSamples(gc));
+                grandgrandchildren.addAll(gc.getChildren());
 
                 for (Sample ggc : grandgrandchildren) {
 
                   String measuredSecID = "";
-                  String openbisSecID =
-                      openBisClient.getSampleByIdentifier(ggc.getIdentifier()).getProperties()
-                          .get("Q_SECONDARY_NAME");
+                  String openbisSecID = ggc.getProperties().get("Q_SECONDARY_NAME");
                   if (openbisSecID != null) {
                     measuredSecID = openbisSecID.replace("nan", "");
                   }

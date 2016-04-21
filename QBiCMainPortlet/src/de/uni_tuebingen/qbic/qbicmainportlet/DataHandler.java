@@ -432,11 +432,18 @@ public class DataHandler implements Serializable {
 
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
+    String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
 
     if (pi.equals("")) {
       newProjectBean.setPrincipalInvestigator("No information provided.");
     } else {
       newProjectBean.setPrincipalInvestigator(pi);
+    }
+
+    if (cp.equals("")) {
+      newProjectBean.setContactPerson("No information provided.");
+    } else {
+      newProjectBean.setContactPerson(cp);
     }
 
     newProjectBean.setId(project.getIdentifier());
@@ -517,11 +524,18 @@ public class DataHandler implements Serializable {
 
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
+    String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
 
     if (pi.equals("")) {
       newProjectBean.setPrincipalInvestigator("No information provided.");
     } else {
       newProjectBean.setPrincipalInvestigator(pi);
+    }
+
+    if (cp.equals("")) {
+      newProjectBean.setContactPerson("No information provided.");
+    } else {
+      newProjectBean.setContactPerson(cp);
     }
 
     newProjectBean.setId(project.getIdentifier());
@@ -605,11 +619,18 @@ public class DataHandler implements Serializable {
 
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
+    String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
 
     if (pi.equals("")) {
       newProjectBean.setPrincipalInvestigator("No information provided.");
     } else {
       newProjectBean.setPrincipalInvestigator(pi);
+    }
+
+    if (cp.equals("")) {
+      newProjectBean.setContactPerson("No information provided.");
+    } else {
+      newProjectBean.setContactPerson(cp);
     }
 
     BeanItemContainer<ExperimentBean> experimentBeans =

@@ -52,28 +52,19 @@ public class BiologicalSamplesComponent extends CustomComponent {
   };
 
   private static final long serialVersionUID = 8672873911284888801L;
-
   private VerticalLayout mainLayout;
   private static Logger LOGGER = new Log4j2Logger(BiologicalSamplesComponent.class);
   private Grid sampleBioGrid;
   private Grid sampleEntityGrid;
-
   private ChangeSampleMetadataComponent changeMetadata;
-
-  VerticalLayout vert;
-
+  private VerticalLayout vert;
   private DataHandler datahandler;
   private State state;
   private String resourceUrl;
-
   private int numberOfBioSamples;
-
   private int numberOfEntitySamples;
-
   private BeanItemContainer<BiologicalSampleBean> samplesBio;
-
   private BeanItemContainer<BiologicalEntitySampleBean> samplesEntity;
-
   private String currentID;
 
   /**
@@ -165,12 +156,21 @@ public class BiologicalSamplesComponent extends CustomComponent {
     if (id == null)
       return;
 
+
     BeanItemContainer<BiologicalSampleBean> samplesBioContainer =
         new BeanItemContainer<BiologicalSampleBean>(BiologicalSampleBean.class);
     BeanItemContainer<BiologicalEntitySampleBean> samplesEntityContainer =
         new BeanItemContainer<BiologicalEntitySampleBean>(BiologicalEntitySampleBean.class);
 
-    List<Sample> allSamples = datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(id);
+    long startTime = System.nanoTime();
+
+    // List<Sample> allSamples =
+    // datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(id);
+
+
+    List<Sample> allSamples =
+        datahandler.getOpenBisClient().getSamplesWithParentsAndChildrenOfProjectBySearchService(id);
+
     List<VocabularyTerm> terms = null;
     Map<String, String> termsMap = new HashMap<String, String>();
 
@@ -222,11 +222,11 @@ public class BiologicalSamplesComponent extends CustomComponent {
         newEntityBean.setGender(sampleProperties.get("Q_GENDER"));
         samplesEntityContainer.addBean(newEntityBean);
 
-        for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
-
-          if (child.getSampleTypeCode().equals(sampleTypes.Q_BIOLOGICAL_SAMPLE.toString())) {
-            Sample realChild =
-                datahandler.getOpenBisClient().getSampleByIdentifier(child.getIdentifier());
+        // for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
+        for (Sample realChild : sample.getChildren()) {
+          if (realChild.getSampleTypeCode().equals(sampleTypes.Q_BIOLOGICAL_SAMPLE.toString())) {
+            // Sample realChild =
+            // datahandler.getOpenBisClient().getSampleByIdentifier(child.getIdentifier());
 
             Map<String, String> sampleBioProperties = realChild.getProperties();
 
@@ -248,6 +248,10 @@ public class BiologicalSamplesComponent extends CustomComponent {
         }
       }
     }
+    long endTime = System.nanoTime();
+
+    long duration = (endTime - startTime) / 1000000;
+    LOGGER.debug(String.valueOf(duration));
 
 
     numberOfBioSamples = samplesBioContainer.size();

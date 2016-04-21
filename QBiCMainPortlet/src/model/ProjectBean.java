@@ -24,6 +24,7 @@ public class ProjectBean implements Serializable {
   private String registrator;
   private String contact;
   private String principalInvestigator;
+  private String contactPerson;
   private Set<String> members;
   private Boolean containsData;
 
@@ -182,5 +183,13 @@ public class ProjectBean implements Serializable {
 
   public void setPrincipalInvestigator(String principalInvestigator) {
     this.principalInvestigator = principalInvestigator;
+  }
+
+  public String getContactPerson() {
+    return contactPerson;
+  }
+
+  public void setContactPerson(String contactPerson) {
+    this.contactPerson = contactPerson;
   }
 }
