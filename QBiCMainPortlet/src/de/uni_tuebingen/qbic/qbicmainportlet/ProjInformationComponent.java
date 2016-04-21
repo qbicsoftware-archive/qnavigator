@@ -144,7 +144,7 @@ public class ProjInformationComponent extends CustomComponent {
 
     investigator = new Label("", ContentMode.PREFORMATTED);
     investigator.setCaption("Investigator");
-    
+
     contactPerson = new Label("", ContentMode.PREFORMATTED);
     contactPerson.setCaption("Contact Person");
 
@@ -183,7 +183,7 @@ public class ProjInformationComponent extends CustomComponent {
 
           @Override
           public void windowClose(CloseEvent e) {
-            LOGGER.debug("OMG window is closes");
+            LOGGER.debug("OMG window is closed");
             ProjectBean updatedBean = datahandler.getProjectFromDB(projectBean.getId());
             updateUI(updatedBean, projectType);
           }
@@ -206,7 +206,6 @@ public class ProjInformationComponent extends CustomComponent {
 
     experimentLabel = new Label("");
     statusContent = new VerticalLayout();
-    tsvDownloadContent = new TSVDownloadComponent();
     hlaTypeLabel = new Label("Not available.", ContentMode.HTML);
     hlaTypeLabel.setStyleName("patientview");
 
@@ -215,7 +214,32 @@ public class ProjInformationComponent extends CustomComponent {
     this.setCompositionRoot(mainLayout);
   }
 
+  private void initTSVDownloads(String space, String project) {
+    tsvDownloadContent = new TSVDownloadComponent();
+    tsvDownloadContent.setVisible(false);
+    List<String> types = new ArrayList<String>(
+        Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE", "Q_TEST_SAMPLE"));
+    boolean tsvable = false;
+    for (Sample s : datahandler.getOpenBisClient()
+        .getSamplesOfProjectBySearchService("/" + space + "/" + project))
+      if (types.contains(s.getSampleTypeCode())) {
+        tsvable = true;
+        break;
+      }
+    if (tsvable) {
+      // need to be disabled first so old project tsvs are not downloadable
+      tsvDownloadContent.disableSpreadSheets();
+      tsvDownloadContent.prepareSpreadsheets(types, space, project, datahandler.getOpenBisClient());
+      tsvDownloadContent.setVisible(true);
+    } else {
+      // nothing to create a tsv from
+      tsvDownloadContent.setVisible(false);
+    }
+  }
+
   public void updateUI(ProjectBean currentBean, String projectType) {
+
+    LOGGER.debug("update UI");
 
     if (currentBean.getId() == null)
       return;
@@ -228,6 +252,10 @@ public class ProjInformationComponent extends CustomComponent {
 
       String pi = projectBean.getPrincipalInvestigator();
       investigator.setValue(pi);
+
+      String ctct = projectBean.getContactPerson();
+      contactPerson.setValue(ctct);
+
       descContent = new Label("");
       // new EditableLabel("");
 
@@ -245,23 +273,7 @@ public class ProjInformationComponent extends CustomComponent {
           currentBean.getExperiments().size())));
       statusContent =
           datahandler.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
-      // TODO can we reuse ids from somewhere else? this might be a bit slower than it needs to be
-      List<String> ids = new ArrayList<String>();
-      List<String> types = new ArrayList<String>(
-          Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE", "Q_TEST_SAMPLE"));
-      for (Sample s : datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(identifier))
-        if (types.contains(s.getSampleTypeCode()))
-          ids.add(s.getIdentifier());
-      // nothing to download
-      if (ids.size() == 0)
-        tsvDownloadContent.setVisible(false);
-      else {
-        // need to be disabled first so old project tsvs are not downloadable
-        tsvDownloadContent.disableSpreadSheets();
-        tsvDownloadContent.prepareSpreadsheets(types, ids.size(), space, currentBean.getCode(),
-            datahandler.getOpenBisClient());
-        tsvDownloadContent.setVisible(true);
-      }
+      initTSVDownloads(space, currentBean.getCode());
 
       HierarchicalContainer datasetContainer = new HierarchicalContainer();
       datasetContainer.addContainerProperty("Select", CheckBox.class, null);
