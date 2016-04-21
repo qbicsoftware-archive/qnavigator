@@ -79,34 +79,34 @@ public class TSVDownloadComponent extends VerticalLayout {
     dlExtracts.setEnabled(false);
     dlPreps.setEnabled(false);
   }
+  
+  public void prepareSpreadsheets(List<String> sampleTypes, int numSamples, String space,
+      final String project, OpenBisClient openbis) {
 
-  public void prepareSpreadsheets(final List<String> ids, final String space, final String project,
-      final OpenBisClient openbis) {
     final TSVDownloadComponent layout = this;
-    // bar.setVisible(true);
-    // info.setVisible(true);
 
-    final int todo = 1;
+//    final int todo = 1;
     Thread t = new Thread(new Runnable() {
-      volatile int current = 0;
+//      volatile int current = 0;
 
       @Override
       public void run() {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put(
-            "types",
-            new ArrayList<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE",
-                "Q_TEST_SAMPLE")));
-        params.put("ids", ids);
-        // updateProgressBar(current, todo, bar, info);
 
-        QueryTableModel table =
-            openbis.getAggregationService("get-experimental-design-tsv", params);
-        current++;
-        // updateProgressBar(current, todo, bar, info);
+        while (openbis.getSamplesOfProject("/" + space + "/" + project).size() < numSamples) {
+          try {
+            Thread.sleep(50);
+          } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+        Map<String, List<String>> tables =
+            openbis.getProjectTSV(project, sampleTypes);
+//        current++;
+//        updateProgressBar(current, todo, bar, info);
 
         UI.getCurrent().setPollInterval(-1);
-        UI.getCurrent().access(new TSVReadyRunnable(layout, table, project));
+        UI.getCurrent().access(new TSVReadyRunnable(layout, tables, project));
       }
     });
     t.start();

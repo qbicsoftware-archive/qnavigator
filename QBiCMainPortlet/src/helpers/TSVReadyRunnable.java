@@ -2,7 +2,6 @@ package helpers;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,92 +13,63 @@ import logging.Log4j2Logger;
 import parser.XMLParser;
 import properties.Factor;
 import qbic.vaadincomponents.TSVDownloadComponent;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 import com.vaadin.server.StreamResource;
 
 public class TSVReadyRunnable implements Runnable {
 
-  TSVDownloadComponent layout;
-  QueryTableModel table;
-  String project;
-  logging.Logger logger = new Log4j2Logger(TSVReadyRunnable.class);
+  private TSVDownloadComponent layout;
+  Map<String, List<String>> tables;
+  private String project;
+  private logging.Logger logger = new Log4j2Logger(TSVReadyRunnable.class);
 
-  public TSVReadyRunnable(TSVDownloadComponent layout, QueryTableModel table, String project) {
+  public TSVReadyRunnable(TSVDownloadComponent layout, Map<String, List<String>> tables, String project) {
     this.layout = layout;
-    this.table = table;
+    this.tables = tables;
     this.project = project;
   }
 
-  @Override
-  public void run() {
-    List<StreamResource> streams = new ArrayList<StreamResource>();
-    Map<String, List<Serializable[]>> tables = sortRows(table);
-    streams.add(getTSVStream(getTSVString(tables.get("Q_BIOLOGICAL_ENTITY")), project
-        + "_sample_sources"));
-    streams.add(getTSVStream(getTSVString(tables.get("Q_BIOLOGICAL_SAMPLE")), project
-        + "_sample_extracts"));
-    if (tables.containsKey("Q_TEST_SAMPLE"))
-      streams.add(getTSVStream(getTSVString(tables.get("Q_TEST_SAMPLE")), project
-          + "_sample_preparations"));
-    layout.armButtons(streams);
-  }
-
-  private Map<String, List<Serializable[]>> sortRows(QueryTableModel table) {
-    Map<String, List<Serializable[]>> res = new HashMap<String, List<Serializable[]>>();
-    for (Serializable[] row : table.getRows()) {
-      String type = (String) row[6];
-      if (res.containsKey(type))
-        res.get(type).add(row);
-      else {
-        List<Serializable[]> subtable = new ArrayList<Serializable[]>();
-        subtable.add(row);
-        res.put(type, subtable);
-      }
+    @Override
+    public void run() {
+      List<StreamResource> streams = new ArrayList<StreamResource>();
+      streams.add(
+          getTSVStream(getTSVString(tables.get("Q_BIOLOGICAL_ENTITY")), project + "_sample_sources"));
+      streams.add(getTSVStream(getTSVString(tables.get("Q_BIOLOGICAL_SAMPLE")),
+          project + "_sample_extracts"));
+      if (tables.containsKey("Q_TEST_SAMPLE"))
+        streams.add(getTSVStream(getTSVString(tables.get("Q_TEST_SAMPLE")),
+            project + "_sample_preparations"));
+      layout.armButtons(streams);
     }
-    return res;
-  }
 
-  public StreamResource getTSVStream(final String content, String name) {
-    StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
-      @Override
-      public InputStream getStream() {
-        try {
-          InputStream is = new ByteArrayInputStream(content.getBytes());
-          return is;
-        } catch (Exception e) {
-          e.printStackTrace();
-          return null;
+    public StreamResource getTSVStream(final String content, String name) {
+      StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
+        @Override
+        public InputStream getStream() {
+          try {
+            InputStream is = new ByteArrayInputStream(content.getBytes());
+            return is;
+          } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+          }
         }
-      }
-    }, String.format("%s.tsv", name));
-    return resource;
-  }
+      }, String.format("%s.tsv", name));
+      return resource;
+    }
 
-  private String getTSVString(List<Serializable[]> table) {
-    XMLParser p = new XMLParser();
-    StringBuilder tsv =
-        new StringBuilder("QBiC ID\tSecondary Name\tSample Source\tExternal ID\tExtract Type");
+    private static String getTSVString(List<String> table) {
+      XMLParser p = new XMLParser();
 
-    if (table != null) {
-      String xml = (String) table.get(0)[5];
-      List<Factor> factors = new ArrayList<Factor>();
-      if (!xml.isEmpty()) {
-        try {
-          factors = p.getFactorsFromXML(xml);
-        } catch (JAXBException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-        for (Factor f : factors) {
-          tsv.append("\t" + f.getLabel());
-        }
-      }
-      for (Serializable[] ss : table) {
-        StringBuilder line =
-            new StringBuilder("\n" + ss[0] + "\t" + ss[1] + "\t" + ss[2] + "\t" + ss[3] + "\t"
-                + ss[4]);
-        xml = (String) ss[5];
+      StringBuilder header = new StringBuilder(table.get(0).replace("\tAttributes", ""));
+      StringBuilder tsv = new StringBuilder();
+      table.remove(0);
+
+      List<String> factorLabels = new ArrayList<String>();
+      for (String row : table) {
+        String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
+        String xml = lineSplit[lineSplit.length - 1];
+        List<Factor> factors = new ArrayList<Factor>();
         if (!xml.isEmpty()) {
           try {
             factors = p.getFactorsFromXML(xml);
@@ -108,16 +78,51 @@ public class TSVReadyRunnable implements Runnable {
             e.printStackTrace();
           }
           for (Factor f : factors) {
-            line.append("\t" + f.getValue());
-            if (f.hasUnit())
-              line.append(f.getUnit());
+            String label = f.getLabel();
+            if (!factorLabels.contains(label)) {
+              factorLabels.add(label);
+              header.append("\t" + label);
+            }
+          }
+        }
+      }
+
+      for (String row : table) {
+        String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
+        String xml = lineSplit[lineSplit.length - 1];
+        if (!xml.isEmpty())
+          row = row.replace("\t" + xml, "");
+        StringBuilder line = new StringBuilder("\n" + row);
+        List<Factor> factors = new ArrayList<Factor>();
+        if (!xml.isEmpty()) {
+          try {
+            factors = p.getFactorsFromXML(xml);
+          } catch (JAXBException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          Map<Integer, Factor> order = new HashMap<Integer, Factor>();
+          for (Factor f : factors) {
+            String label = f.getLabel();
+            order.put(factorLabels.indexOf(label), f);
+          }
+          for (int i = 0; i < factorLabels.size(); i++) {
+            if (order.containsKey(i)) {
+              Factor f = order.get(i);
+              line.append("\t" + f.getValue());
+              if (f.hasUnit())
+                line.append(f.getUnit());
+            } else {
+              line.append("\t");
+            }
+          }
+        } else {
+          for (int i = 0; i < factorLabels.size() - 1; i++) {
+            line.append("\t");
           }
         }
         tsv.append(line);
       }
+      return header.append(tsv).toString();
     }
-
-    return tsv.toString();
-  }
-
 }
