@@ -96,10 +96,13 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       Grid newGrid = new Grid(gpcontainer);
       if (entry.getValue() instanceof FileParameter
           || entry.getValue() instanceof FileListParameter) {
+
+        // TODO also do filtering on filetype level
         List<String> range = getRange(entry.getValue());
 
         if (range.contains("fasta") || range.contains("gtf")) {
           gpcontainer = fastaContainer();
+          // show only bwaIndex references for bwa
         } else if (range.contains("bwaIndex")) {
           gpcontainer = fastaContainerFiltered("bwa");
         } else {
@@ -123,6 +126,8 @@ public class InputFilesComponent extends WorkflowParameterComponent {
             Type.WARNING_MESSAGE);
         layout.addComponent(newGrid);
       }
+      helpers.GridFunctions.addColumnFilters(newGrid, gpcontainer);
+
       inputFileForm.addTab(layout, entry.getKey());
     }
   }
@@ -187,8 +192,14 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     for (java.util.Iterator<DatasetBean> i = datasets.getItemIds().iterator(); i.hasNext();) {
       DatasetBean dataset = i.next();
 
+      // We dont' want to show html and zip files as workflow input (for now). In general we should
+      // use the filter[1] which is the filetype.
+      // However it has to be specified in the corresponding CTD.
       if (filter.contains(dataset.getFileType().toLowerCase())
-          | filter.contains(dataset.getFileType())) {
+          | filter.contains(dataset.getFileType())
+          & !(dataset.getFileName().endsWith(".html") | dataset.getFileName().endsWith(".zip") | dataset
+              .getFileName().endsWith(".pdf"))) {
+        // & dataset.getFileName().contains(filter.get(1))) {
         subContainer.addBean(dataset);
       }
     }
@@ -241,6 +252,7 @@ public class InputFilesComponent extends WorkflowParameterComponent {
             DatasetBean dataset = i.next();
 
             if (associatedDataTypes.contains(dataset.getFileType().toLowerCase())) {
+
               // if (associatedDataType.toLowerCase().equals(dataset.getFileType().toLowerCase())) {
               subContainer.addBean(dataset);
             }
