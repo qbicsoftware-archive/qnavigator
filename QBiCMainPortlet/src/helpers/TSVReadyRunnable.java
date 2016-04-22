@@ -39,6 +39,7 @@ public class TSVReadyRunnable implements Runnable {
       if (tables.containsKey("Q_TEST_SAMPLE"))
         streams.add(getTSVStream(getTSVString(tables.get("Q_TEST_SAMPLE")),
             project + "_sample_preparations"));
+      logger.debug("done, arming buttons");
       layout.armButtons(streams);
     }
 
