@@ -82,7 +82,7 @@ public class TSVReadyRunnable implements Runnable {
             String label = f.getLabel();
             if (!factorLabels.contains(label)) {
               factorLabels.add(label);
-              header.append("\t" + label);
+              header.append("\tCondition: " + label);
             }
           }
         }
