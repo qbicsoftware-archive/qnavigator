@@ -79,31 +79,32 @@ public class TSVDownloadComponent extends VerticalLayout {
     dlExtracts.setEnabled(false);
     dlPreps.setEnabled(false);
   }
-  
+
   public void prepareSpreadsheets(final List<String> sampleTypes, String space,
       final String project, final OpenBisClient openbis) {
-
     final TSVDownloadComponent layout = this;
 
-//    final int todo = 1;
-    Thread t = new Thread(new Runnable() {
-//      volatile int current = 0;
-
-      @Override
-      public void run() {
-        
-        Map<String, List<String>> tables = new HashMap<String, List<String>>();
-        for (String type : sampleTypes) {
-          tables.put(type, openbis.getProjectTSV(project, type));
-//          current++;
-//          updateProgressBar(current, todo, bar, info);
-        }
-        UI.getCurrent().setPollInterval(-1);
-        UI.getCurrent().access(new TSVReadyRunnable(layout, tables, project));
-      }
-    });
-    t.start();
-    UI.getCurrent().setPollInterval(100);
+    // final int todo = 1;
+    // Thread t = new Thread(new Runnable() {
+    //// volatile int current = 0;
+    //
+    // @Override
+    // public void run() {
+    //
+    Map<String, List<String>> tables = new HashMap<String, List<String>>();
+    for (String type : sampleTypes) {
+      tables.put(type, openbis.getProjectTSV(project, type));
+      // current++;
+      // updateProgressBar(current, todo, bar, info);
+    }
+    // UI.getCurrent().setPollInterval(-1);
+    // UI.getCurrent().access(new TSVReadyRunnable(layout, tables, project));
+    // }
+    // });
+    // t.start();
+    // UI.getCurrent().setPollInterval(100);
+    TSVReadyRunnable r = new TSVReadyRunnable(layout, tables, project);
+    r.run();
   }
 
   // private void updateProgressBar(int current, int todo, ProgressBar bar, Label info) {
@@ -119,6 +120,7 @@ public class TSVDownloadComponent extends VerticalLayout {
   }
 
   protected void armDownloadButton(Button b, StreamResource stream, int dlnum) {
+    logger.debug(Integer.toString(dlnum));
     if (downloaders.size() < dlnum) {
       FileDownloader dl = new FileDownloader(stream);
       dl.extend(b);

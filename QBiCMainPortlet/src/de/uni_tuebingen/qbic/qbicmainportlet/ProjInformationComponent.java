@@ -239,8 +239,6 @@ public class ProjInformationComponent extends CustomComponent {
 
   public void updateUI(ProjectBean currentBean, String projectType) {
 
-    LOGGER.debug("update UI");
-
     if (currentBean.getId() == null)
       return;
     try {
@@ -514,6 +512,7 @@ public class ProjInformationComponent extends CustomComponent {
 
 
     projDescriptionContent.addComponent(tsvDownloadContent);
+
     projDescription.addComponent(projDescriptionContent);
 
     projDescriptionContent.addComponent(contact);
