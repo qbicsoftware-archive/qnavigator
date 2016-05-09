@@ -112,8 +112,8 @@ public class HomeView extends VerticalLayout implements View {
     this.table.setContainerDataSource(spaceBean.getProjects());
     this.table.setVisibleColumns(new Object[] {"code", "space", "secondaryName",
         "principalInvestigator"});//, "decription"});
-    this.table.setColumnHeader("code", "Code");
-    this.table.setColumnHeader("secondaryName", "Name");
+    this.table.setColumnHeader("code", "Sub-Project");
+    this.table.setColumnHeader("secondaryName", "Short Name");
     this.table.setColumnHeader("space", "Project");
     this.table.setColumnHeader("principalInvestigator", "Investigator");
 //    this.table.setColumnHeader("description", "Description");

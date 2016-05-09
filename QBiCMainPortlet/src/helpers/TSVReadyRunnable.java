@@ -82,11 +82,12 @@ public class TSVReadyRunnable implements Runnable {
           String label = f.getLabel();
           if (!factorLabels.contains(label)) {
             factorLabels.add(label);
-            header.append("\t" + label);
+            header.append("\tCondition: " + label);
           }
         }
       }
     }
+
 
     for (String row : table) {
       String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
