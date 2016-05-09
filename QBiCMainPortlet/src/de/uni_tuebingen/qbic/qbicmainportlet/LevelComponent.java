@@ -150,8 +150,6 @@ public class LevelComponent extends CustomComponent {
       datasetContainer.addContainerProperty("dl_link", String.class, null);
       datasetContainer.addContainerProperty("CODE", String.class, null);
 
-      // HierarchicalContainer sampleContainer = new HierarchicalContainer()
-
       List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasetsAll = null;
       List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets =
           new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
@@ -216,9 +214,6 @@ public class LevelComponent extends CustomComponent {
                   retrievedDatasets.addAll(foundDataset);
                 }
 
-                // for (Sample child :
-                // datahandler.openBisClient.getFacade().listSamplesOfSample(sample.getPermId())) {
-                // for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
                 for (Sample child : sample.getChildren()) {
                   foundDataset = datasetFilter.get(child.getIdentifier());
                   if (foundDataset != null) {
@@ -252,9 +247,6 @@ public class LevelComponent extends CustomComponent {
                   retrievedDatasets.addAll(foundDataset);
                 }
 
-                // for (Sample child :
-                // datahandler.openBisClient.getFacade().listSamplesOfSample(sample.getPermId())) {
-                // for (Sample child : datahandler.getOpenBisClient().getChildrenSamples(sample)) {
                 for (Sample child : sample.getChildren()) {
                   foundDataset = datasetFilter.get(child.getIdentifier());
                   if (foundDataset != null) {
@@ -410,7 +402,6 @@ public class LevelComponent extends CustomComponent {
 
             sampleGrid.setCaption("Workflow Runs");
             helpers.GridFunctions.addColumnFilters(sampleGrid, gpc);
-            // sampleGrid.setVisible(false);
             this.datasetTable.setCaption("Result Files");
             datasetTable.setColumnHeader("Sample", "Workflow Run");
 
@@ -582,19 +573,12 @@ public class LevelComponent extends CustomComponent {
     sampletableSectionContent.setWidth("100%");
     tableSectionContent.setWidth("100%");
 
-    // this.table.setSizeFull();
-
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setMargin(new MarginInfo(true, false, true, true));
     buttonLayout.setHeight(null);
-    // buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
 
     this.download.setEnabled(false);
-    // final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
-    // visualize.setEnabled(false);
-    // buttonLayout.addComponent(this.download);
-    // buttonLayout.addComponent(visualize);
     buttonLayout.setSpacing(true);
 
     Button checkAll = new Button("Select all datasets");

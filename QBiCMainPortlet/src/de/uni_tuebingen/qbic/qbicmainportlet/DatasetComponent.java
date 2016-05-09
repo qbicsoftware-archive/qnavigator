@@ -161,7 +161,6 @@ public class DatasetComponent extends CustomComponent {
           Set<Sample> allChildren = getAllChildren(startList, start);
 
           for (Sample samp : allChildren) {
-            LOGGER.debug(samp.getIdentifier());
             retrievedDatasets.addAll(datahandler.getOpenBisClient().getDataSetsOfSample(
                 samp.getCode()));
           }
@@ -211,7 +210,6 @@ public class DatasetComponent extends CustomComponent {
         String projectCode = retrievedDatasets.get(0).getExperimentIdentifier().split("/")[2];
         for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet dataset : retrievedDatasets) {
           samples.put(dataset.getCode(), dataset.getSampleIdentifierOrNull().split("/")[2]);
-          LOGGER.debug(dataset.toString());
         }
 
         List<DatasetBean> dsBeans = datahandler.queryDatasetsForFolderStructure(retrievedDatasets);
@@ -483,7 +481,7 @@ public class DatasetComponent extends CustomComponent {
             }
 
             if (visualize) {
-              LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
+              // LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
               BrowserFrame frame = new BrowserFrame("", res);
 
               subContent.addComponent(frame);
@@ -744,6 +742,7 @@ public class DatasetComponent extends CustomComponent {
     return map;
   }
 
+  // Recursively get all samples which are above the corresponding sample in the tree
   public Set<Sample> getAllChildren(Set<Sample> found, Sample sample) {
     // List<Sample> current = datahandler.getOpenBisClient().getChildrenSamples(sample);
     List<Sample> current = sample.getChildren();

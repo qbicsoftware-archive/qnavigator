@@ -24,7 +24,6 @@ import model.DatasetBean;
 import model.ProjectBean;
 import model.TestSampleBean;
 
-import org.apache.catalina.util.Base64;
 import org.tepi.filtertable.FilterTreeTable;
 
 import qbic.vaadincomponents.TSVDownloadComponent;
@@ -35,8 +34,6 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchCl
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 
-import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
@@ -46,10 +43,8 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
-import com.vaadin.server.RequestHandler;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -183,7 +178,6 @@ public class ProjInformationComponent extends CustomComponent {
 
           @Override
           public void windowClose(CloseEvent e) {
-            LOGGER.debug("OMG window is closed");
             ProjectBean updatedBean = datahandler.getProjectFromDB(projectBean.getId());
             updateUI(updatedBean, projectType);
           }
@@ -549,8 +543,6 @@ public class ProjInformationComponent extends CustomComponent {
     buttonLayout.setSpacing(true);
 
     this.download.setEnabled(false);
-    final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
-    visualize.setEnabled(false);
     buttonLayout.setSpacing(true);
 
     Button checkAll = new Button("Select all datasets");
@@ -582,7 +574,6 @@ public class ProjInformationComponent extends CustomComponent {
 
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
-    buttonLayout.addComponent(visualize);
     buttonLayout.addComponent(this.download);
     /**
      * prepare download.
@@ -596,56 +587,6 @@ public class ProjInformationComponent extends CustomComponent {
           .getValue());
     }
 
-
-
-    /*
-     * Update the visualize button. It is only enabled, if the files can be visualized.
-     */
-    this.datasetTable.addValueChangeListener(new ValueChangeListener() {
-      /**
-       * 
-       */
-      private static final long serialVersionUID = -4875903343717437913L;
-
-
-      /**
-       * check for what selection can be visualized. If so, enable the button. TODO change to
-       * checked.
-       */
-      @Override
-      public void valueChange(ValueChangeEvent event) {
-        // Nothing selected or more than one selected.
-        Set<Object> selectedValues = (Set<Object>) event.getProperty().getValue();
-        if (selectedValues == null || selectedValues.size() == 0 || selectedValues.size() > 1) {
-          visualize.setEnabled(false);
-          return;
-        }
-        // if one selected check whether its dataset type is either fastqc or qcml.
-        // For now we only visulize these two file types.
-        Iterator<Object> iterator = selectedValues.iterator();
-        Object next = iterator.next();
-        String datasetType =
-            (String) datasetTable.getItem(next).getItemProperty("Dataset Type").getValue();
-        String fileName =
-            (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
-        // TODO: No hardcoding!!
-        // if (datasetType.equals("FASTQC") || datasetType.equals("QCML") ||
-        // datasetType.equals("BAM")
-        // || datasetType.equals("VCF")) {
-        if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS")
-            && (fileName.endsWith(".html") || fileName.endsWith(".qcML"))) {
-          visualize.setEnabled(true);
-        } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
-            && (fileName.endsWith(".err") || fileName.endsWith(".out"))) {
-          visualize.setEnabled(true);
-        } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS")
-            && (fileName.endsWith(".html"))) {
-          visualize.setEnabled(true);
-        } else {
-          visualize.setEnabled(false);
-        }
-      }
-    });
 
     /*
      * Send message that in datasetview the following was selected. WorkflowViews get those messages
@@ -688,148 +629,6 @@ public class ProjInformationComponent extends CustomComponent {
 
       }
     });
-
-
-    // TODO get the GV to work here. Together with reverse proxy
-    // Assumes that table Value Change listner is enabling or disabling the button if preconditions
-    // are not fullfilled
-    visualize.addClickListener(new ClickListener() {
-      /**
-       * 
-       */
-      private static final long serialVersionUID = 9015273307461506369L;
-
-      @Override
-      public void buttonClick(ClickEvent event) {
-        Set<Object> selectedValues = (Set<Object>) datasetTable.getValue();
-        Iterator<Object> iterator = selectedValues.iterator();
-        Object next = iterator.next();
-        String datasetCode = (String) datasetTable.getItem(next).getItemProperty("CODE").getValue();
-        String datasetFileName =
-            (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
-        URL url;
-        try {
-          Object parent = datasetTable.getParent(next);
-          if (parent != null) {
-            String parentDatasetFileName =
-                (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
-            url =
-                datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
-                    parentDatasetFileName + "/" + datasetFileName);
-          } else {
-            url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
-          }
-
-          Window subWindow = new Window();
-          // ("QC of Sample: "
-          // + (String) datasetTable.getItem(next).getItemProperty("Sample").getValue());
-
-          VerticalLayout subContent = new VerticalLayout();
-          subContent.setMargin(true);
-          subWindow.setContent(subContent);
-          QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
-          // Put some components in it
-          Resource res = null;
-          String datasetType =
-              (String) datasetTable.getItem(next).getItemProperty("Dataset Type").getValue();
-          final RequestHandler rh = new ProxyForGenomeViewerRestApi();
-          boolean rhAttached = false;
-          if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS")
-              && datasetFileName.endsWith(".qcML")) {
-            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-            StreamResource streamres = new StreamResource(re, datasetFileName);
-            streamres.setMIMEType("application/xml");
-            res = streamres;
-          } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_RESULTS")
-              && datasetFileName.endsWith(".html")) {
-            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-            StreamResource streamres = new StreamResource(re, datasetFileName);
-            streamres.setMIMEType("text/html");
-            res = streamres;
-          } else if (datasetType.equals("Q_WF_MS_QUALITYCONTROL_LOGS")
-              && (datasetFileName.endsWith(".err") || datasetFileName.endsWith(".out"))) {
-            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-            StreamResource streamres = new StreamResource(re, datasetFileName);
-            streamres.setMIMEType("text/plain");
-            res = streamres;
-          } else if (datasetType.equals("Q_WF_MA_QUALITYCONTROL_RESULTS")
-              && datasetFileName.endsWith(".html")) {
-            QcMlOpenbisSource re = new QcMlOpenbisSource(url);
-            StreamResource streamres = new StreamResource(re, datasetFileName);
-            streamres.setMIMEType("text/html");
-            res = streamres;
-          } else if (datasetType.equals("FASTQC")) {
-            res = new ExternalResource(url);
-          } else if (datasetType.equals("BAM") || datasetType.equals("VCF")) {
-            String filePath =
-                (String) datasetTable.getItem(next).getItemProperty("dl_link").getValue();
-            filePath = String.format("/store%s", filePath.split("store")[1]);
-            String fileId =
-                (String) datasetTable.getItem(next).getItemProperty("File Name").getValue();
-            // fileId = "control.1kg.panel.samples.vcf.gz";
-            // UI.getCurrent().getSession().addRequestHandler(rh);
-            rhAttached = true;
-            ThemeDisplay themedisplay =
-                (ThemeDisplay) VaadinService.getCurrentRequest()
-                    .getAttribute(WebKeys.THEME_DISPLAY);
-            String hostTmp = "http://localhost:7778/vizrest/rest";// "http://localhost:8080/web/guest/mainportlet?p_p_id=QbicmainportletApplicationPortlet_WAR_QBiCMainPortlet_INSTANCE_5pPd5JQ8uGOt&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_count=1";
-            // hostTmp +=
-            // "&qbicsession=" + UI.getCurrent().getSession().getAttribute("gv-restapi-session")
-            // + "&someblabla=";
-            // String hostTmp = themedisplay.getURLPortal() +
-            // UI.getCurrent().getPage().getLocation().getPath() + "?qbicsession=" +
-            // UI.getCurrent().getSession().getAttribute("gv-restapi-session") + "&someblabla=" ;
-            LOGGER.debug(hostTmp);
-            String host = Base64.encode(hostTmp.getBytes());
-            LOGGER.debug(host);
-            String title = (String) datasetTable.getItem(next).getItemProperty("Sample").getValue();
-            res =
-                new ExternalResource(
-                    String
-                        .format(
-                            "http://localhost:7778/genomeviewer/?host=%s&title=%s&fileid=%s&featuretype=alignments&filepath=%s&removeZeroGenotypes=false",
-                            host, title, fileId, filePath));
-          }
-          LOGGER.debug("Is resource null?: " + String.valueOf(res == null));
-          BrowserFrame frame = new BrowserFrame("", res);
-          if (rhAttached) {
-            frame.addDetachListener(new DetachListener() {
-
-              /**
-               * 
-               */
-              private static final long serialVersionUID = 1534523447730906543L;
-
-              @Override
-              public void detach(DetachEvent event) {
-                UI.getCurrent().getSession().removeRequestHandler(rh);
-              }
-
-            });
-          }
-
-          frame.setSizeFull();
-          subContent.addComponent(frame);
-
-          // Center it in the browser window
-          subWindow.center();
-          subWindow.setModal(true);
-          subWindow.setSizeFull();
-
-          frame.setHeight((int) (ui.getPage().getBrowserWindowHeight() * 0.8), Unit.PIXELS);
-          // Open it in the UI
-          ui.addWindow(subWindow);
-        } catch (MalformedURLException e) {
-          LOGGER.error(String.format(
-              "Visualization failed because of malformedURL for dataset: %s", datasetCode));
-          Notification
-              .show(
-                  "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
-                  Notification.Type.ERROR_MESSAGE);
-        }
-      }
-    });
-
 
     this.datasetTable.addItemClickListener(new ItemClickListener() {
       @Override

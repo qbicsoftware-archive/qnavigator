@@ -162,12 +162,6 @@ public class BiologicalSamplesComponent extends CustomComponent {
     BeanItemContainer<BiologicalEntitySampleBean> samplesEntityContainer =
         new BeanItemContainer<BiologicalEntitySampleBean>(BiologicalEntitySampleBean.class);
 
-    long startTime = System.nanoTime();
-
-    // List<Sample> allSamples =
-    // datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(id);
-
-
     List<Sample> allSamples =
         datahandler.getOpenBisClient().getSamplesWithParentsAndChildrenOfProjectBySearchService(id);
 
@@ -248,11 +242,6 @@ public class BiologicalSamplesComponent extends CustomComponent {
         }
       }
     }
-    long endTime = System.nanoTime();
-
-    long duration = (endTime - startTime) / 1000000;
-    LOGGER.debug(String.valueOf(duration));
-
 
     numberOfBioSamples = samplesBioContainer.size();
     numberOfEntitySamples = samplesEntityContainer.size();

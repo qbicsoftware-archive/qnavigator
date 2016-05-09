@@ -3,21 +3,18 @@ package qbic.vaadincomponents;
 import helpers.TSVReadyRunnable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import logging.Log4j2Logger;
 import main.OpenBisClient;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -86,7 +83,7 @@ public class TSVDownloadComponent extends VerticalLayout {
 
     // final int todo = 1;
     // Thread t = new Thread(new Runnable() {
-    //// volatile int current = 0;
+    // // volatile int current = 0;
     //
     // @Override
     // public void run() {
@@ -120,7 +117,6 @@ public class TSVDownloadComponent extends VerticalLayout {
   }
 
   protected void armDownloadButton(Button b, StreamResource stream, int dlnum) {
-    logger.debug(Integer.toString(dlnum));
     if (downloaders.size() < dlnum) {
       FileDownloader dl = new FileDownloader(stream);
       dl.extend(b);

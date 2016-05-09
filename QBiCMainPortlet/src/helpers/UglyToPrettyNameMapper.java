@@ -38,6 +38,7 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_NGS_RNA_EXPRESSION_ANALYSIS", "RNA Expression Analysis Workflow");
     namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION", "Variant Annotation Workflow");
     namesMapping.put("Q_WF_NGS_VARIANT_CALLING", "Variant Calling Workflow");
+    namesMapping.put("Q_WF_NGS_MAPPING", "NGS Read Alignment Workflow");
     namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME", "Individualized Proteins Workflow");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID", "Ligandomics Identification Workflow");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC", "Ligandomics Quality Control Workflow");
@@ -92,6 +93,7 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_NGS_RNA_EXPRESSION_ANALYSIS_RUN", "RNA Expression Workflow Run");
     namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION_RUN", "Variant Annotation Workflow Run");
     namesMapping.put("Q_WF_NGS_VARIANT_CALLING_RUN", "Variant Calling Workflow Run");
+    namesMapping.put("Q_WF_NGS_MAPPING_RUN", "NGS Read Alignment Workflow Run");
     namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME_RUN", "Individualized Proteins Workflow Run");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_RUN", "Ligandomics Identification Workflow Run");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_RUN", "Ligandomics Quality Control Workflow Run");
@@ -162,6 +164,8 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_NGS_VARIANT_ANNOTATION_RESULTS", "Variant Annotation Results");
     namesMapping.put("Q_WF_NGS_VARIANT_CALLING_LOGS", "Variant Calling Logs");
     namesMapping.put("Q_WF_NGS_VARIANT_CALLING_RESULTS", "Variant Calling Results");
+    namesMapping.put("Q_WF_NGS_MAPPING_LOGS", "NGS Read Alignment Logs");
+    namesMapping.put("Q_WF_NGS_MAPPING_RESULTS", "NGS Read Alignment Results");
     namesMapping.put("MZML", "Mass Spectrometry Raw Data (MZML)");
     namesMapping.put("Q_MS_MZML_DATA", "Mass Spectrometry Raw Data (MZML)");
     namesMapping.put("Q_WF_MS_INDIVIDUALIZED_PROTEOME_RESULTS", "Individualized Proteins Results");
@@ -172,7 +176,6 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_LOGS", "Ligandomics Identification Workflow Logs");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_RESULTS",
         "Ligandomics Identification Workflow Results");
-
 
 
     // deprecated dataset types

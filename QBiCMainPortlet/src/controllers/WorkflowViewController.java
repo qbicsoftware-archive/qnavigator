@@ -200,7 +200,7 @@ public class WorkflowViewController {
   }
 
   public String registerWFSample(String space, String project, String experiment, String typecode,
-      List<String> parents) {
+      List<String> parents, List<DatasetBean> datasets) {
     int last = 0;
     for (Sample s : openbis.getSamplesofExperiment((new StringBuilder("/")).append(space)
         .append("/").append(project).append("/").append(experiment).toString())) {
@@ -227,8 +227,18 @@ public class WorkflowViewController {
     params.put("space", space);
     params.put("experiment", experiment);
 
+    StringBuilder result = new StringBuilder();
+    result.append("Input Files: ");
+
+    for (DatasetBean b : datasets) {
+      result.append(b.getFileName());
+      result.append(",");
+    }
+
+    String secName = result.length() > 0 ? result.substring(0, result.length() - 1) : "";
+
     Map<String, Object> properties = new HashMap<String, Object>();
-    // TODO fill properties
+    properties.put("Q_ADDITIONAL_INFO", secName);
     params.put("properties", properties);
 
     openbis.ingest(openbis_dss, "register-samp", params);
@@ -416,12 +426,12 @@ public class WorkflowViewController {
         registerWFExperiment(spaceCode, projectCode, workflow.getExperimentType(),
             workflow.getID(), workflow.getVersion(), user);
 
-
     List<String> parents = getConnectedSamples(selectedDatasets);
     String sampleType = workflow.getSampleType();
 
     String sampleCode =
-        registerWFSample(spaceCode, projectCode, experimentCode, sampleType, parents);
+        registerWFSample(spaceCode, projectCode, experimentCode, sampleType, parents,
+            selectedDatasets);
 
     String openbisId =
         String.format("%s-%s-%s-%s", spaceCode, projectCode, experimentCode, sampleCode);

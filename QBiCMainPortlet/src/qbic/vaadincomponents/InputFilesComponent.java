@@ -195,14 +195,20 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       // We dont' want to show html and zip files as workflow input (for now). In general we should
       // use the filter[1] which is the filetype.
       // However it has to be specified in the corresponding CTD.
-      if (filter.contains(dataset.getFileType().toLowerCase())
+      // For now, do workflow specific filtering additionally
+      if (((filter.contains(dataset.getFileType().toLowerCase()) | filter.contains(dataset
+          .getFileType()))) & dataset.getFileType().equals("Q_WF_NGS_HLATYPING_RESULTS")) {
+        if (dataset.getFileName().endsWith("alleles")) {
+          subContainer.addBean(dataset);
+        }
+      } else if (filter.contains(dataset.getFileType().toLowerCase())
           | filter.contains(dataset.getFileType())
           & !(dataset.getFileName().endsWith(".html") | dataset.getFileName().endsWith(".zip") | dataset
               .getFileName().endsWith(".pdf"))) {
-        // & dataset.getFileName().contains(filter.get(1))) {
         subContainer.addBean(dataset);
       }
     }
+
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
     gpcontainer.removeContainerProperty("fullPath");
     gpcontainer.removeContainerProperty("openbisCode");
