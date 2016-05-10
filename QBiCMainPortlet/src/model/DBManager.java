@@ -109,9 +109,9 @@ public class DBManager {
         String organization = rs.getString("umbrella_organization");
         String affiliation = "";
 
-        if (group_name == null | group_name.toUpperCase().equals("NULL") | group_name.equals("")) {
+        if (group_name == null || group_name.toUpperCase().equals("NULL") || group_name.equals("")) {
 
-          if (institute == null | institute.toUpperCase().equals("NULL") | institute.equals("")) {
+          if (institute == null || institute.toUpperCase().equals("NULL") || institute.equals("")) {
             affiliation = organization;
           } else {
             affiliation = institute;

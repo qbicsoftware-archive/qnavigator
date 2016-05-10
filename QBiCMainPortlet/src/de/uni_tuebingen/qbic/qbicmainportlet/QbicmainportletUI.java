@@ -71,7 +71,7 @@ public class QbicmainportletUI extends UI {
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "1.5";
-  private String revision = "f913fb2";
+  private String revision = "aeeb884";
   private String resUrl;
   protected View currentView;
 
