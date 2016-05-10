@@ -55,7 +55,6 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupView;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -794,10 +793,16 @@ public class LevelComponent extends CustomComponent {
           } catch (MalformedURLException e) {
             LOGGER.error(String.format(
                 "Visualization failed because of malformedURL for dataset: %s", datasetCode));
-            Notification
-                .show(
+            helpers.Utils
+                .Notification(
+                    "No file attached.",
                     "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
-                    Notification.Type.ERROR_MESSAGE);
+                    "error");
+
+            // Notification
+            // .show(
+            // "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+            // Notification.Type.ERROR_MESSAGE);
           }
         }
       }

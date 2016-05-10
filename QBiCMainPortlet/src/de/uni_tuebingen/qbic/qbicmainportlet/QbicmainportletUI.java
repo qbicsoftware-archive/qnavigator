@@ -70,8 +70,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "1.3";
-  private String revision = "08ea6fa";
+  private String version = "1.5";
+  private String revision = "f913fb2";
   private String resUrl;
   protected View currentView;
 
@@ -279,8 +279,7 @@ public class QbicmainportletUI extends UI {
       e1.printStackTrace();
     }
 
-    WorkflowViewController controller =
-        new WorkflowViewController(submitter, datahandler.getOpenBisClient(), user);
+    WorkflowViewController controller = new WorkflowViewController(submitter, datahandler, user);
 
     final ProjectView projectView =
         new ProjectView(datahandler, state, resUrl, controller, manager);

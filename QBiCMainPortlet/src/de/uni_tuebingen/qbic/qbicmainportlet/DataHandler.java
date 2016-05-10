@@ -376,6 +376,40 @@ public class DataHandler implements Serializable {
     return roots;
   }
 
+  // Recursively get all samples which are above the corresponding sample in the tree
+  public List<DatasetBean> getAllFiles(List<DatasetBean> found, DatasetBean root) {
+    List<DatasetBean> current = root.getChildren();
+
+    if (current == null) {
+      found.add(root);
+    } else if (current.size() == 0) {
+      found.add(root);
+
+    } else {
+      for (int i = 0; i < current.size(); i++) {
+        getAllFiles(found, current.get(i));
+      }
+    }
+    return found;
+  }
+
+
+  public List<DatasetBean> queryDatasetsForFiles(
+      List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> datasets) {
+    List<DatasetBean> results = new ArrayList<DatasetBean>();
+
+    if (datasets.size() > 0) {
+      List<DatasetBean> roots = queryDatasetsForFolderStructure(datasets);
+
+      for (DatasetBean ds : roots) {
+        List<DatasetBean> startList = new ArrayList<DatasetBean>();
+        results.addAll(getAllFiles(startList, ds));
+      }
+    }
+
+    return results;
+  }
+
   /**
    * Method to get Bean from either openbis identifier or openbis object. Checks if corresponding
    * bean is already stored in datahandler map.

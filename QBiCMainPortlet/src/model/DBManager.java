@@ -85,10 +85,9 @@ public class DBManager {
     List<Person> res = new ArrayList<Person>();
     String lnk = "persons_organizations";
     String sql =
-        "SELECT persons.*, organizations.id, organizations.group_name, organizations.group_acronym, "
-            + lnk + ".occupation FROM persons, organizations, " + lnk + " WHERE persons.id = "
-            + Integer.toString(personID) + " AND persons.id = " + lnk
-            + ".person_id and organizations.id = " + lnk + ".organization_id";
+        "SELECT persons.*, organizations.*, " + lnk + ".occupation FROM persons, organizations, "
+            + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = "
+            + lnk + ".person_id and organizations.id = " + lnk + ".organization_id";
     Connection conn = login();
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       ResultSet rs = statement.executeQuery();
@@ -100,9 +99,28 @@ public class DBManager {
         String last = rs.getString("family_name");
         String eMail = rs.getString("email");
         String phone = rs.getString("phone");
+
+
         int affiliationID = rs.getInt("organizations.id");
-        String affiliation =
-            rs.getString("group_name") + " (" + rs.getString("group_acronym") + ")";
+
+        String group_acronym = rs.getString("group_acronym");
+        String group_name = rs.getString("group_name");
+        String institute = rs.getString("institute");
+        String organization = rs.getString("umbrella_organization");
+        String affiliation = "";
+
+        if (group_name == null | group_name.toUpperCase().equals("NULL") | group_name.equals("")) {
+
+          if (institute == null | institute.toUpperCase().equals("NULL") | institute.equals("")) {
+            affiliation = organization;
+          } else {
+            affiliation = institute;
+          }
+
+        } else {
+          affiliation = group_name + " (" + group_acronym + ")";
+        }
+
         String role = rs.getString(lnk + ".occupation");
         res.add(new Person(id, username, title, first, last, eMail, phone, affiliationID,
             affiliation, role));

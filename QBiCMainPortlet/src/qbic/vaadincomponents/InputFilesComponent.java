@@ -19,8 +19,10 @@ import submitter.parameters.InputList;
 import submitter.parameters.Parameter;
 import submitter.parameters.ParameterSet;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
@@ -111,7 +113,9 @@ public class InputFilesComponent extends WorkflowParameterComponent {
         newGrid.setContainerDataSource(gpcontainer);
         newGrid.setSelectionMode(getSelectionMode(entry.getValue()));
       } else {
-        showError(String.format("Invalid Inputfile Parameter!", entry.getKey()));
+        // showError(String.format("Invalid Inputfile Parameter!", entry.getKey()));
+        helpers.Utils.Notification("Invalid Inputfile Parameter",
+            "Invalid value for inputfile parameter has been provided." + entry.getKey(), "error");
       }
       HorizontalLayout layout = new HorizontalLayout();
       layout.setMargin(new MarginInfo(true, true, true, true));
@@ -121,13 +125,20 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       layout.addComponent(newGrid);
 
       if (newGrid.getContainerDataSource().size() == 0) {
-        Notification.show(
-            String.format("No dataset of type %s available in this project!", entry.getKey()),
-            Type.WARNING_MESSAGE);
+        // Notification.show(
+        // String.format("No dataset of type %s available in this project!", entry.getKey()),
+        // Type.WARNING_MESSAGE);
+        helpers.Utils
+            .Notification(
+                "Missing Dataset Type",
+                String
+                    .format(
+                        "Workflow submission might not be possible because no dataset of type %s is available in this project",
+                        entry.getKey()), "warning");
         layout.addComponent(newGrid);
       }
-      helpers.GridFunctions.addColumnFilters(newGrid, gpcontainer);
 
+      helpers.GridFunctions.addColumnFilters(newGrid, gpcontainer);
       inputFileForm.addTab(layout, entry.getKey());
     }
   }
@@ -203,8 +214,11 @@ public class InputFilesComponent extends WorkflowParameterComponent {
         }
       } else if (filter.contains(dataset.getFileType().toLowerCase())
           | filter.contains(dataset.getFileType())
-          & !(dataset.getFileName().endsWith(".html") | dataset.getFileName().endsWith(".zip") | dataset
-              .getFileName().endsWith(".pdf"))) {
+          & !(dataset.getFileName().endsWith(".html") | dataset.getFileName().endsWith(".zip")
+              | dataset.getFileName().endsWith(".pdf")
+              | dataset.getFileName().endsWith(".origlabfilename")
+              | dataset.getFileName().endsWith(".sha256sum") | dataset.getFileName().contains(
+              "source_dropbox"))) {
         subContainer.addBean(dataset);
       }
     }
@@ -212,8 +226,29 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
     gpcontainer.removeContainerProperty("fullPath");
     gpcontainer.removeContainerProperty("openbisCode");
+    gpcontainer.removeContainerProperty("properties");
 
+    gpcontainer.addGeneratedProperty("Additional Info", new PropertyValueGenerator<String>() {
 
+      @Override
+      public Class<String> getType() {
+        return String.class;
+      }
+
+      @Override
+      public String getValue(Item item, Object itemId, Object propertyId) {
+        Map<String, String> properties =
+            (Map<String, String>) item.getItemProperty("properties").getValue();
+
+        String additionalInfo = "";
+        if (properties != null) {
+          if (properties.containsKey("Q_ADDITIONAL_INFO")) {
+            additionalInfo = properties.get("Q_ADDITIONAL_INFO");
+          }
+        }
+        return additionalInfo;
+      }
+    });
     return gpcontainer;
   }
 
@@ -297,8 +332,8 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       }
 
       else {
-        Notification.show(String.format("Invalid Inputfile Parameter!", entry.getKey()),
-            Type.ERROR_MESSAGE);
+        helpers.Utils.Notification("Invalid Inputfile Parameter",
+            "Invalid inputfile parameter has been selected: " + entry.getKey(), "error");
       }
 
       HorizontalLayout layout = new HorizontalLayout();
@@ -309,9 +344,16 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       layout.addComponent(newGrid);
 
       if (newGrid.getContainerDataSource().size() == 0) {
-        Notification.show(
-            String.format("No dataset of type %s available in this project!", entry.getKey()),
-            Type.WARNING_MESSAGE);
+        helpers.Utils
+            .Notification(
+                "Missing Dataset Type",
+                String
+                    .format(
+                        "Workflow submission might not be possible because no dataset of type %s is available in this project",
+                        entry.getKey()), "warning");
+        // Notification.show(
+        // String.format("No dataset of type %s available in this project!", entry.getKey()),
+        // Type.WARNING_MESSAGE);
         layout.addComponent(newGrid);
       }
 
@@ -357,7 +399,9 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       }
     }
     if (selectedDatasets.size() == 0) {
-      showError("Please select at least one dataset.");
+      helpers.Utils.Notification("No dataset selected", "Please select at least one dataset.",
+          "error");
+      // showError("Please select at least one dataset.");
     }
     return selectedDatasets;
   }
@@ -417,7 +461,9 @@ public class InputFilesComponent extends WorkflowParameterComponent {
                 || caption.equals("InputFiles.1.bam")) {
               continue;
             } else {
-              showError("Warning: Nothing selected for single input parameter " + caption);
+              helpers.Utils.Notification("Missing single input parameter",
+                  "Nothing selected for single input parameter " + caption, "warning");
+              // showError("Warning: Nothing selected for single input parameter " + caption);
               return false;
             }
           }
@@ -439,7 +485,9 @@ public class InputFilesComponent extends WorkflowParameterComponent {
           Collection<Object> selectionMulti = currentGrid.getSelectedRows();
           if ((selectionMulti == null || selectionMulti.isEmpty())
               && (!caption.equals("InputFiles.1.fastq"))) {
-            showError("Warning: Nothing selected for multi input parameter " + caption);
+            helpers.Utils.Notification("Missing single input parameter",
+                "Nothing selected for single input parameter " + caption, "warning");
+            // showError("Warning: Nothing selected for multi input parameter " + caption);
             return false;
           }
           List<String> selectedPaths = new ArrayList<String>();

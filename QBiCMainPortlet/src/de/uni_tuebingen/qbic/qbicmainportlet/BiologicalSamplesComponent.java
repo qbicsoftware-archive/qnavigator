@@ -339,7 +339,6 @@ public class BiologicalSamplesComponent extends CustomComponent {
         BeanItem selected = (BeanItem) samplesEntity.getItem(event.getItemId());
         BiologicalEntitySampleBean selectedSample = (BiologicalEntitySampleBean) selected.getBean();
 
-        LOGGER.debug("clicked");
         Window subWindow = new Window("Edit Metadata");
 
         changeMetadata.updateUI(selectedSample.getId(), selectedSample.getType());
@@ -361,7 +360,6 @@ public class BiologicalSamplesComponent extends CustomComponent {
 
           @Override
           public void windowClose(CloseEvent e) {
-            LOGGER.debug("OMG window is closes");
             updateUI(currentID);
           }
         });
@@ -399,11 +397,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
         BeanItem selected = (BeanItem) samplesBio.getItem(event.getItemId());
         BiologicalSampleBean selectedSample = (BiologicalSampleBean) selected.getBean();
 
-        LOGGER.debug("clicked");
         Window subWindow = new Window();
 
-        LOGGER.debug(selectedSample.getId());
-        LOGGER.debug(selectedSample.getType());
         changeMetadata.updateUI(selectedSample.getId(), selectedSample.getType());
         VerticalLayout subContent = new VerticalLayout();
         subContent.setMargin(true);
