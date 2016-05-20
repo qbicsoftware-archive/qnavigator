@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project Wizard enables users to create hierarchical experiments including different study conditions using factorial design.
- * Copyright (C) "2016"  Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects.
+ * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
