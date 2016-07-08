@@ -144,7 +144,7 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_NGS_VARIANT_CALLING_DATA", "Variant Calling Data");
     namesMapping.put("Q_PROJECT_DATA", "Project related Data");
     namesMapping.put("Q_WF_MA_QUALITYCONTROL_LOGS", "Microarray Qualit Control Logs");
-    namesMapping.put("Q_WF_MA_QUALITYCONTROL_RESULTS", "Micoarray Quality Control");
+    namesMapping.put("Q_WF_MA_QUALITYCONTROL_RESULTS", "Microarray Quality Control");
     namesMapping.put("Q_WF_MS_MAXQUANT_ORIGINAL_OUT", "MaxQuant Outfile");
     namesMapping.put("Q_WF_MS_MAXQUANT_RESULTS", "MaxQuant Results");
     namesMapping.put("Q_WF_MS_MAXQUANT_LOGS", "MaxQuant Logs");
