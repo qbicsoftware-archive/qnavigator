@@ -232,7 +232,7 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       } else if (filter.contains(dataset.getFileType().toLowerCase())
           | filter.contains(dataset.getFileType())
           & !(dataset.getFileName().endsWith(".html") | dataset.getFileName().endsWith(".zip")
-              | dataset.getFileName().endsWith(".pdf")
+              | dataset.getFileName().endsWith(".pdf") | dataset.getFileName().endsWith(".png")
               | dataset.getFileName().endsWith(".origlabfilename")
               | dataset.getFileName().endsWith(".sha256sum") | dataset.getFileName().contains(
               "source_dropbox"))) {
@@ -414,6 +414,44 @@ public class InputFilesComponent extends WorkflowParameterComponent {
           }
         }
       }
+    }
+    if (selectedDatasets.size() == 0) {
+      helpers.Utils.Notification("No dataset selected", "Please select at least one dataset.",
+          "error");
+      // showError("Please select at least one dataset.");
+    }
+    return selectedDatasets;
+  }
+
+  /**
+   * returns the currently selected datasets by the user as a map with the tab names (defined in the
+   * input file CTD) as keys. If no datasets are selected, the Map is simply empty Note that no db
+   * selections are returned.
+   * 
+   * @return
+   */
+  public Map<String, List<DatasetBean>> getSelectedDatasetsAsMap() {
+    Map<String, List<DatasetBean>> selectedDatasets = new HashMap<String, List<DatasetBean>>();
+
+    java.util.Iterator<Component> tabs = inputFileForm.iterator();
+    while (tabs.hasNext()) {
+      List<DatasetBean> tempList = new ArrayList<DatasetBean>();
+
+      Tab tab = inputFileForm.getTab(tabs.next());
+      HorizontalLayout current = (HorizontalLayout) tab.getComponent();
+      java.util.Iterator<Component> grids = current.iterator();
+      while (grids.hasNext()) {
+        Grid currentGrid = (Grid) grids.next();
+        // returns one (in single-selection mode) or all (in multi-selection mode) selected items
+        Collection<Object> selected = currentGrid.getSelectedRows();
+        for (Object o : selected) {
+          if (o instanceof DatasetBean) {
+            DatasetBean selectedBean = (DatasetBean) o;
+            tempList.add(selectedBean);
+          }
+        }
+      }
+      selectedDatasets.put(tab.getCaption(), tempList);
     }
     if (selectedDatasets.size() == 0) {
       helpers.Utils.Notification("No dataset selected", "Please select at least one dataset.",

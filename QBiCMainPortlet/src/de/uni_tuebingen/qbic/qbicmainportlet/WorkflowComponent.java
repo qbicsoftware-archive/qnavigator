@@ -35,6 +35,7 @@ import org.springframework.remoting.RemoteAccessException;
 import qbic.model.maxquant.MaxQuantModel;
 import qbic.model.maxquant.MaxquantConverterFactory;
 import qbic.model.maxquant.RawFilesBean;
+import qbic.vaadincomponents.DifferentialExpressionComponent;
 import qbic.vaadincomponents.MaxQuantComponent;
 import qbic.vaadincomponents.MicroarrayQCComponent;
 import qbic.vaadincomponents.NGSMappingComponent;
@@ -348,12 +349,19 @@ public class WorkflowComponent extends CustomComponent {
       qcComp.addResetListener(new MicroarrayQCResetListener(qcComp));
       qcComp.addSubmissionListener(new MicroarrayQCSubmissionListener(qcComp));
       this.submission.addComponent(qcComp);
-    } else if (workFlow.getName().contains("NGS Read Alignment")) {
+    } else if ((workFlow.getName().contains("NGS Read Alignment"))
+        || (workFlow.getName().contains("RNA-seq"))) {
       NGSMappingComponent mappComp = new NGSMappingComponent(controller);
       mappComp.update(workFlow, projectDatasets);
       mappComp.addResetListener(new NGSMappingResetListener(mappComp));
       mappComp.addSubmissionListener(new NGSMappingSubmissionListener(mappComp));
       this.submission.addComponent(mappComp);
+    } else if (workFlow.getName().contains("Differential")) {
+      DifferentialExpressionComponent diffComp = new DifferentialExpressionComponent(controller);
+      diffComp.update(workFlow, projectDatasets);
+      diffComp.addResetListener(new DifferentialExpressionResetListener(diffComp));
+      diffComp.addSubmissionListener(new DifferentialExpressionSubmissionListener(diffComp));
+      this.submission.addComponent(diffComp);
     } else {
       StandardWorkflowComponent standardComponent = new StandardWorkflowComponent(controller);
       standardComponent.update(workFlow, projectDatasets);
@@ -361,7 +369,6 @@ public class WorkflowComponent extends CustomComponent {
       standardComponent.addSubmissionListener(new StandardSubmissionListener(standardComponent));
       this.submission.addComponent(standardComponent);
     }
-
   }
 
   private void addComponentListeners() {
@@ -418,6 +425,51 @@ public class WorkflowComponent extends CustomComponent {
     @Override
     public void buttonClick(ClickEvent event) {
       swc.resetParameters();
+    }
+  }
+
+  /**
+   * 
+   * @author mohr
+   * 
+   */
+  public class DifferentialExpressionResetListener implements ClickListener {
+    private static final long serialVersionUID = -127474228749885664L;
+    private DifferentialExpressionComponent qcc;
+
+    public DifferentialExpressionResetListener(DifferentialExpressionComponent wfComp) {
+      qcc = wfComp;
+    }
+
+    @Override
+    public void buttonClick(ClickEvent event) {
+      qcc.resetParameters();
+    }
+  }
+
+  /**
+   * 
+   * @author mohr
+   * 
+   */
+  private class DifferentialExpressionSubmissionListener implements ClickListener {
+    private static final long serialVersionUID = 24386950203184318L;
+    private DifferentialExpressionComponent comp;
+
+    public DifferentialExpressionSubmissionListener(DifferentialExpressionComponent comp) {
+      this.comp = comp;
+    }
+
+    @Override
+    public void buttonClick(ClickEvent event) {
+      try {
+        List<DatasetBean> selectedDatasets = comp.getSelectedDatasets();
+        comp.writeParametersToWorkflow();
+        Workflow submittedWf = comp.getWorkflow();
+        submit(submittedWf, new ArrayList<DatasetBean>(selectedDatasets));
+      } catch (Exception e) {
+        handleException(e);
+      }
     }
   }
   /**
