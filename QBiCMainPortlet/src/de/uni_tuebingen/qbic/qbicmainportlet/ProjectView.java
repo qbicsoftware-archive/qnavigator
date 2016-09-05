@@ -1,27 +1,27 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.Utils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -29,10 +29,13 @@ import java.util.TreeMap;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import main.OpenBisClient;
 import model.ExperimentBean;
 import model.ProjectBean;
 
 import org.tepi.filtertable.FilterTable;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -69,6 +72,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 
 @SuppressWarnings("serial")
 public class ProjectView extends VerticalLayout implements View {
@@ -903,18 +907,39 @@ public class ProjectView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    // TODO updateContent only if currentProject is not equal to newProject
-    // this.table.unselect(this.table.getValue());
-    ProjectBean pbean = datahandler.getProject2(currentValue);
-    // if the new project bean is different than reset the graph.
-    if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
-      resetGraph();
-      projectview_tab.setSelectedTab(0);
-    }
-    this.currentBean = pbean;
-    // this.setContainerDataSource(pbean);
-    updateContent();
+    OpenBisClient oc = datahandler.getOpenBisClient();
+    List<Project> userProjects =
+        oc.getOpenbisInfoService().listProjectsOnBehalfOfUser(oc.getSessionToken(),
+            LiferayAndVaadinUtils.getUser().getScreenName().toString());
 
+    List<String> projectIDs = new ArrayList<String>();
+
+    for (Project p : userProjects) {
+      projectIDs.add(p.getIdentifier());
+    }
+
+    if (projectIDs.contains(currentValue)) {
+      // TODO updateContent only if currentProject is not equal to newProject
+      // this.table.unselect(this.table.getValue());
+      ProjectBean pbean = datahandler.getProject2(currentValue);
+      // if the new project bean is different than reset the graph.
+      if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
+        resetGraph();
+        projectview_tab.setSelectedTab(0);
+      }
+      this.currentBean = pbean;
+      // this.setContainerDataSource(pbean);
+
+      updateContent();
+    } else {
+      Utils
+          .Notification(
+              "Unable to load project",
+              String
+                  .format(
+                      "The requested project %s could not be loaded. You probably don't have access to the requested project. Please contact the corresponding project manager or write an email to info@qbic.uni-tuebingen.de.",
+                      currentValue), "error");
+    }
     // projectview_tab.setSelectedTab(0);
   }
 
