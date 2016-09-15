@@ -111,7 +111,6 @@ public class DifferentialExpressionComponent extends CustomComponent {
           tsv.append("\n" + file + "\t" + id + "\t" + "-" + "\t" + "-" + "\t" + "-" + "\t" + group
               + "\t" + "-");
         }
-        System.out.println(entry.getKey() + "/" + entry.getValue());
       }
       tsv.append("\n");
 
