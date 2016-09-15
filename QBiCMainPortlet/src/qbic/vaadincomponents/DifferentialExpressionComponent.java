@@ -113,13 +113,6 @@ public class DifferentialExpressionComponent extends CustomComponent {
         }
         System.out.println(entry.getKey() + "/" + entry.getValue());
       }
-
-      /*
-       * for (DatasetBean b : inputFileComponent.getSelectedDatasets()) { String file =
-       * b.getFileName(); String[] splittedID = b.getSampleIdentifier().split("/"); String group =
-       * splittedID[splittedID.length - 1]; tsv.append("\n" + file + "\t" + group + "\t" + "-" +
-       * "\t" + "-" + "\t" + "-" + "\t" + "-" + "\t" + "TODO"); }
-       */
       tsv.append("\n");
 
       GuseNode node = w.getNode("Workflow");

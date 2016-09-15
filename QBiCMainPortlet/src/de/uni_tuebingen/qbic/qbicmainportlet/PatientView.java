@@ -1,21 +1,21 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
+
+import helpers.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +29,7 @@ import java.util.TreeMap;
 
 import logging.Log4j2Logger;
 import logging.Logger;
+import main.OpenBisClient;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
 
@@ -36,6 +37,7 @@ import org.tepi.filtertable.FilterTable;
 
 import views.WorkflowView;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
@@ -87,6 +89,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 
 public class PatientView extends VerticalLayout implements View {
 
@@ -1165,28 +1168,39 @@ public class PatientView extends VerticalLayout implements View {
   @Override
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
-    ProjectBean pbean = datahandler.getProjectIvac(currentValue);
+    OpenBisClient oc = datahandler.getOpenBisClient();
+    List<Project> userProjects =
+        oc.getOpenbisInfoService().listProjectsOnBehalfOfUser(oc.getSessionToken(),
+            LiferayAndVaadinUtils.getUser().getScreenName().toString());
 
-    // registeredExperiments.unselect(registeredExperiments.getValue());
-    // LOGGER.info(String.format("getProject took %f s", ((endTime - startTime) / 1000000000.0)));
-    // if the new project bean is different than reset the graph.
-    // LOGGER.debug(String.valueOf(currentBean == null));
+    List<String> projectIDs = new ArrayList<String>();
 
-    // if (currentBean != null)
-    // LOGGER.debug(String.valueOf(pbean.getId().equals(currentBean.getId())));
-    if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
-      resetGraph();
-      patientViewTab.setSelectedTab(0);
+    for (Project p : userProjects) {
+      projectIDs.add(p.getIdentifier());
     }
-    this.currentBean = pbean;
 
-    // this.setContainerDataSource(pbean);
-    // LOGGER.info(String.format("setContainerDataSource took %f s",
-    // ((endTime - startTime) / 1000000000.0)));
+    if (projectIDs.contains(currentValue)) {
+      // TODO updateContent only if currentProject is not equal to newProject
+      // this.table.unselect(this.table.getValue());
+      ProjectBean pbean = datahandler.getProjectIvac(currentValue);
+      // if the new project bean is different than reset the graph.
+      if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
+        resetGraph();
+        patientViewTab.setSelectedTab(0);
+      }
+      this.currentBean = pbean;
+      // this.setContainerDataSource(pbean);
 
-    updateContent();
-
-    // patientViewTab.setSelectedTab(0);
+      updateContent();
+    } else {
+      Utils
+          .Notification(
+              "Unable to load project",
+              String
+                  .format(
+                      "The requested project %s could not be loaded. You probably don't have access to the requested project. Please contact the corresponding project manager or write an email to info@qbic.uni-tuebingen.de.",
+                      currentValue), "error");
+    }
 
   }
 

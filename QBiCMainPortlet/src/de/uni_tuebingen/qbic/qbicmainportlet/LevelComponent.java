@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -560,37 +558,47 @@ public class LevelComponent extends CustomComponent {
     this.vert.setWidth("100%");
 
     // Table (containing datasets) section
-    VerticalLayout tableSection = new VerticalLayout();
+    VerticalLayout tableSectionDatasets = new VerticalLayout();
+    VerticalLayout tableSectionSamples = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
     HorizontalLayout sampletableSectionContent = new HorizontalLayout();
 
-    tableSectionContent.setMargin(new MarginInfo(true, false, false, false));
-    sampletableSectionContent.setMargin(new MarginInfo(true, false, false, false));
+    tableSectionContent.setMargin(new MarginInfo(false, false, false, false));
+    sampletableSectionContent.setMargin(new MarginInfo(false, false, false, false));
 
     // tableSectionContent.setCaption("Datasets");
     // tableSectionContent.setIcon(FontAwesome.FLASK);
 
     descriptionLabel.setWidth("100%");
-    tableSection.addComponent(descriptionLabel);
+    tableSectionDatasets.addComponent(descriptionLabel);
+
     sampletableSectionContent.addComponent(sampleGrid);
     tableSectionContent.addComponent(this.datasetTable);
 
 
-    tableSection.setMargin(new MarginInfo(true, false, false, true));
-    tableSection.setSpacing(true);
+    tableSectionDatasets.setMargin(new MarginInfo(true, false, false, true));
+    tableSectionDatasets.setSpacing(true);
 
-    tableSection.addComponent(sampletableSectionContent);
-    tableSection.addComponent(tableSectionContent);
-    this.vert.addComponent(tableSection);
+    tableSectionSamples.setMargin(new MarginInfo(true, false, false, true));
+    tableSectionSamples.setSpacing(true);
+
+    tableSectionDatasets.addComponent(tableSectionContent);
+
+
+    tableSectionSamples.addComponent(sampletableSectionContent);
+    this.vert.addComponent(tableSectionDatasets);
 
     sampleGrid.setWidth("100%");
     datasetTable.setWidth("100%");
-    tableSection.setWidth("100%");
+    tableSectionDatasets.setWidth("100%");
+
+    tableSectionSamples.setWidth("100%");
     sampletableSectionContent.setWidth("100%");
+
     tableSectionContent.setWidth("100%");
 
     HorizontalLayout buttonLayout = new HorizontalLayout();
-    buttonLayout.setMargin(new MarginInfo(true, false, true, true));
+    buttonLayout.setMargin(new MarginInfo(false, false, false, true));
     buttonLayout.setHeight(null);
     buttonLayout.setSpacing(true);
 
@@ -824,9 +832,9 @@ public class LevelComponent extends CustomComponent {
         }
       }
     });
-
-    this.vert.addComponent(buttonLayout);
     this.vert.addComponent(help);
+    this.vert.addComponent(buttonLayout);
+    this.vert.addComponent(tableSectionSamples);
 
   }
 
