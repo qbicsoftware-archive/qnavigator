@@ -275,7 +275,7 @@ public class QbicmainportletUI extends UI {
     BarcodeView barcodeView =
         new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
             manager.getBarcodePathVariable());
-    final ExperimentView experimentView = new ExperimentView(datahandler, state, resUrl);
+    final ExperimentView experimentView = new ExperimentView(datahandler, state, resUrl, multiscaleController);
     // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
@@ -608,7 +608,6 @@ public class QbicmainportletUI extends UI {
         new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
             manager.getDataSourceUrl());
     this.openBisConnection.login();
-
     DBConfig mysqlConfig =
         new DBConfig(manager.getMsqlHost(), manager.getMysqlPort(), manager.getMysqlDB(),
             manager.getMysqlUser(), manager.getMysqlPass());

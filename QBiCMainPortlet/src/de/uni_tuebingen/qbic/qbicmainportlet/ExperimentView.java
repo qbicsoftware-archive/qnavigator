@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -44,6 +42,9 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.dto.EventPE.EntityType;
+import controllers.MultiscaleController;
+
 public class ExperimentView extends VerticalLayout implements View {
 
   /**
@@ -72,19 +73,23 @@ public class ExperimentView extends VerticalLayout implements View {
   private Label experimentalFactorLabel;
   private Label idLabel;
 
-  public ExperimentView(DataHandler datahandler, State state, String resourceurl) {
-    this(datahandler, state);
+  private VerticalLayout innerNotesComponent;
+  private MultiscaleController controller;
+  private MultiscaleComponent noteComponent;
+
+  public ExperimentView(DataHandler datahandler, State state, String resourceurl, MultiscaleController controller) {
+    this(datahandler, state, controller);
     this.resourceUrl = resourceurl;
   }
 
 
-  public ExperimentView(DataHandler datahandler, State state) {
+  public ExperimentView(DataHandler datahandler, State state, MultiscaleController controller) {
     this.datahandler = datahandler;
     this.state = state;
+    this.controller = controller;
     resourceUrl = "javascript;";
     initView();
   }
-
 
   /**
    * updates view, if height, width or the browser changes.
@@ -114,13 +119,33 @@ public class ExperimentView extends VerticalLayout implements View {
 
     expview_content.addComponent(expview_tab);
 
-    expview_tab.addTab(initDescription(), "General Information").setIcon(FontAwesome.INFO_CIRCLE);;
+    expview_tab.addTab(initDescription(), "General Information").setIcon(FontAwesome.INFO_CIRCLE);
     // expview_tab.addTab(initStatistics(), "Statistics").setIcon(FontAwesome.CHECK_CIRCLE);
     expview_tab.addTab(initProperties(), "Metadata").setIcon(FontAwesome.LIST_UL);
-    expview_tab.addTab(initTable(), "Samples").setIcon(FontAwesome.TINT);;
+    expview_tab.addTab(initTable(), "Samples").setIcon(FontAwesome.TINT);
+    initNoteComponent();
+    expview_tab.addTab(innerNotesComponent).setIcon(FontAwesome.PENCIL);
 
     expview_content.setWidth("100%");
     this.addComponent(expview_content);
+  }
+
+  private void initNoteComponent() {
+
+    innerNotesComponent = new VerticalLayout();
+
+    innerNotesComponent.setIcon(FontAwesome.NAVICON);
+    innerNotesComponent.setCaption("Experiment Notes");
+
+    noteComponent = new MultiscaleComponent(controller);
+    innerNotesComponent.addComponent(noteComponent);
+    innerNotesComponent.setMargin(new MarginInfo(true, false, false, true));
+  }
+
+  private void updateNoteComponent() {
+    noteComponent.updateUI(currentBean.getId(), EntityType.EXPERIMENT);
+    innerNotesComponent.removeAllComponents();
+    innerNotesComponent.addComponent(noteComponent);
   }
 
   /**
@@ -131,6 +156,7 @@ public class ExperimentView extends VerticalLayout implements View {
     updateContentStatistics();
     updateContentProperties();
     updateContentTable();
+    updateNoteComponent();
     updateContentButtonLayout();
   }
 
@@ -210,8 +236,8 @@ public class ExperimentView extends VerticalLayout implements View {
 
   void updateContentDescription() {
     idLabel.setValue(String.format("Identifier: %s", currentBean.getId()));
-    generalInfoLabel.setValue(String.format("Stage:\t %s",
-        prettyNameMapper.getPrettyName(currentBean.getType())));
+    generalInfoLabel.setValue(
+        String.format("Stage:\t %s", prettyNameMapper.getPrettyName(currentBean.getType())));
     statContentLabel.setValue(String.format("This experimental step involves %s sample(s)",
         currentBean.getSamples().size()));
 
@@ -246,8 +272,8 @@ public class ExperimentView extends VerticalLayout implements View {
      * 
      * String lastSample = "No samples available"; if (experimentBean.getLastChangedSample() !=
      * null) { lastSample = experimentBean.getLastChangedSample();// .split("/")[2]; }
-     * statContent.addComponent(new Label(String.format( "Last change %s",
-     * String.format("occurred in sample %s (%s)", lastSample,
+     * statContent.addComponent(new Label(String.format( "Last change %s", String.format(
+     * "occurred in sample %s (%s)", lastSample,
      * experimentBean.getLastChangedDataset().toString())))); }
      */
 
@@ -427,7 +453,6 @@ public class ExperimentView extends VerticalLayout implements View {
     // TODO updateContent only if currentExperiment is not equal to newExperiment
     this.table.unselect(this.table.getValue());
     this.setContainerDataSource(datahandler.getExperiment2(currentValue));
-
     updateContent();
   }
 
