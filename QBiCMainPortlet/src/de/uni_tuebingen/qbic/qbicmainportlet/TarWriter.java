@@ -120,14 +120,14 @@ public class TarWriter {
    * 
    * @param entry
    */
-  public void writeEntry(Map<String, AbstractMap.SimpleEntry<InputStream, Long>> entries) {
-    Set<Entry<String, SimpleEntry<InputStream, Long>>> entrySet = entries.entrySet();
-    Iterator<Entry<String, SimpleEntry<InputStream, Long>>> it = entrySet.iterator();
-    while (it.hasNext()) {
-      Entry<String, SimpleEntry<InputStream, Long>> entry = it.next();
-      this.writeEntry(entry.getKey(), entry.getValue().getKey(), entry.getValue().getValue());
-    }
-  }
+//  public void writeEntry(Map<String, AbstractMap.SimpleEntry<InputStream, Long>> entries) {
+//    Set<Entry<String, SimpleEntry<InputStream, Long>>> entrySet = entries.entrySet();
+//    Iterator<Entry<String, SimpleEntry<InputStream, Long>>> it = entrySet.iterator();
+//    while (it.hasNext()) {
+//      Entry<String, SimpleEntry<InputStream, Long>> entry = it.next();
+//      this.writeEntry(entry.getKey(), entry.getValue().getKey(), entry.getValue().getValue());
+//    }
+//  }
 
 
 
