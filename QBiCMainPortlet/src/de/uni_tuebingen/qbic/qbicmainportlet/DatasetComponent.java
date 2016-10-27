@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -141,6 +139,7 @@ public class DatasetComponent extends CustomComponent {
       datasetContainer.addContainerProperty("File Size", String.class, null);
       datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
       datasetContainer.addContainerProperty("dl_link", String.class, null);
+      datasetContainer.addContainerProperty("isDirectory", Boolean.class, null);
       datasetContainer.addContainerProperty("CODE", String.class, null);
 
       List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasets = null;
@@ -406,7 +405,9 @@ public class DatasetComponent extends CustomComponent {
     this.table.addItemClickListener(new ItemClickListener() {
       @Override
       public void itemClick(ItemClickEvent event) {
-        if (!event.isDoubleClick()) {
+        if (!event.isDoubleClick()
+            & !((boolean) table.getItem(event.getItemId()).getItemProperty("isDirectory")
+                .getValue())) {
           String datasetCode =
               (String) table.getItem(event.getItemId()).getItemProperty("CODE").getValue();
           String datasetFileName =
@@ -536,8 +537,6 @@ public class DatasetComponent extends CustomComponent {
 
   }
 
-
-
   private void setCheckedBox(Object itemId, String parentFolder) {
     CheckBox itemCheckBox =
         (CheckBox) this.table.getItem(itemId).getItemProperty("Select").getValue();
@@ -610,6 +609,7 @@ public class DatasetComponent extends CustomComponent {
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_ds, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(d.getFileSize());
+      dataset_container.getContainerProperty(new_ds, "isDirectory").setValue(true);
 
       if (parent != null) {
         dataset_container.setParent(new_ds, parent);
@@ -624,7 +624,6 @@ public class DatasetComponent extends CustomComponent {
 
       Object new_file = dataset_container.addItem();
       dataset_container.setChildrenAllowed(new_file, false);
-
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
@@ -640,6 +639,7 @@ public class DatasetComponent extends CustomComponent {
       dataset_container.getContainerProperty(new_file, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(d.getFileSize());
+      dataset_container.getContainerProperty(new_file, "isDirectory").setValue(false);
       if (parent != null) {
         dataset_container.setParent(new_file, parent);
       }

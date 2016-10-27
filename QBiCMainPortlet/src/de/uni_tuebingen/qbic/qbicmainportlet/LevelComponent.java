@@ -162,6 +162,7 @@ public class LevelComponent extends CustomComponent {
       datasetContainer.addContainerProperty("File Size", String.class, null);
       datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
       datasetContainer.addContainerProperty("dl_link", String.class, null);
+      datasetContainer.addContainerProperty("isDirectory", Boolean.class, null);
       datasetContainer.addContainerProperty("CODE", String.class, null);
 
       List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> retrievedDatasetsAll = null;
@@ -687,7 +688,9 @@ public class LevelComponent extends CustomComponent {
     this.datasetTable.addItemClickListener(new ItemClickListener() {
       @Override
       public void itemClick(ItemClickEvent event) {
-        if (!event.isDoubleClick()) {
+        if (!event.isDoubleClick()
+            & !((boolean) datasetTable.getItem(event.getItemId()).getItemProperty("isDirectory")
+                .getValue())) {
           String datasetCode =
               (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
           String datasetFileName =
@@ -914,6 +917,8 @@ public class LevelComponent extends CustomComponent {
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_ds, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_ds, "file_size_bytes").setValue(d.getFileSize());
+      dataset_container.getContainerProperty(new_ds, "isDirectory").setValue(true);
+
 
       if (parent != null) {
         dataset_container.setParent(new_ds, parent);
@@ -929,6 +934,7 @@ public class LevelComponent extends CustomComponent {
       Object new_file = dataset_container.addItem();
       dataset_container.setChildrenAllowed(new_file, false);
 
+      // TODO no hardcoding
       String secName = d.getProperties().get("Q_SECONDARY_NAME");
       // TODO add User here too
       if (secName != null) {
@@ -949,6 +955,8 @@ public class LevelComponent extends CustomComponent {
       dataset_container.getContainerProperty(new_file, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(d.getFileSize());
+      dataset_container.getContainerProperty(new_file, "isDirectory").setValue(false);
+
       if (parent != null) {
         dataset_container.setParent(new_file, parent);
       }

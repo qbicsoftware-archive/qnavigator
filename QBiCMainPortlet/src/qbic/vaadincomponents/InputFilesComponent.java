@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package qbic.vaadincomponents;
 
@@ -124,6 +122,10 @@ public class InputFilesComponent extends WorkflowParameterComponent {
           // show only bwaIndex references for bwa
         } else if (range.contains("bwaIndex")) {
           gpcontainer = fastaContainerFiltered("bwa");
+        } else if (range.contains("barcodes")) {
+          gpcontainer = fastaContainerFiltered("barcodes");
+        } else if (range.contains("shRNAlibrary")) {
+          gpcontainer = fastaContainerFiltered("shRNAlibrary");
         } else {
           gpcontainer = filter(datasets, range);
         }
@@ -141,19 +143,19 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       newGrid.setWidth("100%");
       layout.addComponent(newGrid);
 
-      if (newGrid.getContainerDataSource().size() == 0) {
-        // Notification.show(
-        // String.format("No dataset of type %s available in this project!", entry.getKey()),
-        // Type.WARNING_MESSAGE);
-        helpers.Utils
-            .Notification(
-                "Missing Dataset Type",
-                String
-                    .format(
-                        "Workflow submission might not be possible because no dataset of type %s is available in this project",
-                        entry.getKey()), "warning");
-        layout.addComponent(newGrid);
-      }
+      // if (newGrid.getContainerDataSource().size() == 0) {
+      // Notification.show(
+      // String.format("No dataset of type %s available in this project!", entry.getKey()),
+      // Type.WARNING_MESSAGE);
+      // helpers.Utils
+      // .Notification(
+      // "Missing Dataset Type",
+      // String
+      // .format(
+      // "Workflow submission might not be possible because no dataset of type %s is available in this project",
+      // entry.getKey()), "warning");
+      layout.addComponent(newGrid);
+      // }
 
       helpers.GridFunctions.addColumnFilters(newGrid, gpcontainer);
       inputFileForm.addTab(layout, entry.getKey());
@@ -198,6 +200,10 @@ public class InputFilesComponent extends WorkflowParameterComponent {
 
     if (filter.equals("bwa")) {
       subContainer.addAll(db.getBWAIndices());
+    } else if (filter.equals("barcodes")) {
+      subContainer.addAll(db.getBarcodeBeans());
+    } else if (filter.equals("shRNAlibrary")) {
+      subContainer.addAll(db.getshRNABeans());
     }
 
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
@@ -360,19 +366,19 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       newGrid.setWidth("100%");
       layout.addComponent(newGrid);
 
-      if (newGrid.getContainerDataSource().size() == 0) {
-        helpers.Utils
-            .Notification(
-                "Missing Dataset Type",
-                String
-                    .format(
-                        "Workflow submission might not be possible because no dataset of type %s is available in this project",
-                        entry.getKey()), "warning");
-        // Notification.show(
-        // String.format("No dataset of type %s available in this project!", entry.getKey()),
-        // Type.WARNING_MESSAGE);
-        layout.addComponent(newGrid);
-      }
+      // if (newGrid.getContainerDataSource().size() == 0) {
+      // helpers.Utils
+      // .Notification(
+      // "Missing Dataset Type",
+      // String
+      // .format(
+      // "Workflow submission might not be possible because no dataset of type %s is available in this project",
+      // entry.getKey()), "warning");
+      // Notification.show(
+      // String.format("No dataset of type %s available in this project!", entry.getKey()),
+      // Type.WARNING_MESSAGE);
+      layout.addComponent(newGrid);
+      // }
 
       inputFileForm.addTab(layout, entry.getKey());
     }
@@ -403,6 +409,7 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       Tab tab = inputFileForm.getTab(tabs.next());
       HorizontalLayout current = (HorizontalLayout) tab.getComponent();
       java.util.Iterator<Component> grids = current.iterator();
+
       while (grids.hasNext()) {
         Grid currentGrid = (Grid) grids.next();
         // returns one (in single-selection mode) or all (in multi-selection mode) selected items
@@ -418,7 +425,6 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     if (selectedDatasets.size() == 0) {
       helpers.Utils.Notification("No dataset selected", "Please select at least one dataset.",
           "error");
-      // showError("Please select at least one dataset.");
     }
     return selectedDatasets;
   }
@@ -510,61 +516,77 @@ public class InputFilesComponent extends WorkflowParameterComponent {
         if (currentGrid.getSelectionModel() instanceof SingleSelectionModel) {
           Object selectionSingle = currentGrid.getSelectedRow();
           // Quick solution
-          // TODO
+          // TODO Fixed?!
+          // if (selectionSingle == null) {
+          // if (caption.equals("InputFiles.1.Germline Mutations")
+          // || caption.equals("InputFiles.1.bam")) {
+          // continue;
+          // } else {
           if (selectionSingle == null) {
-            if (caption.equals("InputFiles.1.Germline Mutations")
-                || caption.equals("InputFiles.1.bam")) {
-              continue;
-            } else {
-              helpers.Utils.Notification("Missing single input parameter",
-                  "Nothing selected for single input parameter " + caption, "warning");
-              // showError("Warning: Nothing selected for single input parameter " + caption);
+            if (wf.getData().getData().get(caption).isRequired()) {
+              helpers.Utils.Notification("Missing input file(s)",
+                  "Nothing selected for required input file category" + caption, "error");
               return false;
+            } else {
+              continue;
             }
           }
-          if (selectionSingle instanceof FastaBean) {
-            FastaBean selectedBean = (FastaBean) selectionSingle;
-            inpList.getData().get(caption).setValue(selectedBean.getPath());
-          } else {
-            DatasetBean selectedBean = (DatasetBean) selectionSingle;
-            try {
-              inpList.getData().get(caption).setValue(controller.getDatasetsNfsPath(selectedBean));
-            } catch (Exception e) {
-              LOGGER.error("could not retrieve nfs path. Using datasetbeans getfullpath instead. "
-                  + e.getMessage(), e.getStackTrace());
-              inpList.getData().get(caption).setValue(selectedBean.getFullPath());
+
+          else {
+            if (selectionSingle instanceof FastaBean) {
+              FastaBean selectedBean = (FastaBean) selectionSingle;
+              inpList.getData().get(caption).setValue(selectedBean.getPath());
+            } else {
+              DatasetBean selectedBean = (DatasetBean) selectionSingle;
+              try {
+                inpList.getData().get(caption)
+                    .setValue(controller.getDatasetsNfsPath(selectedBean));
+              } catch (Exception e) {
+                LOGGER.error(
+                    "could not retrieve nfs path. Using datasetbeans getfullpath instead. "
+                        + e.getMessage(), e.getStackTrace());
+                inpList.getData().get(caption).setValue(selectedBean.getFullPath());
+              }
             }
           }
 
         } else {
           Collection<Object> selectionMulti = currentGrid.getSelectedRows();
-          if ((selectionMulti == null || selectionMulti.isEmpty())
-              && (!caption.equals("InputFiles.1.fastq"))) {
-            helpers.Utils.Notification("Missing single input parameter",
-                "Nothing selected for single input parameter " + caption, "warning");
-            // showError("Warning: Nothing selected for multi input parameter " + caption);
-            return false;
-          }
-          List<String> selectedPaths = new ArrayList<String>();
+          // if ((selectionMulti == null || selectionMulti.isEmpty())
+          // && (!caption.equals("InputFiles.1.fastq"))) {
+          if ((selectionMulti == null || selectionMulti.isEmpty())) {
 
-          for (Object o : selectionMulti) {
-            DatasetBean selectedBean = (DatasetBean) o;
-            try {
-              selectedPaths.add(controller.getDatasetsNfsPath(selectedBean));
-            } catch (Exception e) {
-              LOGGER.error("could not retrieve nfs path. Using datasetbeans getfullpath instead. "
-                  + e.getMessage(), e.getStackTrace());
-              selectedPaths.add(selectedBean.getFullPath());
+            if (wf.getData().getData().get(caption).isRequired()) {
+              helpers.Utils.Notification("Missing input file(s)",
+                  "Nothing selected for required input file(s) category" + caption, "warning");
+              return false;
             }
+
+            else {
+              continue;
+            }
+          } else {
+
+            List<String> selectedPaths = new ArrayList<String>();
+
+            for (Object o : selectionMulti) {
+              DatasetBean selectedBean = (DatasetBean) o;
+              try {
+                selectedPaths.add(controller.getDatasetsNfsPath(selectedBean));
+              } catch (Exception e) {
+                LOGGER.error(
+                    "could not retrieve nfs path. Using datasetbeans getfullpath instead. "
+                        + e.getMessage(), e.getStackTrace());
+                selectedPaths.add(selectedBean.getFullPath());
+              }
+            }
+            inpList.getData().get(caption).setValue(selectedPaths);
           }
-          inpList.getData().get(caption).setValue(selectedPaths);
         }
       }
     }
     return true;
   }
-
-
 
   /**
    * returns the number of file parameters
