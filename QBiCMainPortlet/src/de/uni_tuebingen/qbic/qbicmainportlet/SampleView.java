@@ -53,6 +53,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.dto.EventPE.EntityType;
 import controllers.MultiscaleController;
 
 public class SampleView extends VerticalLayout implements View {
@@ -103,7 +104,7 @@ public class SampleView extends VerticalLayout implements View {
   }
 
 
-  private VerticalLayout notesContent;
+  private VerticalLayout innerNotesComponent;
   private MultiscaleController controller;
   private MultiscaleComponent noteComponent;
 
@@ -165,7 +166,8 @@ public class SampleView extends VerticalLayout implements View {
     sampview_tab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     // sampview_tab.addTab(initStatistics()).setIcon(FontAwesome.BAR_CHART_O);
     sampview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
-    sampview_tab.addTab(initNoteComponent()).setIcon(FontAwesome.PENCIL);
+    initNoteComponent();
+    sampview_tab.addTab(innerNotesComponent).setIcon(FontAwesome.PENCIL);
 
     sampview_tab.setImmediate(true);
 
@@ -298,31 +300,21 @@ public class SampleView extends VerticalLayout implements View {
     }
   }
 
-  VerticalLayout initNoteComponent() {
-    VerticalLayout notesLayout = new VerticalLayout();
-    VerticalLayout notesLayoutContent = new VerticalLayout();
+  private void initNoteComponent() {
+    innerNotesComponent = new VerticalLayout();
 
-    notesContent = new VerticalLayout();
-
-    notesContent.setIcon(FontAwesome.NAVICON);
-    notesContent.setCaption("Sample Notes");
+    innerNotesComponent.setIcon(FontAwesome.NAVICON);
+    innerNotesComponent.setCaption("Sample Notes");
 
     noteComponent = new MultiscaleComponent(controller);
-    notesContent.addComponent(noteComponent);
-    notesContent.setMargin(new MarginInfo(true, false, false, true));
-    notesLayoutContent.addComponent(notesContent);
-    notesLayoutContent.setMargin(new MarginInfo(true, false, true, true));
-
-    notesLayout.addComponent(notesContent);
-    notesLayout.setMargin(new MarginInfo(false, false, true, true));
-
-    return notesContent;
+    innerNotesComponent.addComponent(noteComponent);
+    innerNotesComponent.setMargin(new MarginInfo(true, false, false, true));
   }
 
-  void updateNoteComponent() {
-    noteComponent.updateUI(currentBean.getCode());
-    notesContent.removeAllComponents();
-    notesContent.addComponent(noteComponent);
+  private void updateNoteComponent() {
+    noteComponent.updateUI(currentBean.getId(), EntityType.SAMPLE);
+    innerNotesComponent.removeAllComponents();
+    innerNotesComponent.addComponent(noteComponent);
   }
 
   /**
