@@ -143,6 +143,7 @@ public class ExperimentView extends VerticalLayout implements View {
   }
 
   private void updateNoteComponent() {
+    noteComponent = new MultiscaleComponent(controller);
     noteComponent.updateUI(currentBean.getId(), EntityType.EXPERIMENT);
     innerNotesComponent.removeAllComponents();
     innerNotesComponent.addComponent(noteComponent);
