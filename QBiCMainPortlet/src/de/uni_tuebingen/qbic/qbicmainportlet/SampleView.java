@@ -312,6 +312,7 @@ public class SampleView extends VerticalLayout implements View {
   }
 
   private void updateNoteComponent() {
+    noteComponent = new MultiscaleComponent(controller);
     noteComponent.updateUI(currentBean.getId(), EntityType.SAMPLE);
     innerNotesComponent.removeAllComponents();
     innerNotesComponent.addComponent(noteComponent);

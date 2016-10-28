@@ -17,10 +17,8 @@ package controllers;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import logging.SysOutLogger;
 import model.notes.Note;
 import model.notes.Notes;
-import model.notes.ObjectFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,7 +26,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -52,9 +49,6 @@ import com.liferay.portal.model.Company;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.CompanyLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.vaadin.data.util.BeanItemContainer;
-
-import de.uni_tuebingen.qbic.qbicmainportlet.ProjectView;
 
 public class MultiscaleController implements Serializable {
 
@@ -88,8 +82,6 @@ public class MultiscaleController implements Serializable {
   public boolean update(String id, EntityType type) {
     jaxbelem = null;
     String xml = null;
-    System.out.println(type);
-    System.out.println(EntityType.EXPERIMENT);
     if (type.equals(EntityType.EXPERIMENT)) {
       Experiment e = openbis.getExperimentById2(id).get(0);
       xml = e.getProperties().get("Q_NOTES");
