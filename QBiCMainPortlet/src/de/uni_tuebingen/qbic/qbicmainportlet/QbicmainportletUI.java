@@ -85,8 +85,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "1.5.3";
-  private String revision = "31fce46";
+  private String version = "1.5.7";
+  private String revision = "0085d24";
   private String resUrl;
   protected View currentView;
 
@@ -275,7 +275,8 @@ public class QbicmainportletUI extends UI {
     BarcodeView barcodeView =
         new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
             manager.getBarcodePathVariable());
-    final ExperimentView experimentView = new ExperimentView(datahandler, state, resUrl, multiscaleController);
+    final ExperimentView experimentView =
+        new ExperimentView(datahandler, state, resUrl, multiscaleController);
     // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
