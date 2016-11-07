@@ -822,7 +822,6 @@ public class DataHandler implements Serializable {
 
 
   public ExperimentBean getExperiment2(String expIdentifiers) {
-    LOGGER.debug("get experiment 2 called");
     ExperimentBean ebean = new ExperimentBean();
 
     AlternativeSecondaryNameCreator altNameCreator = new AlternativeSecondaryNameCreator(
@@ -868,8 +867,6 @@ public class DataHandler implements Serializable {
 
       if (p.getDataType().toString().equals("MATERIAL")
           && (assignedProperties.get(p.getCode()) != null)) {
-        LOGGER.debug(p.getCode());
-        LOGGER.debug(assignedProperties.get(p.getCode()));
         String[] splitted = assignedProperties.get(p.getCode()).split("\\(");
 
         String materialType = splitted[1].replace(")", "").replace(" ", "");
@@ -1242,9 +1239,6 @@ public class DataHandler implements Serializable {
       sampleBeans.addBean(sbean);
     }
     newExperimentBean.setSamples(sampleBeans);
-    LOGGER.debug("creating experiment bean");
-    newExperimentBean.setSecondaryName(properties.get("Q_SECONDARY_NAME"));// TODO new
-
     return newExperimentBean;
   }
 

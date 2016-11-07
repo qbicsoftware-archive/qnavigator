@@ -35,8 +35,6 @@ import properties.Qproperties;
 
 import com.vaadin.data.util.BeanItemContainer;
 
-import de.uni_tuebingen.qbic.qbicmainportlet.DatasetView;
-
 public class ExperimentBean implements Serializable {
 
   /**
@@ -102,8 +100,9 @@ public class ExperimentBean implements Serializable {
   }
 
   public String getSecondaryName() {
-    if (secondaryName == null || secondaryName.isEmpty())
+    if (secondaryName == null || secondaryName.isEmpty()) {
       secondaryName = nameCreator.createName(properties, type, samples);
+    }
     return secondaryName;
   }
 
@@ -337,7 +336,6 @@ public class ExperimentBean implements Serializable {
   }
 
   public void setAltNameCreator(AlternativeSecondaryNameCreator altNameCreator) {
-    LOGGER.debug("set alt name creator");
     nameCreator = altNameCreator;
   }
 

@@ -51,7 +51,7 @@ public class ExperimentView extends VerticalLayout implements View {
    * 
    */
   private static final long serialVersionUID = -9156593640161721690L;
-  static Logger LOGGER = new Log4j2Logger(ExperimentView.class);
+  private Logger LOGGER = new Log4j2Logger(ExperimentView.class);
   public final static String navigateToLabel = "experiment";
   FilterTable table;
   VerticalLayout expview_content;
