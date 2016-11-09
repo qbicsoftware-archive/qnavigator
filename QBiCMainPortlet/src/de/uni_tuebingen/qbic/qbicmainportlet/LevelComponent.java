@@ -582,7 +582,7 @@ public class LevelComponent extends CustomComponent {
     tableSectionDatasets.setMargin(new MarginInfo(true, false, false, true));
     tableSectionDatasets.setSpacing(true);
 
-    tableSectionSamples.setMargin(new MarginInfo(true, false, false, true));
+    tableSectionSamples.setMargin(new MarginInfo(true, false, true, true));
     tableSectionSamples.setSpacing(true);
 
     tableSectionDatasets.addComponent(tableSectionContent);
