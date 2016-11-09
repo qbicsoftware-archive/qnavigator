@@ -59,7 +59,6 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
-import com.vaadin.server.Sizeable;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -98,7 +97,7 @@ public class ProjInformationComponent extends CustomComponent {
   private final String DOWNLOAD_BUTTON_CAPTION = "Download";
   private final String VISUALIZE_BUTTON_CAPTION = "Visualize";
   public final static String navigateToLabel = "datasetview";
-//  Label descriptionLabel = new Label("");
+  // Label descriptionLabel = new Label("");
   private DataHandler datahandler;
   private State state;
   private String resourceUrl;
@@ -373,7 +372,7 @@ public class ProjInformationComponent extends CustomComponent {
       // numberOfDatasets), Label.CONTENT_PREFORMATTED);
 
       numberOfDatasets = retrievedDatasets.size();
-      this.datasetTable.setPageLength(numberOfDatasets);
+      this.datasetTable.setPageLength(Math.min(numberOfDatasets, 10));
 
       Boolean dataAvailable = true;
 
@@ -537,7 +536,7 @@ public class ProjInformationComponent extends CustomComponent {
     projDescription.setWidth("100%");
     projDescription.setSpacing(true);
 
-//    descriptionLabel.setWidth("100%");
+    // descriptionLabel.setWidth("100%");
     // tableSection.addComponent(descriptionLabel);
     tableSectionContent.addComponent(this.datasetTable);
 
