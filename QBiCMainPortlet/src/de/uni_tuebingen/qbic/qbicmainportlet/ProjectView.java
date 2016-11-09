@@ -218,7 +218,7 @@ public class ProjectView extends VerticalLayout implements View {
     // add tabs to tabsheet
     projectview_tab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
     projectview_tab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
-    projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
+    // projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
 
     projectview_tab.addTab(experimentComponent).setIcon(FontAwesome.FLASK);
     projectview_tab.addTab(datasetComponent).setIcon(FontAwesome.DATABASE);
@@ -285,7 +285,7 @@ public class ProjectView extends VerticalLayout implements View {
     headerLabel = String.format("%s", getCurrentBean().getCode());
 
     // updateContentDescription();
-    updateContentMemberSection();
+    // updateContentMemberSection();
     // updateContentStatistics();
     updateContentTable();
 

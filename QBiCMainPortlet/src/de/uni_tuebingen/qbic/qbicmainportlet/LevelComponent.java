@@ -356,6 +356,7 @@ public class LevelComponent extends CustomComponent {
             this.datasetTable.setCaption("Raw Data");
 
             numberOfDatasets = retrievedDatasets.size();
+            this.datasetTable.setPageLength(numberOfDatasets);
           }
 
           else if (filterFor.equals("results")) {
@@ -438,6 +439,7 @@ public class LevelComponent extends CustomComponent {
             });
 
             numberOfDatasets = retrievedDatasets.size();
+            this.datasetTable.setPageLength(numberOfDatasets);
 
           }
           break;
