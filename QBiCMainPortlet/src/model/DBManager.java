@@ -134,7 +134,7 @@ public class DBManager {
 
         } else {
           affiliation = group_name;
-          if (group_acronym != null)
+          if (group_acronym != null && !group_acronym.isEmpty())
             affiliation += " (" + group_acronym + ")";
         }
 
