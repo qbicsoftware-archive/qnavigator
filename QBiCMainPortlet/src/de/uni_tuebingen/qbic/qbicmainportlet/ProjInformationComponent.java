@@ -59,6 +59,7 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
+import com.vaadin.server.Sizeable;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -89,7 +90,7 @@ public class ProjInformationComponent extends CustomComponent {
   private static final long serialVersionUID = 8672873911284888801L;
 
   private VerticalLayout mainLayout;
-  private static Logger LOGGER = new Log4j2Logger(DatasetView.class);
+  private static Logger LOGGER = new Log4j2Logger(ProjInformationComponent.class);
   private FilterTreeTable datasetTable;
   private HierarchicalContainer datasets;
   private BeanItemContainer<TestSampleBean> samples;
@@ -97,7 +98,7 @@ public class ProjInformationComponent extends CustomComponent {
   private final String DOWNLOAD_BUTTON_CAPTION = "Download";
   private final String VISUALIZE_BUTTON_CAPTION = "Visualize";
   public final static String navigateToLabel = "datasetview";
-  Label descriptionLabel = new Label("");
+//  Label descriptionLabel = new Label("");
   private DataHandler datahandler;
   private State state;
   private String resourceUrl;
@@ -162,7 +163,7 @@ public class ProjInformationComponent extends CustomComponent {
     horz.addComponent(investigator);
     horz.addComponent(contactPerson);
 
-    Button edit = new Button("Edit");
+    Button edit = new Button("Edit Description");
     edit.setIcon(FontAwesome.PENCIL);
     edit.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
 
@@ -264,7 +265,7 @@ public class ProjInformationComponent extends CustomComponent {
       String ctct = projectBean.getContactPerson();
       contactPerson.setValue(ctct);
 
-      descContent = new Label("");
+      descContent = new Label("", ContentMode.PREFORMATTED);
       // new EditableLabel("");
 
       contact
@@ -274,6 +275,7 @@ public class ProjInformationComponent extends CustomComponent {
               + currentBean.getCode() + " (" + space + ")" + "</a>");
       String desc = currentBean.getDescription();
       if (!desc.isEmpty()) {
+        descContent.setCaption("Description");
         descContent.setValue(desc);
       }
 
@@ -448,9 +450,9 @@ public class ProjInformationComponent extends CustomComponent {
 
     projDescription.setCaption("");
 
-    // projDescriptionContent.addComponent(investigator);
     projDescriptionContent.addComponent(horz);
     projDescriptionContent.addComponent(descContent);
+    descContent.setWidth("80%");
     projDescriptionContent.addComponent(experimentLabel);
     projDescriptionContent.addComponent(statusContent);
 
@@ -535,7 +537,7 @@ public class ProjInformationComponent extends CustomComponent {
     projDescription.setWidth("100%");
     projDescription.setSpacing(true);
 
-    descriptionLabel.setWidth("100%");
+//    descriptionLabel.setWidth("100%");
     // tableSection.addComponent(descriptionLabel);
     tableSectionContent.addComponent(this.datasetTable);
 

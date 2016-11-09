@@ -1182,7 +1182,7 @@ public class PatientView extends VerticalLayout implements View {
     if (projectIDs.contains(currentValue)) {
       // TODO updateContent only if currentProject is not equal to newProject
       // this.table.unselect(this.table.getValue());
-      ProjectBean pbean = datahandler.getProjectIvac(currentValue);
+      ProjectBean pbean = datahandler.getProject2(currentValue);
       // if the new project bean is different than reset the graph.
       if (currentBean != null && !pbean.getId().equals(currentBean.getId())) {
         resetGraph();

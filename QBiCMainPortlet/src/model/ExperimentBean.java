@@ -1,23 +1,24 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package model;
 
+import helpers.AlternativeSecondaryNameCreator;
 import helpers.UglyToPrettyNameMapper;
+import logging.Log4j2Logger;
+import logging.Logger;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -40,8 +41,10 @@ public class ExperimentBean implements Serializable {
    * 
    */
   private static final long serialVersionUID = -1927159369993633824L;
+  private static Logger LOGGER = new Log4j2Logger(ExperimentBean.class);
   private String id;
   private String code;
+  private String secondaryName;
   private String type;
   private String prettyType;
   private String status;
@@ -56,6 +59,7 @@ public class ExperimentBean implements Serializable {
   private Boolean containsData;
 
   private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
+  private AlternativeSecondaryNameCreator nameCreator;
 
   public Map<String, String> getTypeLabels() {
     return typeLabels;
@@ -76,6 +80,7 @@ public class ExperimentBean implements Serializable {
     super();
     this.id = id;
     this.code = code;
+    this.secondaryName = nameCreator.createName(properties, type, samples);
     this.type = type;
     this.prettyType = prettyNameMapper.getPrettyName(type);
     this.type = type;
@@ -90,13 +95,16 @@ public class ExperimentBean implements Serializable {
     this.typeLabels = typeLabels;
   }
 
-
-
   public ExperimentBean() {
     // TODO Auto-generated constructor stub
   }
 
-
+  public String getSecondaryName() {
+    if (secondaryName == null || secondaryName.isEmpty()) {
+      secondaryName = nameCreator.createName(properties, type, samples);
+    }
+    return secondaryName;
+  }
 
   public String getId() {
     return id;
@@ -296,7 +304,7 @@ public class ExperimentBean implements Serializable {
           Map.Entry pairsProperties = (Map.Entry) itProperties.next();
 
           xmlPropertiesBottom += "<li><b>"
-          // + (typeLabels.get(pairsProperties.getKey()) + ":</b> "
+              // + (typeLabels.get(pairsProperties.getKey()) + ":</b> "
               + (pairsProperties.getKey() + ":</b> " + pairsProperties.getValue() + "</li>");
         }
         break;
@@ -321,6 +329,14 @@ public class ExperimentBean implements Serializable {
 
   public void setPrettyType(String prettyType) {
     this.prettyType = prettyType;
+  }
+
+  public void setSecondaryName(String name) {
+    this.secondaryName = name;
+  }
+
+  public void setAltNameCreator(AlternativeSecondaryNameCreator altNameCreator) {
+    nameCreator = altNameCreator;
   }
 
 }

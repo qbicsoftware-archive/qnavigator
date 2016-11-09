@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -28,6 +26,7 @@ import model.ProjectBean;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.ItemClickEvent;
@@ -106,11 +105,10 @@ public class ExperimentComponent extends CustomComponent {
     // experiments.setContainerDataSource(new
     // BeanItemContainer<ExperimentBean>(ExperimentBean.class));
 
-    expSteps
-        .addComponent(new Label(
-            "This view shows the experimental steps which have been registered for this projects. "
-                + "Experimental steps contain real biological experiments as well as executed computational workflows on project data",
-            Label.CONTENT_PREFORMATTED));
+    expSteps.addComponent(new Label(
+        "This view shows the experimental steps which have been registered for this projects. "
+            + "Experimental steps contain real biological experiments as well as executed computational workflows on project data",
+        Label.CONTENT_PREFORMATTED));
 
     expSteps.addComponent(experiments);
     expSteps.addComponent(buttonLayoutSection);
@@ -119,11 +117,24 @@ public class ExperimentComponent extends CustomComponent {
 
   }
 
+//  private BeanItemContainer<ExperimentBean> loadMoreExperimentInformation(
+//      BeanItemContainer<ExperimentBean> experiments) {
+//    BeanItemContainer<ExperimentBean> newBeans =
+//        new BeanItemContainer<ExperimentBean>(ExperimentBean.class);
+//    for (ExperimentBean e : experiments.getItemIds()) {
+//      newBeans.addBean(datahandler.getExperiment2(e.getId()));
+//    }
+//    return newBeans;
+//  }
+
   public void updateUI(ProjectBean currentBean) {
     projectBean = currentBean;
     experiments.removeAllColumns();
-    // experiments.setContainerDataSource(projectBean.getExperiments());
+//     experiments.setContainerDataSource(projectBean.getExperiments());
 
+//    BeanItemContainer<ExperimentBean> experimentBeans =
+//        loadMoreExperimentInformation(projectBean.getExperiments());
+//    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(experimentBeans);
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(projectBean.getExperiments());
 
     gpc.removeContainerProperty("containsData");
@@ -214,9 +225,8 @@ public class ExperimentComponent extends CustomComponent {
 
     if (fileDownloader != null)
       this.export.removeExtension(fileDownloader);
-    StreamResource sr =
-        Utils.getTSVStream(Utils.containerToString(projectBean.getExperiments()),
-            projectBean.getId());
+    StreamResource sr = Utils.getTSVStream(Utils.containerToString(projectBean.getExperiments()),
+        projectBean.getId());
     fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(export);
   }

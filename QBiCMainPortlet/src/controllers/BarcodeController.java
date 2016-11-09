@@ -17,7 +17,6 @@
  *******************************************************************************/
 package controllers;
 
-import functions.Functions;
 import helpers.SheetBarcodesReadyRunnable;
 import helpers.TubeBarcodesReadyRunnable;
 
@@ -58,6 +57,7 @@ import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 
 import de.uni_tuebingen.qbic.qbicmainportlet.WizardBarcodeView;
+import functions.Functions;
 
 /**
  * Controls preparation and creation of barcode files
