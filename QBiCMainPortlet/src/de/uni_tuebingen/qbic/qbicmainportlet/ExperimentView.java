@@ -1,15 +1,15 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
- * Mohr, David Wojnar, Andreas Friedrich
- *
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
@@ -25,6 +25,8 @@ import logging.Logger;
 import model.ExperimentBean;
 
 import org.tepi.filtertable.FilterTable;
+
+import ch.systemsx.cisd.openbis.generic.shared.dto.EventPE.EntityType;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -42,7 +44,6 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import ch.systemsx.cisd.openbis.generic.shared.dto.EventPE.EntityType;
 import controllers.MultiscaleController;
 
 public class ExperimentView extends VerticalLayout implements View {
@@ -77,7 +78,8 @@ public class ExperimentView extends VerticalLayout implements View {
   private MultiscaleController controller;
   private MultiscaleComponent noteComponent;
 
-  public ExperimentView(DataHandler datahandler, State state, String resourceurl, MultiscaleController controller) {
+  public ExperimentView(DataHandler datahandler, State state, String resourceurl,
+      MultiscaleController controller) {
     this(datahandler, state, controller);
     this.resourceUrl = resourceurl;
   }
@@ -237,8 +239,8 @@ public class ExperimentView extends VerticalLayout implements View {
 
   void updateContentDescription() {
     idLabel.setValue(String.format("Identifier: %s", currentBean.getId()));
-    generalInfoLabel.setValue(
-        String.format("Stage:\t %s", prettyNameMapper.getPrettyName(currentBean.getType())));
+    generalInfoLabel.setValue(String.format("Stage:\t %s",
+        prettyNameMapper.getPrettyName(currentBean.getType())));
     statContentLabel.setValue(String.format("This experimental step involves %s sample(s)",
         currentBean.getSamples().size()));
 
@@ -409,7 +411,7 @@ public class ExperimentView extends VerticalLayout implements View {
       this.table.setVisible(false);
     } else {
       this.table.setVisible(true);
-      this.table.setPageLength(Math.min(rowNumber, 10));
+      this.table.setPageLength(Math.max(3, Math.min(rowNumber, 10)));
     }
 
 

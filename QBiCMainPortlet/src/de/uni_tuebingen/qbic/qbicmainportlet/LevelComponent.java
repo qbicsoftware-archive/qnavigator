@@ -356,7 +356,9 @@ public class LevelComponent extends CustomComponent {
             this.datasetTable.setCaption("Raw Data");
 
             numberOfDatasets = retrievedDatasets.size();
-            this.datasetTable.setPageLength(Math.min(numberOfDatasets, 10));
+            this.datasetTable.setPageLength(Math.max(3, Math.min(numberOfDatasets, 10)));
+            // sampleGrid.setHeightMode(HeightMode.ROW);
+            // sampleGrid.setHeightByRows(numberOfSamples);
           }
 
           else if (filterFor.equals("results")) {
@@ -415,6 +417,8 @@ public class LevelComponent extends CustomComponent {
             sampleGrid.setColumnReorderingAllowed(true);
             sampleGrid.setColumnOrder("secondaryName", "type", "code", "properties");
             numberOfSamples = samplesContainer.size();
+            // sampleGrid.setHeightMode(HeightMode.ROW);
+            // sampleGrid.setHeightByRows(numberOfSamples);
 
             sampleGrid.setCaption("Workflow Runs");
             helpers.GridFunctions.addColumnFilters(sampleGrid, gpc);
@@ -439,7 +443,7 @@ public class LevelComponent extends CustomComponent {
             });
 
             numberOfDatasets = retrievedDatasets.size();
-            this.datasetTable.setPageLength(Math.min(numberOfDatasets, 10));
+            this.datasetTable.setPageLength(Math.max(3, Math.min(numberOfDatasets, 10)));
 
           }
           break;

@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -498,17 +496,14 @@ public class BiologicalSamplesComponent extends CustomComponent {
     sampleBioGrid.setWidth("100%");
     sampleEntityGrid.setWidth("100%");
 
+    // sampleBioGrid.setHeightMode(HeightMode.ROW);
+    // sampleEntityGrid.setHeightMode(HeightMode.ROW);
+
+    // sampleBioGrid.setHeightByRows(Math.min(10, numberOfBioSamples));
+    // sampleEntityGrid.setHeightByRows(Math.min(10, 5));
+
     tableSection.setWidth("100%");
     sampletableSectionContent.setWidth("100%");
     tableSectionContent.setWidth("100%");
-
-    // this.table.setSizeFull();
-
-    HorizontalLayout buttonLayout = new HorizontalLayout();
-    // buttonLayout.setMargin(new MarginInfo(false, false, false, true));
-    buttonLayout.setHeight(null);
-    // buttonLayout.setWidth("100%");
-    buttonLayout.setSpacing(true);
-
   }
 }

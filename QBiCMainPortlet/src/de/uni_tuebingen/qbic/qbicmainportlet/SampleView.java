@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -28,6 +26,8 @@ import logging.Log4j2Logger;
 import model.SampleBean;
 
 import org.tepi.filtertable.FilterTreeTable;
+
+import ch.systemsx.cisd.openbis.generic.shared.dto.EventPE.EntityType;
 
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.navigator.View;
@@ -53,7 +53,6 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import ch.systemsx.cisd.openbis.generic.shared.dto.EventPE.EntityType;
 import controllers.MultiscaleController;
 
 public class SampleView extends VerticalLayout implements View {
@@ -580,7 +579,7 @@ public class SampleView extends VerticalLayout implements View {
       tableSectionContent.addComponent(table);
       this.table.setVisible(true);
       // this.export.setVisible(true);
-      this.table.setPageLength(Math.min(rowNumber + 1, 10));
+      this.table.setPageLength(Math.max(3, Math.min(rowNumber, 10)));
     }
   }
 

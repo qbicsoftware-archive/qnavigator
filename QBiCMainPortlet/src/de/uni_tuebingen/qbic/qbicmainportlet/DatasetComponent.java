@@ -269,7 +269,7 @@ public class DatasetComponent extends CustomComponent {
   public void setContainerDataSource(HierarchicalContainer newDataSource) {
     datasets = (HierarchicalContainer) newDataSource;
     table.setContainerDataSource(this.datasets);
-    table.setPageLength(Math.min(numberOfDatasets, 10));
+    table.setPageLength(Math.max(3, Math.min(numberOfDatasets, 10)));
 
     table.setVisibleColumns((Object[]) FILTER_TABLE_COLUMNS);
 
