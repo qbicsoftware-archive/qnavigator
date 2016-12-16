@@ -202,8 +202,7 @@ public class ProjectView extends VerticalLayout implements View {
     datasetComponent = new DatasetComponent(datahandler, state, resourceUrl);
     biologicalSamplesComponent =
         new BiologicalSamplesComponent(datahandler, state, resourceUrl, "Biological Samples");
-    measuredSamplesComponent =
-        new LevelComponent(datahandler, state, resourceUrl, "Measured Samples");
+    measuredSamplesComponent = new LevelComponent(datahandler, state, resourceUrl, "Raw Data");
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
     workflowComponent = new WorkflowComponent(wfController);
     uploadComponent = new UploadComponent();
@@ -241,7 +240,7 @@ public class ProjectView extends VerticalLayout implements View {
           experimentComponent.updateUI(getCurrentBean());
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Datasets")) {
           datasetComponent.updateUI(navigateToLabel, getCurrentBean().getId());
-        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Measured Samples")) {
+        } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Raw Data")) {
           measuredSamplesComponent.updateUI(navigateToLabel, getCurrentBean().getId(), "measured");
         } else if (event.getTabSheet().getSelectedTab().getCaption().equals("Biological Samples")) {
           biologicalSamplesComponent.updateUI(getCurrentBean().getId());

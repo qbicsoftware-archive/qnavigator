@@ -1,26 +1,26 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.Utils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import logging.Log4j2Logger;
 import model.ExperimentBean;
@@ -31,7 +31,12 @@ import org.tepi.filtertable.FilterTable;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
+import com.vaadin.event.SelectionEvent;
+import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
@@ -39,12 +44,19 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class HomeView extends VerticalLayout implements View {
@@ -58,6 +70,7 @@ public class HomeView extends VerticalLayout implements View {
 
   String caption;
   FilterTable table;
+  Grid projectGrid;
   VerticalLayout homeview_content;
   VerticalLayout buttonLayoutSection = new VerticalLayout();
   SpaceBean currentBean;
@@ -86,13 +99,14 @@ public class HomeView extends VerticalLayout implements View {
 
   public HomeView(DataHandler datahandler, String caption, String user, State state, String resUrl) {
     homeview_content = new VerticalLayout();
-    this.table = buildFilterTable();
+    // this.table = buildFilterTable();
+    this.projectGrid = new Grid();
     this.datahandler = datahandler;
     this.state = state;
     this.resourceUrl = resUrl;
 
     this.user = user;
-    tableClickChangeTreeView();
+    // tableClickChangeTreeView();
   }
 
   /**
@@ -106,39 +120,97 @@ public class HomeView extends VerticalLayout implements View {
   public void setSizeFull() {
     homeview_content.setSizeFull();
     super.setSizeFull();
-    this.table.setSizeFull();
+    // this.table.setSizeFull();
+    this.projectGrid.setSizeFull();
     homeview_content.setSpacing(true);
     // homeview_content.setMargin(true);
   }
 
   /**
-   * sets the ContainerDataSource of this view. Should usually contains project information. Caption
+   * sets the ContainerDataSource of this view. Should usually contain project information. Caption
    * is caption.
    * 
    * @param homeViewInformation
    * @param caption
    */
-  public void setContainerDataSource(SpaceBean spaceBean, String caption) {
+  public void setContainerDataSource(SpaceBean spaceBean, String newCaption) {
 
-    this.caption = caption;
-    this.currentBean = spaceBean;
-    this.numberOfProjects = currentBean.getProjects().size();
+    caption = newCaption;
+    currentBean = spaceBean;
+    numberOfProjects = currentBean.getProjects().size();
+    projectGrid = new Grid();
 
-    setExportButton();
+    GeneratedPropertyContainer gpcProjects =
+        new GeneratedPropertyContainer(spaceBean.getProjects());
+    gpcProjects.removeContainerProperty("members");
+    gpcProjects.removeContainerProperty("id");
+    gpcProjects.removeContainerProperty("experiments");
+    gpcProjects.removeContainerProperty("contact");
+    gpcProjects.removeContainerProperty("contactPerson");
+    gpcProjects.removeContainerProperty("containsData");
+    gpcProjects.removeContainerProperty("description");
+    gpcProjects.removeContainerProperty("progress");
+    gpcProjects.removeContainerProperty("registrationDate");
+    gpcProjects.removeContainerProperty("registrator");
 
-    this.table.setContainerDataSource(spaceBean.getProjects());
-    this.table.setVisibleColumns(new Object[] {"code", "space", "secondaryName",
-        "principalInvestigator"});//, "decription"});
-    this.table.setColumnHeader("code", "Sub-Project");
-    this.table.setColumnHeader("secondaryName", "Short Name");
-    this.table.setColumnHeader("space", "Project");
-    this.table.setColumnHeader("principalInvestigator", "Investigator");
-//    this.table.setColumnHeader("description", "Description");
-//    this.table.setColumnExpandRatio("Name", 1);
-//    this.table.setColumnExpandRatio("Description", 3);
-    this.table.setColumnExpandRatio("Name", 3);
-    this.table.setColumnExpandRatio("Code", 1);
+    projectGrid.setContainerDataSource(gpcProjects);
 
+    projectGrid.setHeightMode(HeightMode.ROW);
+    projectGrid.setHeightByRows(20);
+
+    projectGrid.getColumn("code").setHeaderCaption("Sub-Project");
+    projectGrid.getColumn("secondaryName").setHeaderCaption("Short Name");
+    projectGrid.getColumn("space").setHeaderCaption("Project");
+    projectGrid.getColumn("principalInvestigator").setHeaderCaption("Investigator");
+    projectGrid.setColumnOrder("code", "space", "secondaryName", "principalInvestigator");
+
+    helpers.GridFunctions.addColumnFilters(projectGrid, gpcProjects);
+
+    gpcProjects.addGeneratedProperty("Summary", new PropertyValueGenerator<String>() {
+      @Override
+      public String getValue(Item item, Object itemId, Object propertyId) {
+        return "download";
+      }
+
+      @Override
+      public Class<String> getType() {
+        return String.class;
+      }
+    });
+
+    projectGrid.getColumn("Summary").setRenderer(new ButtonRenderer(new RendererClickListener() {
+
+      @Override
+      public void click(RendererClickEvent event) {
+        // Provide the functionality to generate summary in here
+        // TODO
+      }
+    }));
+
+    projectGrid.addSelectionListener(new SelectionListener() {
+
+      @Override
+      public void select(SelectionEvent event) {
+        Set<Object> selectedElements = event.getSelected();
+        if (selectedElements == null) {
+          return;
+        }
+
+        ProjectBean selectedProject = (ProjectBean) selectedElements.iterator().next();
+
+        if (selectedProject == null) {
+          return;
+        }
+
+        String entity = selectedProject.getId();
+        State state = (State) UI.getCurrent().getSession().getAttribute("state");
+        ArrayList<String> message = new ArrayList<String>();
+        message.add("clicked");
+        message.add(entity);
+        message.add(ProjectView.navigateToLabel);
+        state.notifyObservers(message);
+      }
+    });
   }
 
   private void setExportButton() {
@@ -190,6 +262,8 @@ public class HomeView extends VerticalLayout implements View {
   }
 
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
+    this.setWidth("100%");
+
     this.setMargin(new MarginInfo(false, false, false, false));
     // clean up first
     homeview_content.removeAllComponents();
@@ -198,24 +272,8 @@ public class HomeView extends VerticalLayout implements View {
     updateView(browserWidth, browserWidth, browser);
 
     // view overall statistics
-    // VerticalLayout statistics = new VerticalLayout();
     VerticalLayout homeViewDescription = new VerticalLayout();
 
-    // patientButton
-    /*
-     * if (includePatientCreation) { Button addPatient = new Button("Add Patient");
-     * addPatient.setIcon(FontAwesome.PLUS); addPatient.setStyleName("addpatient");
-     * 
-     * addPatient.addClickListener(new ClickListener() {
-     * 
-     * @Override public void buttonClick(ClickEvent event) {
-     * UI.getCurrent().getNavigator().navigateTo(String.format(AddPatientView.navigateToLabel)); }
-     * }); statistics.addComponent(addPatient); statistics.setComponentAlignment(addPatient,
-     * Alignment.TOP_RIGHT); }
-     */
-    // statistics
-    // statistics.setCaption("Statistics");
-    // statistics.setIcon(FontAwesome.FILE_TEXT_O);
     Label statContent;
     if (numberOfProjects > 0) {
       statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
@@ -238,11 +296,14 @@ public class HomeView extends VerticalLayout implements View {
 
     tableSectionContent.setCaption("Sub-Projects");
     tableSectionContent.setIcon(FontAwesome.TABLE);
-    tableSectionContent.addComponent(this.table);
+    // tableSectionContent.addComponent(this.table);
+    tableSectionContent.addComponent(this.projectGrid);
 
     tableSection.setMargin(new MarginInfo(false, false, false, false));
 
-    this.table.setWidth("100%");
+    this.projectGrid.setWidth("100%");
+    this.projectGrid.setSelectionMode(SelectionMode.SINGLE);
+
     tableSection.setWidth("100%");
     tableSectionContent.setWidth("100%");
 
@@ -324,37 +385,9 @@ public class HomeView extends VerticalLayout implements View {
             .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     LOGGER.info("Loading projects...done.");
 
-    // get secondary names of sub-projects
-    final long startTime = System.nanoTime();
-    // Map<String, Object> parameters = new HashMap<String, Object>();
-    // List<String> designExperimentIDs = new ArrayList<String>();
-    // for (Project project : projects) {
-    // String projectCode = project.getCode();
-    // String id = project.getIdentifier() + "/" + projectCode + "E1";
-    // if (datahandler.getOpenBisClient().expExists(project.getSpaceCode(), projectCode,
-    // projectCode + "E1"))
-    // designExperimentIDs.add(id);
-    // }
-    // parameters.put("ids", designExperimentIDs);
-    // LOGGER.debug("getting secondary names of projects");
-    // QueryTableModel res =
-    // datahandler.getOpenBisClient().getAggregationService("get-project-names", parameters);
-    // Map<String, String> nameMap = new HashMap<String, String>();
-    // for (Serializable[] row : res.getRows())
-    // nameMap.put((String) row[0], (String) row[1]);
-    // LOGGER.debug("Map of names: " + nameMap);
     for (Project project : projects) {
-      // if (project.getSpaceCode().contains("IVAC")) {
-      // this.includePatientCreation = true;
-      // }
-      // datahandler.addOpenbisDtoProject(project);
-
       String projectIdentifier = project.getIdentifier();
       String projectCode = project.getCode();
-      // if (nameMap.containsKey(projectCode))
-      // secondaryName = nameMap.get(projectCode);
-
-      // Project descriptions can be long; truncate the string to provide a brief preview
       String desc = project.getDescription();
       if (desc == null) {
         desc = "";
@@ -367,7 +400,7 @@ public class HomeView extends VerticalLayout implements View {
 
       // TODO isn't this slow in this fashion? what about SELECT * and creating a map?
       String secondaryName = datahandler.getDatabaseManager().getProjectName(projectIdentifier);
-      if (secondaryName.isEmpty())
+      if (secondaryName.isEmpty() || secondaryName == null)
         secondaryName = "None";
 
       ProjectBean newProjectBean =

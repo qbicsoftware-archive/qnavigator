@@ -394,12 +394,15 @@ public class LevelComponent extends CustomComponent {
 
                 if (foundDataset != null) {
                   for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : foundDataset) {
+                    // we don't want to show project data or log files in the results tab
                     if (ds.getDataSetTypeCode().equals("Q_PROJECT_DATA")) {
                       if (ds.getProperties().get("Q_ATTACHMENT_TYPE").equals("INFORMATION")) {
                         continue;
                       } else {
                         retrievedDatasets.add(ds);
                       }
+                    } else if (ds.getDataSetTypeCode().contains("LOGS")) {
+                      continue;
                     } else {
                       retrievedDatasets.add(ds);
                     }

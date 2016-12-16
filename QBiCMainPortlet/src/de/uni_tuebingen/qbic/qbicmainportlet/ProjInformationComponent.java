@@ -274,7 +274,13 @@ public class ProjInformationComponent extends CustomComponent {
               + currentBean.getCode() + " (" + space + ")" + "</a>");
       String desc = currentBean.getDescription();
       if (!desc.isEmpty()) {
-        descContent.setCaption("Description");
+        String secondaryName = projectBean.getSecondaryName();
+
+        if (secondaryName.equals("None") || secondaryName.equals(desc)) {
+          descContent.setCaption("Description");
+        } else {
+          descContent.setCaption(secondaryName);
+        }
         descContent.setValue(desc);
       }
 
