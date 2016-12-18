@@ -46,11 +46,14 @@
 		<!--<dependency org="org.vaadin.addons" name="vaadin-ipc-for-liferay" rev="2.0.0" />-->
 	
 		<dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.13.v7" />
-		
+		<!-- filter table -->	
+		<dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.11.v7" />
 		<!--logging -->
 		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.2" />
   		<dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.2" />
-  		
+  		<!--DocX4J -->
+  		<dependency org="org.slf4j" name ="slf4j-api" rev="1.7.5" />
+  		<dependency org="org.docx4j" name ="docx4j" rev="3.3.1" />
   		<!--upload -->
   		<dependency org="com.github.lookfirst" name="sardine" rev="5.5" />
   		<dependency org="commons-io" name="commons-io" rev="2.4" />

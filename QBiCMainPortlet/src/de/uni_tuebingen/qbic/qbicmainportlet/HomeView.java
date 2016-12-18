@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -15,6 +15,8 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.ProjectSummaryReadyRunnable;
+import helpers.SummaryFetcher;
 import helpers.Utils;
 
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import org.tepi.filtertable.FilterTable;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
+import com.google.gwt.aria.client.ProgressbarRole;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
@@ -54,6 +57,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
@@ -68,17 +72,17 @@ public class HomeView extends VerticalLayout implements View {
 
   private logging.Logger LOGGER = new Log4j2Logger(HomeView.class);
 
-  String caption;
-  FilterTable table;
-  Grid projectGrid;
-  VerticalLayout homeview_content;
-  VerticalLayout buttonLayoutSection = new VerticalLayout();
-  SpaceBean currentBean;
+  private String caption;
+  private FilterTable table;
+  private Grid projectGrid;
+  private VerticalLayout homeview_content;
+  private VerticalLayout buttonLayoutSection = new VerticalLayout();
+  private SpaceBean currentBean;
   // Boolean includePatientCreation = false;
-  ToolBar toolBar;
-  State state;
-  String resourceUrl;
-  String header;
+  private ToolBar toolBar;
+  private State state;
+  private String resourceUrl;
+  private String header;
 
   public String getHeader() {
     return header;
@@ -89,7 +93,8 @@ public class HomeView extends VerticalLayout implements View {
   }
 
 
-  DataHandler datahandler;
+  private DataHandler datahandler;
+  private SummaryFetcher summaryFetcher;
 
   private Button export = new Button("Export as TSV");
 
@@ -97,13 +102,15 @@ public class HomeView extends VerticalLayout implements View {
 
   private String user;
 
-  public HomeView(DataHandler datahandler, String caption, String user, State state, String resUrl) {
+  public HomeView(DataHandler datahandler, String caption, String user, State state, String resUrl,
+      String tmpFolderPath) {
     homeview_content = new VerticalLayout();
     // this.table = buildFilterTable();
     this.projectGrid = new Grid();
     this.datahandler = datahandler;
     this.state = state;
     this.resourceUrl = resUrl;
+    this.summaryFetcher = new SummaryFetcher(datahandler.getOpenBisClient(), tmpFolderPath);
 
     this.user = user;
     // tableClickChangeTreeView();
@@ -114,7 +121,7 @@ public class HomeView extends VerticalLayout implements View {
    */
   public HomeView(DataHandler datahandler) {
     this(datahandler, "You seem to have no registered projects. Please contact QBiC.", "",
-        new State(), "");
+        new State(), "", "");
   }
 
   public void setSizeFull() {
@@ -169,7 +176,7 @@ public class HomeView extends VerticalLayout implements View {
     gpcProjects.addGeneratedProperty("Summary", new PropertyValueGenerator<String>() {
       @Override
       public String getValue(Item item, Object itemId, Object propertyId) {
-        return "download";
+        return "show";
       }
 
       @Override
@@ -182,8 +189,26 @@ public class HomeView extends VerticalLayout implements View {
 
       @Override
       public void click(RendererClickEvent event) {
-        // Provide the functionality to generate summary in here
-        // TODO
+        // Show loading window
+        ProgressBar bar = new ProgressBar();
+        bar.setIndeterminate(true);
+        VerticalLayout vl = new VerticalLayout(bar);
+        vl.setSpacing(true);
+        vl.setMargin(true);
+        Window loadingWindow = new Window("Project summary loading...");
+        loadingWindow.setContent(vl);
+        loadingWindow.setWidth("210px");
+        loadingWindow.center();
+        loadingWindow.setModal(true);
+        loadingWindow.setResizable(false);
+        QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+        ui.addWindow(loadingWindow);
+
+        // fetch summary and create docx in tmp folder
+        
+        ProjectBean proj = (ProjectBean) event.getItemId();
+        summaryFetcher.fetchSummaryComponent(proj.getCode(),
+            new ProjectSummaryReadyRunnable(summaryFetcher, loadingWindow, proj.getCode()));
       }
     }));
 
@@ -279,9 +304,8 @@ public class HomeView extends VerticalLayout implements View {
       statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
       setHeader(String.format("Total number of Sub-Projects: %s", numberOfProjects));
     } else {
-      statContent =
-          new Label(
-              String.format("You have no projects so far. Please contact your project manager."));
+      statContent = new Label(
+          String.format("You have no projects so far. Please contact your project manager."));
       statContent.addStyleName(ValoTheme.LABEL_FAILURE);
       statContent.addStyleName(ValoTheme.LABEL_LARGE);
     }
@@ -315,8 +339,8 @@ public class HomeView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table,
-        ProjectView.navigateToLabel));
+    this.table
+        .addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
   }
 
 
@@ -380,9 +404,8 @@ public class HomeView extends VerticalLayout implements View {
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
     LOGGER.info("Loading projects...");
-    List<Project> projects =
-        datahandler.getOpenBisClient().getOpenbisInfoService()
-            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     LOGGER.info("Loading projects...done.");
 
     for (Project project : projects) {
@@ -403,10 +426,9 @@ public class HomeView extends VerticalLayout implements View {
       if (secondaryName.isEmpty() || secondaryName == null)
         secondaryName = "None";
 
-      ProjectBean newProjectBean =
-          new ProjectBean(projectIdentifier, projectCode, secondaryName, desc,
-              project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
-              new ProgressBar(), new Date(), "", "", null, false);
+      ProjectBean newProjectBean = new ProjectBean(projectIdentifier, projectCode, secondaryName,
+          desc, project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
+          new ProgressBar(), new Date(), "", "", null, false);
 
       // TODO isn't this slow in this fashion? what about SELECT * and creating a map?
       String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectIdentifier);
