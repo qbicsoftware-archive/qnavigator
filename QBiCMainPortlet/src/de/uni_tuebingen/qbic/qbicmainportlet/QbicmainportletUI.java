@@ -269,7 +269,7 @@ public class QbicmainportletUI extends UI {
 
 
 
-    final HomeView homeView = new HomeView(datahandler, "Your Projects", user, state, resUrl);
+    final HomeView homeView = new HomeView(datahandler, "Your Projects", user, state, resUrl, manager.getTmpFolder());
     DatasetView datasetView = new DatasetView(datahandler, state, resUrl);
     final SampleView sampleView = new SampleView(datahandler, state, resUrl, multiscaleController);
     BarcodeView barcodeView =
