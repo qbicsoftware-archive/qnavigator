@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package helpers;
 
@@ -60,6 +58,9 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID", "Ligandomics Identification Workflow");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC", "Ligandomics Quality Control Workflow");
     namesMapping.put("Q_MHC_LIGAND_EXTRACTION", "MHC Ligand Extraction");
+    namesMapping.put("Q_WF_NGS_SHRNA_COUNTING", "shRNA Counting Workflow");
+    namesMapping.put("Q_HT_QPCR", "High-Throughput Quantitative Real-Time PCR");
+    namesMapping.put("Q_BMI_GENERIC_IMAGING", "Imaging");
 
 
     // deprecated experiment types
@@ -115,6 +116,9 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_RUN", "Ligandomics Identification Workflow Run");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_RUN", "Ligandomics Quality Control Workflow Run");
     namesMapping.put("Q_MHC_LIGAND_EXTRACT", "MHC Ligand Extract");
+    namesMapping.put("Q_WF_NGS_SHRNA_COUNTING_RUN", "shRNA Counting Workflow Run");
+    namesMapping.put("Q_HT_QPCR_RUN", "High-Throughput qPCR Run");
+    namesMapping.put("Q_BMI_GENERIC_IMAGING_RUN", "Imaging Run");
 
 
     // deprecated sample types
@@ -193,6 +197,12 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_LOGS", "Ligandomics Identification Workflow Logs");
     namesMapping.put("Q_WF_MS_LIGANDOMICS_ID_RESULTS",
         "Ligandomics Identification Workflow Results");
+    namesMapping.put("Q_WF_NGS_SHRNA_COUNTING_LOGS", "shRNA Counting Workflow Logs");
+    namesMapping.put("Q_WF_NGS_SHRNA_COUNTING_RESULTS", "shRNA Counting Workflow Results");
+    namesMapping.put("Q_BMI_IMAGING_DATA", "Imaging Data");
+    namesMapping.put("Q_PEPTIDE_DATA", "Peptide Data");
+    namesMapping.put("Q_HT_QPCR_DATA", "High-Throughput qPCR Data");
+
 
 
     // deprecated dataset types
