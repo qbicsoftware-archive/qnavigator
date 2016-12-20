@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package helpers;
 
@@ -30,11 +28,22 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import model.ProjectBean;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
+import com.liferay.portal.model.Company;
+import com.liferay.portal.model.User;
+import com.liferay.portal.service.CompanyLocalServiceUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -56,9 +65,13 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.qbicmainportlet.CustomVisibilityComponent;
+import de.uni_tuebingen.qbic.qbicmainportlet.PatientView;
 import de.uni_tuebingen.qbic.qbicmainportlet.VisibilityChangeListener;
+import logging.Log4j2Logger;
+import logging.Logger;
 
 public class Utils {
+  private static Logger LOGGER = new Log4j2Logger(Utils.class);
 
   /**
    * Checks if a String can be parsed to an Integer
@@ -345,12 +358,43 @@ public class Utils {
     return panel;
   }
 
+  public static String usernameToFullName(String username) {
+    Company company = null;
+
+    String res = username;
+    long companyId = 1;
+    try {
+      String webId = PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
+      company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
+      companyId = company.getCompanyId();
+    } catch (PortalException | SystemException e) {
+      LOGGER
+          .error("liferay error, could not retrieve companyId. Trying default companyId, which is "
+              + companyId, e.getStackTrace());
+    }
+    User user = null;
+    try {
+      user = UserLocalServiceUtil.getUserByScreenName(companyId, username);
+    } catch (PortalException | SystemException e) {
+      LOGGER.warn("got this error while trying to fetch full name of user:");
+      LOGGER.warn(e.getMessage());
+      LOGGER.info("returning username instead.");
+    }
+    if (user == null) {
+      LOGGER.warn(String.format("Openbis user %s appears to not exist in Portal", username));
+    } else {
+      String firstName = user.getFirstName();
+      String lastName = user.getLastName();
+      res = firstName + " " + lastName;
+    }
+    return res;
+  }
+
   public void generateProjectReport(ProjectBean projectBean) {
     Writer report = null;
     try {
-      report =
-          new BufferedWriter(new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"),
-              "utf-8"));
+      report = new BufferedWriter(
+          new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"), "utf-8"));
 
       // write tex file header
       report.write("\\documentclass[ngerman]{scrartcl} \n");

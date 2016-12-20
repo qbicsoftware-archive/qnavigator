@@ -99,6 +99,7 @@ public class SummaryFetcher {
   private Docx4jHelper docxHelper;
   private Component summaryComponent;
   private String tmpFolder;
+  private boolean success = false;
 
   public SummaryFetcher(OpenBisClient openbis, String tmpFolder) {
     this.tmpFolder = tmpFolder;
@@ -162,7 +163,14 @@ public class SummaryFetcher {
     // collect and connect everything (if samples exist)
     List<Sample> samples =
         openbis.getSamplesWithParentsAndChildrenOfProjectBySearchService(projectCode);
-    if (samples.size() > 0) {
+    if (!projectCode.startsWith("Q") || projectCode.length() != 5) {
+      success = false;
+      return res;
+    }
+    if (samples.size() == 0) {
+      success = false;
+      return res;
+    } else {
       List<Experiment> experiments = openbis.getExperimentsForProject3(projectCode);
       Experiment first = experiments.get(0);
       List<DataSet> datasets = openbis.getDataSetsOfProjectByIdentifier(
@@ -212,10 +220,6 @@ public class SummaryFetcher {
                                                                              // details/attachments
                                                                              // information could be
                                                                              // added
-          // String header = type + ": " + e.getCode();
-          // Map<String, String> props = e.getProperties();
-          // parseProperties(props);
-
           P sectionP = factory.createP();
           R run = factory.createR();
 
@@ -229,15 +233,9 @@ public class SummaryFetcher {
               expIDToDS.get(e.getIdentifier()), run);
           section.addComponent(sampleTable);
           res.addComponent(section);
-          // for (Sample s : expToSamples.get(e)) {
-          // header = s.getCode();
-          // props = s.getProperties();
-          // parseProperties(props);
-          // // number of attached datasets
-          // String sampID = s.getIdentifier();
-          // }
         }
       }
+      success = true;
     }
     addSummaryDownload(res);
     return res;
@@ -335,7 +333,7 @@ public class SummaryFetcher {
       e.printStackTrace();
     }
     for (Note n : notes) {
-      res.add(n.getUsername() + " commented: " + n.getComment());
+      res.add(Utils.usernameToFullName(n.getUsername()) + " commented: " + n.getComment());
     }
     return res;
   }
@@ -519,6 +517,10 @@ public class SummaryFetcher {
    */
   public Component getWindowContent() {
     return summaryComponent;
+  }
+
+  public boolean wasSuccessful() {
+    return success;
   }
 
 }
