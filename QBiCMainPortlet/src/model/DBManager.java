@@ -1,15 +1,15 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
- * Mohr, David Wojnar, Andreas Friedrich
- *
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
@@ -48,8 +48,9 @@ public class DBManager {
 
   private Connection login() {
 
-    String DB_URL = "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/"
-        + config.getSql_database();
+    String DB_URL =
+        "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/"
+            + config.getSql_database();
 
     Connection conn = null;
 
@@ -100,8 +101,8 @@ public class DBManager {
     String lnk = "persons_organizations";
     String sql =
         "SELECT persons.*, organizations.*, " + lnk + ".occupation FROM persons, organizations, "
-            + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = " + lnk
-            + ".person_id and organizations.id = " + lnk + ".organization_id";
+            + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = "
+            + lnk + ".person_id and organizations.id = " + lnk + ".organization_id";
     Connection conn = login();
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       ResultSet rs = statement.executeQuery();
@@ -123,8 +124,7 @@ public class DBManager {
         String organization = rs.getString("umbrella_organization");
         String affiliation = "";
 
-        if (group_name == null || group_name.toUpperCase().equals("NULL")
-            || group_name.equals("")) {
+        if (group_name == null || group_name.toUpperCase().equals("NULL") || group_name.equals("")) {
 
           if (institute == null || institute.toUpperCase().equals("NULL") || institute.equals("")) {
             affiliation = organization;
@@ -181,8 +181,15 @@ public class DBManager {
       Person p = personWithAffiliations.get(0);
       String institute = p.getOneAffiliationWithRole().getAffiliation();
 
-      details = String.format("%s %s \n%s \n \n%s \n%s \n", p.getFirst(), p.getLast(), institute,
-          p.getPhone(), p.geteMail());
+      String title = "";
+
+      if (p.getTitle() != null) {
+        title = p.getTitle();
+      }
+
+      details =
+          String.format("%s %s %s \n%s \n \n%s \n%s \n", title, p.getFirst(), p.getLast(),
+              institute, p.getPhone(), p.geteMail());
       // TODO is address important?
     }
 
@@ -229,8 +236,9 @@ public class DBManager {
           String street = rs.getString("street");
           String institute = rs.getString("institute");
 
-          details = String.format("%s %s \n%s \n%s \n%s %s \n \n%s \n%s \n", first, last, institute,
-              street, zipcode, city, phone, email);
+          details =
+              String.format("%s %s \n%s \n%s \n%s %s \n \n%s \n%s \n", first, last, institute,
+                  street, zipcode, city, phone, email);
         }
         // statement.close();
       } catch (SQLException e) {

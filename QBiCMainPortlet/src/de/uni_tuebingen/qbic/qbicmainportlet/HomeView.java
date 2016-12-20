@@ -127,7 +127,7 @@ public class HomeView extends VerticalLayout implements View {
     homeview_content.setSizeFull();
     super.setSizeFull();
     // this.table.setSizeFull();
-    this.projectGrid.setSizeFull();
+    // this.projectGrid.setSizeFull();
     homeview_content.setSpacing(true);
     // homeview_content.setMargin(true);
   }
@@ -164,11 +164,12 @@ public class HomeView extends VerticalLayout implements View {
     projectGrid.setHeightMode(HeightMode.ROW);
     projectGrid.setHeightByRows(20);
 
-    projectGrid.getColumn("code").setHeaderCaption("Sub-Project");
+    projectGrid.getColumn("code").setHeaderCaption("Sub-Project").setWidth(100);
     projectGrid.getColumn("secondaryName").setHeaderCaption("Short Name");
-    projectGrid.getColumn("space").setHeaderCaption("Project");
-    projectGrid.getColumn("principalInvestigator").setHeaderCaption("Investigator");
+    projectGrid.getColumn("space").setHeaderCaption("Project").setWidth(300);
+    projectGrid.getColumn("principalInvestigator").setHeaderCaption("Investigator").setWidth(250);
     projectGrid.setColumnOrder("code", "space", "secondaryName", "principalInvestigator");
+    projectGrid.setResponsive(true);
 
     helpers.GridFunctions.addColumnFilters(projectGrid, gpcProjects);
 
@@ -213,6 +214,7 @@ public class HomeView extends VerticalLayout implements View {
             summaryFetcher, loadingWindow, proj.getCode()));
       }
     }));
+    projectGrid.getColumn("Summary").setWidth(100);
 
     projectGrid.addSelectionListener(new SelectionListener() {
 

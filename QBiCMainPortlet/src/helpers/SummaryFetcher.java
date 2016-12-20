@@ -15,6 +15,10 @@ import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import main.OpenBisClient;
+import model.notes.Note;
+import model.notes.Notes;
+
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.exceptions.InvalidFormatException;
@@ -23,6 +27,15 @@ import org.docx4j.wml.Br;
 import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
+
+import parser.XMLParser;
+import properties.Factor;
+import qbic.utils.Docx4jHelper;
+import sorters.ExperimentTypeComparator;
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
@@ -35,18 +48,6 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import main.OpenBisClient;
-import model.notes.Note;
-import model.notes.Notes;
-import parser.XMLParser;
-import properties.Factor;
-import qbic.utils.Docx4jHelper;
-import sorters.ExperimentTypeComparator;
-
 public class SummaryFetcher {
 
   private OpenBisClient openbis;
@@ -54,8 +55,8 @@ public class SummaryFetcher {
   private String projectCode;
   private String projectName;
   private String projectDescription;
-  private Set<String> noData =
-      new HashSet<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE"));
+  private Set<String> noData = new HashSet<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY",
+      "Q_BIOLOGICAL_SAMPLE"));
   private final Map<String, String> expTypeTranslation = new HashMap<String, String>() {
     {
       put("Q_NGS_MEASUREMENT", "Next Generation Sequencing Run");
@@ -173,8 +174,9 @@ public class SummaryFetcher {
     } else {
       List<Experiment> experiments = openbis.getExperimentsForProject3(projectCode);
       Experiment first = experiments.get(0);
-      List<DataSet> datasets = openbis.getDataSetsOfProjectByIdentifier(
-          first.getIdentifier().replace("/" + first.getCode(), ""));
+      List<DataSet> datasets =
+          openbis.getDataSetsOfProjectByIdentifier(first.getIdentifier().replace(
+              "/" + first.getCode(), ""));
 
       Map<Experiment, List<Sample>> expToSamples = new HashMap<Experiment, List<Sample>>();
       Map<String, List<DataSet>> sampIDToDS = new HashMap<String, List<DataSet>>();
@@ -229,8 +231,9 @@ public class SummaryFetcher {
           sectionP.getContent().add(run);
           wordMLPackage.getMainDocumentPart().addObject(sectionP);
 
-          Table sampleTable = generateSampleTable(expToSamples.get(e), sampIDToDS,
-              expIDToDS.get(e.getIdentifier()), run);
+          Table sampleTable =
+              generateSampleTable(expToSamples.get(e), sampIDToDS,
+                  expIDToDS.get(e.getIdentifier()), run);
           section.addComponent(sampleTable);
           res.addComponent(section);
         }
