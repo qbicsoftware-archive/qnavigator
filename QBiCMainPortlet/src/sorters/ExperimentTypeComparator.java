@@ -1,13 +1,10 @@
 package sorters;
 
-
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,16 +78,17 @@ public class ExperimentTypeComparator implements Comparator<Experiment> {
   public int compare(Experiment o1, Experiment o2) {
     String t1 = o1.getExperimentTypeCode();
     String t2 = o2.getExperimentTypeCode();
-    if (hierarchy.containsKey(t1) && hierarchy.containsKey(t2)) {
-      int base = hierarchy.get(t1) - hierarchy.get(t2);
-      if (base == 0)
-        return compareAlphanumerical(o1.getCode(), o2.getCode());
-      else
-        return base;
-    }
-    // show unknown types last
+    int i1 = Integer.MAX_VALUE;
+    int i2 = Integer.MAX_VALUE;
+    if (hierarchy.containsKey(t1))
+      i1 = hierarchy.get(t1);
+    if (hierarchy.containsKey(t2))
+      i2 = hierarchy.get(t2);
+    int base = i1 - i2;
+    if (base == 0)
+      return compareAlphanumerical(o1.getCode(), o2.getCode());
     else
-      return Integer.MAX_VALUE;
+      return base;
   }
 
   public int compareAlphanumerical(String object1, String object2) {
