@@ -192,11 +192,14 @@ public class HomeView extends VerticalLayout implements View {
         ProgressBar bar = new ProgressBar();
         bar.setIndeterminate(true);
         VerticalLayout vl = new VerticalLayout(bar);
+        vl.setComponentAlignment(bar, Alignment.MIDDLE_CENTER);
+        vl.setWidth("50%");
         vl.setSpacing(true);
         vl.setMargin(true);
-        Window loadingWindow = new Window("Project summary loading...");
-        loadingWindow.setContent(vl);
+
+        Window loadingWindow = new Window("Loading project summary...");
         loadingWindow.setWidth("50%");
+        loadingWindow.setContent(vl);
         loadingWindow.center();
         loadingWindow.setModal(true);
         loadingWindow.setResizable(false);
