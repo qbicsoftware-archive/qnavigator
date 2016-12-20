@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import controllers.Hull;
 
 /**
  * Compares Experiments by their type, meaning that types can be sorted by experimental design
