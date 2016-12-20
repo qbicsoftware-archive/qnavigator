@@ -33,7 +33,6 @@ import org.tepi.filtertable.FilterTable;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
-import com.google.gwt.aria.client.ProgressbarRole;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
@@ -170,6 +169,9 @@ public class HomeView extends VerticalLayout implements View {
     projectGrid.getColumn("space").setHeaderCaption("Project");
     projectGrid.getColumn("principalInvestigator").setHeaderCaption("Investigator");
     projectGrid.setColumnOrder("code", "space", "secondaryName", "principalInvestigator");
+    
+    projectGrid.getColumn("code").setWidth(100);
+    projectGrid.getColumn("secondaryName").setWidth(450);
 
     helpers.GridFunctions.addColumnFilters(projectGrid, gpcProjects);
 
