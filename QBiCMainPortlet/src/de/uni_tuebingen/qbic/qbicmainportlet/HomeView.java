@@ -167,7 +167,7 @@ public class HomeView extends VerticalLayout implements View {
     projectGrid.getColumn("code").setHeaderCaption("Sub-Project").setWidth(100);
     projectGrid.getColumn("secondaryName").setHeaderCaption("Short Name");
     projectGrid.getColumn("space").setHeaderCaption("Project").setWidth(300);
-    projectGrid.getColumn("principalInvestigator").setHeaderCaption("Investigator").setWidth(250);
+    projectGrid.getColumn("principalInvestigator").setHeaderCaption("Investigator").setWidth(210);
     projectGrid.setColumnOrder("code", "space", "secondaryName", "principalInvestigator");
     projectGrid.setResponsive(true);
 
