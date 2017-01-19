@@ -34,6 +34,7 @@ public class ProjectBean implements Serializable {
   private String secondaryName;
   private String code;
   private String description;
+  private String longDescription;
   private String space;
   private BeanItemContainer<ExperimentBean> experiments;
   private ProgressBar progress;
@@ -208,5 +209,13 @@ public class ProjectBean implements Serializable {
 
   public void setContactPerson(String contactPerson) {
     this.contactPerson = contactPerson;
+  }
+  
+  public void setLongDescription(String longDesc) {
+    this.longDescription = longDesc;
+  }
+
+  public String getLongDescription() {
+    return longDescription;
   }
 }

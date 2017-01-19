@@ -484,6 +484,7 @@ public class DataHandler implements Serializable {
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
     String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
+    String longDesc = getDatabaseManager().getLongProjectDescription(project.getIdentifier());
 
     if (pi.equals("")) {
       newProjectBean.setPrincipalInvestigator("No information provided.");
@@ -496,6 +497,10 @@ public class DataHandler implements Serializable {
     } else {
       newProjectBean.setContactPerson(cp);
     }
+    
+    if(longDesc==null)
+      longDesc = "";
+    newProjectBean.setLongDescription(longDesc);
 
     newProjectBean.setId(project.getIdentifier());
     newProjectBean.setCode(project.getCode());
@@ -578,6 +583,7 @@ public class DataHandler implements Serializable {
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
     String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
+    String longDesc = getDatabaseManager().getLongProjectDescription(project.getIdentifier());
 
     if (pi.equals("")) {
       newProjectBean.setPrincipalInvestigator("No information provided.");
@@ -590,6 +596,10 @@ public class DataHandler implements Serializable {
     } else {
       newProjectBean.setContactPerson(cp);
     }
+    
+    if(longDesc==null)
+      longDesc = "";
+    newProjectBean.setLongDescription(longDesc);
 
     newProjectBean.setId(project.getIdentifier());
     newProjectBean.setCode(project.getCode());

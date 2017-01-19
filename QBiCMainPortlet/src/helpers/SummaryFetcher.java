@@ -2,6 +2,7 @@ package helpers;
 
 import java.io.File;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,8 +56,8 @@ public class SummaryFetcher {
   private String projectCode;
   private String projectName;
   private String projectDescription;
-  private Set<String> noData = new HashSet<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY",
-      "Q_BIOLOGICAL_SAMPLE"));
+  private Set<String> noData =
+      new HashSet<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE"));
   private final Map<String, String> expTypeTranslation = new HashMap<String, String>() {
     {
       put("Q_NGS_MEASUREMENT", "Next Generation Sequencing Run");
@@ -174,9 +175,8 @@ public class SummaryFetcher {
     } else {
       List<Experiment> experiments = openbis.getExperimentsForProject3(projectCode);
       Experiment first = experiments.get(0);
-      List<DataSet> datasets =
-          openbis.getDataSetsOfProjectByIdentifier(first.getIdentifier().replace(
-              "/" + first.getCode(), ""));
+      List<DataSet> datasets = openbis.getDataSetsOfProjectByIdentifier(
+          first.getIdentifier().replace("/" + first.getCode(), ""));
 
       Map<Experiment, List<Sample>> expToSamples = new HashMap<Experiment, List<Sample>>();
       Map<String, List<DataSet>> sampIDToDS = new HashMap<String, List<DataSet>>();
@@ -231,9 +231,8 @@ public class SummaryFetcher {
           sectionP.getContent().add(run);
           wordMLPackage.getMainDocumentPart().addObject(sectionP);
 
-          Table sampleTable =
-              generateSampleTable(expToSamples.get(e), sampIDToDS,
-                  expIDToDS.get(e.getIdentifier()), run);
+          Table sampleTable = generateSampleTable(expToSamples.get(e), sampIDToDS,
+              expIDToDS.get(e.getIdentifier()), run);
           section.addComponent(sampleTable);
           res.addComponent(section);
         }
@@ -298,6 +297,10 @@ public class SummaryFetcher {
     // collect ready-to-display key-value pairs
     List<String> metadata = new ArrayList<String>();
 
+    Date date = e.getRegistrationDetails().getRegistrationDate();
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
+    String formattedDate = dateFormat.format(date);
+    metadata.add("Date: " + formattedDate);
     for (PropertyType p : possibleProps) {
       String code = p.getCode();
       if (properties.containsKey(code)) {
