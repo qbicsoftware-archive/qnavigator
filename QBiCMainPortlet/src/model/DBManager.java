@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -48,9 +48,8 @@ public class DBManager {
 
   private Connection login() {
 
-    String DB_URL =
-        "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/"
-            + config.getSql_database();
+    String DB_URL = "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/"
+        + config.getSql_database();
 
     Connection conn = null;
 
@@ -101,8 +100,8 @@ public class DBManager {
     String lnk = "persons_organizations";
     String sql =
         "SELECT persons.*, organizations.*, " + lnk + ".occupation FROM persons, organizations, "
-            + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = "
-            + lnk + ".person_id and organizations.id = " + lnk + ".organization_id";
+            + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = " + lnk
+            + ".person_id and organizations.id = " + lnk + ".organization_id";
     Connection conn = login();
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       ResultSet rs = statement.executeQuery();
@@ -124,7 +123,8 @@ public class DBManager {
         String organization = rs.getString("umbrella_organization");
         String affiliation = "";
 
-        if (group_name == null || group_name.toUpperCase().equals("NULL") || group_name.equals("")) {
+        if (group_name == null || group_name.toUpperCase().equals("NULL")
+            || group_name.equals("")) {
 
           if (institute == null || institute.toUpperCase().equals("NULL") || institute.equals("")) {
             affiliation = organization;
@@ -187,9 +187,8 @@ public class DBManager {
         title = p.getTitle();
       }
 
-      details =
-          String.format("%s %s %s \n%s \n \n%s \n%s \n", title, p.getFirst(), p.getLast(),
-              institute, p.getPhone(), p.geteMail());
+      details = String.format("%s %s %s \n%s \n \n%s \n%s \n", title, p.getFirst(), p.getLast(),
+          institute, p.getPhone(), p.geteMail());
       // TODO is address important?
     }
 
@@ -236,18 +235,73 @@ public class DBManager {
           String street = rs.getString("street");
           String institute = rs.getString("institute");
 
-          details =
-              String.format("%s %s \n%s \n%s \n%s %s \n \n%s \n%s \n", first, last, institute,
-                  street, zipcode, city, phone, email);
+          details = String.format("%s %s \n%s \n%s \n%s %s \n \n%s \n%s \n", first, last, institute,
+              street, zipcode, city, phone, email);
         }
         // statement.close();
       } catch (SQLException e) {
         e.printStackTrace();
       }
     }
-
     logout(conn);
     return details;
+  }
+
+  public boolean changeLongProjectDescription(String projectIdentifier, String description) {
+    LOGGER.info("Adding/Updating long description of project " + projectIdentifier
+        + ". New length: " + description.length());
+    String sql = "UPDATE projects SET long_description = ? WHERE openbis_project_identifier = ?";
+    Connection conn = login();
+    PreparedStatement statement = null;
+    int res = -1;
+    try {
+      statement = conn.prepareStatement(sql);
+      statement.setString(1, description);
+      statement.setString(2, projectIdentifier);
+      statement.execute();
+      res = statement.getUpdateCount();
+      LOGGER.info("Successful.");
+    } catch (SQLException e) {
+      LOGGER.error("SQL operation unsuccessful: " + e.getMessage());
+      e.printStackTrace();
+    } finally {
+      endQuery(conn, statement);
+    }
+    return res != -1;
+  }
+
+  private void endQuery(Connection c, PreparedStatement p) {
+    if (p != null)
+      try {
+        p.close();
+      } catch (Exception e) {
+        LOGGER.error("PreparedStatement close problem");
+      }
+    if (c != null)
+      try {
+        logout(c);
+      } catch (Exception e) {
+        LOGGER.error("Database Connection close problem");
+      }
+  }
+
+  public String getLongProjectDescription(String projectIdentifier) {
+    String sql = "SELECT long_description from projects WHERE openbis_project_identifier = ?";
+    String res = "";
+    Connection conn = login();
+    try {
+      PreparedStatement statement = conn.prepareStatement(sql);
+      statement.setString(1, projectIdentifier);
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        res = rs.getString(1);
+      }
+    } catch (SQLException e) {
+      LOGGER.error("SQL operation unsuccessful: " + e.getMessage());
+      e.printStackTrace();
+    }
+    logout(conn);
+    return res;
   }
 
   public String getProjectName(String projectIdentifier) {
