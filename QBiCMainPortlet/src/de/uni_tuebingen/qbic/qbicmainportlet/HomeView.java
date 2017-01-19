@@ -158,6 +158,7 @@ public class HomeView extends VerticalLayout implements View {
     gpcProjects.removeContainerProperty("progress");
     gpcProjects.removeContainerProperty("registrationDate");
     gpcProjects.removeContainerProperty("registrator");
+    gpcProjects.removeContainerProperty("longDescription");
 
     projectGrid.setContainerDataSource(gpcProjects);
 
