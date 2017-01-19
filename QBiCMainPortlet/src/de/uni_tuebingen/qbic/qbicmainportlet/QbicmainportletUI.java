@@ -85,8 +85,8 @@ public class QbicmainportletUI extends UI {
   private VerticalLayout mainLayout;
   private ConfigurationManager manager;
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
-  private String version = "1.5.8";
-  private String revision = "823c1b8";
+  private String version = "1.5.9";
+  private String revision = "fa793cb";
   private String resUrl;
   protected View currentView;
 
@@ -269,7 +269,8 @@ public class QbicmainportletUI extends UI {
 
 
 
-    final HomeView homeView = new HomeView(datahandler, "Your Projects", user, state, resUrl, manager.getTmpFolder());
+    final HomeView homeView =
+        new HomeView(datahandler, "Your Projects", user, state, resUrl, manager.getTmpFolder());
     DatasetView datasetView = new DatasetView(datahandler, state, resUrl);
     final SampleView sampleView = new SampleView(datahandler, state, resUrl, multiscaleController);
     BarcodeView barcodeView =
