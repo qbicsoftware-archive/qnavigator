@@ -498,6 +498,11 @@ public class DataHandler implements Serializable {
       newProjectBean.setContactPerson(cp);
     }
     
+    String secondaryName = getDatabaseManager().getProjectName(projectIdentifier);
+    if (secondaryName == null || secondaryName.isEmpty())
+      secondaryName = "None";
+    newProjectBean.setSecondaryName(secondaryName);
+    
     if(longDesc==null)
       longDesc = "";
     newProjectBean.setLongDescription(longDesc);
@@ -676,7 +681,7 @@ public class DataHandler implements Serializable {
     newProjectBean.setMembers(new HashSet<String>());
 
     String secondaryName = getDatabaseManager().getProjectName(projectIdentifier);
-    if (secondaryName.isEmpty() || secondaryName == null)
+    if (secondaryName == null || secondaryName.isEmpty())
       secondaryName = "None";
 
     newProjectBean.setSecondaryName(secondaryName);
