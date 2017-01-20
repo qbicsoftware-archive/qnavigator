@@ -1,12 +1,16 @@
 package sorters;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import helpers.BarcodeFunctions;
 
 /**
  * Compares Experiments by their type, meaning that types can be sorted by experimental design
@@ -87,6 +91,15 @@ public class ExperimentTypeComparator implements Comparator<Experiment> {
       return compareNatural(o1.getCode(), o2.getCode());
     else
       return base;
+  }
+
+  public static int compareCodeByNumberSuffix(String a, String b) {
+    if (BarcodeFunctions.isExperimentCode(a) && BarcodeFunctions.isExperimentCode(b)) {
+      int aNum = Integer.parseInt(a.substring(6));
+      int bNum = Integer.parseInt(b.substring(6));
+      return aNum - bNum;
+    } else
+      return compareNatural(a, b);
   }
 
   public static int compareNatural(String a, String b) {
