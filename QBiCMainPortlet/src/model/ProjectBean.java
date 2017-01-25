@@ -43,6 +43,7 @@ public class ProjectBean implements Serializable {
   private String contact;
   private String principalInvestigator;
   private String contactPerson;
+  private String manager;
   private Set<String> members;
   private Boolean containsData;
 
@@ -209,6 +210,14 @@ public class ProjectBean implements Serializable {
 
   public void setContactPerson(String contactPerson) {
     this.contactPerson = contactPerson;
+  }
+  
+  public String getProjectManager() {
+    return this.manager;
+  }
+
+  public void setProjectManager(String manager) {
+    this.manager = manager;
   }
   
   public void setLongDescription(String longDesc) {
