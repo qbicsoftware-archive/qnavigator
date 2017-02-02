@@ -304,6 +304,8 @@ public class QbicmainportletUI extends UI {
         new PatientView(datahandler, state, resUrl, controller, manager);
 
     VerticalLayout navigatorContent = new VerticalLayout();
+    navigatorContent.setResponsive(true);
+
     final Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
 
     navigator.addView(DatasetView.navigateToLabel, datasetView);
@@ -320,10 +322,11 @@ public class QbicmainportletUI extends UI {
     setNavigator(navigator);
 
     mainLayout = new VerticalLayout();
+    mainLayout.setResponsive(true);
     mainLayout.setMargin(new MarginInfo(false, true, false, false));
 
     HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
-    treeViewAndLevelView.setMargin(new MarginInfo(false, true, false, false));
+    treeViewAndLevelView.setMargin(new MarginInfo(false, false, false, false));
 
     HorizontalLayout headerView = new HorizontalLayout();
     headerView.setMargin(new MarginInfo(false, true, false, false));

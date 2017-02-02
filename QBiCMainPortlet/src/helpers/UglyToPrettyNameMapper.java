@@ -59,8 +59,10 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC", "Ligandomics Quality Control Workflow");
     namesMapping.put("Q_MHC_LIGAND_EXTRACTION", "MHC Ligand Extraction");
     namesMapping.put("Q_WF_NGS_SHRNA_COUNTING", "shRNA Counting Workflow");
+    namesMapping.put("Q_WF_NGS_16S_TAXONOMIC_PROFILING", "16S Taxonomic Profiling Workflow");
     namesMapping.put("Q_HT_QPCR", "High-Throughput Quantitative Real-Time PCR");
     namesMapping.put("Q_BMI_GENERIC_IMAGING", "Imaging");
+    namesMapping.put("Q_NGS_READ_MATCH_ALIGNMENT", "Read-Match Alignment");
 
 
     // deprecated experiment types
@@ -117,8 +119,11 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_WF_MS_LIGANDOMICS_QC_RUN", "Ligandomics Quality Control Workflow Run");
     namesMapping.put("Q_MHC_LIGAND_EXTRACT", "MHC Ligand Extract");
     namesMapping.put("Q_WF_NGS_SHRNA_COUNTING_RUN", "shRNA Counting Workflow Run");
+    namesMapping
+        .put("Q_WF_NGS_16S_TAXONOMIC_PROFILING_RUN", "16S Taxonomic Profiling Workflow Run");
     namesMapping.put("Q_HT_QPCR_RUN", "High-Throughput qPCR Run");
     namesMapping.put("Q_BMI_GENERIC_IMAGING_RUN", "Imaging Run");
+    namesMapping.put("Q_NGS_READ_MATCH_ALIGNMENT_RUN", "Read-Match Alignment Run");
 
 
     // deprecated sample types
@@ -199,6 +204,8 @@ public class UglyToPrettyNameMapper {
         "Ligandomics Identification Workflow Results");
     namesMapping.put("Q_WF_NGS_SHRNA_COUNTING_LOGS", "shRNA Counting Workflow Logs");
     namesMapping.put("Q_WF_NGS_SHRNA_COUNTING_RESULTS", "shRNA Counting Workflow Results");
+    namesMapping.put("Q_WF_NGS_16S_TAXONOMIC_PROFILING_LOGS", "16S Taxonomic Profiling Logs");
+    namesMapping.put("Q_NGS_READ_MATCH_ARCHIVE", "Read-Match Archive");
     namesMapping.put("Q_BMI_IMAGING_DATA", "Imaging Data");
     namesMapping.put("Q_PEPTIDE_DATA", "Peptide Data");
     namesMapping.put("Q_HT_QPCR_DATA", "High-Throughput qPCR Data");
