@@ -8,10 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -21,9 +19,11 @@ import model.notes.Note;
 import model.notes.Notes;
 
 import org.docx4j.jaxb.Context;
+import org.docx4j.model.datastorage.XPathEnhancerParser.main_return;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.wml.Br;
 import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
@@ -54,10 +54,9 @@ public class SummaryFetcher {
   private OpenBisClient openbis;
   private Map<String, String> allMap;
   private String projectCode;
+  private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
   private String projectName;
   private String projectDescription;
-  private Set<String> noData =
-      new HashSet<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE"));
   private final Map<String, String> expTypeTranslation = new HashMap<String, String>() {
     {
       put("Q_NGS_MEASUREMENT", "Next Generation Sequencing Run");
@@ -132,8 +131,11 @@ public class SummaryFetcher {
     return reverse;
   }
 
-  public void fetchSummaryComponent(String code, final ProjectSummaryReadyRunnable ready) {
+  public void fetchSummaryComponent(String code, String name, String description,
+      final ProjectSummaryReadyRunnable ready) {
     this.projectCode = code;
+    this.projectName = name;
+    this.projectDescription = description;
     Thread t = new Thread(new Runnable() {
 
       @Override
@@ -149,13 +151,13 @@ public class SummaryFetcher {
 
   private VerticalLayout computePopupComponent() {
     initDocx4J();
-    P spc = factory.createP();
-    R rspc = factory.createR();
-    List<Object> list = rspc.getContent();
+    // P spc = factory.createP();
+    // R rspc = factory.createR();
+    // List<Object> list = rspc.getContent();
     P p = docxHelper.createParagraph("Summary for project " + projectCode, true, false, "40");
-    list.add(p);
-    spc.getContent().add(rspc);
-    wordMLPackage.getMainDocumentPart().addObject(spc);
+    // list.add(p);
+    // spc.getContent().add(rspc);
+    wordMLPackage.getMainDocumentPart().addObject(p);
 
     VerticalLayout res = new VerticalLayout();
     res.setCaption("Summary");
@@ -222,17 +224,12 @@ public class SummaryFetcher {
                                                                              // details/attachments
                                                                              // information could be
                                                                              // added
-          P sectionP = factory.createP();
-          R run = factory.createR();
-
           VerticalLayout section = new VerticalLayout();
           // create vaadin and docx section
-          generateExperimentHeader(e, section, run, expTypeToProperties);
-          sectionP.getContent().add(run);
-          wordMLPackage.getMainDocumentPart().addObject(sectionP);
+          generateExperimentHeaderWithMetadata(e, section, wordMLPackage.getMainDocumentPart(), expTypeToProperties);
 
           Table sampleTable = generateSampleTable(expToSamples.get(e), sampIDToDS,
-              expIDToDS.get(e.getIdentifier()), run);
+              expIDToDS.get(e.getIdentifier()), wordMLPackage.getMainDocumentPart());
           section.addComponent(sampleTable);
           res.addComponent(section);
         }
@@ -274,15 +271,14 @@ public class SummaryFetcher {
     }
   }
 
-  private void generateExperimentHeader(Experiment e, VerticalLayout section, R run,
+  private void generateExperimentHeaderWithMetadata(Experiment e, VerticalLayout section, MainDocumentPart mainDocumentPart,
       Map<String, List<PropertyType>> expTypeToProperties) {
     String expHeadline =
         expTypeTranslation.get(e.getExperimentTypeCode()) + " (" + e.getCode() + ")";
 
     // docx
-    List<Object> docSection = run.getContent();
-    P p1 = docxHelper.createParagraph(expHeadline, false, true, "32");
-    docSection.add(p1);
+    P p1 = docxHelper.createParagraph(expHeadline, true, false, "32");
+    mainDocumentPart.addObject(p1);
 
     // view
     Panel expPanel = new Panel();
@@ -323,7 +319,7 @@ public class SummaryFetcher {
       Label l = new Label(line);
       section.addComponent(l);
       // docx
-      docSection.add(docxHelper.createParagraph(line, false, false, "32"));
+      mainDocumentPart.addObject(docxHelper.createParagraph(line, false, false, "32"));
     }
     expPanel.setContent(section);
   }
@@ -345,10 +341,9 @@ public class SummaryFetcher {
   }
 
   private Table generateSampleTable(List<Sample> samples, Map<String, List<DataSet>> sampIDToDS,
-      List<DataSet> expDS, R run) {
-    String tableHeadline = "Units/Samples/Runs";
-    List<Object> docSection = run.getContent();
-    docSection.add(docxHelper.createParagraph(tableHeadline, true, false, "32"));
+      List<DataSet> expDS, MainDocumentPart mainDocumentPart) {
+    String tableHeadline = prettyNameMapper.getPrettyName(samples.get(0).getSampleTypeCode()) + "s"; // plural
+    mainDocumentPart.addObject(docxHelper.createParagraph(tableHeadline, false, false, "32"));
 
     Table table = new Table(tableHeadline);
     table.setStyleName(ValoTheme.TABLE_SMALL);
@@ -363,7 +358,6 @@ public class SummaryFetcher {
       header.add("Datasets");
       table.addContainerProperty("Samples", Integer.class, null);
       table.addContainerProperty("Datasets", Integer.class, null);
-      // table.addContainerProperty("More", Button.class, null);
       List<Object> row = new ArrayList<Object>();
 
       row.add(samples.size());

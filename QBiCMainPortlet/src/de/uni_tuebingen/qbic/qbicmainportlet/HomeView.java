@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -211,8 +211,9 @@ public class HomeView extends VerticalLayout implements View {
         // fetch summary and create docx in tmp folder
 
         ProjectBean proj = (ProjectBean) event.getItemId();
-        summaryFetcher.fetchSummaryComponent(proj.getCode(), new ProjectSummaryReadyRunnable(
-            summaryFetcher, loadingWindow, proj.getCode()));
+        summaryFetcher.fetchSummaryComponent(proj.getCode(), proj.getSecondaryName(),
+            proj.getDescription(),
+            new ProjectSummaryReadyRunnable(summaryFetcher, loadingWindow, proj.getCode()));
       }
     }));
     projectGrid.getColumn("Summary").setWidth(100);
@@ -309,9 +310,8 @@ public class HomeView extends VerticalLayout implements View {
       statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
       setHeader(String.format("Total number of Sub-Projects: %s", numberOfProjects));
     } else {
-      statContent =
-          new Label(
-              String.format("You have no projects so far. Please contact your project manager."));
+      statContent = new Label(
+          String.format("You have no projects so far. Please contact your project manager."));
       statContent.addStyleName(ValoTheme.LABEL_FAILURE);
       statContent.addStyleName(ValoTheme.LABEL_LARGE);
     }
@@ -345,8 +345,8 @@ public class HomeView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table,
-        ProjectView.navigateToLabel));
+    this.table
+        .addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
   }
 
 
@@ -410,9 +410,8 @@ public class HomeView extends VerticalLayout implements View {
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
     LOGGER.info("Loading projects...");
-    List<Project> projects =
-        datahandler.getOpenBisClient().getOpenbisInfoService()
-            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     LOGGER.info("Loading projects...done.");
 
     for (Project project : projects) {
@@ -433,10 +432,9 @@ public class HomeView extends VerticalLayout implements View {
       if (secondaryName.isEmpty() || secondaryName == null)
         secondaryName = "None";
 
-      ProjectBean newProjectBean =
-          new ProjectBean(projectIdentifier, projectCode, secondaryName, desc,
-              project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
-              new ProgressBar(), new Date(), "", "", null, false);
+      ProjectBean newProjectBean = new ProjectBean(projectIdentifier, projectCode, secondaryName,
+          desc, project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
+          new ProgressBar(), new Date(), "", "", null, false);
 
       // TODO isn't this slow in this fashion? what about SELECT * and creating a map?
       String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectIdentifier);

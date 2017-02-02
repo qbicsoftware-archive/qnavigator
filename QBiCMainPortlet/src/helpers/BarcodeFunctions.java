@@ -80,4 +80,9 @@ public class BarcodeFunctions {
     String pattern = "Q[A-Z0-9]{4}[0-9]{3}[A-Z0-9]{2}";
     return code.matches(pattern);
   }
+  
+  public static boolean isExperimentCode(String code) {
+    String pattern = "Q[A-Z0-9]{4}E[1-9][0-9]*";
+    return code.matches(pattern);
+  }
 }

@@ -484,6 +484,8 @@ public class DataHandler implements Serializable {
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
     String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
+//    String manager = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Manager");//TODO
+    String manager = "";
     String longDesc = getDatabaseManager().getLongProjectDescription(project.getIdentifier());
 
     if (pi.equals("")) {
@@ -496,6 +498,12 @@ public class DataHandler implements Serializable {
       newProjectBean.setContactPerson("No information provided.");
     } else {
       newProjectBean.setContactPerson(cp);
+    }
+    
+    if (manager.equals("")) {
+      newProjectBean.setProjectManager("No information provided.");
+    } else {
+      newProjectBean.setProjectManager(manager);
     }
     
     String secondaryName = getDatabaseManager().getProjectName(projectIdentifier);
@@ -588,6 +596,8 @@ public class DataHandler implements Serializable {
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
     String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
+//    String manager = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Manager"); //TODO
+    String manager = "";
     String longDesc = getDatabaseManager().getLongProjectDescription(project.getIdentifier());
 
     if (pi.equals("")) {
@@ -600,6 +610,12 @@ public class DataHandler implements Serializable {
       newProjectBean.setContactPerson("No information provided.");
     } else {
       newProjectBean.setContactPerson(cp);
+    }
+    
+    if (manager.equals("")) {
+      newProjectBean.setProjectManager("No information provided.");
+    } else {
+      newProjectBean.setProjectManager(manager);
     }
     
     if(longDesc==null)
