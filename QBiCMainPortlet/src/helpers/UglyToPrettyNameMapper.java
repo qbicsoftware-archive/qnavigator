@@ -101,7 +101,7 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_NGS_MAPPING", "Mapping of NGS Reads");
     namesMapping.put("Q_NGS_SINGLE_SAMPLE_RUN", "Next-Generation Sequencing Run");
     namesMapping.put("Q_NGS_VARIANT_CALLING", "Variant Calling Run");
-    namesMapping.put("Q_WF_MA_QUALITYCONTROL_RUN", "Microarray Qualit Control Workflow Run");
+    namesMapping.put("Q_WF_MA_QUALITYCONTROL_RUN", "Microarray Quality Control Workflow Run");
     namesMapping.put("Q_WF_MS_MAXQUANT_RUN", "MaxQuant Workflow Run");
     namesMapping.put("Q_WF_MS_PEPTIDEID_RUN", "Peptide Identification Workflow Run");
     namesMapping.put("Q_WF_MS_QUALITYCONTROL_RUN", "MS Quality Control Workflow Run");
@@ -164,7 +164,7 @@ public class UglyToPrettyNameMapper {
     namesMapping.put("Q_NGS_RAW_DATA", "NGS Raw Data");
     namesMapping.put("Q_NGS_VARIANT_CALLING_DATA", "Variant Calling Data");
     namesMapping.put("Q_PROJECT_DATA", "Project related Data");
-    namesMapping.put("Q_WF_MA_QUALITYCONTROL_LOGS", "Microarray Qualit Control Logs");
+    namesMapping.put("Q_WF_MA_QUALITYCONTROL_LOGS", "Microarray Quality Control Logs");
     namesMapping.put("Q_WF_MA_QUALITYCONTROL_RESULTS", "Microarray Quality Control");
     namesMapping.put("Q_WF_MS_MAXQUANT_ORIGINAL_OUT", "MaxQuant Outfile");
     namesMapping.put("Q_WF_MS_MAXQUANT_RESULTS", "MaxQuant Results");
