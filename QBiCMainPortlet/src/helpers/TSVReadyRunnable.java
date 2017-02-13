@@ -82,13 +82,19 @@ public class TSVReadyRunnable implements Runnable {
     StringBuilder header = new StringBuilder(table.get(0).replace("\tAttributes", ""));
     StringBuilder tsv = new StringBuilder();
     table.remove(0);
-
+    
+    String xmlStart = "<?xml";
+    //header
     List<String> factorLabels = new ArrayList<String>();
     for (String row : table) {
       String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
-      String xml = lineSplit[lineSplit.length - 1];
+      String xml = "";
+      for(String cell : lineSplit) {
+        if(cell.startsWith(xmlStart))
+          xml = cell;
+      }
       List<Factor> factors = new ArrayList<Factor>();
-      if (!xml.isEmpty()) {
+      if (!xml.equals(xmlStart)) {
         try {
           factors = p.getFactorsFromXML(xml);
         } catch (JAXBException e) {
@@ -105,15 +111,19 @@ public class TSVReadyRunnable implements Runnable {
       }
     }
 
-
+    //data
     for (String row : table) {
       String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
-      String xml = lineSplit[lineSplit.length - 1];
-      if (!xml.isEmpty())
+      String xml = "";
+      for(String cell : lineSplit) {
+        if(cell.startsWith(xmlStart))
+          xml = cell;
+      }
+      if (!xml.equals(xmlStart))
         row = row.replace("\t" + xml, "");
       StringBuilder line = new StringBuilder("\n" + row);
       List<Factor> factors = new ArrayList<Factor>();
-      if (!xml.isEmpty()) {
+      if (!xml.equals(xmlStart)) {
         try {
           factors = p.getFactorsFromXML(xml);
         } catch (JAXBException e) {
@@ -144,4 +154,5 @@ public class TSVReadyRunnable implements Runnable {
     }
     return header.append(tsv).toString();
   }
+  
 }
