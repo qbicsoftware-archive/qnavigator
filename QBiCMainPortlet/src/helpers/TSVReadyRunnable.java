@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package helpers;
 
@@ -50,13 +48,13 @@ public class TSVReadyRunnable implements Runnable {
   @Override
   public void run() {
     List<StreamResource> streams = new ArrayList<StreamResource>();
-    streams.add(getTSVStream(getTSVString(tables.get("Q_BIOLOGICAL_ENTITY")), project
-        + "_sample_sources"));
-    streams.add(getTSVStream(getTSVString(tables.get("Q_BIOLOGICAL_SAMPLE")), project
-        + "_sample_extracts"));
+    streams.add(
+        getTSVStream(getTSVString(tables.get("Q_BIOLOGICAL_ENTITY")), project + "_sample_sources"));
+    streams.add(getTSVStream(getTSVString(tables.get("Q_BIOLOGICAL_SAMPLE")),
+        project + "_sample_extracts"));
     if (tables.containsKey("Q_TEST_SAMPLE"))
-      streams.add(getTSVStream(getTSVString(tables.get("Q_TEST_SAMPLE")), project
-          + "_sample_preparations"));
+      streams.add(getTSVStream(getTSVString(tables.get("Q_TEST_SAMPLE")),
+          project + "_sample_preparations"));
     layout.armButtons(streams);
   }
 
@@ -82,15 +80,15 @@ public class TSVReadyRunnable implements Runnable {
     StringBuilder header = new StringBuilder(table.get(0).replace("\tAttributes", ""));
     StringBuilder tsv = new StringBuilder();
     table.remove(0);
-    
+
     String xmlStart = "<?xml";
-    //header
+    // header
     List<String> factorLabels = new ArrayList<String>();
     for (String row : table) {
       String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
       String xml = "";
-      for(String cell : lineSplit) {
-        if(cell.startsWith(xmlStart))
+      for (String cell : lineSplit) {
+        if (cell.startsWith(xmlStart))
           xml = cell;
       }
       List<Factor> factors = new ArrayList<Factor>();
@@ -111,16 +109,15 @@ public class TSVReadyRunnable implements Runnable {
       }
     }
 
-    //data
+    // data
     for (String row : table) {
       String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
       String xml = "";
-      for(String cell : lineSplit) {
-        if(cell.startsWith(xmlStart))
+      for (String cell : lineSplit) {
+        if (cell.startsWith(xmlStart))
           xml = cell;
       }
-      if (!xml.equals(xmlStart))
-        row = row.replace("\t" + xml, "");
+      row = row.replace("\t" + xml, "");
       StringBuilder line = new StringBuilder("\n" + row);
       List<Factor> factors = new ArrayList<Factor>();
       if (!xml.equals(xmlStart)) {
@@ -154,5 +151,5 @@ public class TSVReadyRunnable implements Runnable {
     }
     return header.append(tsv).toString();
   }
-  
+
 }
