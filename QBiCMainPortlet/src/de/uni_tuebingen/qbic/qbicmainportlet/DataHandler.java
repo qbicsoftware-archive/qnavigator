@@ -73,6 +73,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import de.uni_tuebingen.qbic.util.DashboardUtil;
@@ -484,36 +485,36 @@ public class DataHandler implements Serializable {
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
     String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
-//    String manager = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Manager");//TODO
+    // String manager = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(),
+    // "Manager");//TODO
     String manager = "";
     String longDesc = getDatabaseManager().getLongProjectDescription(project.getIdentifier());
 
     if (pi.equals("")) {
-      newProjectBean.setPrincipalInvestigator("No information provided.");
+      newProjectBean.setPrincipalInvestigator("n/a");
     } else {
       newProjectBean.setPrincipalInvestigator(pi);
     }
 
     if (cp.equals("")) {
-      newProjectBean.setContactPerson("No information provided.");
+      newProjectBean.setContactPerson("n/a");
     } else {
       newProjectBean.setContactPerson(cp);
     }
-    
+
     if (manager.equals("")) {
-      newProjectBean.setProjectManager("No information provided.");
+      newProjectBean.setProjectManager("n/a");
     } else {
       newProjectBean.setProjectManager(manager);
     }
-    
+
     String secondaryName = getDatabaseManager().getProjectName(projectIdentifier);
     if (secondaryName == null || secondaryName.isEmpty())
-      secondaryName = "None";
+      secondaryName = "n/a";
     newProjectBean.setSecondaryName(secondaryName);
-    
-    if(longDesc==null)
+
+    if (longDesc == null)
       longDesc = "";
-    newProjectBean.setLongDescription(longDesc);
 
     newProjectBean.setId(project.getIdentifier());
     newProjectBean.setCode(project.getCode());
@@ -596,30 +597,32 @@ public class DataHandler implements Serializable {
     // String pi = getDatabaseManager().getInvestigatorDetailsForProject(project.getCode());
     String pi = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "PI");
     String cp = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Contact");
-//    String manager = getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Manager"); //TODO
-    String manager = "";
+    String manager =
+        getDatabaseManager().getPersonDetailsForProject(project.getIdentifier(), "Manager");
+
     String longDesc = getDatabaseManager().getLongProjectDescription(project.getIdentifier());
 
     if (pi.equals("")) {
-      newProjectBean.setPrincipalInvestigator("No information provided.");
+      newProjectBean.setPrincipalInvestigator("n/a");
     } else {
       newProjectBean.setPrincipalInvestigator(pi);
     }
 
     if (cp.equals("")) {
-      newProjectBean.setContactPerson("No information provided.");
+      newProjectBean.setContactPerson("n/a");
     } else {
       newProjectBean.setContactPerson(cp);
     }
-    
+
     if (manager.equals("")) {
-      newProjectBean.setProjectManager("No information provided.");
+      newProjectBean.setProjectManager("n/a");
     } else {
       newProjectBean.setProjectManager(manager);
     }
-    
-    if(longDesc==null)
+
+    if (longDesc == null)
       longDesc = "";
+
     newProjectBean.setLongDescription(longDesc);
 
     newProjectBean.setId(project.getIdentifier());
@@ -698,7 +701,7 @@ public class DataHandler implements Serializable {
 
     String secondaryName = getDatabaseManager().getProjectName(projectIdentifier);
     if (secondaryName == null || secondaryName.isEmpty())
-      secondaryName = "None";
+      secondaryName = "n/a";
 
     newProjectBean.setSecondaryName(secondaryName);
     return newProjectBean;
@@ -2390,6 +2393,49 @@ public class DataHandler implements Serializable {
 
         }
         finishedExperiments += (Integer) pairs.getValue();
+      }
+    }
+    // ProgressBar progressBar = new ProgressBar();
+    // progressBar.setValue((float) finishedExperiments / statusValues.keySet().size());
+    // projectStatusContent.addComponent(progressBar);
+
+    return projectStatusContent;
+  }
+
+  /**
+   * 
+   * @param statusValues
+   * @return
+   */
+  public VerticalLayout createProjectStatusComponentNew(Map<String, Integer> statusValues) {
+    VerticalLayout projectStatusContent = new VerticalLayout();
+    projectStatusContent.setMargin(true);
+    projectStatusContent.setSpacing(true);
+
+    Iterator<Entry<String, Integer>> it = statusValues.entrySet().iterator();
+
+    while (it.hasNext()) {
+      Map.Entry<String, Integer> pairs = (Map.Entry<String, Integer>) it.next();
+
+      if ((Integer) pairs.getValue() == 0) {
+        Label statusLabel = new Label(pairs.getKey());
+        statusLabel.setStyleName(ValoTheme.LABEL_FAILURE);
+        // statusLabel.addStyleName("redicon");
+        projectStatusContent.addComponent(statusLabel);
+      }
+
+      else {
+        Label statusLabel = new Label(pairs.getKey());
+        statusLabel.setStyleName(ValoTheme.LABEL_SUCCESS);
+
+        // statusLabel.addStyleName("greenicon");
+
+        if (pairs.getKey().equals("Project Planned")) {
+          projectStatusContent.addComponentAsFirst(statusLabel);
+        } else {
+          projectStatusContent.addComponent(statusLabel);
+
+        }
       }
     }
     // ProgressBar progressBar = new ProgressBar();

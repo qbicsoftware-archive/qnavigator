@@ -316,6 +316,24 @@
  */
 
 @font-face {
+	font-family: ThemeIcons;
+	font-weight: normal;
+	font-style: normal;
+	src: url(../valo/util/bourbon/css3/../../../../base/fonts/themeicons-webfont.eot);
+	src: url(../valo/util/bourbon/css3/../../../../base/fonts/themeicons-webfont.eot?#iefix) format("embedded-opentype"), url(../valo/util/bourbon/css3/../../../../base/fonts/themeicons-webfont.woff) format("woff"), url(../valo/util/bourbon/css3/../../../../base/fonts/themeicons-webfont.ttf) format("truetype"), url(../valo/util/bourbon/css3/../../../../base/fonts/themeicons-webfont.svg#ThemeIcons) format("svg");
+}
+
+.ThemeIcons {
+	font-family: ThemeIcons;
+	font-style: normal;
+	font-weight: normal;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	display: inline-block;
+	text-align: center;
+}
+
+@font-face {
 	font-family: FontAwesome;
 	font-weight: normal;
 	font-style: normal;
@@ -957,7 +975,7 @@
  */
 
 .v-vaadin-version:after {
-	content: "7.5.9";
+	content: "7.7.5";
 }
 
 .v-widget {
@@ -1846,6 +1864,60 @@ div.v-layout.v-horizontal.v-widget {
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
 }
 
+.tests-valo-facebook .v-reconnect-dialog {
+	color: white;
+	top: 10px;
+	right: 10px;
+	max-width: 100%;
+	border-radius: 0;
+	-webkit-box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.25);
+	box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.25);
+	padding: 10px 12px;
+	background-color: #444;
+	background-color: rgba(68, 68, 68, 0.9);
+	line-height: 20px;
+	text-align: center;
+}
+
+.tests-valo-facebook .v-reconnect-dialog .text {
+	display: inline-block;
+	padding-left: 10px;
+}
+
+.tests-valo-facebook .v-reconnect-dialog .spinner {
+	height: 24px !important;
+	width: 24px !important;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	border: 2px solid rgba(59, 89, 152, 0.2);
+	border-top-color: #3b5998;
+	border-right-color: #3b5998;
+	border-radius: 100%;
+	-webkit-animation: v-rotate-360 500ms infinite linear;
+	-moz-animation: v-rotate-360 500ms infinite linear;
+	animation: v-rotate-360 500ms infinite linear;
+	pointer-events: none;
+	display: none;
+	vertical-align: middle;
+}
+
+.v-ie8 .tests-valo-facebook .v-reconnect-dialog .spinner, .v-ie9 .tests-valo-facebook .v-reconnect-dialog .spinner {
+	border: none;
+	border-radius: 3px;
+	background: #fff url(../valo/shared/img/spinner.gif) no-repeat 50% 50%;
+	background-size: 80%;
+}
+
+.v-ie8 .tests-valo-facebook .v-reconnect-dialog .spinner {
+	min-width: 30px;
+	min-height: 30px;
+}
+
+.tests-valo-facebook .v-reconnect-dialog.active .spinner {
+	display: inline-block;
+}
+
 .tests-valo-facebook .v-absolutelayout-wrapper {
 	position: absolute;
 }
@@ -2490,7 +2562,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-checkbox > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -2620,7 +2692,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-checkbox-small > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -2750,7 +2822,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-checkbox-large > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -2841,7 +2913,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: box-shadow 180ms, border 180ms;
 	width: 100% !important;
 	height: 100%;
-	padding-right: 36px;
+	padding-right: 31px;
 	border-radius: inherit;
 }
 
@@ -2911,7 +2983,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-filterselect [class$="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -3012,21 +3084,20 @@ div.v-layout.v-horizontal.v-widget {
 	-ms-backface-visibility: hidden;
 	backface-visibility: hidden;
 	padding: 6px 0;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	position: relative;
-	z-index: 1;
-}
-
-.tests-valo-facebook .v-filterselect-suggestpopup [class$="suggestmenu"][style*="height"] {
 	-webkit-box-sizing: content-box;
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
+	position: relative;
+	z-index: 1;
+	display: block;
 }
 
 .tests-valo-facebook .v-filterselect-suggestpopup table, .tests-valo-facebook .v-filterselect-suggestpopup tbody, .tests-valo-facebook .v-filterselect-suggestpopup tr, .tests-valo-facebook .v-filterselect-suggestpopup td {
 	display: block;
+	width: 100%;
+	overflow-y: hidden;
+	float: left;
+	clear: both;
 }
 
 .tests-valo-facebook .v-filterselect-suggestpopup .gwt-MenuItem {
@@ -3036,6 +3107,10 @@ div.v-layout.v-horizontal.v-widget {
 	font-weight: 400;
 	white-space: nowrap;
 	position: relative;
+	height: 22px;
+	box-sizing: border-box;
+	text-overflow: ellipsis;
+	overflow-x: hidden;
 }
 
 .tests-valo-facebook .v-filterselect-suggestpopup .gwt-MenuItem:active:before {
@@ -3103,7 +3178,7 @@ div.v-layout.v-horizontal.v-widget {
 	height: 20px;
 	line-height: 20px;
 	text-align: center;
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	-webkit-transform: scale(0.8);
 	-moz-transform: scale(0.8);
 	-ms-transform: scale(0.8);
@@ -3296,7 +3371,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: box-shadow 180ms, border 180ms;
 	width: 100% !important;
 	height: 100%;
-	padding-right: 28px;
+	padding-right: 24px;
 	border-radius: inherit;
 }
 
@@ -3332,7 +3407,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-filterselect-tiny [class$="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -3423,7 +3498,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: box-shadow 180ms, border 180ms;
 	width: 100% !important;
 	height: 100%;
-	padding-right: 31px;
+	padding-right: 27px;
 	border-radius: inherit;
 }
 
@@ -3459,7 +3534,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-filterselect-compact [class$="button"]:before, .tests-valo-facebook .v-filterselect-small [class$="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -3555,7 +3630,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: box-shadow 180ms, border 180ms;
 	width: 100% !important;
 	height: 100%;
-	padding-right: 43px;
+	padding-right: 37px;
 	border-radius: inherit;
 }
 
@@ -3591,7 +3666,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-filterselect-large [class$="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -3683,7 +3758,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: box-shadow 180ms, border 180ms;
 	width: 100% !important;
 	height: 100%;
-	padding-right: 58px;
+	padding-right: 49px;
 	border-radius: inherit;
 }
 
@@ -3719,7 +3794,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-filterselect-huge [class$="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -4162,6 +4237,8 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-grid-body {
+	-ms-touch-action: none;
+	touch-action: none;
 	z-index: 0;
 	top: 0;
 }
@@ -4283,6 +4360,10 @@ div.v-layout.v-horizontal.v-widget {
 	z-index: 5;
 }
 
+.tests-valo-facebook .v-grid-sidebar.v-contextmenu.v-grid-sidebar-popup {
+	right: auto;
+}
+
 .tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-button {
 	background: transparent;
 	border: none;
@@ -4305,7 +4386,7 @@ div.v-layout.v-horizontal.v-widget {
 .tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-button:after {
 	content: "\f0c9";
 	display: block;
-	font-family: FontAwesome, sans-serif;
+	font-family: ThemeIcons, sans-serif;
 	font-size: 12px;
 }
 
@@ -4335,6 +4416,8 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-content {
 	padding: 4px 0;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .tests-valo-facebook .v-grid-sidebar.v-contextmenu .v-grid-sidebar-content .gwt-MenuBar .gwt-MenuItem .column-hiding-toggle {
@@ -4343,7 +4426,7 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-grid-cell {
 	background-color: white;
-	padding: 0 10px;
+	padding: 0 15px;
 	line-height: 30px;
 	text-overflow: ellipsis;
 }
@@ -4411,19 +4494,49 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-grid-header .sort-asc, .tests-valo-facebook .v-grid-header .sort-desc {
-	padding-right: 24px;
+	padding-right: 29px;
 }
 
 .tests-valo-facebook .v-grid-header .sort-asc:after, .tests-valo-facebook .v-grid-header .sort-desc:after {
-	font-family: FontAwesome, sans-serif;
+	font-family: ThemeIcons, sans-serif;
 	content: "\f0de" " " attr(sort-order);
 	position: absolute;
-	right: 10px;
+	right: 15px;
 	font-size: 10px;
 }
 
 .tests-valo-facebook .v-grid-header .sort-desc:after {
 	content: "\f0dd" " " attr(sort-order);
+}
+
+.tests-valo-facebook .v-grid-column-resize-handle {
+	position: absolute;
+	width: 30px;
+	right: -15px;
+	top: 0px;
+	bottom: 0px;
+	cursor: col-resize;
+	z-index: 10;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.tests-valo-facebook .v-grid-column-resize-simple-indicator {
+	position: absolute;
+	width: 3px;
+	top: 0px;
+	left: 15px;
+	z-index: 9001;
+	background: #fff;
+	box-shadow: 0px 0px 5px #000;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .tests-valo-facebook .v-grid-footer td {
@@ -4438,6 +4551,18 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-grid-footer td:first-child {
 	border-left: none;
+}
+
+.tests-valo-facebook .v-grid-header .v-grid-cell, .tests-valo-facebook .v-grid-footer .v-grid-cell {
+	overflow: visible;
+}
+
+.tests-valo-facebook .v-grid-column-header-content, .tests-valo-facebook .v-grid-column-footer-content {
+	width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 30px;
+	vertical-align: baseline;
 }
 
 .tests-valo-facebook .v-grid-header-deco {
@@ -4500,6 +4625,10 @@ div.v-layout.v-horizontal.v-widget {
 	box-shadow: 0 0 9px rgba(0, 0, 0, 0.2);
 }
 
+.tests-valo-facebook .v-grid-editor.unbuffered .v-grid-editor-footer {
+	width: 100%;
+}
+
 .tests-valo-facebook .v-grid-editor-cells {
 	position: relative;
 	white-space: nowrap;
@@ -4527,6 +4656,22 @@ div.v-layout.v-horizontal.v-widget {
 	display: inline-block;
 }
 
+.tests-valo-facebook .v-grid-editor-cells  > div .v-filterselect {
+	padding-left: 0;
+}
+
+.tests-valo-facebook .v-grid-editor-cells  > div input[type="text"], .tests-valo-facebook .v-grid-editor-cells  > div input[type="text"].v-filterselect-input, .tests-valo-facebook .v-grid-editor-cells  > div input[type="password"] {
+	padding-left: 15px;
+}
+
+.tests-valo-facebook .v-grid-editor-cells  > div input[type="text"]:not(.v-filterselect-input), .tests-valo-facebook .v-grid-editor-cells  > div input[type="password"] {
+	padding-right: 7.5px;
+}
+
+.tests-valo-facebook .v-grid-editor-cells  > div input[type="checkbox"] {
+	margin-left: 15px;
+}
+
 .tests-valo-facebook .v-grid-editor-cells  > div .v-textfield, .tests-valo-facebook .v-grid-editor-cells  > div .v-datefield, .tests-valo-facebook .v-grid-editor-cells  > div .v-filterselect {
 	min-width: 100%;
 	max-width: 100%;
@@ -4535,16 +4680,20 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .v-ie8 .tests-valo-facebook .v-grid-editor-cells  > div .v-datefield-button {
-	margin-left: -30px;
+	margin-left: -37px;
 }
 
 .v-ie8 .tests-valo-facebook .v-grid-editor-cells  > div .v-filterselect-button {
-	margin-left: -27px;
+	margin-left: -25px;
 }
 
 .tests-valo-facebook .v-grid-editor-cells  > div .v-select, .tests-valo-facebook .v-grid-editor-cells  > div .v-select-select {
 	min-width: 100%;
 	max-width: 100%;
+}
+
+.tests-valo-facebook .v-grid-editor-cells  > div.not-editable.v-grid-cell {
+	float: none;
 }
 
 .tests-valo-facebook .v-grid-editor-cells .error::before {
@@ -4745,6 +4894,10 @@ div.v-layout.v-horizontal.v-widget {
 	vertical-align: middle;
 }
 
+.tests-valo-facebook .v-grid-editor-cells > div.not-editable.v-grid-cell {
+	float: none;
+}
+
 .tests-valo-facebook .v-grid-editor-cells > div .error::before {
 	border-top: 8px solid #ed473b;
 	border-right: 8px solid transparent;
@@ -4762,6 +4915,10 @@ div.v-layout.v-horizontal.v-widget {
 	box-shadow: inset 0 1px 0 #f2f2f2;
 }
 
+.tests-valo-facebook .v-grid-editor-cells > div input[type="text"].v-datefield-textfield {
+	padding-left: 36px;
+}
+
 .v-ie8 .tests-valo-facebook .v-grid-editor-cells > div .v-datefield-button {
 	margin-left: 0px;
 }
@@ -4775,15 +4932,19 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-grid-editor-cells > div .v-select {
-	padding-left: 5px;
-	padding-right: 5px;
+	padding-left: 8px;
+	padding-right: 8px;
 }
 
 .tests-valo-facebook .v-grid-editor-cells > div .v-checkbox {
-	margin: 0 5px;
+	margin: 0 8px 0 15px;
 }
 
-.tests-valo-facebook .v-grid-editor-cells > div .v-checkbox label {
+.tests-valo-facebook .v-grid-editor-cells > div .v-checkbox  > input[type="checkbox"] {
+	margin-left: 0;
+}
+
+.tests-valo-facebook .v-grid-editor-cells > div .v-checkbox  > label {
 	white-space: nowrap;
 }
 
@@ -4829,6 +4990,8 @@ div.v-layout.v-horizontal.v-widget {
 .tests-valo-facebook .v-grid-sidebar.v-contextmenu.open .v-grid-sidebar-content {
 	margin: 0 0 2px;
 	padding: 4px 4px 2px;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .tests-valo-facebook .v-grid-sidebar.v-contextmenu.closed {
@@ -5704,7 +5867,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield [class*="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f073";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -5952,22 +6115,22 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield-popup .v-button-prevyear:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f100";
 }
 
 .tests-valo-facebook .v-datefield-popup .v-button-prevmonth:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f104";
 }
 
 .tests-valo-facebook .v-datefield-popup .v-button-nextyear:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f101";
 }
 
 .tests-valo-facebook .v-datefield-popup .v-button-nextmonth:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f105";
 }
 
@@ -6145,22 +6308,22 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-button-prevyear:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f100";
 }
 
 .tests-valo-facebook .v-button-prevmonth:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f104";
 }
 
 .tests-valo-facebook .v-button-nextyear:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f101";
 }
 
 .tests-valo-facebook .v-button-nextmonth:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f105";
 }
 
@@ -6308,7 +6471,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield-tiny [class*="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f073";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -6422,7 +6585,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield-compact [class*="button"]:before, .tests-valo-facebook .v-datefield-small [class*="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f073";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -6541,7 +6704,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield-large [class*="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f073";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -6656,7 +6819,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield-huge [class*="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f073";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -6836,22 +6999,22 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-button-prevyear:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f100";
 }
 
 .tests-valo-facebook .v-button-prevmonth:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f104";
 }
 
 .tests-valo-facebook .v-button-nextyear:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f101";
 }
 
 .tests-valo-facebook .v-button-nextmonth:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f105";
 }
 
@@ -7147,7 +7310,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-menubar .v-menubar-submenu-indicator  + .v-menubar-menuitem-caption:after {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	font-size: 0.7em;
 	vertical-align: 0.15em;
@@ -7230,7 +7393,7 @@ div.v-layout.v-horizontal.v-widget {
 .tests-valo-facebook .v-menubar-popup .v-menubar-submenu-indicator  + .v-menubar-menuitem-caption:after {
 	position: absolute;
 	right: 8px;
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f054";
 	line-height: 24px;
 }
@@ -7253,7 +7416,7 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-menubar-popup [class*="checked"] .v-menubar-menuitem-caption:before {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	position: absolute;
 	left: 8px;
 }
@@ -7440,7 +7603,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-radiobutton > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -7603,7 +7766,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-select-optiongroup-small .v-checkbox > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -7732,7 +7895,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-select-optiongroup-small .v-radiobutton > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -7895,7 +8058,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-select-optiongroup-large .v-checkbox > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -8024,7 +8187,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-select-optiongroup-large .v-radiobutton > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -8547,7 +8710,7 @@ div.v-layout.v-horizontal.v-widget {
 	margin-left: -1.9em;
 	vertical-align: top;
 	content: "\f0da";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	text-align: center;
 	background: transparent;
 }
@@ -8573,7 +8736,7 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-tree-node-caption > div:before {
 	content: "\f0da";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	display: inline-block;
 	width: 0.5em;
 	text-align: center;
@@ -8636,12 +8799,12 @@ div.v-layout.v-horizontal.v-widget {
 	-o-transform: rotate(90deg);
 	transform: rotate(90deg);
 	content: "\f0da";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 }
 
 .v-ie8 .tests-valo-facebook .v-tree-node-expanded:before {
 	content: "\f0d7";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 }
 
 .tests-valo-facebook .v-tree-node-leaf:before, .tests-valo-facebook .v-tree-node-leaf > .v-tree-node-caption > div:before {
@@ -8859,7 +9022,7 @@ div.v-layout.v-horizontal.v-widget {
 	border-top: 1px solid #d4d4d4;
 }
 
-.tests-valo-facebook .v-table-table tr:first-child td {
+.tests-valo-facebook .v-table-table tr:first-child > td {
 	border-top: none;
 }
 
@@ -8919,12 +9082,12 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-table-header-cell-asc .v-table-sort-indicator:before {
 	content: "\f0de";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 }
 
 .tests-valo-facebook .v-table-header-cell-desc .v-table-sort-indicator:before {
 	content: "\f0dd";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 }
 
 .tests-valo-facebook [class*="rowheader"] span.v-icon {
@@ -9038,7 +9201,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-table-column-selector:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f013";
 }
 
@@ -9052,13 +9215,18 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-on:before, .tests-valo-facebook .v-off:before {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	font-size: 0.9em;
 	margin-right: 5px;
 }
 
 .tests-valo-facebook .v-on div, .tests-valo-facebook .v-off div {
 	display: inline;
+}
+
+.tests-valo-facebook .v-on.v-disabled, .tests-valo-facebook .v-off.v-disabled {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
 }
 
 .tests-valo-facebook .v-off:before {
@@ -9316,12 +9484,12 @@ div.v-layout.v-horizontal.v-widget {
 
 .tests-valo-facebook .v-treetable-node-closed:before {
 	content: "\f0da";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 }
 
 .tests-valo-facebook .v-treetable-node-open:before {
 	content: "\f0d7";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 }
 
 .tests-valo-facebook .v-splitpanel-horizontal  > div > .v-splitpanel-hsplitter {
@@ -10098,7 +10266,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-tabsheet-scroller [class*="Next"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f054";
 }
 
@@ -10107,7 +10275,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-tabsheet-scroller [class*="Prev"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f053";
 }
 
@@ -10365,8 +10533,8 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-colorpicker-popup .resize-button:before {
-	font-family: FontAwesome;
-	content: "\F141";
+	font-family: ThemeIcons;
+	content: "\f141";
 }
 
 .tests-valo-facebook .v-colorpicker-popup .resize-button-caption {
@@ -10769,13 +10937,19 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-select-twincol-buttons .v-button-wrap:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f053";
 }
 
 .tests-valo-facebook .v-select-twincol-buttons .v-button:first-child .v-button-wrap:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f054";
+}
+
+.tests-valo-facebook .v-select-twincol-error .v-select-twincol-options, .tests-valo-facebook .v-select-twincol-error .v-select-twincol-selections {
+	border-color: #ed473b !important;
+	background: #fffbfb;
+	color: #6c2621;
 }
 
 .tests-valo-facebook .v-select select {
@@ -10804,6 +10978,12 @@ div.v-layout.v-horizontal.v-widget {
 .tests-valo-facebook .v-select-select  + .v-textfield  + .v-nativebutton {
 	margin-top: 8px;
 	margin-left: 8px;
+}
+
+.tests-valo-facebook .v-select-error .v-select-select {
+	border-color: #ed473b !important;
+	background: #fffbfb;
+	color: #6c2621;
 }
 
 .tests-valo-facebook .v-calendar-header-day {
@@ -10844,12 +11024,12 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-calendar-header-week .v-calendar-back:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f053";
 }
 
 .tests-valo-facebook .v-calendar-header-week .v-calendar-next:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f054";
 }
 
@@ -11246,6 +11426,11 @@ div.v-layout.v-horizontal.v-widget {
 	user-select: text;
 }
 
+.tests-valo-facebook .v-label.v-disabled {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 .tests-valo-facebook .v-label-undef-w {
 	white-space: nowrap;
 }
@@ -11382,7 +11567,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-label-success:before, .tests-valo-facebook .v-label-failure:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f00c";
 	margin-right: 0.5em;
 	margin-left: -15px;
@@ -11525,6 +11710,12 @@ div.v-layout.v-horizontal.v-widget {
 .tests-valo-facebook .v-select-select  + .v-textfield  + .v-nativebutton {
 	margin-top: 8px;
 	margin-left: 8px;
+}
+
+.tests-valo-facebook .v-select-error .v-select-select {
+	border-color: #ed473b !important;
+	background: #fffbfb;
+	color: #6c2621;
 }
 
 .tests-valo-facebook .v-popupview {
@@ -11689,7 +11880,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-richtextarea .gwt-RichTextToolbar-top div:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 }
 
 .tests-valo-facebook .v-richtextarea .gwt-RichTextToolbar-top div[title="Toggle Bold"]:before {
@@ -12160,7 +12351,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-Notification.success .v-Notification-caption:before, .tests-valo-facebook .v-Notification.failure .v-Notification-caption:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f00c";
 	margin-right: 0.5em;
 }
@@ -12755,7 +12946,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: all 300ms;
 }
 
-.tests-valo-facebook .valo-menu-responsive[width-range~="0-800px"] .valo-menu-visible .valo-menuitems {
+.tests-valo-facebook .valo-menu-responsive[width-range~="0-800px"] .valo-menu-visible .valo-menuitems, .tests-valo-facebook .valo-menu-responsive[width-range~="0-800px"] .valo-menu-hover:hover .valo-menuitems {
 	-webkit-transform: translatex(0%);
 	-moz-transform: translatex(0%);
 	-ms-transform: translatex(0%);
@@ -13256,7 +13447,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield-color1 [class*="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f073";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -13408,7 +13599,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield-color2 [class*="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f073";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -13560,7 +13751,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-datefield-color3 [class*="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f073";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -13649,7 +13840,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: box-shadow 180ms, border 180ms;
 	width: 100% !important;
 	height: 100%;
-	padding-right: 36px;
+	padding-right: 31px;
 	border-radius: inherit;
 }
 
@@ -13719,7 +13910,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-filterselect-color1 [class$="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -13818,7 +14009,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: box-shadow 180ms, border 180ms;
 	width: 100% !important;
 	height: 100%;
-	padding-right: 36px;
+	padding-right: 31px;
 	border-radius: inherit;
 }
 
@@ -13888,7 +14079,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-filterselect-color2 [class$="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -13987,7 +14178,7 @@ div.v-layout.v-horizontal.v-widget {
 	transition: box-shadow 180ms, border 180ms;
 	width: 100% !important;
 	height: 100%;
-	padding-right: 36px;
+	padding-right: 31px;
 	border-radius: inherit;
 }
 
@@ -14057,7 +14248,7 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .tests-valo-facebook .v-filterselect-color3 [class$="button"]:before {
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	content: "\f078";
 	-webkit-transition: color 140ms;
 	-moz-transition: color 140ms;
@@ -14197,7 +14388,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-checkbox-color1 > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;
@@ -14326,7 +14517,7 @@ div.v-layout.v-horizontal.v-widget {
 
 :root .tests-valo-facebook .v-checkbox-color2 > input ~ label:after {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: ThemeIcons;
 	color: transparent;
 	-webkit-transition: color 100ms;
 	-moz-transition: color 100ms;

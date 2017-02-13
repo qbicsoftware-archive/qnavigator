@@ -1,33 +1,29 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.util.ArrayList;
 
+import views.WorkflowView;
+
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.UI;
-
-import views.WorkflowView;
 
 public class ToolBar extends HorizontalLayout {
 
@@ -37,8 +33,8 @@ public class ToolBar extends HorizontalLayout {
    * 
    */
   private static final long serialVersionUID = -3673630619072584036L;
-  
-  //private SearchBarView searchBarView;
+
+  // private SearchBarView searchBarView;
   private SearchEngineView searchEngineView;
   private MenuItem downloadwhole;
   private MenuItem datasetoverview;
@@ -54,19 +50,19 @@ public class ToolBar extends HorizontalLayout {
     resourceUrl = "javascript";
   }
 
-//  public ToolBar(String resourceUrl, State state, SearchBarView searchBarView) {
-//    this.searchBarView = searchBarView;
-//    this.resourceUrl = resourceUrl;
-//    this.state = state;
-//  }
-  
+  // public ToolBar(String resourceUrl, State state, SearchBarView searchBarView) {
+  // this.searchBarView = searchBarView;
+  // this.resourceUrl = resourceUrl;
+  // this.state = state;
+  // }
+
   public ToolBar(String resourceUrl, State state, SearchEngineView searchEngineView) {
-	    this.searchEngineView = searchEngineView;
-	    this.resourceUrl = resourceUrl;
-	    this.state = state;
-	  }
-  
-  
+    this.searchEngineView = searchEngineView;
+    this.resourceUrl = resourceUrl;
+    this.state = state;
+  }
+
+
   void setCompleteDownloadResourceUrl(String resourceUrl) {
     this.resourceUrl = resourceUrl;
   }
@@ -107,13 +103,13 @@ public class ToolBar extends HorizontalLayout {
 
 
   void init() {
-    //setWidth(100.0f, Unit.PERCENTAGE);
-    //addStyleName("user-menu");
-    setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.6f), Unit.PIXELS);
-    
+    // setWidth(100.0f, Unit.PERCENTAGE);
+    // addStyleName("user-menu");
+    // setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.6f), Unit.PIXELS);
+
     MenuBar menuBar = new MenuBar();
     menuBar.addStyleName("user-menu");
-    
+
     menuBar.setHtmlContentAllowed(true);
     download = menuBar.addItem("Download your data", null, null);
     download.setEnabled(false);
@@ -141,15 +137,16 @@ public class ToolBar extends HorizontalLayout {
     workflows = menuBar.addItem("Run workflows", null, null);
     workflows.setIcon(new ThemeResource("dna_higher.png"));
     workflows.setEnabled(false);
-    
+
     addComponent(menuBar);
-    //menuBar.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f), Unit.PIXELS);
-    //searchEngineView.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.2f), Unit.PIXELS);
-    //searchEngineView.setWidth("100%");
+    // menuBar.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.3f), Unit.PIXELS);
+    // searchEngineView.setWidth((UI.getCurrent().getPage().getBrowserWindowWidth() * 0.2f),
+    // Unit.PIXELS);
+    // searchEngineView.setWidth("100%");
     addComponent(searchEngineView);
     setComponentAlignment(searchEngineView, Alignment.TOP_RIGHT);
-    //setExpandRatio(menuBar, 0.7f);
-    //setExpandRatio(searchEngineView, 0.3f);
+    // setExpandRatio(menuBar, 0.7f);
+    // setExpandRatio(searchEngineView, 0.3f);
   }
 
   void update(final String type, final String id) {
@@ -159,7 +156,7 @@ public class ToolBar extends HorizontalLayout {
             + resourceUrl
             + "\" target=\"_blank\" style=\"text-decoration: none ; color:#2c2f34\">Download complete project</a>");
 
-    if(state != null){
+    if (state != null) {
       datasetoverview.setCommand(new MenuBar.Command() {
 
         @Override
@@ -185,24 +182,24 @@ public class ToolBar extends HorizontalLayout {
           state.notifyObservers(message);
         }
       });
-      
-      if(workflows.isEnabled() && workflows.isVisible()){
-      workflows.setCommand(new MenuBar.Command(){
-        public void menuSelected(MenuItem selectedItem){
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          StringBuilder sb = new StringBuilder("type=");
-          sb.append(type);
-          sb.append("&");
-          sb.append("id=");
-          sb.append(id);
-          message.add(sb.toString());
-          message.add(WorkflowView.navigateToLabel);
-          state.notifyObservers(message);
-        }
-      });  
+
+      if (workflows.isEnabled() && workflows.isVisible()) {
+        workflows.setCommand(new MenuBar.Command() {
+          public void menuSelected(MenuItem selectedItem) {
+            ArrayList<String> message = new ArrayList<String>();
+            message.add("clicked");
+            StringBuilder sb = new StringBuilder("type=");
+            sb.append(type);
+            sb.append("&");
+            sb.append("id=");
+            sb.append(id);
+            message.add(sb.toString());
+            message.add(WorkflowView.navigateToLabel);
+            state.notifyObservers(message);
+          }
+        });
       }
-      
+
     }
 
   }

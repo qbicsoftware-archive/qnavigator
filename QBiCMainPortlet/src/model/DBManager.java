@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
- * Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -48,8 +48,9 @@ public class DBManager {
 
   private Connection login() {
 
-    String DB_URL = "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/"
-        + config.getSql_database();
+    String DB_URL =
+        "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/"
+            + config.getSql_database();
 
     Connection conn = null;
 
@@ -86,7 +87,7 @@ public class DBManager {
 
   public String getInvestigatorForProject(String projectIdentifier) {
     String details = getPersonDetailsForProject(projectIdentifier, "PI");
-    return details.split("\n")[0].trim();
+    return details.split("<br>")[0].trim().replace("<p>", "");
   }
 
   // TODO
@@ -100,8 +101,8 @@ public class DBManager {
     String lnk = "persons_organizations";
     String sql =
         "SELECT persons.*, organizations.*, " + lnk + ".occupation FROM persons, organizations, "
-            + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = " + lnk
-            + ".person_id and organizations.id = " + lnk + ".organization_id";
+            + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = "
+            + lnk + ".person_id and organizations.id = " + lnk + ".organization_id";
     Connection conn = login();
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       ResultSet rs = statement.executeQuery();
@@ -123,8 +124,7 @@ public class DBManager {
         String organization = rs.getString("umbrella_organization");
         String affiliation = "";
 
-        if (group_name == null || group_name.toUpperCase().equals("NULL")
-            || group_name.equals("")) {
+        if (group_name == null || group_name.toUpperCase().equals("NULL") || group_name.equals("")) {
 
           if (institute == null || institute.toUpperCase().equals("NULL") || institute.equals("")) {
             affiliation = organization;
@@ -187,8 +187,9 @@ public class DBManager {
         title = p.getTitle();
       }
 
-      details = String.format("%s %s %s \n%s \n \n%s \n%s \n", title, p.getFirst(), p.getLast(),
-          institute, p.getPhone(), p.geteMail());
+      details =
+          String.format("<p>%s %s %s <br> %s <br><br> %s <br> %s</p>", title, p.getFirst(),
+              p.getLast(), institute, p.getPhone(), p.geteMail());
       // TODO is address important?
     }
 
@@ -196,60 +197,59 @@ public class DBManager {
     return details;
   }
 
-//  public String getInvestigatorDetailsForProject(String projectCode) {
-//    String id_query = "SELECT pi_id FROM projects WHERE project_code=?";
-//    String id = "";
-//    Boolean success = false;
-//
-//    Connection conn = login();
-//    try (PreparedStatement statement = conn.prepareStatement(id_query)) {
-//      statement.setString(1, projectCode);
-//
-//      ResultSet rs = statement.executeQuery();
-//
-//      while (rs.next()) {
-//        id = Integer.toString(rs.getInt("pi_id"));
-//      }
-//      // statement.close();
-//      success = true;
-//
-//    } catch (SQLException e) {
-//      e.printStackTrace();
-//      // LOGGER.debug("Project not associated with Investigator. PI will be set to 'Unknown'");
-//    }
-//
-//    String sql = "SELECT * FROM project_investigators WHERE pi_id=?";
-//    String details = "";
-//
-//    if (success) {
-//      try (PreparedStatement statement = conn.prepareStatement(sql)) {
-//        statement.setString(1, id);
-//        ResultSet rs = statement.executeQuery();
-//        while (rs.next()) {
-//          String first = rs.getString("first_name");
-//          String last = rs.getString("last_name");
-//          String email = rs.getString("email");
-//          String phone = rs.getString("phone");
-//          String zipcode = rs.getString("zip_code");
-//          String city = rs.getString("city");
-//          String street = rs.getString("street");
-//          String institute = rs.getString("institute");
-//
-//          details = String.format("%s %s \n%s \n%s \n%s %s \n \n%s \n%s \n", first, last, institute,
-//              street, zipcode, city, phone, email);
-//        }
-//        // statement.close();
-//      } catch (SQLException e) {
-//        e.printStackTrace();
-//      }
-//    }
-//    logout(conn);
-//    return details;
-//  }
+  // public String getInvestigatorDetailsForProject(String projectCode) {
+  // String id_query = "SELECT pi_id FROM projects WHERE project_code=?";
+  // String id = "";
+  // Boolean success = false;
+  //
+  // Connection conn = login();
+  // try (PreparedStatement statement = conn.prepareStatement(id_query)) {
+  // statement.setString(1, projectCode);
+  //
+  // ResultSet rs = statement.executeQuery();
+  //
+  // while (rs.next()) {
+  // id = Integer.toString(rs.getInt("pi_id"));
+  // }
+  // // statement.close();
+  // success = true;
+  //
+  // } catch (SQLException e) {
+  // e.printStackTrace();
+  // // LOGGER.debug("Project not associated with Investigator. PI will be set to 'Unknown'");
+  // }
+  //
+  // String sql = "SELECT * FROM project_investigators WHERE pi_id=?";
+  // String details = "";
+  //
+  // if (success) {
+  // try (PreparedStatement statement = conn.prepareStatement(sql)) {
+  // statement.setString(1, id);
+  // ResultSet rs = statement.executeQuery();
+  // while (rs.next()) {
+  // String first = rs.getString("first_name");
+  // String last = rs.getString("last_name");
+  // String email = rs.getString("email");
+  // String phone = rs.getString("phone");
+  // String zipcode = rs.getString("zip_code");
+  // String city = rs.getString("city");
+  // String street = rs.getString("street");
+  // String institute = rs.getString("institute");
+  //
+  // details = String.format("%s %s \n%s \n%s \n%s %s \n \n%s \n%s \n", first, last, institute,
+  // street, zipcode, city, phone, email);
+  // }
+  // // statement.close();
+  // } catch (SQLException e) {
+  // e.printStackTrace();
+  // }
+  // }
+  // logout(conn);
+  // return details;
+  // }
 
   public boolean changeLongProjectDescription(String projectIdentifier, String description) {
-    LOGGER.info("Adding/Updating long description of project " + projectIdentifier
-        + ". New length: " + description.length());
+    LOGGER.info("Adding/Updating long description of project " + projectIdentifier);
     String sql = "UPDATE projects SET long_description = ? WHERE openbis_project_identifier = ?";
     Connection conn = login();
     PreparedStatement statement = null;

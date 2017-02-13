@@ -55,7 +55,6 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
@@ -132,8 +131,13 @@ public class LevelComponent extends CustomComponent {
     sampleGrid = new Grid();
 
     mainLayout = new VerticalLayout(vert);
+    mainLayout.setResponsive(true);
+    vert.setResponsive(true);
+    vert.setMargin(new MarginInfo(false, true, false, false));
 
-    this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
+    setResponsive(true);
+
+    // this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
 
@@ -477,7 +481,7 @@ public class LevelComponent extends CustomComponent {
             new Label(
                 String.format(
                     "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
-                    numberOfSamples, 0), Label.CONTENT_PREFORMATTED);
+                    numberOfSamples, 0), ContentMode.HTML);
 
         helpers.Utils
             .Notification(
@@ -487,7 +491,7 @@ public class LevelComponent extends CustomComponent {
       } else if (numberOfDatasets == 0 & filterFor.equals("results")) {
         descriptionLabel =
             new Label(String.format("This project contains %s result datasets.", 0),
-                Label.CONTENT_PREFORMATTED);
+                ContentMode.HTML);
 
         helpers.Utils
             .Notification(
@@ -521,11 +525,11 @@ public class LevelComponent extends CustomComponent {
               new Label(
                   String.format(
                       "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
-                      numberOfSamples, dsBeans.size()), Label.CONTENT_PREFORMATTED);
+                      numberOfSamples, dsBeans.size()), ContentMode.HTML);
         } else if (filterFor.equals("results")) {
           descriptionLabel =
               new Label(String.format("This project contains %s result datasets.", dsBeans.size()),
-                  Label.CONTENT_PREFORMATTED);
+                  ContentMode.HTML);
         }
 
       }

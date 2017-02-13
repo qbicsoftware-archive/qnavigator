@@ -33,7 +33,6 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
@@ -93,27 +92,22 @@ public class ExperimentView extends VerticalLayout implements View {
     initView();
   }
 
-  /**
-   * updates view, if height, width or the browser changes.
-   * 
-   * @param browserHeight
-   * @param browserWidth
-   * @param browser
-   */
-  public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-    setWidth((browserWidth * 0.85f), Unit.PIXELS);
-  }
 
   /**
    * init this view. builds the layout skeleton Menubar Description and others Statisitcs Experiment
    * Table Graph
    */
   void initView() {
+    setWidth(100, Unit.PERCENTAGE);
+    setResponsive(true);
 
     expview_content = new VerticalLayout();
+    expview_content.setResponsive(true);
     expview_content.setMargin(new MarginInfo(true, true, false, false));
 
     expview_tab = new TabSheet();
+    expview_tab.setWidth(100, Unit.PERCENTAGE);
+    expview_tab.setResponsive(true);
 
     expview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     expview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
@@ -128,7 +122,7 @@ public class ExperimentView extends VerticalLayout implements View {
     initNoteComponent();
     expview_tab.addTab(innerNotesComponent).setIcon(FontAwesome.PENCIL);
 
-    expview_content.setWidth("100%");
+    expview_content.setWidth(100, Unit.PERCENTAGE);
     this.addComponent(expview_content);
   }
 

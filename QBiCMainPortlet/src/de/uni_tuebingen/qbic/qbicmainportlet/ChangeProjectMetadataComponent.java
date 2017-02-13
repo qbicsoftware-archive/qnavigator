@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -115,12 +113,13 @@ public class ChangeProjectMetadataComponent extends CustomComponent {
     });
 
     buildFormLayout();
-    properties
-        .addComponent(new Label(
-            String
-                .format(
-                    "This view shows project details and can be used to change the corresponding values. \nIdentifier: %s",
-                    projectBean.getId()), Label.CONTENT_PREFORMATTED));
+    Label desc =
+        new Label(
+            String.format(
+                "This view shows project details and can be used to change the corresponding values. \nIdentifier: %s",
+                projectBean.getId()), Label.CONTENT_PREFORMATTED);
+    desc.setWidth("50%");
+    properties.addComponent(desc);
 
     properties.addComponent(this.form);
     properties.addComponent(saveButton);
@@ -132,6 +131,8 @@ public class ChangeProjectMetadataComponent extends CustomComponent {
     final FormLayout form2 = new FormLayout();
 
     TextArea tf = new TextArea("Description");
+    tf.setWidth("50%");
+    tf.setHeight("50%");
     fieldGroup.bind(tf, "Description");
     tf.setCaption("Description");
     tf.setDescription("Description of this project.");

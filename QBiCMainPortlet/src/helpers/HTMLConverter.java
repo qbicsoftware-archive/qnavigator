@@ -5,11 +5,13 @@ import java.util.Locale;
 import com.vaadin.data.util.converter.Converter;
 
 /**
- * Converts normal newlines to html newlines as used in html components. can be extended to convert different html tags
+ * Converts normal newlines to html newlines as used in html components. can be extended to convert
+ * different html tags
+ * 
  * @author Andreas Friedrich
- *
+ * 
  */
-public class HTMLConverter implements Converter<String,String> {
+public class HTMLConverter implements Converter<String, String> {
 
   /**
    * 

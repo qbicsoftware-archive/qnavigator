@@ -212,7 +212,7 @@ public class ProjectView extends VerticalLayout implements View {
     // add styles to tab sheet
     projectview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     projectview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
-    projectview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
+    // projectview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
 
     // add tabs to tabsheet
     projectview_tab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);

@@ -1,25 +1,26 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
- * Mohr, David Wojnar, Andreas Friedrich
- *
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
+import helpers.HTMLConverter;
+
 import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
@@ -33,16 +34,29 @@ public class EditableLabel extends VerticalLayout {
   private Label label = new Label();
   private TextArea editArea = new TextArea();
 
-  public EditableLabel(String caption, String value) {
-    label.setContentMode(ContentMode.PREFORMATTED);
-    label.setCaption(caption);
-    label.setValue(value);
-    label.setHeightUndefined();
-    label.setWidth("100%");
-    label.setIcon(FontAwesome.PENCIL);
-    editArea.setPropertyDataSource(label);
-    editArea.setWidth("100%");
-    editArea.setHeight("1000px");
+  public EditableLabel(String value) {
+    label.setContentMode(ContentMode.HTML);
+    if (value.isEmpty()) {
+      label.setHeight(100, Unit.PIXELS);
+    } else {
+      label.setHeightUndefined();
+    }
+    editArea.setConverter(new HTMLConverter());
+
+    editArea.setValue(value);
+    label.setValue(editArea.getConvertedValue().toString());
+
+    label.setWidth(100, Unit.PERCENTAGE);
+    label.setResponsive(true);
+    editArea.setResponsive(true);
+    setResponsive(true);
+    setMargin(true);
+    // setSpacing(true);
+    // addStyleName(ValoTheme.LAYOUT_CARD);
+    // label.setIcon(FontAwesome.PENCIL);
+    // editArea.setPropertyDataSource(label);
+    editArea.setWidth(100, Unit.PERCENTAGE);
+    editArea.setHeight(100, Unit.PERCENTAGE);
     setDescription("Double click to change value");
     addComponent(label);
     addListeners();
@@ -57,6 +71,7 @@ public class EditableLabel extends VerticalLayout {
       public void layoutClick(LayoutClickEvent event) {
         if (event.isDoubleClick() && event.getClickedComponent() instanceof Label) {
           removeComponent(label);
+          editArea.setConvertedValue(label.getValue().toString());
           addComponent(editArea);
           editArea.focus();
         }
@@ -68,6 +83,7 @@ public class EditableLabel extends VerticalLayout {
       @Override
       public void blur(BlurEvent event) {
         removeComponent(editArea);
+        label.setValue(editArea.getConvertedValue().toString());
         addComponent(label);
       }
     });
@@ -76,11 +92,11 @@ public class EditableLabel extends VerticalLayout {
   public String getValue() {
     return editArea.getValue();
   }
-  
+
   public void setValue(String desc) {
     label.setValue(desc);
   }
-  
+
   public void addBlurListener(BlurListener l) {
     editArea.addBlurListener(l);
   }

@@ -34,6 +34,7 @@ import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
@@ -106,9 +107,8 @@ public class ExperimentComponent extends CustomComponent {
 
     expSteps
         .addComponent(new Label(
-            "This view shows the experimental steps which have been registered for this projects. "
-                + "Experimental steps contain real biological experiments as well as executed computational workflows on project data",
-            Label.CONTENT_PREFORMATTED));
+            "This view shows the experimental steps which have been registered for this project. Experimental steps contain real biological experiments as well as executed computational workflows on project data",
+            ContentMode.HTML));
 
     expSteps.addComponent(experiments);
     expSteps.addComponent(buttonLayoutSection);

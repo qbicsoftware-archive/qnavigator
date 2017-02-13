@@ -49,7 +49,6 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
@@ -99,7 +98,7 @@ public class DatasetComponent extends CustomComponent {
 
   private UglyToPrettyNameMapper prettyNameMapper = new UglyToPrettyNameMapper();
 
-  private Label headerLabel = new Label("", Label.CONTENT_PREFORMATTED);
+  private Label headerLabel = new Label("", ContentMode.HTML);
 
 
   public DatasetComponent(DataHandler dh, State state, String resourceurl) {
@@ -116,8 +115,9 @@ public class DatasetComponent extends CustomComponent {
     vert = new VerticalLayout();
     table = buildFilterTable();
     mainLayout = new VerticalLayout(vert);
+    mainLayout.setResponsive(true);
 
-    this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
+    // this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
 
@@ -291,11 +291,15 @@ public class DatasetComponent extends CustomComponent {
    */
   private void buildLayout() {
     this.vert.removeAllComponents();
-    this.vert.setWidth("100%");
+    this.vert.setSizeFull();
+
+    vert.setResponsive(true);
 
     // Table (containing datasets) section
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
+    tableSection.setResponsive(true);
+    tableSectionContent.setResponsive(true);
 
     // tableSectionContent.setCaption("Datasets");
     // tableSectionContent.setIcon(FontAwesome.FLASK);
@@ -305,6 +309,7 @@ public class DatasetComponent extends CustomComponent {
 
     tableSection.addComponent(headerLabel);
     tableSectionContent.addComponent(this.table);
+    vert.setMargin(new MarginInfo(false, true, false, false));
 
     tableSection.setMargin(new MarginInfo(true, false, false, true));
     // tableSectionContent.setMargin(true);
@@ -313,9 +318,9 @@ public class DatasetComponent extends CustomComponent {
     tableSection.addComponent(tableSectionContent);
     this.vert.addComponent(tableSection);
 
-    table.setWidth("100%");
-    tableSection.setWidth("100%");
-    tableSectionContent.setWidth("100%");
+    table.setSizeFull();
+    tableSection.setSizeFull();
+    tableSectionContent.setSizeFull();
 
     // this.table.setSizeFull();
 
@@ -324,6 +329,7 @@ public class DatasetComponent extends CustomComponent {
     buttonLayout.setHeight(null);
     // buttonLayout.setWidth("100%");
     buttonLayout.setSpacing(true);
+    buttonLayout.setResponsive(true);
 
     // final Button visualize = new Button(VISUALIZE_BUTTON_CAPTION);
 

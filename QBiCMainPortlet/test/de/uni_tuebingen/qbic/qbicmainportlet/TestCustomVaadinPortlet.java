@@ -25,7 +25,6 @@ import org.junit.Test;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
 
 public class TestCustomVaadinPortlet {
@@ -101,11 +100,11 @@ public class TestCustomVaadinPortlet {
 
 
     ExperimentBean expbean1 =
-        new ExperimentBean("expbean1-id", "expbean1-code", "expbean1-type", new Image(), "Lister",
+        new ExperimentBean("expbean1-id", "expbean1-code", "expbean1-type", "", "Lister",
             new Date(), samples1, "sample1-id", new Date(), new HashMap<String, String>(),
             new HashMap<String, List<String>>(), new HashMap<String, String>());
     ExperimentBean expbean2 =
-        new ExperimentBean("expbean2-id", "expbean2-code", "expbean2-type", new Image(), "Lister",
+        new ExperimentBean("expbean2-id", "expbean2-code", "expbean2-type", "", "Lister",
             new Date(), samples2, "sample4-id", new Date(), new HashMap<String, String>(),
             new HashMap<String, List<String>>(), new HashMap<String, String>());
     BeanItemContainer<ExperimentBean> expbeans =
@@ -115,11 +114,13 @@ public class TestCustomVaadinPortlet {
     Set<String> members = new HashSet<String>();
 
     projectBean =
-        new ProjectBean("project-id", "project-code", "project-description", spaceBean, expbeans,
-            new ProgressBar(0.25f), new Date(), "Davinci", "Donatello", members, true);
+        new ProjectBean("project-id", "project-code", "secName", "project-description",
+            spaceBean.getId(), expbeans, new ProgressBar(0.25f), new Date(), "Davinci",
+            "Donatello", members, true, "projManager");
     datasetBean1.setProject(projectBean);
     datasetBean1.setExperiment(expbean1);
     datasetBean1.setSample(sample1);
+
   }
 
   @AfterClass
@@ -173,5 +174,5 @@ public class TestCustomVaadinPortlet {
     ASSERT.that(entries.get("dataset1-code/oscureCode1/dataset01.txt").getValue()).isEqualTo(5);
     ASSERT.that(entries.get("dataset1-code/oscureCode1/dataset02.html").getValue()).isEqualTo(10);
   }
-  
+
 }

@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -25,11 +23,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import logging.Log4j2Logger;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleFetchOption;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
+
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -44,16 +53,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleFetchOption;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
-import logging.Log4j2Logger;
 
 
 
@@ -104,21 +104,36 @@ public class SearchEngineView extends CustomComponent {
 
     // Search bar
     // *----------- search text field .... search button-----------*
-    HorizontalLayout searchbar = new HorizontalLayout();
+    VerticalLayout searchbar = new VerticalLayout();
+    searchbar.setWidth(100, Unit.PERCENTAGE);
+    setResponsive(true);
+    searchbar.setResponsive(true);
+    // searchbar.setWidth();
 
-    VerticalLayout searchFieldLayout = new VerticalLayout();
+    HorizontalLayout buttonLayout = new HorizontalLayout();
+    buttonLayout.setResponsive(true);
+    buttonLayout.setWidth(75, Unit.PERCENTAGE);
 
-    searchbar.setSpacing(true);
+    // searchbar.setSpacing(true);
     final TextField searchfield = new TextField();
     searchfield.setHeight("44px");
     searchfield.setImmediate(true);
+    searchfield.setResponsive(true);
+    searchfield.setWidth(75, Unit.PERCENTAGE);
+
+    buttonLayout.setSpacing(true);
+
 
     searchfield.setInputPrompt("search DB");
     // searchfield.setCaption("QSearch");
-    searchfield.setWidth(30.0f, Unit.EM);
+    // searchfield.setWidth(25.0f, Unit.EM);
+    // searchfield.setWidth(60, Unit.PERCENTAGE);
 
     // TODO would be nice to have a autofill or something similar
-    searchFieldLayout.addComponent(searchfield);
+    // searchFieldLayout.addComponent(searchfield);
+    searchbar.addComponent(searchfield);
+    searchbar.setComponentAlignment(searchfield, Alignment.MIDDLE_RIGHT);
+
 
     final NativeSelect navsel = new NativeSelect();
     navsel.addItem("Whole DB");
@@ -126,8 +141,10 @@ public class SearchEngineView extends CustomComponent {
     navsel.addItem("Experiments Only");
     navsel.addItem("Samples Only");
     navsel.setValue("Whole DB");
-    navsel.setWidth(10.0f, Unit.EM);
+    navsel.setHeight("20px");
     navsel.setNullSelectionAllowed(false);
+    navsel.setResponsive(true);
+    navsel.setWidth(100, Unit.PERCENTAGE);
 
     navsel.addValueChangeListener(new Property.ValueChangeListener() {
 
@@ -163,15 +180,18 @@ public class SearchEngineView extends CustomComponent {
       }
     });
 
-    searchFieldLayout.addComponent(navsel);
-
-    searchbar.addComponent(searchFieldLayout);
-
-
-
-    Button searchOk = new Button("Search");
+    searchbar.addComponent(buttonLayout);
+    searchbar.setComponentAlignment(buttonLayout, Alignment.MIDDLE_RIGHT);
+    Button searchOk = new Button("");
+    searchOk.setStyleName(ValoTheme.BUTTON_TINY);
     // searchOk.addStyleName(ValoTheme.BUTTON_BORDERLESS);
     searchOk.setIcon(FontAwesome.SEARCH);
+    searchOk.setSizeUndefined();
+    // searchOk.setWidth(15.0f, Unit.EM);
+    searchOk.setResponsive(true);
+    searchOk.setHeight("20px");
+
+
     searchOk.addClickListener(new ClickListener() {
       private static final long serialVersionUID = -2409450448301908214L;
 
@@ -225,8 +245,22 @@ public class SearchEngineView extends CustomComponent {
     searchfield.addValidator(new NullValidator("Field must not be empty", false));
     searchfield.setValidationVisible(false);
 
-    searchbar.addComponent(searchOk);
-    // searchbar.setComponentAlignment(searchOk, Alignment.MIDDLE_CENTER);
+    buttonLayout.addComponent(navsel);
+    // buttonLayout.addComponent(new Label(""));
+    buttonLayout.addComponent(searchOk);
+
+    // searchFieldLayout.setComponentAlignment(searchOk, Alignment.TOP_RIGHT);
+    // buttonLayout.setExpandRatio(searchOk, 1);
+    // buttonLayout.setExpandRatio(navsel, 1);
+
+    // searchFieldLayout.setSpacing(true);
+    buttonLayout.setComponentAlignment(searchOk, Alignment.BOTTOM_RIGHT);
+    // buttonLayout.setComponentAlignment(navsel, Alignment.BOTTOM_LEFT);
+
+    buttonLayout.setExpandRatio(searchOk, 1);
+    buttonLayout.setExpandRatio(navsel, 2);
+
+
     // searchbar.setMargin(new MarginInfo(true, false, true, false));
     mainlayout.setContent(searchbar);
     // mainlayout.setComponentAlignment(searchbar, Alignment.MIDDLE_RIGHT);
@@ -246,9 +280,12 @@ public class SearchEngineView extends CustomComponent {
     // datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
     // sc1, fetchOptions,LiferayAndVaadinUtils.getUser().getScreenName());
 
-    List<Sample> samples2 = datahandler.getOpenBisClient().getOpenbisInfoService()
-        .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc2,
-            fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
+    List<Sample> samples2 =
+        datahandler
+            .getOpenBisClient()
+            .getOpenbisInfoService()
+            .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc2,
+                fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
 
     // LOGGER.info("hits: " + samples1.size() + " " + samples2.size());
 
@@ -272,8 +309,9 @@ public class SearchEngineView extends CustomComponent {
     // List<Sample> samples2 =
     // datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
     // sc2, fetchOptions,LiferayAndVaadinUtils.getUser().getScreenName());
-    List<Experiment> exps = datahandler.getOpenBisClient().getOpenbisInfoService()
-        .searchForExperiments(datahandler.getOpenBisClient().getSessionToken(), sc2);
+    List<Experiment> exps =
+        datahandler.getOpenBisClient().getOpenbisInfoService()
+            .searchForExperiments(datahandler.getOpenBisClient().getSessionToken(), sc2);
 
 
     List<Experiment> expFilteredByUser = new ArrayList<Experiment>();
@@ -297,7 +335,9 @@ public class SearchEngineView extends CustomComponent {
     List<Project> result = new ArrayList<Project>();
 
     List<Project> projects =
-        new ArrayList<Project>(datahandler.getOpenBisClient().getOpenbisInfoService()
+        new ArrayList<Project>(datahandler
+            .getOpenBisClient()
+            .getOpenbisInfoService()
             .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
                 LiferayAndVaadinUtils.getUser().getScreenName()));
 
@@ -324,7 +364,9 @@ public class SearchEngineView extends CustomComponent {
   public Set<String> listSpacesOnBehalfOfUser() {
     // first retrieve all projects belonging to the user
     List<Project> projects =
-        new ArrayList<Project>(datahandler.getOpenBisClient().getOpenbisInfoService()
+        new ArrayList<Project>(datahandler
+            .getOpenBisClient()
+            .getOpenbisInfoService()
             .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
                 LiferayAndVaadinUtils.getUser().getScreenName()));
 
@@ -344,12 +386,14 @@ public class SearchEngineView extends CustomComponent {
   public List<String> getSearchResults(String samplecode) {
     java.util.EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
     SearchCriteria sc = new SearchCriteria();
-    sc.addMatchClause(
-        MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, samplecode + "*"));
+    sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, samplecode + "*"));
 
-    List<Sample> samples = datahandler.getOpenBisClient().getOpenbisInfoService()
-        .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc,
-            fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
+    List<Sample> samples =
+        datahandler
+            .getOpenBisClient()
+            .getOpenbisInfoService()
+            .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc,
+                fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
     List<String> ret = new ArrayList<String>(samples.size());
     for (Sample sample : samples) {
       ret.add(sample.getCode());

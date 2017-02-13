@@ -34,7 +34,6 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.ui.MarginInfo;
@@ -148,11 +147,16 @@ public class SampleView extends VerticalLayout implements View {
    * Table Graph
    */
   void initView() {
+    setResponsive(true);
+    setWidth(100, Unit.PERCENTAGE);
+
     sampview_content = new VerticalLayout();
     sampview_content.setMargin(new MarginInfo(true, true, false, false));
+    sampview_content.setResponsive(true);
 
     sampview_tab = new TabSheet();
-    sampview_tab.setWidth("100%");
+    sampview_tab.setResponsive(true);
+    sampview_tab.setWidth(100, Unit.PERCENTAGE);
     sampview_tab.addStyleName(ValoTheme.TABSHEET_FRAMED);
     sampview_tab.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     sampview_tab.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
@@ -522,7 +526,7 @@ public class SampleView extends VerticalLayout implements View {
     tableSectionContent.setMargin(new MarginInfo(true, false, false, true));
     tableSection.setMargin(new MarginInfo(true, false, false, true));
     this.table.setWidth("100%");
-    tableSection.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
+    // tableSection.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     tableSectionContent.setWidth("100%");
 
     tableSection.addComponent(tableSectionContent);

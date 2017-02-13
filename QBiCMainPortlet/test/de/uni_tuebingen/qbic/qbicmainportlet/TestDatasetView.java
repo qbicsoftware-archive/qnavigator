@@ -26,7 +26,6 @@ import org.junit.Test;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.ProgressBar;
 
 public class TestDatasetView {
@@ -110,11 +109,11 @@ public class TestDatasetView {
 
 
     ExperimentBean expbean1 =
-        new ExperimentBean("expbean1-id", "expbean1-code", "expbean1-type", new Image(), "Lister",
+        new ExperimentBean("expbean1-id", "expbean1-code", "expbean1-type", "", "Lister",
             new Date(), samples1, "sample1-id", new Date(), new HashMap<String, String>(),
             new HashMap<String, List<String>>(), new HashMap<String, String>());
     ExperimentBean expbean2 =
-        new ExperimentBean("expbean2-id", "expbean2-code", "expbean2-type", new Image(), "Lister",
+        new ExperimentBean("expbean2-id", "expbean2-code", "expbean2-type", "", "Lister",
             new Date(), samples2, "sample4-id", new Date(), new HashMap<String, String>(),
             new HashMap<String, List<String>>(), new HashMap<String, String>());
     BeanItemContainer<ExperimentBean> expbeans =
@@ -124,8 +123,9 @@ public class TestDatasetView {
     Set<String> members = new HashSet<String>();
 
     ProjectBean projectBean =
-        new ProjectBean("project-id", "project-code", "project-description", spaceBean, expbeans,
-            new ProgressBar(0.25f), new Date(), "Davinci", "Donatello", members, true);
+        new ProjectBean("project-id", "project-code", "", "project-description", spaceBean.getId(),
+            expbeans, new ProgressBar(0.25f), new Date(), "Davinci", "Donatello", members, true,
+            "projManager");
     datasetBean1.setProject(projectBean);
     datasetBean1.setExperiment(expbean1);
     datasetBean1.setSample(sample1);
@@ -134,7 +134,7 @@ public class TestDatasetView {
     when(dh.getProject("project-id")).thenReturn(projectBean);
 
 
-    datasetView = new DatasetView(dh);
+    // datasetView = new DatasetView(dh);
 
 
   }

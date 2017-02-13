@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
-	<!ENTITY vaadin.version "7.5.9">
+	<!ENTITY vaadin.version "7.7.5">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -44,10 +44,10 @@
 		<dependency org="org.json" name="json" rev="20090211" />
 				
 		<!--<dependency org="org.vaadin.addons" name="vaadin-ipc-for-liferay" rev="2.0.0" />-->
-	
-		<dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.13.v7" />
+		<dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.15.v7" />
+		<!-- <dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.13.v7" /> --> 
 		<!-- filter table -->	
-		<dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.11.v7" />
+		<!-- <dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.11.v7" /> -->
 		<!--logging -->
 		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.2" />
   		<dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.2" />

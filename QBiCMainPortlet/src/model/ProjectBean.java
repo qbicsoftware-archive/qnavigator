@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package model;
 
@@ -43,14 +41,14 @@ public class ProjectBean implements Serializable {
   private String contact;
   private String principalInvestigator;
   private String contactPerson;
-  private String manager;
+  private String projectManager;
   private Set<String> members;
   private Boolean containsData;
 
   public ProjectBean(String id, String code, String secondaryName, String description,
       String space, BeanItemContainer<ExperimentBean> experiments, ProgressBar progress,
       Date registrationDate, String registrator, String contact, Set<String> members,
-      Boolean containsData) {
+      Boolean containsData, String projectManager) {
     super();
     this.id = id;
     this.code = code;
@@ -211,15 +209,15 @@ public class ProjectBean implements Serializable {
   public void setContactPerson(String contactPerson) {
     this.contactPerson = contactPerson;
   }
-  
+
   public String getProjectManager() {
-    return this.manager;
+    return this.projectManager;
   }
 
   public void setProjectManager(String manager) {
-    this.manager = manager;
+    this.projectManager = manager;
   }
-  
+
   public void setLongDescription(String longDesc) {
     this.longDescription = longDesc;
   }

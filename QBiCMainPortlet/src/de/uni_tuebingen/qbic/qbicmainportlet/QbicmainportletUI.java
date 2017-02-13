@@ -39,28 +39,25 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page.BrowserWindowResizeEvent;
-import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.WebBrowser;
 import com.vaadin.server.WrappedPortletSession;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 import controllers.MultiscaleController;
@@ -82,8 +79,10 @@ public class QbicmainportletUI extends UI {
 
   private OpenBisClient openBisConnection;
   private DataHandler datahandler;
-  private VerticalLayout mainLayout;
+  // private VerticalLayout mainLayout;
+  private GridLayout mainLayout;
   private ConfigurationManager manager;
+
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "1.5.9";
   private String revision = "fa793cb";
@@ -152,7 +151,7 @@ public class QbicmainportletUI extends UI {
     VerticalLayout vl = new VerticalLayout();
     this.setContent(vl);
     vl.addComponent(new Label(
-        "An error occured, while trying to connect to the database. Please try again later, or contact your project manager."));
+        "An error occured while trying to connect to the database. Please try again later or contact your project manager."));
   }
 
   /**
@@ -164,7 +163,7 @@ public class QbicmainportletUI extends UI {
     VerticalLayout vl = new VerticalLayout();
     this.setContent(vl);
     vl.addComponent(new Label(
-        "An error occured, while trying to load projects. Please contact your project manager to make sure your account is added to your projects."));
+        "An error occured while trying to load projects. Please contact your project manager to make sure your account is added to your projects."));
     LOGGER
         .error("Couldn't initialize view. User is probably not added to openBIS and has been informed to contact prject manager.");
   }
@@ -304,7 +303,7 @@ public class QbicmainportletUI extends UI {
         new PatientView(datahandler, state, resUrl, controller, manager);
 
     VerticalLayout navigatorContent = new VerticalLayout();
-    navigatorContent.setResponsive(true);
+    // navigatorContent.setResponsive(true);
 
     final Navigator navigator = new Navigator(UI.getCurrent(), navigatorContent);
 
@@ -317,31 +316,33 @@ public class QbicmainportletUI extends UI {
     navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateToLabel, addPatientView);
     navigator.addView(SearchResultsView.navigateToLabel, searchResultsView);
-    // navigator.addView(VaccineDesignerView.navigateToLabel, vaccineDesignerView);
 
     setNavigator(navigator);
 
-    mainLayout = new VerticalLayout();
+    // Production
+    // mainLayout = new VerticalLayout();
+    for (Window w : getWindows()) {
+      w.setSizeFull();
+    }
+
+    mainLayout = new GridLayout(3, 3);
     mainLayout.setResponsive(true);
-    mainLayout.setMargin(new MarginInfo(false, true, false, false));
+    mainLayout.setWidth(100, Unit.PERCENTAGE);
 
-    HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
-    treeViewAndLevelView.setMargin(new MarginInfo(false, false, false, false));
+    mainLayout.addComponent(navigatorContent, 0, 1, 2, 1);
+    mainLayout.setColumnExpandRatio(0, 0.2f);
+    mainLayout.setColumnExpandRatio(1, 0.3f);
+    mainLayout.setColumnExpandRatio(2, 0.5f);
 
-    HorizontalLayout headerView = new HorizontalLayout();
-    headerView.setMargin(new MarginInfo(false, true, false, false));
-
-    headerView.setWidth((getPage().getBrowserWindowHeight() * 0.85f), Unit.PIXELS);
-    headerView.setSpacing(false);
-
+    // Production
+    // HorizontalLayout treeViewAndLevelView = new HorizontalLayout();
+    // HorizontalLayout headerView = new HorizontalLayout();
+    // headerView.setSpacing(false);
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setSpacing(true);
-
-    final HorizontalLayout labelLayout = new HorizontalLayout();
-    headerView.addComponent(buttonLayout);
-    headerView.addComponent(labelLayout);
-
-    VerticalLayout versionLayout = new VerticalLayout();
+    // final HorizontalLayout labelLayout = new HorizontalLayout();
+    // headerView.addComponent(buttonLayout);
+    // headerView.addComponent(labelLayout);
 
     Button homeButton = new Button("Home");
     homeButton.setIcon(FontAwesome.HOME);
@@ -355,7 +356,10 @@ public class QbicmainportletUI extends UI {
 
     });
 
+    // Production
     buttonLayout.addComponent(homeButton);
+    // mainLayout.addComponent(homeButton, 0, 0);
+
     Boolean includePatientCreation = false;
 
     List<Project> projects =
@@ -373,7 +377,8 @@ public class QbicmainportletUI extends UI {
     if (includePatientCreation) {
       Button addPatient = new Button("Add Patient");
       addPatient.setIcon(FontAwesome.PLUS);
-      addPatient.setStyleName("addpatient");
+      addPatient.setStyleName(ValoTheme.BUTTON_LARGE);
+      // addPatient.setStyleName("addpatient");
 
       addPatient.addClickListener(new ClickListener() {
         @Override
@@ -382,188 +387,150 @@ public class QbicmainportletUI extends UI {
         }
       });
 
+      // Production
       buttonLayout.addComponent(addPatient);
+      // mainLayout.addComponent(addPatient, 1, 0);
     }
+
+    mainLayout.addComponent(buttonLayout, 0, 0);
 
     Button header = new Button(String.format("Total number of projects: %s", numberOfProjects));
     header.setIcon(FontAwesome.HAND_O_RIGHT);
     header.setStyleName(ValoTheme.BUTTON_LARGE);
     header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
-    labelLayout.addComponent(header);
-    labelLayout.setWidth(null);
+    // Production
+    // labelLayout.addComponent(header);
+    // labelLayout.setWidth(null);
 
-    // SearchBarView searchBarView = new SearchBarView(datahandler);
     SearchEngineView searchBarView = new SearchEngineView(datahandler);
 
+    // headerView.setWidth("100%");
+    // Production
+    // headerView.addComponent(searchBarView);
+    // headerView.setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
+    // searchBarView.setSizeUndefined();
+    // treeViewAndLevelView.addComponent(navigatorContent);
+    // mainLayout.addComponent(headerView);
+    // mainLayout.addComponent(treeViewAndLevelView);
 
-    headerView.setWidth("100%");
-    headerView.addComponent(searchBarView);
-    headerView.setComponentAlignment(searchBarView, Alignment.TOP_RIGHT);
-    // headerView.setComponentAlignment(homeButton, Alignment.TOP_LEFT);
+    mainLayout.addComponent(header, 1, 0);
+    mainLayout.addComponent(searchBarView, 2, 0);
 
-    // headerView.setExpandRatio(buttonLayout, 1.0f);
-    // headerView.setExpandRatio(labelLayout, 1.0f);
-    // headerView.setExpandRatio(searchBarView, 1.0f);
+    // Production
+    VerticalLayout versionLayout = new VerticalLayout();
+    versionLayout.setWidth(100, Unit.PERCENTAGE);
+    Label versionLabel = new Label(String.format("version: %s", version));
+    Label revisionLabel = new Label(String.format("rev: %s", revision));
+    revisionLabel.setWidth(null);
+    versionLabel.setWidth(null);
 
-    searchBarView.setSizeUndefined();
-
-    treeViewAndLevelView.addComponent(navigatorContent);
-    mainLayout.addComponent(headerView);
-    mainLayout.addComponent(treeViewAndLevelView);
-    versionLayout.addComponent(new Label(String.format("version: %s", version)));
+    versionLayout.addComponent(versionLabel);
     if (!isInProductionMode()) {
-      versionLayout.addComponent(new Label(String.format("revision: %s", revision)));
+      versionLayout.addComponent(revisionLabel);
     }
-    versionLayout.setMargin(new MarginInfo(true, false, false, false));
-    mainLayout.addComponent(versionLayout);
+    // versionLayout.setMargin(new MarginInfo(true, false, false, false));
+    // mainLayout.addComponent(versionLayout);
+    mainLayout.addComponent(versionLayout, 0, 2, 2, 2);
+    mainLayout.setRowExpandRatio(2, 1.0f);
+    // mainLayout.setSpacing(true);
+
+    versionLayout.setComponentAlignment(versionLabel, Alignment.MIDDLE_RIGHT);
+    versionLayout.setComponentAlignment(revisionLabel, Alignment.BOTTOM_RIGHT);
+
+    mainLayout.setComponentAlignment(searchBarView, Alignment.BOTTOM_RIGHT);
+
     setContent(mainLayout);
+    // getContent().setSizeFull();
 
     // "Responsive design"
-    getPage().addBrowserWindowResizeListener(new BrowserWindowResizeListener() {
-      @Override
-      public void browserWindowResized(BrowserWindowResizeEvent event) {
-        int height = event.getHeight();
-        int width = event.getWidth();
-        WebBrowser browser = event.getSource().getWebBrowser();
-        // tv.rebuildLayout(height, width, browser);
-        if (currentView instanceof HomeView) {
-          homeView.updateView(height, width, browser);
-        } else if (currentView instanceof ProjectView) {
-          projectView.updateView(height, width, browser);
-        } else if (currentView instanceof ExperimentView) {
-          experimentView.updateView(height, width, browser);
-        } else if (currentView instanceof PatientView) {
-          patientView.updateView(height, width, browser);
-        } else if (currentView instanceof AddPatientView) {
-          addPatientView.updateView(height, width, browser);
-        }
-      }
-    });
-
-    navigator.addViewChangeListener(new ViewChangeListener() {
-
-      @Override
-      public boolean beforeViewChange(ViewChangeEvent event) {
-        int height = getPage().getBrowserWindowHeight();
-        int width = getPage().getBrowserWindowWidth();
-        WebBrowser browser = getPage().getWebBrowser();
-        // View oldView = event.getOldView();
-        // this.setEnabled(oldView, false);
-
-        currentView = event.getNewView();
-        if (currentView instanceof HomeView) {
-          homeView.updateView(height, width, browser);
-        }
-        if (currentView instanceof ProjectView) {
-          projectView.updateView(height, width, browser);
-        }
-        if (currentView instanceof ExperimentView) {
-          experimentView.updateView(height, width, browser);
-        }
-        if (currentView instanceof SampleView) {
-          sampleView.updateView(height, width, browser);
-        } else if (currentView instanceof PatientView) {
-          patientView.updateView(height, width, browser);
-        } else if (currentView instanceof AddPatientView) {
-          addPatientView.updateView(height, width, browser);
-        }
-        return true;
-      }
-
-      private void setEnabled(View view, boolean enabled) {
-        // tv.setEnabled(enabled);
-        if (view instanceof HomeView) {
-          homeView.setEnabled(enabled);
-        }
-        if (view instanceof ProjectView) {
-          projectView.setEnabled(enabled);
-        }
-        if (view instanceof ExperimentView) {
-          experimentView.setEnabled(enabled);
-        }
-        if (view instanceof SampleView) {
-          sampleView.setEnabled(enabled);
-        }
-      }
-
-      @Override
-      public void afterViewChange(ViewChangeEvent event) {
-        currentView = event.getNewView();
-        // this.setEnabled(currentView, true);
-        Object currentBean = null;
-        if (currentView instanceof ProjectView) {
-          // TODO refactoring
-          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-
-          labelLayout.removeAllComponents();
-          Button header = new Button(projectView.getHeaderLabel());
-          header.setStyleName(ValoTheme.BUTTON_LARGE);
-          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-          header.setIcon(FontAwesome.HAND_O_RIGHT);
-
-          labelLayout.addComponent(header);
-        } else if (currentView instanceof HomeView) {
-          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-
-          labelLayout.removeAllComponents();
-          Button header = new Button(homeView.getHeader());
-          header.setStyleName(ValoTheme.BUTTON_LARGE);
-          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-          header.setIcon(FontAwesome.HAND_O_RIGHT);
-
-          labelLayout.addComponent(header);
-          // currentBean = projectView.getCurrentBean();
-        } else if (currentView instanceof ExperimentView) {
-          currentBean = experimentView.getCurrentBean();
-
-        } else if (currentView instanceof SampleView) {
-          // TODO refactoring
-          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-
-          labelLayout.removeAllComponents();
-          Button header = new Button(sampleView.getHeader());
-          header.setStyleName(ValoTheme.BUTTON_LARGE);
-          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-          header.setIcon(FontAwesome.HAND_O_RIGHT);
-
-          labelLayout.addComponent(header);
-
-        } else if (currentView instanceof DatasetView) {
-          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-        } else if (currentView instanceof PatientView) {
-          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-
-          labelLayout.removeAllComponents();
-          Button header = new Button(patientView.getHeaderLabel());
-          header.setStyleName(ValoTheme.BUTTON_LARGE);
-          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-          header.setIcon(FontAwesome.HAND_O_RIGHT);
-          labelLayout.addComponent(header);
-        } else if (currentView instanceof AddPatientView) {
-          currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
-
-          labelLayout.removeAllComponents();
-          Button header = new Button(addPatientView.getHeader());
-          header.setStyleName(ValoTheme.BUTTON_LARGE);
-          header.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-          header.setIcon(FontAwesome.HAND_O_RIGHT);
-          labelLayout.addComponent(header);
-        }
-        try {
-          PortletSession portletSession = QbicmainportletUI.getCurrent().getPortletSession();
-          if (portletSession != null) {
-            portletSession.setAttribute("qbic_download", currentBean,
-                PortletSession.APPLICATION_SCOPE);
-          }
-        } catch (NullPointerException e) {
-          // nothing to do. during initialization that might happen. Nothing to worry about
-        }
-
-
-      }
-
-    });
+    /*
+     * getPage().addBrowserWindowResizeListener(new BrowserWindowResizeListener() {
+     * 
+     * @Override public void browserWindowResized(BrowserWindowResizeEvent event) { int height =
+     * event.getHeight(); int width = event.getWidth(); WebBrowser browser =
+     * event.getSource().getWebBrowser(); // tv.rebuildLayout(height, width, browser); if
+     * (currentView instanceof HomeView) { homeView.updateView(height, width, browser); } else if
+     * (currentView instanceof ProjectView) { projectView.updateView(height, width, browser); } else
+     * if (currentView instanceof ExperimentView) { experimentView.updateView(height, width,
+     * browser); } else if (currentView instanceof PatientView) { patientView.updateView(height,
+     * width, browser); } else if (currentView instanceof AddPatientView) {
+     * addPatientView.updateView(height, width, browser); } } });
+     * 
+     * navigator.addViewChangeListener(new ViewChangeListener() {
+     * 
+     * @Override public boolean beforeViewChange(ViewChangeEvent event) { int height =
+     * getPage().getBrowserWindowHeight(); int width = getPage().getBrowserWindowWidth(); WebBrowser
+     * browser = getPage().getWebBrowser(); // View oldView = event.getOldView(); //
+     * this.setEnabled(oldView, false);
+     * 
+     * currentView = event.getNewView(); if (currentView instanceof HomeView) {
+     * homeView.updateView(height, width, browser); } if (currentView instanceof ProjectView) {
+     * projectView.updateView(height, width, browser); } if (currentView instanceof ExperimentView)
+     * { experimentView.updateView(height, width, browser); } if (currentView instanceof SampleView)
+     * { sampleView.updateView(height, width, browser); } else if (currentView instanceof
+     * PatientView) { patientView.updateView(height, width, browser); } else if (currentView
+     * instanceof AddPatientView) { addPatientView.updateView(height, width, browser); } return
+     * true; }
+     * 
+     * private void setEnabled(View view, boolean enabled) { // tv.setEnabled(enabled); if (view
+     * instanceof HomeView) { homeView.setEnabled(enabled); } if (view instanceof ProjectView) {
+     * projectView.setEnabled(enabled); } if (view instanceof ExperimentView) {
+     * experimentView.setEnabled(enabled); } if (view instanceof SampleView) {
+     * sampleView.setEnabled(enabled); } }
+     * 
+     * @Override public void afterViewChange(ViewChangeEvent event) { currentView =
+     * event.getNewView(); // this.setEnabled(currentView, true); Object currentBean = null; if
+     * (currentView instanceof ProjectView) { // TODO refactoring currentBean = new HashMap<String,
+     * AbstractMap.SimpleEntry<String, Long>>();
+     * 
+     * // Production // labelLayout.removeAllComponents(); Button header = new
+     * Button(projectView.getHeaderLabel()); header.setStyleName(ValoTheme.BUTTON_LARGE);
+     * header.addStyleName(ValoTheme.BUTTON_BORDERLESS); header.setIcon(FontAwesome.HAND_O_RIGHT);
+     * 
+     * // labelLayout.addComponent(header); } else if (currentView instanceof HomeView) {
+     * currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+     * 
+     * // labelLayout.removeAllComponents(); Button header = new Button(homeView.getHeader());
+     * header.setStyleName(ValoTheme.BUTTON_LARGE);
+     * header.addStyleName(ValoTheme.BUTTON_BORDERLESS); header.setIcon(FontAwesome.HAND_O_RIGHT);
+     * 
+     * // labelLayout.addComponent(header); // currentBean = projectView.getCurrentBean(); } else if
+     * (currentView instanceof ExperimentView) { currentBean = experimentView.getCurrentBean();
+     * 
+     * } else if (currentView instanceof SampleView) { // TODO refactoring currentBean = new
+     * HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+     * 
+     * // labelLayout.removeAllComponents(); Button header = new Button(sampleView.getHeader());
+     * header.setStyleName(ValoTheme.BUTTON_LARGE);
+     * header.addStyleName(ValoTheme.BUTTON_BORDERLESS); header.setIcon(FontAwesome.HAND_O_RIGHT);
+     * 
+     * // labelLayout.addComponent(header);
+     * 
+     * } else if (currentView instanceof DatasetView) { currentBean = new HashMap<String,
+     * AbstractMap.SimpleEntry<String, Long>>(); } else if (currentView instanceof PatientView) {
+     * currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+     * 
+     * // labelLayout.removeAllComponents(); Button header = new
+     * Button(patientView.getHeaderLabel()); header.setStyleName(ValoTheme.BUTTON_LARGE);
+     * header.addStyleName(ValoTheme.BUTTON_BORDERLESS); header.setIcon(FontAwesome.HAND_O_RIGHT);
+     * // labelLayout.addComponent(header); } else if (currentView instanceof AddPatientView) {
+     * currentBean = new HashMap<String, AbstractMap.SimpleEntry<String, Long>>();
+     * 
+     * // labelLayout.removeAllComponents(); Button header = new Button(addPatientView.getHeader());
+     * header.setStyleName(ValoTheme.BUTTON_LARGE);
+     * header.addStyleName(ValoTheme.BUTTON_BORDERLESS); header.setIcon(FontAwesome.HAND_O_RIGHT);
+     * // labelLayout.addComponent(header); } try { PortletSession portletSession =
+     * QbicmainportletUI.getCurrent().getPortletSession(); if (portletSession != null) {
+     * portletSession.setAttribute("qbic_download", currentBean, PortletSession.APPLICATION_SCOPE);
+     * } } catch (NullPointerException e) { // nothing to do. during initialization that might
+     * happen. Nothing to worry about }
+     * 
+     * 
+     * }
+     * 
+     * });
+     */
 
     /*
      * // go to correct page String requestParams = Page.getCurrent().getUriFragment();
@@ -573,7 +540,6 @@ public class QbicmainportletUI extends UI {
      * requestParams); } else { navigator.navigateTo(""); }
      */
   }
-
 
   /**
    * 

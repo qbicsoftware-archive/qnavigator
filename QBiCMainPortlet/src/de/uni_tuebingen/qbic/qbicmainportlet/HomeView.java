@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
- * Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -45,11 +45,11 @@ import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.WebBrowser;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -124,11 +124,11 @@ public class HomeView extends VerticalLayout implements View {
   }
 
   public void setSizeFull() {
-    homeview_content.setSizeFull();
-    super.setSizeFull();
+    // homeview_content.setSizeFull();
+    // super.setSizeFull();
     // this.table.setSizeFull();
     // this.projectGrid.setSizeFull();
-    homeview_content.setSpacing(true);
+    // homeview_content.setSpacing(true);
     // homeview_content.setMargin(true);
   }
 
@@ -153,6 +153,7 @@ public class HomeView extends VerticalLayout implements View {
     gpcProjects.removeContainerProperty("experiments");
     gpcProjects.removeContainerProperty("contact");
     gpcProjects.removeContainerProperty("contactPerson");
+    gpcProjects.removeContainerProperty("projectManager");
     gpcProjects.removeContainerProperty("containsData");
     gpcProjects.removeContainerProperty("description");
     gpcProjects.removeContainerProperty("progress");
@@ -165,11 +166,22 @@ public class HomeView extends VerticalLayout implements View {
     projectGrid.setHeightMode(HeightMode.ROW);
     projectGrid.setHeightByRows(20);
 
-    projectGrid.getColumn("code").setHeaderCaption("Sub-Project").setWidth(100);
-    projectGrid.getColumn("secondaryName").setHeaderCaption("Short Name");
-    projectGrid.getColumn("space").setHeaderCaption("Project").setWidth(300);
-    projectGrid.getColumn("principalInvestigator").setHeaderCaption("Investigator").setWidth(210);
+    // projectGrid.getColumn("space").setWidthUndefined();
+    // projectGrid.getColumn("code").setWidthUndefined();
+    // projectGrid.getColumn("secondaryName").setWidthUndefined();
+    // projectGrid.getColumn("principalInvestigator").setWidthUndefined();
+
+    projectGrid.getColumn("code").setHeaderCaption("Sub-Project").setWidth(150);
+    // projectGrid.getColumn("space").setWidth(200);
+
+    Column nameCol = projectGrid.getColumn("secondaryName");
+    nameCol.setHeaderCaption("Short Name");
+    nameCol.setMaximumWidth(450);
+    projectGrid.getColumn("space").setMaximumWidth(350);
+    projectGrid.getColumn("space").setHeaderCaption("Project");
+    projectGrid.getColumn("principalInvestigator").setHeaderCaption("Investigator");
     projectGrid.setColumnOrder("code", "space", "secondaryName", "principalInvestigator");
+
     projectGrid.setResponsive(true);
 
     helpers.GridFunctions.addColumnFilters(projectGrid, gpcProjects);
@@ -185,6 +197,9 @@ public class HomeView extends VerticalLayout implements View {
         return String.class;
       }
     });
+
+    projectGrid.getColumn("Summary").setWidthUndefined();
+
 
     projectGrid.getColumn("Summary").setRenderer(new ButtonRenderer(new RendererClickListener() {
 
@@ -211,8 +226,8 @@ public class HomeView extends VerticalLayout implements View {
         // fetch summary and create docx in tmp folder
 
         ProjectBean proj = (ProjectBean) event.getItemId();
-        summaryFetcher.fetchSummaryComponent(proj.getCode(), proj.getSecondaryName(),
-            proj.getDescription(),
+        summaryFetcher.fetchSummaryComponent(proj.getCode(), proj.getSecondaryName(), proj
+            .getDescription(),
             new ProjectSummaryReadyRunnable(summaryFetcher, loadingWindow, proj.getCode()));
       }
     }));
@@ -267,7 +282,7 @@ public class HomeView extends VerticalLayout implements View {
    * @param browser
    */
   public void updateView(int browserHeight, int browserWidth, WebBrowser browser) {
-    setWidth((browserWidth * 0.85f), Unit.PIXELS);
+    // setWidth((browserWidth * 0.85f), Unit.PIXELS);
   }
 
   /**
@@ -293,80 +308,55 @@ public class HomeView extends VerticalLayout implements View {
   }
 
   void buildLayout(int browserHeight, int browserWidth, WebBrowser browser) {
-    this.setWidth("100%");
-
-    this.setMargin(new MarginInfo(false, false, false, false));
     // clean up first
-    homeview_content.removeAllComponents();
-    homeview_content.setWidth("100%");
+    // homeview_content.removeAllComponents();
+    removeAllComponents();
 
-    updateView(browserWidth, browserWidth, browser);
+    // updateView(browserWidth, browserWidth, browser);
 
     // view overall statistics
-    VerticalLayout homeViewDescription = new VerticalLayout();
+    // VerticalLayout homeViewDescription = new VerticalLayout();
 
-    Label statContent;
-    if (numberOfProjects > 0) {
-      statContent = new Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
-      setHeader(String.format("Total number of Sub-Projects: %s", numberOfProjects));
-    } else {
-      statContent = new Label(
-          String.format("You have no projects so far. Please contact your project manager."));
-      statContent.addStyleName(ValoTheme.LABEL_FAILURE);
-      statContent.addStyleName(ValoTheme.LABEL_LARGE);
-    }
+    /*
+     * Label statContent; if (numberOfProjects > 0) { statContent = new
+     * Label(String.format("You have %s Sub-Project(s)", numberOfProjects));
+     * setHeader(String.format("Total number of Sub-Projects: %s", numberOfProjects)); } else {
+     * statContent = new Label(
+     * String.format("You have no projects so far. Please contact your project manager."));
+     * statContent.addStyleName(ValoTheme.LABEL_FAILURE);
+     * statContent.addStyleName(ValoTheme.LABEL_LARGE); }
+     */
 
-    homeViewDescription.setWidth("100%");
-    homeview_content.addComponent(homeViewDescription);
+    // homeViewDescription.setWidth("100%");
+    // homeview_content.addComponent(homeViewDescription);
 
 
     // table
-    VerticalLayout tableSection = new VerticalLayout();
-    VerticalLayout tableSectionContent = new VerticalLayout();
+    // VerticalLayout tableSection = new VerticalLayout();
+    // VerticalLayout tableSectionContent = new VerticalLayout();
 
-    tableSectionContent.setCaption("Sub-Projects");
-    tableSectionContent.setIcon(FontAwesome.TABLE);
+    // tableSectionContent.setCaption("Sub-Projects");
+    // tableSectionContent.setIcon(FontAwesome.TABLE);
     // tableSectionContent.addComponent(this.table);
-    tableSectionContent.addComponent(this.projectGrid);
+    addComponent(projectGrid);
 
-    tableSection.setMargin(new MarginInfo(false, false, false, false));
+    setCaption("Sub-Projects");
+    setIcon(FontAwesome.TABLE);
 
-    this.projectGrid.setWidth("100%");
-    this.projectGrid.setSelectionMode(SelectionMode.SINGLE);
+    // tableSection.setMargin(new MarginInfo(false, false, false, false));
 
-    tableSection.setWidth("100%");
-    tableSectionContent.setWidth("100%");
+    projectGrid.setWidth(100, Unit.PERCENTAGE);
+    projectGrid.setSelectionMode(SelectionMode.SINGLE);
+    projectGrid.setResponsive(true);
 
-    tableSection.addComponent(tableSectionContent);
-    homeview_content.addComponent(tableSection);
-    this.addComponent(homeview_content);
-  }
+    // tableSection.setWidth("100%");
+    // tableSectionContent.setWidth("100%");
 
-  private void tableClickChangeTreeView() {
-    table.setSelectable(true);
-    table.setImmediate(true);
-    this.table
-        .addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
-  }
-
-
-  private FilterTable buildFilterTable() {
-    FilterTable filterTable = new FilterTable();
-
-    filterTable.setFilterDecorator(new DatasetViewFilterDecorator());
-    filterTable.setFilterGenerator(new DatasetViewFilterGenerator());
-
-    filterTable.setFilterBarVisible(true);
-
-    filterTable.setSelectable(true);
-    filterTable.setImmediate(true);
-
-    // filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
-
-    filterTable.setColumnCollapsingAllowed(false);
-
-    filterTable.setColumnReorderingAllowed(true);
-    return filterTable;
+    // tableSection.addComponent(tableSectionContent);
+    // homeview_content.addComponent(tableSection);
+    setWidth(100, Unit.PERCENTAGE);
+    setResponsive(true);
+    // this.addComponent(homeview_content);
   }
 
   @Override
@@ -378,13 +368,17 @@ public class HomeView extends VerticalLayout implements View {
       buildLayout(height, width, event.getNavigator().getUI().getPage().getWebBrowser());
     } catch (Exception e) {
       LOGGER.error(String.format("failed to load projects for user %s", user), e);
-      homeview_content.removeAllComponents();
+      // homeview_content.removeAllComponents();
+      removeAllComponents();
       Label error = new Label("Connection to database interrupted. Please try again later.");
       error.addStyleName(ValoTheme.LABEL_FAILURE);
       error.addStyleName(ValoTheme.LABEL_HUGE);
-      homeview_content.addComponent(error);
-      homeview_content.setComponentAlignment(error, Alignment.MIDDLE_CENTER);
-      this.addComponent(homeview_content);
+      addComponent(error);
+      setComponentAlignment(error, Alignment.MIDDLE_CENTER);
+
+      // homeview_content.addComponent(error);
+      // homeview_content.setComponentAlignment(error, Alignment.MIDDLE_CENTER);
+      // this.addComponent(homeview_content);
     }
   }
 
@@ -410,8 +404,9 @@ public class HomeView extends VerticalLayout implements View {
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
     LOGGER.info("Loading projects...");
-    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
-        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+    List<Project> projects =
+        datahandler.getOpenBisClient().getOpenbisInfoService()
+            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     LOGGER.info("Loading projects...done.");
 
     for (Project project : projects) {
@@ -432,15 +427,16 @@ public class HomeView extends VerticalLayout implements View {
       if (secondaryName.isEmpty() || secondaryName == null)
         secondaryName = "None";
 
-      ProjectBean newProjectBean = new ProjectBean(projectIdentifier, projectCode, secondaryName,
-          desc, project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
-          new ProgressBar(), new Date(), "", "", null, false);
+      ProjectBean newProjectBean =
+          new ProjectBean(projectIdentifier, projectCode, secondaryName, desc,
+              project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
+              new ProgressBar(), new Date(), "", "", null, false, "");
 
       // TODO isn't this slow in this fashion? what about SELECT * and creating a map?
       String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectIdentifier);
 
       if (pi.equals("")) {
-        newProjectBean.setPrincipalInvestigator("No information provided.");
+        newProjectBean.setPrincipalInvestigator("n/a");
       } else {
         newProjectBean.setPrincipalInvestigator(pi);
       }

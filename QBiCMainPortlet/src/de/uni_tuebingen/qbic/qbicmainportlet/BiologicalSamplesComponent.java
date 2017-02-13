@@ -38,8 +38,8 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
@@ -108,6 +108,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
     sampleBioGrid = new Grid();
     sampleEntityGrid = new Grid();
 
+    vert.setMargin(new MarginInfo(false, true, false, false));
+
     sampleEntityGrid.addSelectionListener(new SelectionListener() {
 
       @Override
@@ -131,8 +133,10 @@ public class BiologicalSamplesComponent extends CustomComponent {
     });
 
     mainLayout = new VerticalLayout(vert);
+    mainLayout.setResponsive(true);
+    setResponsive(true);
 
-    this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
+    // this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
 
@@ -460,12 +464,16 @@ public class BiologicalSamplesComponent extends CustomComponent {
    */
   private void buildLayout() {
     this.vert.removeAllComponents();
-    this.vert.setWidth("100%");
+    this.vert.setSizeFull();
+    vert.setResponsive(true);
 
     // Table (containing datasets) section
     VerticalLayout tableSection = new VerticalLayout();
     HorizontalLayout tableSectionContent = new HorizontalLayout();
     HorizontalLayout sampletableSectionContent = new HorizontalLayout();
+    tableSection.setResponsive(true);
+    tableSectionContent.setResponsive(true);
+    sampletableSectionContent.setResponsive(true);
 
     tableSectionContent.setMargin(new MarginInfo(true, false, true, false));
     sampletableSectionContent.setMargin(new MarginInfo(true, false, false, false));
@@ -476,9 +484,9 @@ public class BiologicalSamplesComponent extends CustomComponent {
         .addComponent(new Label(
             String
                 .format(
-                    "This view shows the sample sources (e.g., human, mouse) to be studied and the corresponding extracted samples. With sample sources, information specific to the subject (e.g., age or BMI in the case of patient data) can be stored. The extracted sample is a sample which has been extracted from the corresponding sample source. This is the raw sample material that can be later prepared for specific analytical methods such as MS or NGS. "
+                    "This view shows the sample sources (e.g., human, mouse) to be studied and the corresponding extracted samples. With sample sources, information specific to the subject (e.g., age or BMI in the case of patient data) can be stored. The extracted sample is a sample which has been extracted from the corresponding sample source. This is the raw sample material that can be later prepared for specific analytical methods such as MS or NGS.<br> "
                         + "\n\n There are %s extracted  samples coming from %s distinct sample sources in this study.",
-                    numberOfBioSamples, numberOfEntitySamples), Label.CONTENT_PREFORMATTED));
+                    numberOfBioSamples, numberOfEntitySamples), ContentMode.HTML));
 
     tableSectionContent.addComponent(sampleBioGrid);
     sampletableSectionContent.addComponent(sampleEntityGrid);
@@ -493,8 +501,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
     tableSection.addComponent(tableSectionContent);
     this.vert.addComponent(tableSection);
 
-    sampleBioGrid.setWidth("100%");
-    sampleEntityGrid.setWidth("100%");
+    sampleBioGrid.setWidth(100, Unit.PERCENTAGE);
+    sampleEntityGrid.setWidth(100, Unit.PERCENTAGE);
 
     // sampleBioGrid.setHeightMode(HeightMode.ROW);
     // sampleEntityGrid.setHeightMode(HeightMode.ROW);
@@ -502,8 +510,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
     // sampleBioGrid.setHeightByRows(Math.min(10, numberOfBioSamples));
     // sampleEntityGrid.setHeightByRows(Math.min(10, 5));
 
-    tableSection.setWidth("100%");
-    sampletableSectionContent.setWidth("100%");
-    tableSectionContent.setWidth("100%");
+    tableSection.setSizeFull();
+    sampletableSectionContent.setSizeFull();
+    tableSectionContent.setSizeFull();
   }
 }
