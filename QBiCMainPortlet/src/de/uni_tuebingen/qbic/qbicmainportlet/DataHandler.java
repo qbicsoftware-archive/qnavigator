@@ -559,6 +559,8 @@ public class DataHandler implements Serializable {
       experimentBeans.addBean(newExperimentBean);
     }
 
+    newProjectBean.setLongDescription(longDesc);
+
     newProjectBean.setContainsData(this.getOpenBisClient()
         .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier).size() != 0);
 
