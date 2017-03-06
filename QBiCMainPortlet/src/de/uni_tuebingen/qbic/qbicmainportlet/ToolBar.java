@@ -17,8 +17,6 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import java.util.ArrayList;
 
-import views.WorkflowView;
-
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
