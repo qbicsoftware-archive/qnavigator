@@ -38,8 +38,10 @@ public class EditableLabel extends VerticalLayout {
     label.setContentMode(ContentMode.HTML);
     if (value.isEmpty()) {
       label.setHeight(100, Unit.PIXELS);
+      editArea.setHeight(100, Unit.PERCENTAGE);
     } else {
       label.setHeightUndefined();
+      editArea.setHeightUndefined();
     }
     editArea.setConverter(new HTMLConverter());
 
@@ -51,12 +53,7 @@ public class EditableLabel extends VerticalLayout {
     editArea.setResponsive(true);
     setResponsive(true);
     setMargin(true);
-    // setSpacing(true);
-    // addStyleName(ValoTheme.LAYOUT_CARD);
-    // label.setIcon(FontAwesome.PENCIL);
-    // editArea.setPropertyDataSource(label);
     editArea.setWidth(100, Unit.PERCENTAGE);
-    editArea.setHeight(100, Unit.PERCENTAGE);
     setDescription("Double click to change value");
     addComponent(label);
     addListeners();

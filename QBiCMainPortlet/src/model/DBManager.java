@@ -20,7 +20,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import logging.Log4j2Logger;
@@ -250,6 +252,9 @@ public class DBManager {
 
   public boolean changeLongProjectDescription(String projectIdentifier, String description) {
     LOGGER.info("Adding/Updating long description of project " + projectIdentifier);
+    boolean saved = saveOldDescription(projectIdentifier);
+    if(! saved)
+      LOGGER.warn("Could not save old project description to database!");
     String sql = "UPDATE projects SET long_description = ? WHERE openbis_project_identifier = ?";
     Connection conn = login();
     PreparedStatement statement = null;
@@ -258,6 +263,49 @@ public class DBManager {
       statement = conn.prepareStatement(sql);
       statement.setString(1, description);
       statement.setString(2, projectIdentifier);
+      statement.execute();
+      res = statement.getUpdateCount();
+      LOGGER.info("Successful.");
+    } catch (SQLException e) {
+      LOGGER.error("SQL operation unsuccessful: " + e.getMessage());
+      e.printStackTrace();
+    } finally {
+      endQuery(conn, statement);
+    }
+    return res != -1;
+  }
+
+  private boolean saveOldDescription(String projectIdentifier) {
+    String sql = "SELECT * from projects WHERE openbis_project_identifier = ?";
+    int id = -1;
+    String oldDescription = "";
+    String oldTitle = "";
+    Connection conn = login();
+    PreparedStatement statement = null;
+    try {
+      statement = conn.prepareStatement(sql);
+      statement.setString(1, projectIdentifier);
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        id = rs.getInt("id");
+        oldDescription = rs.getString("long_description");
+        oldTitle = rs.getString("short_title");
+      }
+    } catch (SQLException e) {
+      LOGGER.error("SQL operation unsuccessful: " + e.getMessage());
+      e.printStackTrace();
+    }
+    Date date = new java.util.Date();
+    Timestamp timestamp = new Timestamp(date.getTime());
+    sql = "INSERT INTO projects_history (project_id, timestamp, long_description, short_title) VALUES(?, ?, ?, ?)";
+    statement = null;
+    int res = -1;
+    try {
+      statement = conn.prepareStatement(sql);
+      statement.setInt(1, id);
+      statement.setTimestamp(2, timestamp);
+      statement.setString(3, oldDescription);
+      statement.setString(4, oldTitle);
       statement.execute();
       res = statement.getUpdateCount();
       LOGGER.info("Successful.");
@@ -322,25 +370,5 @@ public class DBManager {
     logout(conn);
     return res;
   }
-
-  // public Map<Integer, String> getPrincipalInvestigatorsWithIDs() {
-  // String sql = "SELECT pi_id, first_name, last_name FROM project_investigators WHERE active = 1";
-  // Map<Integer, String> res = new HashMap<Integer, String>();
-  // Connection conn = login();
-  // try (PreparedStatement statement = conn.prepareStatement(sql)) {
-  // ResultSet rs = statement.executeQuery();
-  // while (rs.next()) {
-  // int pi_id = rs.getInt("pi_id");
-  // String first = rs.getString("first_name");
-  // String last = rs.getString("last_name");
-  // res.put(pi_id, first + " " + last);
-  // }
-  // statement.close();
-  // } catch (SQLException e) {
-  // e.printStackTrace();
-  // }
-  // logout(conn);
-  // return res;
-  // }
 
 }
