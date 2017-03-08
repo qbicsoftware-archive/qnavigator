@@ -1,15 +1,15 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
- * Mohr, David Wojnar, Andreas Friedrich
- *
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
+ * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
@@ -28,12 +28,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
+import logging.Log4j2Logger;
+import logging.Logger;
 import model.ProjectBean;
 
 import com.liferay.portal.kernel.exception.PortalException;
@@ -65,10 +64,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.qbicmainportlet.CustomVisibilityComponent;
-import de.uni_tuebingen.qbic.qbicmainportlet.PatientView;
 import de.uni_tuebingen.qbic.qbicmainportlet.VisibilityChangeListener;
-import logging.Log4j2Logger;
-import logging.Logger;
 
 public class Utils {
   private static Logger LOGGER = new Log4j2Logger(Utils.class);
@@ -176,7 +172,8 @@ public class Utils {
           return null;
         }
       }
-    }, String.format("%s_table_contents.tsv", id));
+      // remove slashes and get rid of leading underscore afterwards
+    }, String.format("%s_table_contents.tsv", id.replace("/", "_").substring(1)));
     return resource;
   }
 
@@ -368,8 +365,8 @@ public class Utils {
       company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
       companyId = company.getCompanyId();
     } catch (PortalException | SystemException e) {
-      LOGGER
-          .error("liferay error, could not retrieve companyId. Trying default companyId, which is "
+      LOGGER.error(
+          "liferay error, could not retrieve companyId. Trying default companyId, which is "
               + companyId, e.getStackTrace());
     }
     User user = null;
@@ -393,8 +390,9 @@ public class Utils {
   public void generateProjectReport(ProjectBean projectBean) {
     Writer report = null;
     try {
-      report = new BufferedWriter(
-          new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"), "utf-8"));
+      report =
+          new BufferedWriter(new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"),
+              "utf-8"));
 
       // write tex file header
       report.write("\\documentclass[ngerman]{scrartcl} \n");

@@ -425,7 +425,7 @@ public class HomeView extends VerticalLayout implements View {
       // TODO isn't this slow in this fashion? what about SELECT * and creating a map?
       String secondaryName = datahandler.getDatabaseManager().getProjectName(projectIdentifier);
       if (secondaryName.isEmpty() || secondaryName == null)
-        secondaryName = "None";
+        secondaryName = "n/a";
 
       ProjectBean newProjectBean =
           new ProjectBean(projectIdentifier, projectCode, secondaryName, desc,

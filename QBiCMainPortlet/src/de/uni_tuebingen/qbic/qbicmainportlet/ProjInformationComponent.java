@@ -18,7 +18,6 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
@@ -200,6 +199,7 @@ public class ProjInformationComponent extends CustomComponent {
     descEdit = new Button("Edit Description");
     descEdit.setIcon(FontAwesome.PENCIL);
     descEdit.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+    descEdit.setResponsive(true);
 
     descEdit.addClickListener(new ClickListener() {
 
@@ -344,6 +344,8 @@ public class ProjInformationComponent extends CustomComponent {
           datahandler.createProjectStatusComponentNew(datahandler
               .computeProjectStatuses(currentBean));
       statusPanel.setContent(statusContent);
+      statusPanel.setResponsive(true);
+      statusPanel.setResponsive(true);
       statusContent.setWidth(25, Unit.PERCENTAGE);
 
 
@@ -358,7 +360,7 @@ public class ProjInformationComponent extends CustomComponent {
       datasetContainer.addContainerProperty("File Name", String.class, null);
       datasetContainer.addContainerProperty("File Type", String.class, null);
       datasetContainer.addContainerProperty("Dataset Type", String.class, null);
-      datasetContainer.addContainerProperty("Registration Date", Timestamp.class, null);
+      datasetContainer.addContainerProperty("Registration Date", String.class, null);
       datasetContainer.addContainerProperty("Validated", Boolean.class, null);
       datasetContainer.addContainerProperty("File Size", String.class, null);
       datasetContainer.addContainerProperty("file_size_bytes", Long.class, null);
@@ -459,12 +461,12 @@ public class ProjInformationComponent extends CustomComponent {
 
         for (DatasetBean d : dsBeans) {
           Date date = d.getRegistrationDate();
-          SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+          SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
           String dateString = sd.format(date);
-          Timestamp ts = Timestamp.valueOf(dateString);
+          // Timestamp ts = Timestamp.valueOf(dateString);
           String sampleID = samples.get(d.getCode());
 
-          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, ts, null);
+          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, dateString, null);
         }
       }
 
@@ -839,7 +841,7 @@ public class ProjInformationComponent extends CustomComponent {
 
   @SuppressWarnings("unchecked")
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
-      String project, String sample, Timestamp ts, Object parent) {
+      String project, String sample, String ts, Object parent) {
     if (d.hasChildren()) {
 
       Object new_ds = dataset_container.addItem();

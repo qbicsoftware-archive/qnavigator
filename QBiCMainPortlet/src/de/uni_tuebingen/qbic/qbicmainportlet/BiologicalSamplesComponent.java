@@ -414,34 +414,40 @@ public class BiologicalSamplesComponent extends CustomComponent {
       @Override
       public void click(RendererClickEvent event) {
         BeanItem selected = (BeanItem) samplesBio.getItem(event.getItemId());
-        BiologicalSampleBean selectedSample = (BiologicalSampleBean) selected.getBean();
 
-        Window subWindow = new Window();
+        try {
+          BiologicalSampleBean selectedSample = (BiologicalSampleBean) selected.getBean();
 
-        changeMetadata.updateUI(selectedSample.getId(), selectedSample.getType());
-        VerticalLayout subContent = new VerticalLayout();
-        subContent.setMargin(true);
-        subContent.addComponent(changeMetadata);
-        subWindow.setContent(subContent);
-        // Center it in the browser window
-        subWindow.center();
-        subWindow.setModal(true);
-        subWindow.setResizable(false);
+          Window subWindow = new Window();
 
-        subWindow.addCloseListener(new CloseListener() {
-          /**
+          changeMetadata.updateUI(selectedSample.getId(), selectedSample.getType());
+          VerticalLayout subContent = new VerticalLayout();
+          subContent.setMargin(true);
+          subContent.addComponent(changeMetadata);
+          subWindow.setContent(subContent);
+          // Center it in the browser window
+          subWindow.center();
+          subWindow.setModal(true);
+          subWindow.setResizable(false);
+
+          subWindow.addCloseListener(new CloseListener() {
+            /**
            * 
            */
-          private static final long serialVersionUID = -1329152609834711109L;
+            private static final long serialVersionUID = -1329152609834711109L;
 
-          @Override
-          public void windowClose(CloseEvent e) {
-            updateUI(currentID);
-          }
-        });
+            @Override
+            public void windowClose(CloseEvent e) {
+              updateUI(currentID);
+            }
+          });
 
-        QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
-        ui.addWindow(subWindow);
+          QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
+          ui.addWindow(subWindow);
+        } catch (NullPointerException e) {
+          System.err.println("NullPointerException while trying to set metadata: " + e.getMessage());
+
+        }
       }
     }));
 

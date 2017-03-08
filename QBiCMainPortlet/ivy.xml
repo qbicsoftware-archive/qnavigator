@@ -62,5 +62,8 @@
   		<!--name conversion -->
   		<dependency org="org.apache.commons" name="commons-collections4" rev="4.0" />
   		
+  		<!--vaadin charts -->
+  		<dependency org="com.vaadin.addon" name="vaadin-charts" rev="3.2.0" />
+  		
 	</dependencies>
 </ivy-module>

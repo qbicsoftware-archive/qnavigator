@@ -2411,6 +2411,7 @@ public class DataHandler implements Serializable {
    */
   public VerticalLayout createProjectStatusComponentNew(Map<String, Integer> statusValues) {
     VerticalLayout projectStatusContent = new VerticalLayout();
+    projectStatusContent.setResponsive(true);
     projectStatusContent.setMargin(true);
     projectStatusContent.setSpacing(true);
 
@@ -2422,6 +2423,7 @@ public class DataHandler implements Serializable {
       if ((Integer) pairs.getValue() == 0) {
         Label statusLabel = new Label(pairs.getKey());
         statusLabel.setStyleName(ValoTheme.LABEL_FAILURE);
+        statusLabel.setResponsive(true);
         // statusLabel.addStyleName("redicon");
         projectStatusContent.addComponent(statusLabel);
       }
@@ -2429,6 +2431,7 @@ public class DataHandler implements Serializable {
       else {
         Label statusLabel = new Label(pairs.getKey());
         statusLabel.setStyleName(ValoTheme.LABEL_SUCCESS);
+        statusLabel.setResponsive(true);
 
         // statusLabel.addStyleName("greenicon");
 

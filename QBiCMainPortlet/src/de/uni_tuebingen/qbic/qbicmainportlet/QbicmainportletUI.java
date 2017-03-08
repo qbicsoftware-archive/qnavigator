@@ -85,7 +85,7 @@ public class QbicmainportletUI extends UI {
 
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "1.6.0";
-  private String revision = "c71da4c";
+  private String revision = "ee24d3b";
   private String resUrl;
   protected View currentView;
 
@@ -346,6 +346,7 @@ public class QbicmainportletUI extends UI {
 
     Button homeButton = new Button("Home");
     homeButton.setIcon(FontAwesome.HOME);
+    homeButton.setResponsive(true);
     homeButton.setStyleName(ValoTheme.BUTTON_LARGE);
     homeButton.addClickListener(new Button.ClickListener() {
 
@@ -378,6 +379,7 @@ public class QbicmainportletUI extends UI {
       Button addPatient = new Button("Add Patient");
       addPatient.setIcon(FontAwesome.PLUS);
       addPatient.setStyleName(ValoTheme.BUTTON_LARGE);
+      addPatient.setResponsive(true);
       // addPatient.setStyleName("addpatient");
 
       addPatient.addClickListener(new ClickListener() {

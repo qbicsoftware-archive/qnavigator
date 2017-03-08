@@ -17,7 +17,9 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import logging.Log4j2Logger;
 import logging.Logger;
@@ -147,6 +149,8 @@ public class ExperimentComponent extends CustomComponent {
     gpc.removeContainerProperty("samples");
     gpc.removeContainerProperty("status");
     gpc.removeContainerProperty("typeLabels");
+    gpc.removeContainerProperty("registrationDate");
+
 
     experiments.addItemClickListener(new ItemClickListener() {
 
@@ -188,9 +192,27 @@ public class ExperimentComponent extends CustomComponent {
       }
     });
 
+    gpc.addGeneratedProperty("registrationDate", new PropertyValueGenerator<String>() {
+
+      @Override
+      public Class<String> getType() {
+        return String.class;
+      }
+
+      @Override
+      public String getValue(Item item, Object itemId, Object propertyId) {
+        BeanItem selected = (BeanItem) projectBean.getExperiments().getItem(itemId);
+        ExperimentBean expBean = (ExperimentBean) selected.getBean();
+        Date date = expBean.getRegistrationDate();
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
+        String dateString = sd.format(date);
+
+        return dateString;
+      }
+    });
+
     experiments.setContainerDataSource(gpc);
     experiments.getColumn("prettyType").setHeaderCaption("Type");
-
     experiments.getColumn("edit").setRenderer(new ButtonRenderer(new RendererClickListener() {
 
       @Override
@@ -222,6 +244,7 @@ public class ExperimentComponent extends CustomComponent {
     experiments.getColumn("edit").setWidth(70);
     experiments.setColumnOrder("edit", "prettyType");
     experiments.getColumn("edit").setHeaderCaption("");
+
     // experiments.setHeightMode(HeightMode.ROW);
     // experiments.setHeightByRows(gpc.size());
 
