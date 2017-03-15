@@ -226,7 +226,8 @@ public class SummaryFetcher {
                                                                              // added
           VerticalLayout section = new VerticalLayout();
           // create vaadin and docx section
-          generateExperimentHeaderWithMetadata(e, section, wordMLPackage.getMainDocumentPart(), expTypeToProperties);
+          generateExperimentHeaderWithMetadata(e, section, wordMLPackage.getMainDocumentPart(),
+              expTypeToProperties);
 
           Table sampleTable = generateSampleTable(expToSamples.get(e), sampIDToDS,
               expIDToDS.get(e.getIdentifier()), wordMLPackage.getMainDocumentPart());
@@ -271,8 +272,8 @@ public class SummaryFetcher {
     }
   }
 
-  private void generateExperimentHeaderWithMetadata(Experiment e, VerticalLayout section, MainDocumentPart mainDocumentPart,
-      Map<String, List<PropertyType>> expTypeToProperties) {
+  private void generateExperimentHeaderWithMetadata(Experiment e, VerticalLayout section,
+      MainDocumentPart mainDocumentPart, Map<String, List<PropertyType>> expTypeToProperties) {
     String expHeadline =
         expTypeTranslation.get(e.getExperimentTypeCode()) + " (" + e.getCode() + ")";
 
@@ -356,15 +357,15 @@ public class SummaryFetcher {
     if (samples.size() > 50) {
       header.add("Samples");
       header.add("Datasets");
-      table.addContainerProperty("Samples", Integer.class, null);
-      table.addContainerProperty("Datasets", Integer.class, null);
-      List<Object> row = new ArrayList<Object>();
+      table.addContainerProperty("Samples", String.class, null);
+      table.addContainerProperty("Datasets", String.class, null);
+      List<String> row = new ArrayList<String>();
 
-      row.add(samples.size());
-      row.add(numDS);
-      // row.add(new Button(""));
+      row.add(Integer.toString(samples.size()));
+      row.add(Integer.toString(numDS));
       table.addItem(row.toArray(new Object[row.size()]), 1);
       table.setPageLength(1);
+      data.add(row); // test
     } else {
       header.add("Code");
       header.add("Name");
