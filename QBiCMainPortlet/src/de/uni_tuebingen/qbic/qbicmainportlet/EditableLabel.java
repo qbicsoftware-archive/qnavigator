@@ -17,13 +17,14 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.HTMLConverter;
 
+import org.vaadin.hene.expandingtextarea.ExpandingTextArea;
+
 import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 
 public class EditableLabel extends VerticalLayout {
@@ -32,16 +33,16 @@ public class EditableLabel extends VerticalLayout {
    */
   private static final long serialVersionUID = -2770589094081457177L;
   private Label label = new Label();
-  private TextArea editArea = new TextArea();
+  private ExpandingTextArea editArea = new ExpandingTextArea();
 
   public EditableLabel(String value) {
     label.setContentMode(ContentMode.HTML);
     if (value.isEmpty()) {
       label.setHeight(100, Unit.PIXELS);
-      editArea.setHeight(100, Unit.PERCENTAGE);
+//      editArea.setHeight(100, Unit.PERCENTAGE);
     } else {
       label.setHeightUndefined();
-      editArea.setHeightUndefined();
+//      editArea.setHeightUndefined();
     }
     editArea.setConverter(new HTMLConverter());
 
@@ -98,11 +99,11 @@ public class EditableLabel extends VerticalLayout {
     editArea.addBlurListener(l);
   }
 
-  public TextArea getTextField() {
+  public ExpandingTextArea getTextField() {
     return editArea;
   }
 
-  public void setTextArea(TextArea textField) {
+  public void setTextArea(ExpandingTextArea textField) {
     this.editArea = textField;
   }
 }
