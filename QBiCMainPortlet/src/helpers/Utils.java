@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -365,8 +365,8 @@ public class Utils {
       company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
       companyId = company.getCompanyId();
     } catch (PortalException | SystemException e) {
-      LOGGER.error(
-          "liferay error, could not retrieve companyId. Trying default companyId, which is "
+      LOGGER
+          .error("liferay error, could not retrieve companyId. Trying default companyId, which is "
               + companyId, e.getStackTrace());
     }
     User user = null;
@@ -390,9 +390,8 @@ public class Utils {
   public void generateProjectReport(ProjectBean projectBean) {
     Writer report = null;
     try {
-      report =
-          new BufferedWriter(new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"),
-              "utf-8"));
+      report = new BufferedWriter(
+          new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"), "utf-8"));
 
       // write tex file header
       report.write("\\documentclass[ngerman]{scrartcl} \n");

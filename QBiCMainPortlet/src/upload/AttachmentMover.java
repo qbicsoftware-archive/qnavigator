@@ -13,7 +13,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 
-import concurrency.UpdateProgressBar;
 import logging.Log4j2Logger;
 
 /**
