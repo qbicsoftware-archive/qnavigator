@@ -25,7 +25,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
 import logging.Log4j2Logger;
-import main.OpenBisClient;
 import model.DBConfig;
 import model.DBManager;
 import submitter.Submitter;
@@ -65,6 +64,7 @@ import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
@@ -272,9 +272,9 @@ public class QbicmainportletUI extends UI {
         new HomeView(datahandler, "Your Projects", user, state, resUrl, manager.getTmpFolder());
     DatasetView datasetView = new DatasetView(datahandler, state, resUrl);
     final SampleView sampleView = new SampleView(datahandler, state, resUrl, multiscaleController);
-    BarcodeView barcodeView =
-        new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
-            manager.getBarcodePathVariable());
+//    BarcodeView barcodeView =
+//        new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
+//            manager.getBarcodePathVariable());
     final ExperimentView experimentView =
         new ExperimentView(datahandler, state, resUrl, multiscaleController);
     // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
@@ -311,7 +311,7 @@ public class QbicmainportletUI extends UI {
     navigator.addView(SampleView.navigateToLabel, sampleView);
     navigator.addView("", homeView);
     navigator.addView(ProjectView.navigateToLabel, projectView);
-    navigator.addView(BarcodeView.navigateToLabel, barcodeView);
+//    navigator.addView(BarcodeView.navigateToLabel, barcodeView);
     navigator.addView(ExperimentView.navigateToLabel, experimentView);
     navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateToLabel, addPatientView);

@@ -14,7 +14,6 @@ import java.util.Map;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import main.OpenBisClient;
 import model.notes.Note;
 import model.notes.Notes;
 
@@ -37,6 +36,7 @@ import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;

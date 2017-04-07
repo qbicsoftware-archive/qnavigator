@@ -16,6 +16,7 @@
 package controllers;
 
 import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import java.io.Serializable;
 import java.net.ConnectException;
@@ -31,7 +32,6 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 
 import logging.Log4j2Logger;
-import main.OpenBisClient;
 
 import org.apache.commons.lang.NotImplementedException;
 

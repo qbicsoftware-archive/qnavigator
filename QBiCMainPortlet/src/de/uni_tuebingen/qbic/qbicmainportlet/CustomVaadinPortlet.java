@@ -41,7 +41,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import main.OpenBisClient;
 import model.DatasetBean;
 import model.ExperimentBean;
 import model.ProjectBean;
@@ -49,6 +48,7 @@ import model.SampleBean;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;

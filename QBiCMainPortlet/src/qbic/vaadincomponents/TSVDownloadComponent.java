@@ -18,6 +18,7 @@
 package qbic.vaadincomponents;
 
 import helpers.TSVReadyRunnable;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import logging.Log4j2Logger;
-import main.OpenBisClient;
 
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
