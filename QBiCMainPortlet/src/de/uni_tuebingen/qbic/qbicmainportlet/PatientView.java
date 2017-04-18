@@ -16,6 +16,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,13 +30,13 @@ import java.util.TreeMap;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import main.OpenBisClient;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
+import upload.AttachmentUploadComponent;
+import views.WorkflowView;
 
 import org.tepi.filtertable.FilterTable;
 
-import views.WorkflowView;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
@@ -168,7 +169,7 @@ public class PatientView extends VerticalLayout implements View {
 
   private ConfigurationManager manager;
 
-  private UploadComponent uploadComponent;
+  private AttachmentUploadComponent uploadComponent;
 
   private ProjInformationComponent projectInformation;
 
@@ -253,7 +254,7 @@ public class PatientView extends VerticalLayout implements View {
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
     statusComponent = new PatientStatusComponent(datahandler, state, resourceUrl);
     workflowComponent = new WorkflowComponent(wfController);
-    uploadComponent = new UploadComponent();
+    uploadComponent = new AttachmentUploadComponent();
     projectInformation = new ProjInformationComponent(datahandler, state, resourceUrl);
     experimentComponent = new ExperimentComponent(datahandler, state, resourceUrl);
 
@@ -898,8 +899,9 @@ public class PatientView extends VerticalLayout implements View {
               ArrayList<String> message = new ArrayList<String>();
               message.add("clicked");
               message.add(currentBean.getId());
-              message.add(BarcodeView.navigateToLabel);
-              state.notifyObservers(message);
+              //TODO link to barcode dragon
+//              message.add(BarcodeView.navigateToLabel);
+//              state.notifyObservers(message);
             } else {
               ArrayList<String> message = new ArrayList<String>();
               message.add("clicked");

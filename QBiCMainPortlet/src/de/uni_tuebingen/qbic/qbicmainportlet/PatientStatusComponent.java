@@ -161,8 +161,9 @@ public class PatientStatusComponent extends CustomComponent {
           ArrayList<String> message = new ArrayList<String>();
           message.add("clicked");
           message.add(currentBean.getId());
-          message.add(BarcodeView.navigateToLabel);
-          state.notifyObservers(message);
+          //TODO navigate to barcode dragon rawwwr
+//          message.add(BarcodeView.navigateToLabel);
+//          state.notifyObservers(message);
         } else if (esb.getDescription().equals("Variant Annotation")) {
           /*
            * ArrayList<String> message = new ArrayList<String>(); message.add("clicked");

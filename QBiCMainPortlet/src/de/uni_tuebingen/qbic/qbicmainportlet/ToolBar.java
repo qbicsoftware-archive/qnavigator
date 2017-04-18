@@ -171,32 +171,32 @@ public class ToolBar extends HorizontalLayout {
           state.notifyObservers(message);
         }
       });
-      createBarcodes.setCommand(new MenuBar.Command() {
-        public void menuSelected(MenuItem selectedItem) {
-          ArrayList<String> message = new ArrayList<String>();
-          message.add("clicked");
-          message.add(id);
-          message.add(BarcodeView.navigateToLabel);
-          state.notifyObservers(message);
-        }
-      });
-
-      if (workflows.isEnabled() && workflows.isVisible()) {
-        workflows.setCommand(new MenuBar.Command() {
-          public void menuSelected(MenuItem selectedItem) {
-            ArrayList<String> message = new ArrayList<String>();
-            message.add("clicked");
-            StringBuilder sb = new StringBuilder("type=");
-            sb.append(type);
-            sb.append("&");
-            sb.append("id=");
-            sb.append(id);
-            message.add(sb.toString());
-            message.add(WorkflowView.navigateToLabel);
-            state.notifyObservers(message);
-          }
-        });
-      }
+//      createBarcodes.setCommand(new MenuBar.Command() {
+//        public void menuSelected(MenuItem selectedItem) {
+//          ArrayList<String> message = new ArrayList<String>();
+//          message.add("clicked");
+//          message.add(id);
+//          message.add(BarcodeView.navigateToLabel);
+//          state.notifyObservers(message);
+//        }
+//      });
+//
+//      if (workflows.isEnabled() && workflows.isVisible()) {
+//        workflows.setCommand(new MenuBar.Command() {
+//          public void menuSelected(MenuItem selectedItem) {
+//            ArrayList<String> message = new ArrayList<String>();
+//            message.add("clicked");
+//            StringBuilder sb = new StringBuilder("type=");
+//            sb.append(type);
+//            sb.append("&");
+//            sb.append("id=");
+//            sb.append(id);
+//            message.add(sb.toString());
+//            message.add(WorkflowView.navigateToLabel);
+//            state.notifyObservers(message);
+//          }
+//        });
+//      }
 
     }
 

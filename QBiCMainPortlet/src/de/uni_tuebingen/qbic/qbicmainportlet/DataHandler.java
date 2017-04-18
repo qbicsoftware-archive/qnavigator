@@ -17,6 +17,7 @@ package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.AlternativeSecondaryNameCreator;
 import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -39,7 +40,6 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 
 import logging.Log4j2Logger;
-import main.OpenBisClient;
 import model.DBManager;
 import model.DatasetBean;
 import model.ExperimentBean;

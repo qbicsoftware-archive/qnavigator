@@ -18,6 +18,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.OpenBisFunctions;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -34,7 +35,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.SwingConstants;
 
-import main.OpenBisClient;
 import model.ProjectBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;

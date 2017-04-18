@@ -16,6 +16,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,9 +30,9 @@ import java.util.TreeMap;
 
 import logging.Log4j2Logger;
 import logging.Logger;
-import main.OpenBisClient;
 import model.ExperimentBean;
 import model.ProjectBean;
+import upload.AttachmentUploadComponent;
 
 import org.tepi.filtertable.FilterTable;
 
@@ -136,7 +137,7 @@ public class ProjectView extends VerticalLayout implements View {
 
   private ConfigurationManager manager;
 
-  private UploadComponent uploadComponent;
+  private AttachmentUploadComponent uploadComponent;
 
   private ProjInformationComponent projectInformation;
 
@@ -205,7 +206,7 @@ public class ProjectView extends VerticalLayout implements View {
     measuredSamplesComponent = new LevelComponent(datahandler, state, resourceUrl, "Raw Data");
     resultsComponent = new LevelComponent(datahandler, state, resourceUrl, "Results");
     workflowComponent = new WorkflowComponent(wfController);
-    uploadComponent = new UploadComponent();
+    uploadComponent = new AttachmentUploadComponent();
     projectInformation = new ProjInformationComponent(datahandler, state, resourceUrl);
     experimentComponent = new ExperimentComponent(datahandler, state, resourceUrl);
 
