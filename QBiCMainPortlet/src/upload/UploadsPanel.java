@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -134,8 +135,7 @@ public class UploadsPanel extends VerticalLayout {
     toUpload.setVisible(false);
   }
 
-  private void addListeners() {
-  }
+  private void addListeners() {}
 
   private String getBarcode() {
     return project + "000";
@@ -254,14 +254,13 @@ public class UploadsPanel extends VerticalLayout {
     if (!openbis.sampleExists(sample)) {
       if (!openbis.expExists(space, project, experiment)) {
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("code", experiment);
-        params.put("type", "Q_PROJECT_DETAILS");
+        params.put("codes", new ArrayList<String>(Arrays.asList(experiment)));
+        params.put("types", new ArrayList<String>(Arrays.asList("Q_PROJECT_DETAILS")));
         params.put("project", project);
         params.put("space", space);
-        params.put("properties", params);
+        params.put("properties", new HashMap<String, Object>());
         params.put("user", userID);
         openbis.ingest("DSS1", "register-exp", params);
-
 
         while (!openbis.expExists(space, project, experiment))
           try {
@@ -278,7 +277,7 @@ public class UploadsPanel extends VerticalLayout {
       map.put("experiment", experiment);
       map.put("user", userID);
       map.put("type", "Q_ATTACHMENT_SAMPLE");
-      map.put("metadata", params);
+      map.put("metadata", new HashMap<String, Object>());
       params.put(sample, map);
       openbis.ingest("DSS1", "register-sample-batch", params);
       while (!openbis.sampleExists(sample))
