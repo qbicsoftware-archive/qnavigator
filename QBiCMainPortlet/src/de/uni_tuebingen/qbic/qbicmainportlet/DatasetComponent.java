@@ -597,7 +597,6 @@ public class DatasetComponent extends CustomComponent {
 
       List<DatasetBean> subList = d.getChildren();
 
-
       dataset_container.setChildrenAllowed(new_ds, true);
 
       dataset_container.getContainerProperty(new_ds, "Select").setValue(new CheckBox());
@@ -621,12 +620,15 @@ public class DatasetComponent extends CustomComponent {
         dataset_container.setParent(new_ds, parent);
       }
 
+//      LOGGER.debug(d+" has files/folders:");
       for (DatasetBean file : subList) {
+//        LOGGER.debug(file.getFileName());
         registerDatasetInTable(file, dataset_container, project, sample, ts, new_ds);
       }
 
     } else {
-      // System.out.println("Now it should be a file: " + filelist[0].getPathInDataSet());
+//      LOGGER.debug("(no more subfolders)");
+      // sut.println("Now it should be a file: " + filelist[0].getPathInDataSet());
 
       Object new_file = dataset_container.addItem();
       dataset_container.setChildrenAllowed(new_file, false);

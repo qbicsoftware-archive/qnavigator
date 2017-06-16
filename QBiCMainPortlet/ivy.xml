@@ -49,6 +49,8 @@
 		<!-- filter table -->	
 		<!-- <dependency org="org.vaadin.addons" name="filteringtable" rev="0.9.11.v7" /> -->
 		<!-- expanding text area -->
+		<!-- https://mvnrepository.com/artifact/org.apache.ant/ant -->
+		<dependency org="org.apache.ant" name="ant" rev="1.10.1"/>
 		<dependency org="org.vaadin.addons" name="expandingtextarea" rev="1.2.0" />
 		<!--logging -->
 		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.2" />
