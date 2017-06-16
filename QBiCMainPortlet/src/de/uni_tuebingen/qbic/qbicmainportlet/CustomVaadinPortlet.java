@@ -132,6 +132,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
     }
   }
 
+  //used!
   public void serveDownloadResource(javax.portlet.ResourceRequest request,
       javax.portlet.ResourceResponse response) throws PortletException, IOException {
     OpenBisClient openBisClient =
@@ -204,7 +205,7 @@ public class CustomVaadinPortlet extends VaadinPortlet {
 
       long tarFileLength = writer.computeTarLength2(entries);
 
-      LOGGER.debug(String.valueOf(tarFileLength));
+      LOGGER.debug("tar file length: "+String.valueOf(tarFileLength));
 
       // Integer fileSize = (int) (long) tarFileLength;
 
