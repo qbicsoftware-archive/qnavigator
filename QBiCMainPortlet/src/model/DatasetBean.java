@@ -140,7 +140,6 @@ public class DatasetBean implements Serializable {
 
   public void setChildren(List<DatasetBean> children) {
     this.children = children;
-    this.children.forEach(System.out::println);
   }
 
   public String getName() {

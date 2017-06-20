@@ -281,7 +281,7 @@ public class DataHandler implements Serializable {
       b.setDssPath(dssPath);
       long size = (Long) ss[3];
       b.setFileSize(size);
-      b.setRegistrationDate(new Date());
+      b.setRegistrationDate(parseDate((String) ss[5]));
       b.setProperties(props.get(dsCode));
 
       // both code and filename are needed for the keys to be unique
@@ -369,7 +369,8 @@ public class DataHandler implements Serializable {
     for (DatasetBean b : roots) {
       annoyanceCount--;
       if (annoyanceCount > 0) {
-        LOGGER.debug("root has attached subfiles: " + b.getChildren().size());
+        if (b.hasChildren())
+          LOGGER.debug("root has attached subfiles: " + b.getChildren().size());
       }
     }
     return roots;
