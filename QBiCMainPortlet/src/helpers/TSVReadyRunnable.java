@@ -24,12 +24,12 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import com.vaadin.server.StreamResource;
+
 import logging.Log4j2Logger;
 import parser.XMLParser;
 import properties.Factor;
 import qbic.vaadincomponents.TSVDownloadComponent;
-
-import com.vaadin.server.StreamResource;
 
 public class TSVReadyRunnable implements Runnable {
 
