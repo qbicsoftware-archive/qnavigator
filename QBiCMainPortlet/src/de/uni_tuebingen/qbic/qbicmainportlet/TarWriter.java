@@ -141,7 +141,7 @@ public class TarWriter {
    * @param fileSize
    */
   public void writeEntry(String entryName, InputStream entry, long fileSize) {
-    LOGGER.debug(entryName + " " + entry + " " + fileSize);
+//    LOGGER.debug(entryName + " " + entry + " " + fileSize);
     TarEntry tar_entry = new TarEntry(entryName);
     tar_entry.setSize(fileSize);
     tar_entry.getRealSize();
