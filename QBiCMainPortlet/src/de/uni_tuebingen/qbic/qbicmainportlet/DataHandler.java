@@ -15,10 +15,6 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.AlternativeSecondaryNameCreator;
-import helpers.Utils;
-import life.qbic.openbis.openbisclient.OpenBisClient;
-
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -39,30 +35,6 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
-import logging.Log4j2Logger;
-import model.DBManager;
-import model.DatasetBean;
-import model.ExperimentBean;
-import model.ExperimentStatusBean;
-import model.ExperimentType;
-import model.NewIvacSampleBean;
-import model.ProjectBean;
-import model.SampleBean;
-import parser.PersonParser;
-import persons.Qperson;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
-import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Material;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.MaterialIdentifier;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.MaterialTypeIdentifier;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
-
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.IndexedContainer;
@@ -75,8 +47,34 @@ import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
+import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Material;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.MaterialIdentifier;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.MaterialTypeIdentifier;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
+import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import de.uni_tuebingen.qbic.util.DashboardUtil;
+import helpers.AlternativeSecondaryNameCreator;
+import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
+import logging.Log4j2Logger;
+import model.DBManager;
+import model.DatasetBean;
+import model.ExperimentBean;
+import model.ExperimentStatusBean;
+import model.ExperimentType;
+import model.NewIvacSampleBean;
+import model.ProjectBean;
+import model.SampleBean;
+import parser.PersonParser;
+import persons.Qperson;
 
 
 public class DataHandler implements Serializable {
@@ -544,8 +542,32 @@ public class DataHandler implements Serializable {
 
     newProjectBean.setLongDescription(longDesc);
 
-    newProjectBean.setContainsData(this.getOpenBisClient()
-        .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier).size() != 0);
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> projectData = this
+        .getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
+
+    Boolean containsData = false;
+    Boolean containsResults = false;
+    Boolean attachmentResult = false;
+    // Boolean containsAttachments = false;
+
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : projectData) {
+      attachmentResult = false;
+      if (ds.getDataSetTypeCode().equals("Q_PROJECT_DATA")) {
+        attachmentResult = ds.getProperties().get("Q_ATTACHMENT_TYPE").equals("RESULT");
+      }
+
+      if (!(ds.getDataSetTypeCode().equals("Q_PROJECT_DATA"))
+          && !(ds.getDataSetTypeCode().contains("RESULTS"))) {
+        containsData = true;
+      } else if (ds.getDataSetTypeCode().contains("RESULTS") || attachmentResult) {
+        containsResults = true;
+      } // else if (ds.getDataSetTypeCode() == "Q_PROJECT_DATA") {
+        // containsAttachments = true;
+      // }
+    }
+
+    newProjectBean.setContainsData(containsData);
+    newProjectBean.setContainsResults(containsResults);
 
     newProjectBean.setExperiments(experimentBeans);
     newProjectBean.setMembers(new HashSet<String>());
@@ -676,8 +698,33 @@ public class DataHandler implements Serializable {
       experimentBeans.addBean(newExperimentBean);
     }
 
-    newProjectBean.setContainsData(this.getOpenBisClient()
-        .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier).size() != 0);
+    List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> projectData = this
+        .getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
+
+    Boolean containsData = false;
+    Boolean containsResults = false;
+    Boolean attachmentResult = false;
+    // Boolean containsAttachments = false;
+
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : projectData) {
+      attachmentResult = false;
+      if (ds.getDataSetTypeCode().equals("Q_PROJECT_DATA")) {
+        attachmentResult = ds.getProperties().get("Q_ATTACHMENT_TYPE").equals("RESULT");
+      }
+
+      if (!(ds.getDataSetTypeCode().equals("Q_PROJECT_DATA"))
+          && !(ds.getDataSetTypeCode().contains("RESULTS"))) {
+        containsData = true;
+      } else if (ds.getDataSetTypeCode().contains("RESULTS") || attachmentResult) {
+        containsResults = true;
+      } // else if (ds.getDataSetTypeCode() == "Q_PROJECT_DATA") {
+        // containsAttachments = true;
+      // }
+    }
+
+    newProjectBean.setContainsData(containsData);
+    newProjectBean.setContainsResults(containsResults);
+    // newProjectBean.setContainsAttachments(containsAttachments);
 
     newProjectBean.setExperiments(experimentBeans);
     newProjectBean.setMembers(new HashSet<String>());
@@ -1827,7 +1874,7 @@ public class DataHandler implements Serializable {
     BeanItemContainer<ExperimentBean> cont = projectBean.getExperiments();
 
     // project was planned (otherwise it would hopefully not exist :) )
-    res.put("Project Planned", 1);
+    res.put("Project planned", 1);
 
     // design is pre-registered to the test sample level
     int prereg = 0;
@@ -1839,14 +1886,20 @@ public class DataHandler implements Serializable {
         break;
       }
     }
-    res.put("Experimental Design registered", prereg);
+    res.put("Experimental design registered", prereg);
     // data is uploaded
     // TODO fix that
     // if (datasetMap.get(p.getIdentifier()) != null)
     // res.put("Data Registered", 1);
     // else
     int dataregistered = projectBean.getContainsData() ? 1 : 0;
-    res.put("Data Registered", dataregistered);
+    int resultsregistered = projectBean.getContainsResults() ? 1 : 0;
+    // int attachmentsregistered = projectBean.getContainsAttachments() ? 1 : 0;
+
+    // res.put("Attachments registered", attachmentsregistered);
+    res.put("Raw data registered", dataregistered);
+    res.put("Results registered", resultsregistered);
+
     return res;
   }
 
@@ -2330,6 +2383,7 @@ public class DataHandler implements Serializable {
    * 
    * @param statusValues
    * @return
+   * @deprecated
    */
   public VerticalLayout createProjectStatusComponent(Map<String, Integer> statusValues) {
     VerticalLayout projectStatusContent = new VerticalLayout();
@@ -2379,6 +2433,11 @@ public class DataHandler implements Serializable {
     projectStatusContent.setMargin(true);
     projectStatusContent.setSpacing(true);
 
+    Label planned = new Label();
+    Label design = new Label();
+    Label raw = new Label();
+    Label results = new Label();
+
     Iterator<Entry<String, Integer>> it = statusValues.entrySet().iterator();
 
     while (it.hasNext()) {
@@ -2389,7 +2448,15 @@ public class DataHandler implements Serializable {
         statusLabel.setStyleName(ValoTheme.LABEL_FAILURE);
         statusLabel.setResponsive(true);
         // statusLabel.addStyleName("redicon");
-        projectStatusContent.addComponent(statusLabel);
+        if (pairs.getKey().equals("Project planned")) {
+          planned = statusLabel;
+        } else if (pairs.getKey().equals("Experimental design registered")) {
+          design = statusLabel;
+        } else if (pairs.getKey().equals("Raw data registered")) {
+          raw = statusLabel;
+        } else if (pairs.getKey().equals("Results registered")) {
+          results = statusLabel;
+        }
       }
 
       else {
@@ -2399,14 +2466,23 @@ public class DataHandler implements Serializable {
 
         // statusLabel.addStyleName("greenicon");
 
-        if (pairs.getKey().equals("Project Planned")) {
-          projectStatusContent.addComponentAsFirst(statusLabel);
-        } else {
-          projectStatusContent.addComponent(statusLabel);
-
+        if (pairs.getKey().equals("Project planned")) {
+          planned = statusLabel;
+        } else if (pairs.getKey().equals("Experimental design registered")) {
+          design = statusLabel;
+        } else if (pairs.getKey().equals("Raw data registered")) {
+          raw = statusLabel;
+        } else if (pairs.getKey().equals("Results registered")) {
+          results = statusLabel;
         }
       }
     }
+
+    projectStatusContent.addComponent(planned);
+    projectStatusContent.addComponent(design);
+    projectStatusContent.addComponent(raw);
+    projectStatusContent.addComponent(results);
+
     // ProgressBar progressBar = new ProgressBar();
     // progressBar.setValue((float) finishedExperiments / statusValues.keySet().size());
     // projectStatusContent.addComponent(progressBar);

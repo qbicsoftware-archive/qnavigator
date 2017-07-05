@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -14,8 +14,6 @@
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
-
-import helpers.UglyToPrettyNameMapper;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -33,14 +31,7 @@ import java.util.Map;
 
 import javax.portlet.PortletSession;
 
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.DatasetBean;
-import model.TestSampleBean;
-
 import org.tepi.filtertable.FilterTreeTable;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -78,7 +69,13 @@ import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import de.uni_tuebingen.qbic.util.DashboardUtil;
+import helpers.UglyToPrettyNameMapper;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.DatasetBean;
+import model.TestSampleBean;
 
 public class LevelComponent extends CustomComponent {
 
@@ -101,8 +98,8 @@ public class LevelComponent extends CustomComponent {
   private State state;
   private String resourceUrl;
   private ChangeSampleMetadataComponent changeMetadata;
-  private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
-      ""));
+  private final ButtonLink download =
+      new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
   private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Sample", "File Name",
       "Description", "Dataset Type", "Registration Date", "File Size"};
   private int numberOfDatasets;
@@ -174,13 +171,17 @@ public class LevelComponent extends CustomComponent {
       Map<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>> datasetFilter =
           new HashMap<String, ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>>();
 
+      // clear download queue for new view
+      PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
+      portletSession.setAttribute("qbic_download",
+          new HashMap<String, AbstractMap.SimpleEntry<String, Long>>(),
+          PortletSession.APPLICATION_SCOPE);
 
       switch (type) {
         case "project":
           String projectIdentifier = id;
-          retrievedDatasetsAll =
-              datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(
-                  projectIdentifier);
+          retrievedDatasetsAll = datahandler.getOpenBisClient()
+              .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
 
           for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : retrievedDatasetsAll) {
 
@@ -202,9 +203,8 @@ public class LevelComponent extends CustomComponent {
             // datahandler.getOpenBisClient()
             // .getSamplesOfProjectBySearchService(projectIdentifier);
 
-            List<Sample> allSamples =
-                datahandler.getOpenBisClient()
-                    .getSamplesWithParentsAndChildrenOfProjectBySearchService(id);
+            List<Sample> allSamples = datahandler.getOpenBisClient()
+                .getSamplesWithParentsAndChildrenOfProjectBySearchService(id);
 
             for (Sample sample : allSamples) {
               if (sample.getSampleTypeCode().equals("Q_TEST_SAMPLE")) {
@@ -310,8 +310,8 @@ public class LevelComponent extends CustomComponent {
               }
             });
 
-            sampleGrid.getColumn("edit").setRenderer(
-                new ButtonRenderer(new RendererClickListener() {
+            sampleGrid.getColumn("edit")
+                .setRenderer(new ButtonRenderer(new RendererClickListener() {
 
                   @Override
                   public void click(RendererClickEvent event) {
@@ -368,9 +368,8 @@ public class LevelComponent extends CustomComponent {
             BeanItemContainer<TestSampleBean> samplesContainer =
                 new BeanItemContainer<TestSampleBean>(TestSampleBean.class);
 
-            List<Sample> allSamples =
-                datahandler.getOpenBisClient()
-                    .getSamplesWithParentsAndChildrenOfProjectBySearchService(projectIdentifier);
+            List<Sample> allSamples = datahandler.getOpenBisClient()
+                .getSamplesWithParentsAndChildrenOfProjectBySearchService(projectIdentifier);
 
 
             for (Sample sample : allSamples) {
@@ -456,9 +455,8 @@ public class LevelComponent extends CustomComponent {
 
         case "experiment":
           String experimentIdentifier = id;
-          retrievedDatasets =
-              datahandler.getOpenBisClient().getDataSetsOfExperimentByCodeWithSearchCriteria(
-                  experimentIdentifier);
+          retrievedDatasets = datahandler.getOpenBisClient()
+              .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
           break;
 
         case "sample":
@@ -476,27 +474,20 @@ public class LevelComponent extends CustomComponent {
       numberOfDatasets = retrievedDatasets.size();
 
       if (numberOfDatasets == 0 & filterFor.equals("measured")) {
-        descriptionLabel =
-            new Label(
-                String.format(
-                    "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
-                    numberOfSamples, 0), ContentMode.HTML);
+        descriptionLabel = new Label(String.format(
+            "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
+            numberOfSamples, 0), ContentMode.HTML);
 
-        helpers.Utils
-            .Notification(
-                "No raw data available.",
-                "No raw data is available for this project. Please contact the project manager if this is not expected.",
-                "warning");
+        helpers.Utils.Notification("No raw data available.",
+            "No raw data is available for this project. Please contact the project manager if this is not expected.",
+            "warning");
       } else if (numberOfDatasets == 0 & filterFor.equals("results")) {
-        descriptionLabel =
-            new Label(String.format("This project contains %s result datasets.", 0),
-                ContentMode.HTML);
+        descriptionLabel = new Label(String.format("This project contains %s result datasets.", 0),
+            ContentMode.HTML);
 
-        helpers.Utils
-            .Notification(
-                "No results available.",
-                "No result data is available for this project. Please contact the project manager if this is not expected.",
-                "warning");
+        helpers.Utils.Notification("No results available.",
+            "No result data is available for this project. Please contact the project manager if this is not expected.",
+            "warning");
       } else {
 
         Map<String, String> samples = new HashMap<String, String>();
@@ -521,11 +512,9 @@ public class LevelComponent extends CustomComponent {
         }
 
         if (filterFor.equals("measured")) {
-          descriptionLabel =
-              new Label(
-                  String.format(
-                      "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
-                      numberOfSamples, dsBeans.size()), ContentMode.HTML);
+          descriptionLabel = new Label(String.format(
+              "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
+              numberOfSamples, dsBeans.size()), ContentMode.HTML);
         } else if (filterFor.equals("results")) {
           descriptionLabel =
               new Label(String.format("This project contains %s result datasets.", dsBeans.size()),
@@ -652,19 +641,11 @@ public class LevelComponent extends CustomComponent {
         "<p> In case of multiple file selections, Project Browser will create a tar archive.</p>"
             + "<hr>"
             + "<p> If you need help on extracting a tar archive file, follow the tips below: </p>"
-            + "<p>"
-            + FontAwesome.WINDOWS.getHtml()
-            + " Windows </p>"
+            + "<p>" + FontAwesome.WINDOWS.getHtml() + " Windows </p>"
             + "<p> To open/extract TAR file on Windows, you can use 7-Zip, Easy 7-Zip, PeaZip.</p>"
-            + "<hr>"
-            + "<p>"
-            + FontAwesome.APPLE.getHtml()
-            + " MacOS </p>"
+            + "<hr>" + "<p>" + FontAwesome.APPLE.getHtml() + " MacOS </p>"
             + "<p> To open/extract TAR file on Mac, you can use Mac OS built-in utility Archive Utility,<br> or third-part freeware. </p>"
-            + "<hr>"
-            + "<p>"
-            + FontAwesome.LINUX.getHtml()
-            + " Linux </p>"
+            + "<hr>" + "<p>" + FontAwesome.LINUX.getHtml() + " Linux </p>"
             + "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> "
             + "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
 
@@ -694,21 +675,19 @@ public class LevelComponent extends CustomComponent {
 
 
     for (final Object itemId : this.datasetTable.getItemIds()) {
-      setCheckedBox(itemId, (String) this.datasetTable.getItem(itemId).getItemProperty("CODE")
-          .getValue());
+      setCheckedBox(itemId,
+          (String) this.datasetTable.getItem(itemId).getItemProperty("CODE").getValue());
     }
 
     this.datasetTable.addItemClickListener(new ItemClickListener() {
       @Override
       public void itemClick(ItemClickEvent event) {
-        if (!event.isDoubleClick()
-            & !((boolean) datasetTable.getItem(event.getItemId()).getItemProperty("isDirectory")
-                .getValue())) {
+        if (!event.isDoubleClick() & !((boolean) datasetTable.getItem(event.getItemId())
+            .getItemProperty("isDirectory").getValue())) {
           String datasetCode =
               (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
-          String datasetFileName =
-              (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name")
-                  .getValue();
+          String datasetFileName = (String) datasetTable.getItem(event.getItemId())
+              .getItemProperty("File Name").getValue();
           URL url = null;
           try {
             Resource res = null;
@@ -718,18 +697,16 @@ public class LevelComponent extends CustomComponent {
               String parentDatasetFileName =
                   (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
               try {
-                url =
-                    datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
-                        parentDatasetFileName + "/" + URLEncoder.encode(datasetFileName, "UTF-8"));
+                url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                    parentDatasetFileName + "/" + URLEncoder.encode(datasetFileName, "UTF-8"));
               } catch (UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
               }
             } else {
               try {
-                url =
-                    datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
-                        URLEncoder.encode(datasetFileName, "UTF-8"));
+                url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                    URLEncoder.encode(datasetFileName, "UTF-8"));
               } catch (UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -834,15 +811,14 @@ public class LevelComponent extends CustomComponent {
           } catch (MalformedURLException e) {
             LOGGER.error(String.format(
                 "Visualization failed because of malformedURL for dataset: %s", datasetCode));
-            helpers.Utils
-                .Notification(
-                    "No file attached.",
-                    "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
-                    "error");
+            helpers.Utils.Notification("No file attached.",
+                "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+                "error");
 
             // Notification
             // .show(
-            // "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+            // "Given dataset has no file attached to it!! Please Contact your project manager. Or
+            // check whether it already has some data",
             // Notification.Type.ERROR_MESSAGE);
           }
         }
@@ -862,10 +838,10 @@ public class LevelComponent extends CustomComponent {
 
     if (datasetTable.hasChildren(itemId)) {
       for (Object childId : datasetTable.getChildren(itemId)) {
-        String newParentFolder =
-            Paths.get(parentFolder,
+        String newParentFolder = Paths
+            .get(parentFolder,
                 (String) this.datasetTable.getItem(itemId).getItemProperty("File Name").getValue())
-                .toString();
+            .toString();
         setCheckedBox(childId, newParentFolder);
       }
     }
@@ -923,8 +899,8 @@ public class LevelComponent extends CustomComponent {
       // d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
       dataset_container.getContainerProperty(new_ds, "File Type").setValue("Folder");
-      dataset_container.getContainerProperty(new_ds, "Dataset Type").setValue(
-          prettyNameMapper.getPrettyName(d.getType()) + " Folder");
+      dataset_container.getContainerProperty(new_ds, "Dataset Type")
+          .setValue(prettyNameMapper.getPrettyName(d.getType()) + " Folder");
       dataset_container.getContainerProperty(new_ds, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_ds, "Validated").setValue(true);
       dataset_container.getContainerProperty(new_ds, "dl_link").setValue(d.getDssPath());
@@ -959,12 +935,12 @@ public class LevelComponent extends CustomComponent {
       // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());
-      dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(
-          prettyNameMapper.getPrettyName(d.getType()));
+      dataset_container.getContainerProperty(new_file, "Dataset Type")
+          .setValue(prettyNameMapper.getPrettyName(d.getType()));
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
-      dataset_container.getContainerProperty(new_file, "File Size").setValue(
-          DashboardUtil.humanReadableByteCount(d.getFileSize(), true));
+      dataset_container.getContainerProperty(new_file, "File Size")
+          .setValue(DashboardUtil.humanReadableByteCount(d.getFileSize(), true));
       dataset_container.getContainerProperty(new_file, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(d.getFileSize());
@@ -997,8 +973,8 @@ public class LevelComponent extends CustomComponent {
 
       PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
       Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
-          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
-              "qbic_download", PortletSession.APPLICATION_SCOPE);
+          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession
+              .getAttribute("qbic_download", PortletSession.APPLICATION_SCOPE);
 
       boolean itemSelected = (Boolean) event.getProperty().getValue();
       /*
@@ -1038,10 +1014,10 @@ public class LevelComponent extends CustomComponent {
 
       ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue())
           .setValue(itemSelected);
-      fileName =
-          Paths.get(fileName,
+      fileName = Paths
+          .get(fileName,
               (String) datasetTable.getItem(itemId).getItemProperty("File Name").getValue())
-              .toString();
+          .toString();
 
       // System.out.println(fileName);
       if (datasetTable.hasChildren(itemId)) {
@@ -1053,8 +1029,8 @@ public class LevelComponent extends CustomComponent {
             (String) datasetTable.getItem(itemId).getItemProperty("CODE").getValue();
         Long datasetFileSize =
             (Long) datasetTable.getItem(itemId).getItemProperty("file_size_bytes").getValue();
-        entries.put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode,
-            datasetFileSize));
+        entries.put(fileName,
+            new AbstractMap.SimpleEntry<String, Long>(datasetCode, datasetFileSize));
       } else {
         entries.remove(fileName);
       }

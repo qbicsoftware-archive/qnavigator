@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -15,23 +15,12 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.ProjectSummaryReadyRunnable;
-import helpers.SummaryFetcher;
-import helpers.Utils;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import logging.Log4j2Logger;
-import model.ExperimentBean;
-import model.ProjectBean;
-import model.SpaceBean;
-
 import org.tepi.filtertable.FilterTable;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
@@ -61,6 +50,15 @@ import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.themes.ValoTheme;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import helpers.ProjectSummaryReadyRunnable;
+import helpers.SummaryFetcher;
+import helpers.Utils;
+import logging.Log4j2Logger;
+import model.ExperimentBean;
+import model.ProjectBean;
+import model.SpaceBean;
 
 public class HomeView extends VerticalLayout implements View {
 
@@ -155,6 +153,8 @@ public class HomeView extends VerticalLayout implements View {
     gpcProjects.removeContainerProperty("contactPerson");
     gpcProjects.removeContainerProperty("projectManager");
     gpcProjects.removeContainerProperty("containsData");
+    gpcProjects.removeContainerProperty("containsResults");
+    gpcProjects.removeContainerProperty("containsAttachments");
     gpcProjects.removeContainerProperty("description");
     gpcProjects.removeContainerProperty("progress");
     gpcProjects.removeContainerProperty("registrationDate");
@@ -226,8 +226,8 @@ public class HomeView extends VerticalLayout implements View {
         // fetch summary and create docx in tmp folder
 
         ProjectBean proj = (ProjectBean) event.getItemId();
-        summaryFetcher.fetchSummaryComponent(proj.getCode(), proj.getSecondaryName(), proj
-            .getDescription(),
+        summaryFetcher.fetchSummaryComponent(proj.getCode(), proj.getSecondaryName(),
+            proj.getDescription(),
             new ProjectSummaryReadyRunnable(summaryFetcher, loadingWindow, proj.getCode()));
       }
     }));
@@ -404,9 +404,8 @@ public class HomeView extends VerticalLayout implements View {
         new BeanItemContainer<ProjectBean>(ProjectBean.class);
 
     LOGGER.info("Loading projects...");
-    List<Project> projects =
-        datahandler.getOpenBisClient().getOpenbisInfoService()
-            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     LOGGER.info("Loading projects...done.");
 
     for (Project project : projects) {
@@ -427,10 +426,9 @@ public class HomeView extends VerticalLayout implements View {
       if (secondaryName.isEmpty() || secondaryName == null)
         secondaryName = "n/a";
 
-      ProjectBean newProjectBean =
-          new ProjectBean(projectIdentifier, projectCode, secondaryName, desc,
-              project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
-              new ProgressBar(), new Date(), "", "", null, false, "");
+      ProjectBean newProjectBean = new ProjectBean(projectIdentifier, projectCode, secondaryName,
+          desc, project.getSpaceCode(), new BeanItemContainer<ExperimentBean>(ExperimentBean.class),
+          new ProgressBar(), new Date(), "", "", null, false, false, false, "");
 
       // TODO isn't this slow in this fashion? what about SELECT * and creating a map?
       String pi = datahandler.getDatabaseManager().getInvestigatorForProject(projectIdentifier);

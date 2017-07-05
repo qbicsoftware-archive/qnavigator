@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -32,21 +32,7 @@ import java.util.Set;
 
 import javax.portlet.PortletSession;
 
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.DatasetBean;
-import model.ProjectBean;
-import model.TestSampleBean;
-
 import org.tepi.filtertable.FilterTreeTable;
-
-import qbic.vaadincomponents.TSVDownloadComponent;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -81,7 +67,19 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 import de.uni_tuebingen.qbic.util.DashboardUtil;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.DatasetBean;
+import model.ProjectBean;
+import model.TestSampleBean;
+import qbic.vaadincomponents.TSVDownloadComponent;
 
 public class ProjInformationComponent extends CustomComponent {
 
@@ -103,11 +101,11 @@ public class ProjInformationComponent extends CustomComponent {
   private DataHandler datahandler;
   private State state;
   private String resourceUrl;
-  private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
-      ""));
+  private final ButtonLink download =
+      new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
 
-  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Description", "File Name",
-      "Registration Date"};
+  private final String[] FILTER_TABLE_COLUMNS =
+      new String[] {"Select", "Description", "File Name", "Registration Date"};
 
   private int numberOfDatasets;
 
@@ -259,12 +257,11 @@ public class ProjInformationComponent extends CustomComponent {
   private void initTSVDownloads(String space, String project) {
     tsvDownloadContent = new TSVDownloadComponent();
     tsvDownloadContent.setVisible(false);
-    List<String> types =
-        new ArrayList<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE",
-            "Q_TEST_SAMPLE"));
+    List<String> types = new ArrayList<String>(
+        Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE", "Q_TEST_SAMPLE"));
     boolean tsvable = false;
-    for (Sample s : datahandler.getOpenBisClient().getSamplesOfProjectBySearchService(
-        "/" + space + "/" + project))
+    for (Sample s : datahandler.getOpenBisClient()
+        .getSamplesOfProjectBySearchService("/" + space + "/" + project))
       if (types.contains(s.getSampleTypeCode())) {
         tsvable = true;
         break;
@@ -300,8 +297,8 @@ public class ProjInformationComponent extends CustomComponent {
       String pm = projectBean.getProjectManager();
       projectManager.setValue(pm);
 
-      contact
-          .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+      contact.setValue(
+          "<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
               + identifier
               + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
               + currentBean.getCode() + " (" + space + ")" + "</a>");
@@ -337,12 +334,11 @@ public class ProjInformationComponent extends CustomComponent {
       // experimentLabel.setValue((String.format("This project includes %s experimental step(s)",
       // currentBean.getExperiments().size())));
 
-      statusPanel.setCaption((String.format("Project includes %s experimental step(s)", currentBean
-          .getExperiments().size())));
+      statusPanel.setCaption((String.format("Project includes %s experimental step(s)",
+          currentBean.getExperiments().size())));
 
-      statusContent =
-          datahandler.createProjectStatusComponentNew(datahandler
-              .computeProjectStatuses(currentBean));
+      statusContent = datahandler
+          .createProjectStatusComponentNew(datahandler.computeProjectStatuses(currentBean));
       statusPanel.setContent(statusContent);
       statusPanel.setResponsive(true);
       statusPanel.setResponsive(true);
@@ -378,9 +374,8 @@ public class ProjInformationComponent extends CustomComponent {
 
 
       final String projectIdentifier = currentBean.getId();
-      retrievedDatasetsAll =
-          datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(
-              projectIdentifier);
+      retrievedDatasetsAll = datahandler.getOpenBisClient()
+          .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
 
       for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet ds : retrievedDatasetsAll) {
 
@@ -438,7 +433,7 @@ public class ProjInformationComponent extends CustomComponent {
       // numberOfDatasets), Label.CONTENT_PREFORMATTED);
 
       numberOfDatasets = retrievedDatasets.size();
-      this.datasetTable.setPageLength(Math.min(numberOfDatasets, 10));
+      this.datasetTable.setPageLength(Math.max(3, Math.min(numberOfDatasets, 10)));
 
       Boolean dataAvailable = true;
 
@@ -535,11 +530,11 @@ public class ProjInformationComponent extends CustomComponent {
       Boolean available = false;
 
       SearchCriteria sampleSc = new SearchCriteria();
-      sampleSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
-          "Q_BIOLOGICAL_ENTITY"));
+      sampleSc.addMatchClause(
+          MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, "Q_BIOLOGICAL_ENTITY"));
       SearchCriteria projectSc = new SearchCriteria();
-      projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
-          projectBean.getCode()));
+      projectSc.addMatchClause(
+          MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, projectBean.getCode()));
       sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
 
       SearchCriteria experimentSc = new SearchCriteria();
@@ -672,8 +667,8 @@ public class ProjInformationComponent extends CustomComponent {
 
 
     for (final Object itemId : this.datasetTable.getItemIds()) {
-      setCheckedBox(itemId, (String) this.datasetTable.getItem(itemId).getItemProperty("CODE")
-          .getValue());
+      setCheckedBox(itemId,
+          (String) this.datasetTable.getItem(itemId).getItemProperty("CODE").getValue());
     }
 
 
@@ -725,9 +720,8 @@ public class ProjInformationComponent extends CustomComponent {
         if (!event.isDoubleClick()) {
           String datasetCode =
               (String) datasetTable.getItem(event.getItemId()).getItemProperty("CODE").getValue();
-          String datasetFileName =
-              (String) datasetTable.getItem(event.getItemId()).getItemProperty("File Name")
-                  .getValue();
+          String datasetFileName = (String) datasetTable.getItem(event.getItemId())
+              .getItemProperty("File Name").getValue();
           URL url;
           try {
             Resource res = null;
@@ -735,9 +729,8 @@ public class ProjInformationComponent extends CustomComponent {
             if (parent != null) {
               String parentDatasetFileName =
                   (String) datasetTable.getItem(parent).getItemProperty("File Name").getValue();
-              url =
-                  datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
-                      parentDatasetFileName + "/" + datasetFileName);
+              url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                  parentDatasetFileName + "/" + datasetFileName);
             } else {
               url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
             }
@@ -778,10 +771,9 @@ public class ProjInformationComponent extends CustomComponent {
           } catch (MalformedURLException e) {
             LOGGER.error(String.format(
                 "Visualization failed because of malformedURL for dataset: %s", datasetCode));
-            Notification
-                .show(
-                    "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
-                    Notification.Type.ERROR_MESSAGE);
+            Notification.show(
+                "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+                Notification.Type.ERROR_MESSAGE);
           }
         }
       }
@@ -803,10 +795,10 @@ public class ProjInformationComponent extends CustomComponent {
 
     if (datasetTable.hasChildren(itemId)) {
       for (Object childId : datasetTable.getChildren(itemId)) {
-        String newParentFolder =
-            Paths.get(parentFolder,
+        String newParentFolder = Paths
+            .get(parentFolder,
                 (String) this.datasetTable.getItem(itemId).getItemProperty("File Name").getValue())
-                .toString();
+            .toString();
         setCheckedBox(childId, newParentFolder);
       }
     }
@@ -858,8 +850,8 @@ public class ProjInformationComponent extends CustomComponent {
       String secName = d.getProperties().get("Q_SECONDARY_NAME");
       // TODO add User here
       if (secName != null) {
-        dataset_container.getContainerProperty(new_ds, "Description").setValue(
-            d.getProperties().get("Q_SECONDARY_NAME"));
+        dataset_container.getContainerProperty(new_ds, "Description")
+            .setValue(d.getProperties().get("Q_SECONDARY_NAME"));
       }
       // dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
       // d.getSample().getType());
@@ -892,8 +884,8 @@ public class ProjInformationComponent extends CustomComponent {
       String secName = d.getProperties().get("Q_SECONDARY_NAME");
       // TODO add User here too
       if (secName != null) {
-        dataset_container.getContainerProperty(new_file, "Description").setValue(
-            d.getProperties().get("Q_SECONDARY_NAME"));
+        dataset_container.getContainerProperty(new_file, "Description")
+            .setValue(d.getProperties().get("Q_SECONDARY_NAME"));
       }
       // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
@@ -901,8 +893,8 @@ public class ProjInformationComponent extends CustomComponent {
       dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
-      dataset_container.getContainerProperty(new_file, "File Size").setValue(
-          DashboardUtil.humanReadableByteCount(d.getFileSize(), true));
+      dataset_container.getContainerProperty(new_file, "File Size")
+          .setValue(DashboardUtil.humanReadableByteCount(d.getFileSize(), true));
       dataset_container.getContainerProperty(new_file, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(d.getFileSize());
@@ -933,8 +925,8 @@ public class ProjInformationComponent extends CustomComponent {
 
       PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
       Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
-          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
-              "qbic_download", PortletSession.APPLICATION_SCOPE);
+          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession
+              .getAttribute("qbic_download", PortletSession.APPLICATION_SCOPE);
 
       boolean itemSelected = (Boolean) event.getProperty().getValue();
       /*
@@ -974,10 +966,10 @@ public class ProjInformationComponent extends CustomComponent {
 
       ((CheckBox) datasetTable.getItem(itemId).getItemProperty("Select").getValue())
           .setValue(itemSelected);
-      fileName =
-          Paths.get(fileName,
+      fileName = Paths
+          .get(fileName,
               (String) datasetTable.getItem(itemId).getItemProperty("File Name").getValue())
-              .toString();
+          .toString();
 
       // System.out.println(fileName);
       if (datasetTable.hasChildren(itemId)) {
@@ -989,8 +981,8 @@ public class ProjInformationComponent extends CustomComponent {
             (String) datasetTable.getItem(itemId).getItemProperty("CODE").getValue();
         Long datasetFileSize =
             (Long) datasetTable.getItem(itemId).getItemProperty("file_size_bytes").getValue();
-        entries.put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode,
-            datasetFileSize));
+        entries.put(fileName,
+            new AbstractMap.SimpleEntry<String, Long>(datasetCode, datasetFileSize));
       } else {
         entries.remove(fileName);
       }
@@ -1035,8 +1027,8 @@ public class ProjInformationComponent extends CustomComponent {
     sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
         model.ExperimentType.Q_NGS_HLATYPING.name()));
     SearchCriteria projectSc = new SearchCriteria();
-    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
-        projectBean.getCode()));
+    projectSc.addMatchClause(
+        MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, projectBean.getCode()));
     sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
 
     SearchCriteria experimentSc = new SearchCriteria();
@@ -1052,8 +1044,8 @@ public class ProjInformationComponent extends CustomComponent {
     sc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
         model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
     SearchCriteria projectSc2 = new SearchCriteria();
-    projectSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
-        projectBean.getCode()));
+    projectSc2.addMatchClause(
+        MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, projectBean.getCode()));
     sc2.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc2));
 
     SearchCriteria experimentSc2 = new SearchCriteria();
@@ -1092,9 +1084,8 @@ public class ProjInformationComponent extends CustomComponent {
         addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
       }
 
-      labelContent +=
-          String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ", lastOne,
-              sample.getProperties().get("Q_HLA_TYPING"), addInformation);
+      labelContent += String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ",
+          lastOne, sample.getProperties().get("Q_HLA_TYPING"), addInformation);
     }
 
     for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : wfSamples) {
@@ -1102,9 +1093,8 @@ public class ProjInformationComponent extends CustomComponent {
 
 
       if (!(sample.getProperties().get("Q_HLA_TYPING") == null)) {
-        labelContent +=
-            String.format("<u>Computational Typing (OptiType)</u>" + "<p> %s </p> ", sample
-                .getProperties().get("Q_HLA_TYPING"));
+        labelContent += String.format("<u>Computational Typing (OptiType)</u>" + "<p> %s </p> ",
+            sample.getProperties().get("Q_HLA_TYPING"));
       }
     }
 
