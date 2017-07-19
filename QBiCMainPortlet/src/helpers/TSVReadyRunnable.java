@@ -28,7 +28,7 @@ import com.vaadin.server.StreamResource;
 
 import logging.Log4j2Logger;
 import parser.XMLParser;
-import properties.Factor;
+import properties.Property;
 import qbic.vaadincomponents.TSVDownloadComponent;
 
 public class TSVReadyRunnable implements Runnable {
@@ -91,15 +91,15 @@ public class TSVReadyRunnable implements Runnable {
         if (cell.startsWith(xmlStart))
           xml = cell;
       }
-      List<Factor> factors = new ArrayList<Factor>();
+      List<Property> factors = new ArrayList<Property>();
       if (!xml.equals(xmlStart)) {
         try {
-          factors = p.getFactorsFromXML(xml);
+          factors = p.getAllPropertiesFromXML(xml);
         } catch (JAXBException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
-        for (Factor f : factors) {
+        for (Property f : factors) {
           String label = f.getLabel();
           if (!factorLabels.contains(label)) {
             factorLabels.add(label);
@@ -119,22 +119,22 @@ public class TSVReadyRunnable implements Runnable {
       }
       row = row.replace("\t" + xml, "");
       StringBuilder line = new StringBuilder("\n" + row);
-      List<Factor> factors = new ArrayList<Factor>();
+      List<Property> factors = new ArrayList<Property>();
       if (!xml.equals(xmlStart)) {
         try {
-          factors = p.getFactorsFromXML(xml);
+          factors = p.getAllPropertiesFromXML(xml);
         } catch (JAXBException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
-        Map<Integer, Factor> order = new HashMap<Integer, Factor>();
-        for (Factor f : factors) {
+        Map<Integer, Property> order = new HashMap<Integer, Property>();
+        for (Property f : factors) {
           String label = f.getLabel();
           order.put(factorLabels.indexOf(label), f);
         }
         for (int i = 0; i < factorLabels.size(); i++) {
           if (order.containsKey(i)) {
-            Factor f = order.get(i);
+            Property f = order.get(i);
             line.append("\t" + f.getValue());
             if (f.hasUnit())
               line.append(f.getUnit());
