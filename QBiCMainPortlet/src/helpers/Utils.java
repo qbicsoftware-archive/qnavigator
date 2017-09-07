@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -31,10 +31,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.ProjectBean;
-
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -43,7 +39,6 @@ import com.liferay.portal.model.Company;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.CompanyLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
@@ -54,7 +49,6 @@ import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
@@ -65,6 +59,9 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.qbicmainportlet.CustomVisibilityComponent;
 import de.uni_tuebingen.qbic.qbicmainportlet.VisibilityChangeListener;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.ProjectBean;
 
 public class Utils {
   private static Logger LOGGER = new Log4j2Logger(Utils.class);
@@ -173,41 +170,26 @@ public class Utils {
         }
       }
       // remove slashes and get rid of leading underscore afterwards
-    }, String.format("%s_table_contents.tsv", id.replace("/", "_").substring(1)));
+    }, String.format("%s.tsv", id));
     return resource;
   }
 
-  public static String containerToString(Container container) {
-    String header = "";
-    Collection<?> i = container.getItemIds();
-    String rowString = "";
-
-    Collection<?> propertyIDs = container.getContainerPropertyIds();
-
-    for (Object o : propertyIDs) {
-      header += o.toString() + "\t";
-    }
-
-    // for (int x = 1; x <= i.size(); x++) {
-    for (Object id : i) {
-      Item it = container.getItem(id);
-
-      for (Object o : propertyIDs) {
-        // Could be extended to an exclusion list if we don't want to show further columns
-        if (o.toString() == "dl_link") {
-          continue;
-        } else if (o.toString() == "Status") {
-          Image image = (Image) it.getItemProperty(o).getValue();
-          rowString += image.getCaption() + "\t";
-        } else {
-          Property prop = it.getItemProperty(o);
-          rowString += prop.toString() + "\t";
-        }
-      }
-      rowString += "\n";
-    }
-    return header + "\n" + rowString;
-  }
+  /*
+   * public static String containerToString(Container container) { String header = ""; Collection<?>
+   * i = container.getItemIds(); String rowString = "";
+   * 
+   * Collection<?> propertyIDs = container.getContainerPropertyIds();
+   * 
+   * for (Object o : propertyIDs) { header += o.toString() + "\t"; }
+   * 
+   * // for (int x = 1; x <= i.size(); x++) { for (Object id : i) { Item it = container.getItem(id);
+   * 
+   * for (Object o : propertyIDs) { // Could be extended to an exclusion list if we don't want to
+   * show further columns if (o.toString() == "dl_link") { continue; } else if (o.toString() ==
+   * "Status") { Image image = (Image) it.getItemProperty(o).getValue(); rowString +=
+   * image.getCaption() + "\t"; } else { Property prop = it.getItemProperty(o); rowString +=
+   * prop.toString() + "\t"; } } rowString += "\n"; } return header + "\n" + rowString; }
+   */
 
   // TODO fix and test
   public static String containerToString(BeanItemContainer container) {
@@ -229,6 +211,8 @@ public class Utils {
     exklusionList.add("root");
     exklusionList.add("children");
     exklusionList.add("dssPath");
+    exklusionList.add("experiments");
+
 
     Collection<?> propertyIDs = container.getContainerPropertyIds();
 
@@ -236,7 +220,8 @@ public class Utils {
       if (exklusionList.contains(o.toString())) {
         continue;
       } else {
-        header += o.toString() + "\t";
+        header +=
+            o.toString().replaceAll("project", "sub-project").replace("space", "project") + "\t";
       }
     }
 
@@ -365,8 +350,8 @@ public class Utils {
       company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
       companyId = company.getCompanyId();
     } catch (PortalException | SystemException e) {
-      LOGGER.error(
-          "liferay error, could not retrieve companyId. Trying default companyId, which is "
+      LOGGER
+          .error("liferay error, could not retrieve companyId. Trying default companyId, which is "
               + companyId, e.getStackTrace());
     }
     User user = null;
@@ -390,9 +375,8 @@ public class Utils {
   public void generateProjectReport(ProjectBean projectBean) {
     Writer report = null;
     try {
-      report =
-          new BufferedWriter(new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"),
-              "utf-8"));
+      report = new BufferedWriter(
+          new OutputStreamWriter(new FileOutputStream("/tmp/report.tex"), "utf-8"));
 
       // write tex file header
       report.write("\\documentclass[ngerman]{scrartcl} \n");

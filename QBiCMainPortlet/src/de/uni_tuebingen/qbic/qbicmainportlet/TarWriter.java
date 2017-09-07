@@ -88,6 +88,7 @@ public class TarWriter {
       try {
         tar.close();
       } catch (IOException e) {
+        e.printStackTrace();
         LOGGER.error("closing previous stream failed.", e.getCause());
       }
     }
@@ -140,7 +141,7 @@ public class TarWriter {
    * @param fileSize
    */
   public void writeEntry(String entryName, InputStream entry, long fileSize) {
-    //LOGGER.debug(entryName + " " + entry + " " + fileSize);
+//    LOGGER.debug(entryName + " " + entry + " " + fileSize);
     TarEntry tar_entry = new TarEntry(entryName);
     tar_entry.setSize(fileSize);
     tar_entry.getRealSize();
@@ -176,6 +177,7 @@ public class TarWriter {
         LOGGER.info("client aborted download.");
         return;
       } else {
+        e1.printStackTrace();
         LOGGER.error("writing entry to client failed", e1.getCause());
       }
 

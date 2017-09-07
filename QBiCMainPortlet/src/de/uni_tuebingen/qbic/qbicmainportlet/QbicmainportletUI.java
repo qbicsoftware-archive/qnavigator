@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -23,15 +23,6 @@ import java.util.List;
 import javax.portlet.PortletSession;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
-
-import logging.Log4j2Logger;
-import main.OpenBisClient;
-import model.DBConfig;
-import model.DBManager;
-import submitter.Submitter;
-import submitter.WorkflowSubmitterFactory;
-import submitter.WorkflowSubmitterFactory.Type;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -60,11 +51,19 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import controllers.MultiscaleController;
 import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.main.ConfigurationManager;
 import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
+import logging.Log4j2Logger;
+import model.DBConfig;
+import model.DBManager;
+import submitter.Submitter;
+import submitter.WorkflowSubmitterFactory;
+import submitter.WorkflowSubmitterFactory.Type;
 
 @SuppressWarnings("serial")
 @Theme("qbicmainportlet")
@@ -85,7 +84,7 @@ public class QbicmainportletUI extends UI {
 
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "1.6.0";
-  private String revision = "ee24d3b";
+  private String revision = "73a8242";
   private String resUrl;
   protected View currentView;
 
@@ -122,8 +121,8 @@ public class QbicmainportletUI extends UI {
   }
 
   /**
- * 
- */
+  * 
+  */
   void errorMessageIfIsProduction() {
     if (isInProductionMode())
       try {
@@ -164,8 +163,8 @@ public class QbicmainportletUI extends UI {
     this.setContent(vl);
     vl.addComponent(new Label(
         "An error occured while trying to load projects. Please contact your project manager to make sure your account is added to your projects."));
-    LOGGER
-        .error("Couldn't initialize view. User is probably not added to openBIS and has been informed to contact prject manager.");
+    LOGGER.error(
+        "Couldn't initialize view. User is probably not added to openBIS and has been informed to contact prject manager.");
   }
 
   /**
@@ -241,8 +240,8 @@ public class QbicmainportletUI extends UI {
         buildUserUnknownError(request);
       } else {
         LOGGER.error("exception thrown during initialization.", e);
-        status
-            .setValue("An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
+        status.setValue(
+            "An error occured, while trying to connect to the database. Please try again later, or contact your project manager.");
       }
     }
   }
@@ -272,9 +271,9 @@ public class QbicmainportletUI extends UI {
         new HomeView(datahandler, "Your Projects", user, state, resUrl, manager.getTmpFolder());
     DatasetView datasetView = new DatasetView(datahandler, state, resUrl);
     final SampleView sampleView = new SampleView(datahandler, state, resUrl, multiscaleController);
-    BarcodeView barcodeView =
-        new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
-            manager.getBarcodePathVariable());
+    // BarcodeView barcodeView =
+    // new BarcodeView(datahandler.getOpenBisClient(), manager.getBarcodeScriptsFolder(),
+    // manager.getBarcodePathVariable());
     final ExperimentView experimentView =
         new ExperimentView(datahandler, state, resUrl, multiscaleController);
     // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
@@ -311,7 +310,7 @@ public class QbicmainportletUI extends UI {
     navigator.addView(SampleView.navigateToLabel, sampleView);
     navigator.addView("", homeView);
     navigator.addView(ProjectView.navigateToLabel, projectView);
-    navigator.addView(BarcodeView.navigateToLabel, barcodeView);
+    // navigator.addView(BarcodeView.navigateToLabel, barcodeView);
     navigator.addView(ExperimentView.navigateToLabel, experimentView);
     navigator.addView(PatientView.navigateToLabel, patientView);
     navigator.addView(AddPatientView.navigateToLabel, addPatientView);
@@ -363,9 +362,8 @@ public class QbicmainportletUI extends UI {
 
     Boolean includePatientCreation = false;
 
-    List<Project> projects =
-        datahandler.getOpenBisClient().getOpenbisInfoService()
-            .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
+    List<Project> projects = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), user);
     int numberOfProjects = 0;
     for (Project project : projects) {
       if (project.getSpaceCode().contains("IVAC")) {
@@ -577,13 +575,11 @@ public class QbicmainportletUI extends UI {
    * 
    */
   private void initConnection() {
-    this.openBisConnection =
-        new OpenBisClient(manager.getDataSourceUser(), manager.getDataSourcePassword(),
-            manager.getDataSourceUrl());
+    this.openBisConnection = new OpenBisClient(manager.getDataSourceUser(),
+        manager.getDataSourcePassword(), manager.getDataSourceUrl());
     this.openBisConnection.login();
-    DBConfig mysqlConfig =
-        new DBConfig(manager.getMsqlHost(), manager.getMysqlPort(), manager.getMysqlDB(),
-            manager.getMysqlUser(), manager.getMysqlPass());
+    DBConfig mysqlConfig = new DBConfig(manager.getMsqlHost(), manager.getMysqlPort(),
+        manager.getMysqlDB(), manager.getMysqlUser(), manager.getMysqlPass());
     DBManager databaseManager = new DBManager(mysqlConfig);
 
     this.datahandler = new DataHandler(openBisConnection, databaseManager);

@@ -18,6 +18,7 @@
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
 import helpers.UglyToPrettyNameMapper;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import logging.Log4j2Logger;
-import main.OpenBisClient;
 
 import com.vaadin.server.Page;
 import com.vaadin.ui.Button;

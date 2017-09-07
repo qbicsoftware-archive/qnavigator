@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -20,16 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import logging.Log4j2Logger;
-import model.SearchResultsExperimentBean;
-import model.SearchResultsProjectBean;
-import model.SearchResultsSampleBean;
-
 import org.tepi.filtertable.FilterTable;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
@@ -46,6 +37,14 @@ import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import logging.Log4j2Logger;
+import model.SearchResultsExperimentBean;
+import model.SearchResultsProjectBean;
+import model.SearchResultsSampleBean;
 
 public class SearchResultsView extends VerticalLayout implements View {
 
@@ -159,9 +158,8 @@ public class SearchResultsView extends VerticalLayout implements View {
       projCollection.add(tmpProjectBean);
     }
 
-    projBeanContainer =
-        new BeanItemContainer<SearchResultsProjectBean>(SearchResultsProjectBean.class,
-            projCollection);
+    projBeanContainer = new BeanItemContainer<SearchResultsProjectBean>(
+        SearchResultsProjectBean.class, projCollection);
 
 
     // get the experiment search result data
@@ -181,9 +179,8 @@ public class SearchResultsView extends VerticalLayout implements View {
 
     }
 
-    expBeanContainer =
-        new BeanItemContainer<SearchResultsExperimentBean>(SearchResultsExperimentBean.class,
-            expCollection);
+    expBeanContainer = new BeanItemContainer<SearchResultsExperimentBean>(
+        SearchResultsExperimentBean.class, expCollection);
 
     // get the sample search result data
     Collection<SearchResultsSampleBean> sampleCollection = new ArrayList<SearchResultsSampleBean>();
@@ -199,9 +196,8 @@ public class SearchResultsView extends VerticalLayout implements View {
 
     }
 
-    sampleBeanContainer =
-        new BeanItemContainer<SearchResultsSampleBean>(SearchResultsSampleBean.class,
-            sampleCollection);
+    sampleBeanContainer = new BeanItemContainer<SearchResultsSampleBean>(
+        SearchResultsSampleBean.class, sampleCollection);
 
   }
 
@@ -291,10 +287,9 @@ public class SearchResultsView extends VerticalLayout implements View {
           String cellType = new String(event.getPropertyId().toString());
 
           if (cellType.equals("projectID")) {
-            String cellContent =
-                new String(projBeanContainer
-                    .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
-                    .toString());
+            String cellContent = new String(
+                projBeanContainer.getContainerProperty(event.getItemId(), event.getPropertyId())
+                    .getValue().toString());
 
             State state = (State) UI.getCurrent().getSession().getAttribute("state");
             ArrayList<String> message = new ArrayList<String>();
@@ -335,14 +330,12 @@ public class SearchResultsView extends VerticalLayout implements View {
       expGrid.addItemClickListener(new ItemClickListener() {
         @Override
         public void itemClick(ItemClickEvent event) {
-          // System.out.println(event.getItemId() + " ::: " + event.getPropertyId());
           String cellType = new String(event.getPropertyId().toString());
 
           if (cellType.equals("experimentID")) {
-            String cellContent =
-                new String(expBeanContainer
-                    .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
-                    .toString());
+            String cellContent = new String(
+                expBeanContainer.getContainerProperty(event.getItemId(), event.getPropertyId())
+                    .getValue().toString());
 
 
             State state = (State) UI.getCurrent().getSession().getAttribute("state");
@@ -385,10 +378,9 @@ public class SearchResultsView extends VerticalLayout implements View {
           String cellType = new String(event.getPropertyId().toString());
 
           if (cellType.equals("sampleID")) {
-            String cellContent =
-                new String(sampleBeanContainer
-                    .getContainerProperty(event.getItemId(), event.getPropertyId()).getValue()
-                    .toString());
+            String cellContent = new String(
+                sampleBeanContainer.getContainerProperty(event.getItemId(), event.getPropertyId())
+                    .getValue().toString());
 
             State state = (State) UI.getCurrent().getSession().getAttribute("state");
             ArrayList<String> message = new ArrayList<String>();
@@ -425,8 +417,8 @@ public class SearchResultsView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table,
-        ProjectView.navigateToLabel));
+    this.table
+        .addValueChangeListener(new ViewTablesClickListener(table, ProjectView.navigateToLabel));
   }
 
 
@@ -455,6 +447,7 @@ public class SearchResultsView extends VerticalLayout implements View {
     int height = event.getNavigator().getUI().getPage().getBrowserWindowHeight();
     int width = event.getNavigator().getUI().getPage().getBrowserWindowWidth();
     buildLayout(height, width, event.getNavigator().getUI().getPage().getWebBrowser());
+    updateUI();
   }
 
   /**

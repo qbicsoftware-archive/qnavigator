@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -23,16 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import logging.Log4j2Logger;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleFetchOption;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
-
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.validator.NullValidator;
@@ -53,7 +43,17 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleFetchOption;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
+import ch.systemsx.cisd.openbis.generic.shared.basic.dto.ExperimentFetchOption;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import logging.Log4j2Logger;
 
 
 
@@ -200,7 +200,7 @@ public class SearchEngineView extends CustomComponent {
       public void buttonClick(ClickEvent event) {
         String queryString = (String) searchfield.getValue().toString();
 
-        // LOGGER.debug("the query was " + queryString);
+        LOGGER.debug("the query was " + queryString);
 
         if (searchfield.getValue() == null || searchfield.getValue().toString().equals("")
             || searchfield.getValue().toString().trim().length() == 0) {
@@ -222,7 +222,7 @@ public class SearchEngineView extends CustomComponent {
             State state = (State) UI.getCurrent().getSession().getAttribute("state");
             ArrayList<String> message = new ArrayList<String>();
             message.add("clicked");
-            message.add("view");
+            message.add("view" + queryString);
             message.add("searchresults");
             state.notifyObservers(message);
 
@@ -269,33 +269,46 @@ public class SearchEngineView extends CustomComponent {
   }
 
   public List<Sample> querySamples(String queryString) {
-    EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
-    // SearchCriteria sc1 = new SearchCriteria();
-    // sc1.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, queryString));
+    EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES,
+        SampleFetchOption.BASIC, SampleFetchOption.CONTAINED, SampleFetchOption.DESCENDANTS,
+        SampleFetchOption.PARENTS, SampleFetchOption.CHILDREN, SampleFetchOption.ANCESTORS);
 
     SearchCriteria sc2 = new SearchCriteria();
     sc2.addMatchClause(MatchClause.createAnyFieldMatch(queryString));
 
-    // List<Sample> samples1 =
-    // datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
-    // sc1, fetchOptions,LiferayAndVaadinUtils.getUser().getScreenName());
-
-    List<Sample> samples2 =
-        datahandler
-            .getOpenBisClient()
-            .getOpenbisInfoService()
-            .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc2,
-                fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
-
-    // LOGGER.info("hits: " + samples1.size() + " " + samples2.size());
+    // List<Sample> samples2 = datahandler.getOpenBisClient().getOpenbisInfoService()
+    // .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc2,
+    // fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
+    List<Sample> samples2 = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .searchForSamples(datahandler.getOpenBisClient().getSessionToken(), sc2, fetchOptions);
 
     return samples2;
   }
 
+  /*
+   * public List<DataSet> queryDatasets(String queryString) { // EnumSet<SampleFetchOption>
+   * fetchOptions = EnumSet.of(DatasetF.PROPERTIES, // SampleFetchOption.BASIC,
+   * SampleFetchOption.CONTAINED, SampleFetchOption.DESCENDANTS, // SampleFetchOption.PARENTS,
+   * SampleFetchOption.CHILDREN, SampleFetchOption.ANCESTORS);
+   * 
+   * SearchCriteria sc2 = new SearchCriteria();
+   * sc2.addMatchClause(MatchClause.createAnyFieldMatch(queryString));
+   * 
+   * // List<Sample> samples2 = datahandler.getOpenBisClient().getOpenbisInfoService() //
+   * .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc2, //
+   * fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
+   * List<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet> datasets =
+   * datahandler.getOpenBisClient().getOpenbisInfoService()
+   * .searchForDataSets(datahandler.getOpenBisClient().getSessionToken(), sc2);
+   * 
+   * return datasets; }
+   */
+
 
 
   public List<Experiment> queryExperiments(String queryString) {
-    EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
+    EnumSet<ExperimentFetchOption> fetchOptions =
+        EnumSet.of(ExperimentFetchOption.PROPERTIES, ExperimentFetchOption.BASIC);
     // SearchCriteria sc1 = new SearchCriteria();
     // sc1.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, queryString));
 
@@ -309,9 +322,8 @@ public class SearchEngineView extends CustomComponent {
     // List<Sample> samples2 =
     // datahandler.getOpenBisClient().getOpenbisInfoService().searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
     // sc2, fetchOptions,LiferayAndVaadinUtils.getUser().getScreenName());
-    List<Experiment> exps =
-        datahandler.getOpenBisClient().getOpenbisInfoService()
-            .searchForExperiments(datahandler.getOpenBisClient().getSessionToken(), sc2);
+    List<Experiment> exps = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .searchForExperiments(datahandler.getOpenBisClient().getSessionToken(), sc2);
 
 
     List<Experiment> expFilteredByUser = new ArrayList<Experiment>();
@@ -335,9 +347,7 @@ public class SearchEngineView extends CustomComponent {
     List<Project> result = new ArrayList<Project>();
 
     List<Project> projects =
-        new ArrayList<Project>(datahandler
-            .getOpenBisClient()
-            .getOpenbisInfoService()
+        new ArrayList<Project>(datahandler.getOpenBisClient().getOpenbisInfoService()
             .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
                 LiferayAndVaadinUtils.getUser().getScreenName()));
 
@@ -364,9 +374,7 @@ public class SearchEngineView extends CustomComponent {
   public Set<String> listSpacesOnBehalfOfUser() {
     // first retrieve all projects belonging to the user
     List<Project> projects =
-        new ArrayList<Project>(datahandler
-            .getOpenBisClient()
-            .getOpenbisInfoService()
+        new ArrayList<Project>(datahandler.getOpenBisClient().getOpenbisInfoService()
             .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
                 LiferayAndVaadinUtils.getUser().getScreenName()));
 
@@ -386,14 +394,12 @@ public class SearchEngineView extends CustomComponent {
   public List<String> getSearchResults(String samplecode) {
     java.util.EnumSet<SampleFetchOption> fetchOptions = EnumSet.of(SampleFetchOption.PROPERTIES);
     SearchCriteria sc = new SearchCriteria();
-    sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, samplecode + "*"));
+    sc.addMatchClause(
+        MatchClause.createAttributeMatch(MatchClauseAttribute.CODE, samplecode + "*"));
 
-    List<Sample> samples =
-        datahandler
-            .getOpenBisClient()
-            .getOpenbisInfoService()
-            .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc,
-                fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
+    List<Sample> samples = datahandler.getOpenBisClient().getOpenbisInfoService()
+        .searchForSamplesOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(), sc,
+            fetchOptions, LiferayAndVaadinUtils.getUser().getScreenName());
     List<String> ret = new ArrayList<String>(samples.size());
     for (Sample sample : samples) {
       ret.add(sample.getCode());

@@ -25,7 +25,7 @@ import java.util.List;
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.ProjectBean;
-import properties.Factor;
+import properties.Property;
 
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.server.Page;
@@ -95,7 +95,7 @@ public class ChangeProjectMetadataComponent extends CustomComponent {
         HashMap<String, Object> parameters = new HashMap<String, Object>();
         Collection<Field<?>> registeredFields = fieldGroup.getFields();
 
-        List<Factor> factors = new ArrayList<Factor>();
+//        List<Property> factors = new ArrayList<Property>();
 
         for (Field<?> field : registeredFields) {
           parameters.put("description", field.getValue());

@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -15,16 +15,9 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.Utils;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.ExperimentBean;
-import model.ProjectBean;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
@@ -48,6 +41,12 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
+
+import helpers.Utils;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.ExperimentBean;
+import model.ProjectBean;
 
 public class ExperimentComponent extends CustomComponent {
   /**
@@ -89,6 +88,7 @@ public class ExperimentComponent extends CustomComponent {
     expSteps.setSpacing(true);
 
     export = new Button("Export as TSV");
+    export.setIcon(FontAwesome.DOWNLOAD);
     VerticalLayout buttonLayoutSection = new VerticalLayout();
     HorizontalLayout buttonLayout = new HorizontalLayout();
     buttonLayout.setHeight(null);
@@ -107,10 +107,9 @@ public class ExperimentComponent extends CustomComponent {
     // experiments.setContainerDataSource(new
     // BeanItemContainer<ExperimentBean>(ExperimentBean.class));
 
-    expSteps
-        .addComponent(new Label(
-            "This view shows the experimental steps which have been registered for this project. Experimental steps contain real biological experiments as well as executed computational workflows on project data",
-            ContentMode.HTML));
+    expSteps.addComponent(new Label(
+        "This view shows the experimental steps which have been registered for this project. Experimental steps contain real biological experiments as well as executed computational workflows on project data",
+        ContentMode.HTML));
 
     expSteps.addComponent(experiments);
     expSteps.addComponent(buttonLayoutSection);
@@ -251,8 +250,8 @@ public class ExperimentComponent extends CustomComponent {
     if (fileDownloader != null)
       this.export.removeExtension(fileDownloader);
     StreamResource sr =
-        Utils.getTSVStream(Utils.containerToString(projectBean.getExperiments()),
-            projectBean.getId());
+        Utils.getTSVStream(Utils.containerToString(projectBean.getExperiments()), String.format(
+            "%s_%s_", projectBean.getId().substring(1).replace("/", "_"), "experimental_steps"));
     fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(export);
   }

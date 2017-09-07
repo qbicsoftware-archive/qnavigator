@@ -1,23 +1,19 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
-
-import helpers.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,9 +23,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import model.NewIvacSampleBean;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -57,7 +50,11 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import helpers.Utils;
+import model.NewIvacSampleBean;
+
 
 public class AddPatientView extends VerticalLayout implements View {
 
@@ -91,8 +88,8 @@ public class AddPatientView extends VerticalLayout implements View {
   private String header;
 
 
-  private BeanItemContainer sampleOptions = new BeanItemContainer<NewIvacSampleBean>(
-      NewIvacSampleBean.class);
+  private BeanItemContainer sampleOptions =
+      new BeanItemContainer<NewIvacSampleBean>(NewIvacSampleBean.class);
 
   private VerticalLayout optionLayoutSection;
 
@@ -184,17 +181,15 @@ public class AddPatientView extends VerticalLayout implements View {
 
     final Grid optionGrid = new Grid();
     optionGrid.setWidth("80%");
-    // optionGrid.setCaption("Which biological samples are available for the patient(s) and which experiments will be performed?");
+    // optionGrid.setCaption("Which biological samples are available for the patient(s) and which
+    // experiments will be performed?");
 
     gridInfo = new CustomVisibilityComponent(new Label(""));
     ((Label) gridInfo.getInnerComponent()).addStyleName(ValoTheme.LABEL_LARGE);
 
-    Component gridInfoContent =
-        Utils
-            .questionize(
-                gridInfo,
-                "Which biological samples are available for the patient(s) and which experiments will be performed?",
-                "Extracted Samples");
+    Component gridInfoContent = Utils.questionize(gridInfo,
+        "Which biological samples are available for the patient(s) and which experiments will be performed?",
+        "Extracted Samples");
 
     // optionGrid.setSelectionMode(SelectionMode.MULTI);
     optionGrid.setEditorEnabled(true);
@@ -285,9 +280,7 @@ public class AddPatientView extends VerticalLayout implements View {
      * visibleSpaces.add(space); } } }
      */
 
-    for (Project project : datahandler
-        .getOpenBisClient()
-        .getOpenbisInfoService()
+    for (Project project : datahandler.getOpenBisClient().getOpenbisInfoService()
         .listProjectsOnBehalfOfUser(datahandler.getOpenBisClient().getSessionToken(),
             LiferayAndVaadinUtils.getUser().getScreenName())) {
 
@@ -324,9 +317,8 @@ public class AddPatientView extends VerticalLayout implements View {
     numberOfPatients.setVisible(false);
     ((TextField) numberOfPatients.getInnerComponent()).setImmediate(true);
 
-    Component numberContext =
-        Utils.questionize(numberOfPatients,
-            "How many patients with the same setup should be registered?", "Number of Patients");
+    Component numberContext = Utils.questionize(numberOfPatients,
+        "How many patients with the same setup should be registered?", "Number of Patients");
 
     ((TextField) numberOfPatients.getInnerComponent())
         .addTextChangeListener(new TextChangeListener() {
@@ -343,9 +335,8 @@ public class AddPatientView extends VerticalLayout implements View {
     ((TextField) secondaryNames.getInnerComponent()).setImmediate(true);
 
     secondaryNames.setVisible(false);
-    Component secondaryContext =
-        Utils.questionize(secondaryNames, "Please provide a list of comma separated IDs.",
-            "Identifiers");
+    Component secondaryContext = Utils.questionize(secondaryNames,
+        "Please provide a list of comma separated IDs.", "Identifiers");
 
     ((TextField) secondaryNames.getInnerComponent())
         .addTextChangeListener(new TextChangeListener() {
@@ -361,9 +352,8 @@ public class AddPatientView extends VerticalLayout implements View {
     description = new CustomVisibilityComponent(new TextField("Description"));
     ((TextField) description.getInnerComponent()).setImmediate(true);
     description.setVisible(false);
-    Component descriptionContext =
-        Utils.questionize(description,
-            "Please provide a general description for the new patient cases", "Description");
+    Component descriptionContext = Utils.questionize(description,
+        "Please provide a general description for the new patient cases", "Description");
 
     ((TextField) description.getInnerComponent()).addTextChangeListener(new TextChangeListener() {
 
@@ -396,9 +386,8 @@ public class AddPatientView extends VerticalLayout implements View {
     hlaInfo = new CustomVisibilityComponent(new Label("HLA Typing"));
     ((Label) hlaInfo.getInnerComponent()).setHeight("24px");
 
-    Component hlaContext =
-        Utils.questionize(hlaInfo,
-            "Register available HLA typing for this patient (one allele per line)", "HLA Typing");
+    Component hlaContext = Utils.questionize(hlaInfo,
+        "Register available HLA typing for this patient (one allele per line)", "HLA Typing");
 
     hlaLayout.addComponent(hlaContext);
 
@@ -417,8 +406,8 @@ public class AddPatientView extends VerticalLayout implements View {
 
     hlalayout.setSpacing(true);
 
-    typingMethod.addItems(datahandler.getOpenBisClient().getVocabCodesForVocab(
-        "Q_HLA_TYPING_METHODS"));
+    typingMethod
+        .addItems(datahandler.getOpenBisClient().getVocabCodesForVocab("Q_HLA_TYPING_METHODS"));
 
     hlaLayout.addComponent(typingMethod);
     hlaLayout.addComponent(hlalayout);
@@ -441,11 +430,9 @@ public class AddPatientView extends VerticalLayout implements View {
         hlaTypingI.add(typingMethod.getValue().toString());
         hlaTyping.put("MHC_CLASS_I", hlaTypingI);
       } else {
-        helpers.Utils
-            .Notification(
-                "HLA Typing not fully specified for class I.",
-                "The HLA alleles or the method which has been used for typing have not been specified.",
-                "error");
+        helpers.Utils.Notification("HLA Typing not fully specified for class I.",
+            "The HLA alleles or the method which has been used for typing have not been specified.",
+            "error");
         hlaIvalid = false;
       }
     }
@@ -457,11 +444,9 @@ public class AddPatientView extends VerticalLayout implements View {
         hlaTypingII.add(typingMethod.getValue().toString());
         hlaTyping.put("MHC_CLASS_II", hlaTypingII);
       } else {
-        helpers.Utils
-            .Notification(
-                "HLA Typing not fully specified for class II.",
-                "The HLA alleles or the method which has been used for typing have not been specified.",
-                "error");
+        helpers.Utils.Notification("HLA Typing not fully specified for class II.",
+            "The HLA alleles or the method which has been used for typing have not been specified.",
+            "error");
         hlaIIvalid = false;
       }
     }
@@ -470,18 +455,16 @@ public class AddPatientView extends VerticalLayout implements View {
 
     if (numberPatients.equals(secondaryIDs.size()) & checkRegisteredSamplesTable() & hlaIvalid
         & hlaIIvalid) {
-      datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions, projects
-          .getValue().toString(), description.getValue(), hlaTyping);
+      datahandler.registerNewPatients(numberPatients, secondaryIDs, sampleOptions,
+          projects.getValue().toString(), description.getValue(), hlaTyping);
       helpers.Utils.Notification("Patients successfully registered.",
           "The provided patient information has been written to the database successfully.",
           "success");
       // sucess.show(Page.getCurrent());
     } else {
-      helpers.Utils
-          .Notification(
-              "Registration failed",
-              "Number of Patients and secondary IDs has to be the same and tissues have to be fully specified.",
-              "error");
+      helpers.Utils.Notification("Registration failed",
+          "Number of Patients and secondary IDs has to be the same and tissues have to be fully specified.",
+          "error");
     }
 
   }
@@ -501,9 +484,8 @@ public class AddPatientView extends VerticalLayout implements View {
 
       NewIvacSampleBean sampleBean = (NewIvacSampleBean) iter.next();
 
-      expsSpecified =
-          ((sampleBean.getDeepSeq() == true) | (sampleBean.getDnaSeq() == true) | (sampleBean
-              .getRnaSeq() == true));
+      expsSpecified = ((sampleBean.getDeepSeq() == true) | (sampleBean.getDnaSeq() == true)
+          | (sampleBean.getRnaSeq() == true));
 
       tissueSpecified = (!sampleBean.getTissue().equals(""));
       instrumentSpecified = (!sampleBean.getSeqDevice().equals(""));

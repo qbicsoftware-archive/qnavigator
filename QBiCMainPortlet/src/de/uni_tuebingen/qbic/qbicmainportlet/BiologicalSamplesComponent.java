@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -20,14 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.BiologicalEntitySampleBean;
-import model.BiologicalSampleBean;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Vocabulary;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
-
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -37,9 +29,12 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
@@ -54,6 +49,15 @@ import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.renderers.HtmlRenderer;
+
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Vocabulary;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
+import helpers.Utils;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.BiologicalEntitySampleBean;
+import model.BiologicalSampleBean;
 
 
 public class BiologicalSamplesComponent extends CustomComponent {
@@ -81,6 +85,12 @@ public class BiologicalSamplesComponent extends CustomComponent {
   private BeanItemContainer<BiologicalSampleBean> samplesBio;
   private BeanItemContainer<BiologicalEntitySampleBean> samplesEntity;
   private String currentID;
+  private Button exportSources = new Button("Export as TSV");
+  private Button exportSamples = new Button("Export as TSV");
+  private FileDownloader fileDownloaderSources;
+  private FileDownloader fileDownloaderSamples;
+
+
 
   /**
    * 
@@ -89,7 +99,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
    * @param resourceurl
    * @param caption
    */
-  public BiologicalSamplesComponent(DataHandler dh, State state, String resourceurl, String caption) {
+  public BiologicalSamplesComponent(DataHandler dh, State state, String resourceurl,
+      String caption) {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
     this.state = state;
@@ -135,6 +146,9 @@ public class BiologicalSamplesComponent extends CustomComponent {
     mainLayout = new VerticalLayout(vert);
     mainLayout.setResponsive(true);
     setResponsive(true);
+
+    exportSources.setIcon(FontAwesome.DOWNLOAD);
+    exportSamples.setIcon(FontAwesome.DOWNLOAD);
 
     // this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
@@ -288,12 +302,10 @@ public class BiologicalSamplesComponent extends CustomComponent {
 
       @Override
       public String getValue(Item item, Object itemId, Object propertyId) {
-        String ncbi =
-            String
-                .format(
-                    "http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&name=%s&lvl=0&srchmode=1&keep=1&unlock' target='_blank'>%s</a>",
-                    item.getItemProperty("organism").getValue(),
-                    item.getItemProperty("organismName").getValue());
+        String ncbi = String.format(
+            "http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&name=%s&lvl=0&srchmode=1&keep=1&unlock' target='_blank'>%s</a>",
+            item.getItemProperty("organism").getValue(),
+            item.getItemProperty("organismName").getValue());
         String link = String.format("<a href='%s", ncbi);
 
         return link;
@@ -432,8 +444,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
 
           subWindow.addCloseListener(new CloseListener() {
             /**
-           * 
-           */
+            * 
+            */
             private static final long serialVersionUID = -1329152609834711109L;
 
             @Override
@@ -445,7 +457,8 @@ public class BiologicalSamplesComponent extends CustomComponent {
           QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
           ui.addWindow(subWindow);
         } catch (NullPointerException e) {
-          System.err.println("NullPointerException while trying to set metadata: " + e.getMessage());
+          System.err
+              .println("NullPointerException while trying to set metadata: " + e.getMessage());
 
         }
       }
@@ -460,6 +473,23 @@ public class BiologicalSamplesComponent extends CustomComponent {
 
     helpers.GridFunctions.addColumnFilters(sampleBioGrid, gpcBio);
     helpers.GridFunctions.addColumnFilters(sampleEntityGrid, gpcEntity);
+
+
+    if (fileDownloaderSources != null)
+      exportSources.removeExtension(fileDownloaderSources);
+    StreamResource srSource = Utils.getTSVStream(Utils.containerToString(samplesEntityContainer),
+        String.format("%s_%s_", id.substring(1).replace("/", "_"), "sample_sources"));
+    fileDownloaderSources = new FileDownloader(srSource);
+    fileDownloaderSources.extend(exportSources);
+
+
+    if (fileDownloaderSamples != null)
+      exportSamples.removeExtension(fileDownloaderSamples);
+    StreamResource srSamples = Utils.getTSVStream(Utils.containerToString(samplesBioContainer),
+        String.format("%s_%s_", id.substring(1).replace("/", "_"), "extracted_samples"));
+    fileDownloaderSamples = new FileDownloader(srSamples);
+    fileDownloaderSamples.extend(exportSamples);
+
     this.buildLayout();
   }
 
@@ -481,18 +511,15 @@ public class BiologicalSamplesComponent extends CustomComponent {
     tableSectionContent.setResponsive(true);
     sampletableSectionContent.setResponsive(true);
 
-    tableSectionContent.setMargin(new MarginInfo(true, false, true, false));
+    tableSectionContent.setMargin(new MarginInfo(true, false, false, false));
     sampletableSectionContent.setMargin(new MarginInfo(true, false, false, false));
 
     // tableSectionContent.setCaption("Datasets");
     // tableSectionContent.setIcon(FontAwesome.FLASK);
-    tableSection
-        .addComponent(new Label(
-            String
-                .format(
-                    "This view shows the sample sources (e.g., human, mouse) to be studied and the corresponding extracted samples. With sample sources, information specific to the subject (e.g., age or BMI in the case of patient data) can be stored. The extracted sample is a sample which has been extracted from the corresponding sample source. This is the raw sample material that can be later prepared for specific analytical methods such as MS or NGS.<br> "
-                        + "\n\n There are %s extracted  samples coming from %s distinct sample sources in this study.",
-                    numberOfBioSamples, numberOfEntitySamples), ContentMode.HTML));
+    tableSection.addComponent(new Label(String.format(
+        "This view shows the sample sources (e.g., human, mouse) to be studied and the corresponding extracted samples. With sample sources, information specific to the subject (e.g., age or BMI in the case of patient data) can be stored. The extracted sample is a sample which has been extracted from the corresponding sample source. This is the raw sample material that can be later prepared for specific analytical methods such as MS or NGS.<br> "
+            + "\n\n There are %s extracted  samples coming from %s distinct sample sources in this study.",
+        numberOfBioSamples, numberOfEntitySamples), ContentMode.HTML));
 
     tableSectionContent.addComponent(sampleBioGrid);
     sampletableSectionContent.addComponent(sampleEntityGrid);
@@ -500,11 +527,13 @@ public class BiologicalSamplesComponent extends CustomComponent {
     sampleEntityGrid.setCaption("Sample Sources");
     sampleBioGrid.setCaption("Extracted Samples");
 
-    tableSection.setMargin(new MarginInfo(true, false, false, true));
+    tableSection.setMargin(new MarginInfo(true, false, true, true));
     tableSection.setSpacing(true);
 
     tableSection.addComponent(sampletableSectionContent);
+    tableSection.addComponent(exportSources);
     tableSection.addComponent(tableSectionContent);
+    tableSection.addComponent(exportSamples);
     this.vert.addComponent(tableSection);
 
     sampleBioGrid.setWidth(100, Unit.PERCENTAGE);

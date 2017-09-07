@@ -16,6 +16,7 @@
 package controllers;
 
 import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import java.io.Serializable;
 import java.net.ConnectException;
@@ -31,12 +32,11 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 
 import logging.Log4j2Logger;
-import main.OpenBisClient;
 
 import org.apache.commons.lang.NotImplementedException;
 
 import parser.XMLParser;
-import properties.Factor;
+import properties.Property;
 import submitter.SubmitFailedException;
 import submitter.Submitter;
 import submitter.Workflow;
@@ -370,13 +370,13 @@ public class WorkflowViewController {
             secondaryName += "1";
           secondaryNames.add(secondaryName);
           row.append(secondaryName);
-          List<Factor> factors = new ArrayList<Factor>();
+          List<Property> properties = new ArrayList<Property>();
           try {
-            factors = p.getFactorsFromXML(xml);
+            properties = p.getAllPropertiesFromXML(xml);
           } catch (JAXBException e) {
             e.printStackTrace();
           }
-          for (Factor f : factors) {
+          for (Property f : properties) {
             factorNames.add(f.getLabel());
             String val = f.getValue();
             if (f.hasUnit())

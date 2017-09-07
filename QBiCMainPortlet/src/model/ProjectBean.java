@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -44,11 +44,13 @@ public class ProjectBean implements Serializable {
   private String projectManager;
   private Set<String> members;
   private Boolean containsData;
+  private Boolean containsResults;
+  private Boolean containsAttachments;
 
-  public ProjectBean(String id, String code, String secondaryName, String description,
-      String space, BeanItemContainer<ExperimentBean> experiments, ProgressBar progress,
-      Date registrationDate, String registrator, String contact, Set<String> members,
-      Boolean containsData, String projectManager) {
+  public ProjectBean(String id, String code, String secondaryName, String description, String space,
+      BeanItemContainer<ExperimentBean> experiments, ProgressBar progress, Date registrationDate,
+      String registrator, String contact, Set<String> members, Boolean containsData,
+      Boolean containsResults, Boolean containsAttachments, String projectManager) {
     super();
     this.id = id;
     this.code = code;
@@ -62,6 +64,8 @@ public class ProjectBean implements Serializable {
     this.contact = contact;
     this.members = members;
     this.setContainsData(containsData);
+    this.setContainsResults(containsResults);
+    this.setContainsAttachments(containsAttachments);
   }
 
   public ProjectBean() {
@@ -190,6 +194,14 @@ public class ProjectBean implements Serializable {
     return containsData;
   }
 
+  public Boolean getContainsResults() {
+    return containsResults;
+  }
+
+  public Boolean getContainsAttachments() {
+    return containsAttachments;
+  }
+
   public void setContainsData(Boolean containsData) {
     this.containsData = containsData;
   }
@@ -224,5 +236,13 @@ public class ProjectBean implements Serializable {
 
   public String getLongDescription() {
     return longDescription;
+  }
+
+  public void setContainsResults(Boolean containsResults) {
+    this.containsResults = containsResults;
+  }
+
+  public void setContainsAttachments(Boolean containsAttachment) {
+    this.containsAttachments = containsAttachment;
   }
 }
