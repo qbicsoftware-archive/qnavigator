@@ -44,6 +44,7 @@ import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
@@ -72,6 +73,7 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 import helpers.UglyToPrettyNameMapper;
+import helpers.Utils;
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.DatasetBean;
@@ -109,6 +111,12 @@ public class LevelComponent extends CustomComponent {
   private String idString;
   private String filterString;
 
+  private Button exportData = new Button("Export as TSV");
+  private Button exportSamples = new Button("Export as TSV");
+
+  FileDownloader fileDownloaderData;
+  FileDownloader fileDownloaderSamples;
+
   public LevelComponent(DataHandler dh, State state, String resourceurl, String caption) {
     this.datahandler = dh;
     this.resourceUrl = resourceurl;
@@ -133,6 +141,9 @@ public class LevelComponent extends CustomComponent {
 
     setResponsive(true);
 
+    exportData.setIcon(FontAwesome.DOWNLOAD);
+    exportSamples.setIcon(FontAwesome.DOWNLOAD);
+
     // this.setWidth(Page.getCurrent().getBrowserWindowWidth() * 0.8f, Unit.PIXELS);
     this.setCompositionRoot(mainLayout);
   }
@@ -143,7 +154,6 @@ public class LevelComponent extends CustomComponent {
     typeString = type;
     idString = id;
     filterString = filterFor;
-
 
     if (id == null)
       return;
@@ -471,6 +481,7 @@ public class LevelComponent extends CustomComponent {
           break;
       }
 
+      BeanItemContainer<DatasetBean> forExport = new BeanItemContainer(DatasetBean.class);
       numberOfDatasets = retrievedDatasets.size();
 
       if (numberOfDatasets == 0 & filterFor.equals("measured")) {
@@ -506,7 +517,7 @@ public class LevelComponent extends CustomComponent {
           String dateString = sd.format(date);
           // Timestamp ts = Timestamp.valueOf(dateString);
           String sampleID = samples.get(d.getCode());
-
+          forExport.addBean(d);
 
           registerDatasetInTable(d, datasetContainer, projectCode, sampleID, dateString, null);
         }
@@ -524,6 +535,22 @@ public class LevelComponent extends CustomComponent {
       }
 
       this.setContainerDataSource(datasetContainer);
+
+      if (fileDownloaderData != null)
+        this.exportData.removeExtension(fileDownloaderData);
+      StreamResource srData =
+          Utils.getTSVStream(Utils.containerToString(forExport), String.format("%s_%s_",
+              id.substring(1).replace("/", "_"), datasetTable.getCaption().replace(" ", "_")));
+      fileDownloaderData = new FileDownloader(srData);
+      fileDownloaderData.extend(exportData);
+
+      if (fileDownloaderSamples != null)
+        this.exportSamples.removeExtension(fileDownloaderSamples);
+      StreamResource srSamples =
+          Utils.getTSVStream(Utils.containerToString(samples), String.format("%s_%s_",
+              id.substring(1).replace("/", "_"), sampleGrid.getCaption().replaceAll(" ", "_")));
+      fileDownloaderSamples = new FileDownloader(srSamples);
+      fileDownloaderSamples.extend(exportSamples);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -589,6 +616,8 @@ public class LevelComponent extends CustomComponent {
 
 
     tableSectionSamples.addComponent(sampletableSectionContent);
+    tableSectionSamples.addComponent(exportSamples);
+
     this.vert.addComponent(tableSectionDatasets);
 
     sampleGrid.setWidth("100%");
@@ -632,6 +661,7 @@ public class LevelComponent extends CustomComponent {
       }
     });
 
+    buttonLayout.addComponent(exportData);
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
     // buttonLayout.addComponent(visualize);

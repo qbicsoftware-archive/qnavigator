@@ -35,10 +35,12 @@ import org.tepi.filtertable.FilterTreeTable;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
@@ -62,6 +64,7 @@ import com.vaadin.ui.Window;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import de.uni_tuebingen.qbic.util.DashboardUtil;
 import helpers.UglyToPrettyNameMapper;
+import helpers.Utils;
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.DatasetBean;
@@ -86,6 +89,9 @@ public class DatasetComponent extends CustomComponent {
   private String resourceUrl;
   private final ButtonLink download =
       new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
+
+  private Button export = new Button("Export as TSV");
+  private FileDownloader fileDownloader;
 
   private final String[] FILTER_TABLE_COLUMNS =
       new String[] {"Select", "File Name", "Dataset Type", "Registration Date", "File Size"};
@@ -189,6 +195,8 @@ public class DatasetComponent extends CustomComponent {
       }
 
       numberOfDatasets = retrievedDatasets.size();
+
+      BeanItemContainer<DatasetBean> forExport = new BeanItemContainer(DatasetBean.class);
       if (numberOfDatasets == 0) {
 
         if (type.equals("project")) {
@@ -240,6 +248,7 @@ public class DatasetComponent extends CustomComponent {
           String dateString = sd.format(date);
           // Timestamp ts = Timestamp.valueOf(dateString);
           String sampleID = samples.get(d.getCode());
+          forExport.addBean(d);
 
           registerDatasetInTable(d, datasetContainer, projectCode, sampleID, dateString, null);
         }
@@ -247,7 +256,16 @@ public class DatasetComponent extends CustomComponent {
 
       this.setContainerDataSource(datasetContainer);
 
-    } catch (Exception e) {
+      if (fileDownloader != null)
+        this.export.removeExtension(fileDownloader);
+      StreamResource sr = Utils.getTSVStream(Utils.containerToString(forExport),
+          String.format("%s_%s_", id.substring(1).replace("/", "_"), "registered_datasets"));
+      fileDownloader = new FileDownloader(sr);
+      fileDownloader.extend(export);
+
+    } catch (
+
+    Exception e) {
       e.printStackTrace();
       LOGGER.error(String.format("getting dataset failed for dataset %s %s", type, id),
           e.getStackTrace());
@@ -355,6 +373,9 @@ public class DatasetComponent extends CustomComponent {
             + "<p> You need to use command tar. The tar is the GNU version of tar archiving utility. <br> "
             + "To extract/unpack a tar file, type: $ tar -xvf file.tar</p>";
 
+
+    export.setIcon(FontAwesome.DOWNLOAD);
+
     PopupView tooltip = new PopupView(new helpers.ToolTip(content));
     tooltip.setHeight("44px");
 
@@ -373,6 +394,7 @@ public class DatasetComponent extends CustomComponent {
     help.addComponent(helpContent);
     help.setComponentAlignment(helpContent, Alignment.TOP_CENTER);
 
+    buttonLayout.addComponent(export);
     buttonLayout.addComponent(checkAll);
     buttonLayout.addComponent(uncheckAll);
     // buttonLayout.addComponent(visualize);

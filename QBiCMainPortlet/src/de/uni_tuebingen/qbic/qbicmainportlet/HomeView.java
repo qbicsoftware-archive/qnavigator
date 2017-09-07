@@ -269,7 +269,7 @@ public class HomeView extends VerticalLayout implements View {
     buttonLayout.addComponent(this.export);
 
     StreamResource sr =
-        Utils.getTSVStream(Utils.containerToString(currentBean.getProjects()), this.caption);
+        Utils.getTSVStream(Utils.containerToString(currentBean.getProjects()), "project_overview");
     FileDownloader fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
   }
@@ -311,6 +311,7 @@ public class HomeView extends VerticalLayout implements View {
     // clean up first
     // homeview_content.removeAllComponents();
     removeAllComponents();
+    setSpacing(true);
 
     // updateView(browserWidth, browserWidth, browser);
 
@@ -339,6 +340,8 @@ public class HomeView extends VerticalLayout implements View {
     // tableSectionContent.setIcon(FontAwesome.TABLE);
     // tableSectionContent.addComponent(this.table);
     addComponent(projectGrid);
+    addComponent(buttonLayoutSection);
+    setExportButton();
 
     setCaption("Sub-Projects");
     setIcon(FontAwesome.TABLE);
@@ -348,6 +351,8 @@ public class HomeView extends VerticalLayout implements View {
     projectGrid.setWidth(100, Unit.PERCENTAGE);
     projectGrid.setSelectionMode(SelectionMode.SINGLE);
     projectGrid.setResponsive(true);
+
+    export.setIcon(FontAwesome.DOWNLOAD);
 
     // tableSection.setWidth("100%");
     // tableSectionContent.setWidth("100%");
