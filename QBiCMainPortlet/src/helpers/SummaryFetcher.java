@@ -29,7 +29,7 @@ import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 
 import parser.XMLParser;
-import properties.Factor;
+import properties.Property;
 import qbic.utils.Docx4jHelper;
 import sorters.ExperimentTypeComparator;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
@@ -375,9 +375,9 @@ public class SummaryFetcher {
       table.addContainerProperty("External ID", String.class, null);
       table.setImmediate(true);
       List<String> factorLabels = new ArrayList<String>();
-      List<Factor> factors = new ArrayList<Factor>();
+      List<Property> factors = new ArrayList<Property>();
       int maxCols = 0;
-      Map<Sample, List<Factor>> samplesToFactors = new HashMap<Sample, List<Factor>>();
+      Map<Sample, List<Property>> samplesToFactors = new HashMap<Sample, List<Property>>();
       Sample mostInformative = samples.get(0);
       boolean specialSet = false;
       String sType = mostInformative.getSampleTypeCode();
@@ -386,9 +386,9 @@ public class SummaryFetcher {
 
         for (Sample s : samples) {
           String xml = s.getProperties().get("Q_PROPERTIES");
-          List<Factor> curr = new ArrayList<Factor>();
+          List<Property> curr = new ArrayList<Property>();
           try {
-            curr = xmlParser.getFactorsFromXML(xml);
+            curr = xmlParser.getAllPropertiesFromXML(xml);
             samplesToFactors.put(s, curr);
           } catch (JAXBException e) {
             // TODO Auto-generated catch block
@@ -449,11 +449,11 @@ public class SummaryFetcher {
         row.add(props.get("Q_SECONDARY_NAME"));
         row.add(props.get("Q_EXTERNALDB_ID"));
 
-        List<Factor> currFactors = new ArrayList<Factor>();
+        List<Property> currFactors = new ArrayList<Property>();
         if (samplesToFactors.containsKey(s))
           currFactors = samplesToFactors.get(s);
         int missing = maxCols - currFactors.size();
-        for (Factor f : currFactors) {
+        for (Property f : currFactors) {
           String v = f.getValue();
           if (f.hasUnit())
             v += " " + f.getUnit();

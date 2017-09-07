@@ -183,7 +183,7 @@ public class BiologicalSampleBean implements Comparable<Object>, Serializable {
         XMLParser xmlParser = new XMLParser();
         JAXBElement<Qproperties> xmlProperties =
             xmlParser.parseXMLString(pairs.getValue().toString());
-        Map<String, String> xmlPropertiesMap = xmlParser.getMap(xmlProperties);
+        Map<String, String> xmlPropertiesMap = xmlParser.getMapOfProperties(xmlProperties);
 
         Iterator itProperties = xmlPropertiesMap.entrySet().iterator();
         while (itProperties.hasNext()) {
