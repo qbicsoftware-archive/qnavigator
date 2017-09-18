@@ -3,7 +3,7 @@
 
 ## Installation instructions
 
-1. Follow the instructions for setting up Liferay and openBIS as well as the QBiC-specific data model found on our portal (coming soon)
+1. Follow the instructions for setting up Liferay and openBIS as well as the QBiC-specific data model found on our portal (http://qbic.life/portal/web/qbic/software)
 2. Clone qNavigator from the git repository: 'git clone https://github.com/qbicsoftware/qnavigator qnavigator'
 3. Adjust the properties defined in the file 'portlet.properties' (this is what links the portlet to the qbic-ext.properties file)
 4. For deployment a web application archive (.war) file has to be created. Navigate to the ‘WebContent’ folder of the qNavigator project and type 'jar cvf qnavigator.war .'
