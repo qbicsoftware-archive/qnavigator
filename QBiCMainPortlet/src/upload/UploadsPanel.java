@@ -27,6 +27,7 @@ import com.vaadin.ui.Upload.FinishedEvent;
 import com.vaadin.ui.Upload.FinishedListener;
 import com.vaadin.ui.themes.ValoTheme;
 
+import helpers.Utils;
 import life.qbic.openbis.openbisclient.OpenBisClient;
 
 import com.vaadin.ui.ComboBox;
@@ -248,26 +249,35 @@ public class UploadsPanel extends VerticalLayout {
   public void startCommit() {
     commit.setEnabled(false);
     bar.setVisible(true);
-
     String sample = project + "000";
     String experiment = project + "_INFO";
+    // only executed if someone wants to add files to an otherwise empty project
     if (!openbis.sampleExists(sample)) {
+      // timeout in seconds if something goes wrong
+      int TIMEOUT = 10;// in s
+      int step = 100; // in ms
+      boolean error = false;
       if (!openbis.expExists(space, project, experiment)) {
         Map<String, Object> params = new HashMap<String, Object>();
+        List<Map<String, Object>> props = new ArrayList<Map<String, Object>>();
+        props.add(new HashMap<String, Object>()); // empty properties for this experiment object
         params.put("codes", new ArrayList<String>(Arrays.asList(experiment)));
         params.put("types", new ArrayList<String>(Arrays.asList("Q_PROJECT_DETAILS")));
         params.put("project", project);
         params.put("space", space);
-        params.put("properties", new HashMap<String, Object>());
+        params.put("properties", props);
         params.put("user", userID);
         openbis.ingest("DSS1", "register-exp", params);
-
-        while (!openbis.expExists(space, project, experiment))
+        int time = TIMEOUT * 1000;
+        while (!openbis.expExists(space, project, experiment) && time > 0) {
+          time -= step;
           try {
-            Thread.sleep(100);
+            Thread.sleep(step);
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
+        }
+        error = time == 0;
       }
       Map<String, Object> params = new HashMap<String, Object>();
       Map<String, Object> map = new HashMap<String, Object>();
@@ -280,17 +290,22 @@ public class UploadsPanel extends VerticalLayout {
       map.put("metadata", new HashMap<String, Object>());
       params.put(sample, map);
       openbis.ingest("DSS1", "register-sample-batch", params);
-      while (!openbis.sampleExists(sample))
+      int time = TIMEOUT * 1000;
+      while (!openbis.sampleExists(sample) && time > 0) {
+        time -= step;
         try {
-          Thread.sleep(100);
+          Thread.sleep(step);
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
+      }
+      error = error || time == 0;
+      if (error)
+        Utils.Notification("Something went wrong", "Attachment could not be registered.", "error");
     }
   }
 
   public void commitDone() {
-    // upload.setVisible(false);
     bar.setVisible(false);
     info.setValue("Successfully moved all files.");
     toUpload.removeAllItems();
