@@ -69,7 +69,7 @@ public class WorkflowViewController {
   private final String wf_started = "Q_WF_STARTED_AT";
   private final String wf_status = "Q_WF_STATUS";
   private final String wf_name = "Q_WF_NAME";
-  private final String openbis_dss = "DSS1";
+  private final String openbis_dss = "DSS1"; //TODO this shouldn't be hardcoded
 
   // used by Microarray QC Workflow. See function mapExperimentalProperties
   private Map<String, String> expProps;
@@ -508,6 +508,7 @@ public class WorkflowViewController {
       // TODO get rid of hardocded paths
       path = path.replaceFirst("/mnt/" + openbis_dss, "/mnt/nfs/qbic");
       path = path.replaceFirst("/mnt/DSS_icgc", "/mnt/glusterfs/DSS_icgc");
+      path = path.replaceFirst("/beegfs/bigbio", "/mnt/nfs/bigbio_temp");
       return path;
     } catch (Exception e) {
       e.printStackTrace();
