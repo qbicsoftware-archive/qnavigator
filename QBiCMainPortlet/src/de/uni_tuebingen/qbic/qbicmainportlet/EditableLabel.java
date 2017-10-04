@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -34,26 +34,28 @@ public class EditableLabel extends VerticalLayout {
   private static final long serialVersionUID = -2770589094081457177L;
   private Label label = new Label();
   private ExpandingTextArea editArea = new ExpandingTextArea();
+  // used to show placeholder text if no information is given
+  private final String nullValueLabel = "Double click to add description.";
 
+  // initialized with cleartext value from the mysql db
   public EditableLabel(String value) {
-    label.setContentMode(ContentMode.HTML);
-    if (value.isEmpty()) {
-      label.setHeight(100, Unit.PIXELS);
-//      editArea.setHeight(100, Unit.PERCENTAGE);
-    } else {
-      label.setHeightUndefined();
-//      editArea.setHeightUndefined();
-    }
-    editArea.setConverter(new HTMLConverter());
-
-    editArea.setValue(value);
-    label.setValue(editArea.getConvertedValue().toString());
-
+    label.setHeightUndefined();
     label.setWidth(100, Unit.PERCENTAGE);
     label.setResponsive(true);
     editArea.setResponsive(true);
     setResponsive(true);
     setMargin(true);
+    editArea.setConverter(new HTMLConverter());
+    label.setContentMode(ContentMode.HTML);
+
+    if (value.isEmpty()) {
+      value = nullValueLabel;
+      editArea.setValue("");
+    } else {
+      editArea.setValue(value);
+    }
+    label.setValue(editArea.getConvertedValue().toString());
+
     editArea.setWidth(100, Unit.PERCENTAGE);
     setDescription("Double click to change value");
     addComponent(label);
@@ -69,7 +71,11 @@ public class EditableLabel extends VerticalLayout {
       public void layoutClick(LayoutClickEvent event) {
         if (event.isDoubleClick() && event.getClickedComponent() instanceof Label) {
           removeComponent(label);
-          editArea.setConvertedValue(label.getValue().toString());
+          String labelVal = label.getValue().toString();
+          if (labelVal.equals(nullValueLabel))
+            editArea.setConvertedValue("");
+          else
+            editArea.setConvertedValue(labelVal);
           addComponent(editArea);
           editArea.focus();
         }
@@ -81,7 +87,11 @@ public class EditableLabel extends VerticalLayout {
       @Override
       public void blur(BlurEvent event) {
         removeComponent(editArea);
-        label.setValue(editArea.getConvertedValue().toString());
+        String editedVal = editArea.getConvertedValue().toString();
+        if (editedVal.equals(""))
+          label.setValue(nullValueLabel);
+        else
+          label.setValue(editedVal);
         addComponent(label);
       }
     });
@@ -91,9 +101,9 @@ public class EditableLabel extends VerticalLayout {
     return editArea.getValue();
   }
 
-  public void setValue(String desc) {
-    label.setValue(desc);
-  }
+  // public void setValue(String desc) {
+  // label.setValue(desc);
+  // }
 
   public void addBlurListener(BlurListener l) {
     editArea.addBlurListener(l);
