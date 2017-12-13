@@ -61,10 +61,11 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import de.uni_tuebingen.qbic.util.DashboardUtil;
 import helpers.UglyToPrettyNameMapper;
 import helpers.Utils;
+import life.qbic.portal.liferayandvaadinhelpers.util.DashboardUtil;
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.DatasetBean;
@@ -93,8 +94,8 @@ public class DatasetComponent extends CustomComponent {
   private Button export = new Button("Export as TSV");
   private FileDownloader fileDownloader;
 
-  private final String[] FILTER_TABLE_COLUMNS =
-      new String[] {"Select", "File Name", "Dataset Type", "Registration Date", "File Size"};
+  private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "File Name", "Description",
+      "Dataset Type", "Registration Date", "File Size"};
 
   private int numberOfDatasets;
 
@@ -132,6 +133,7 @@ public class DatasetComponent extends CustomComponent {
       datasetContainer.addContainerProperty("Select", CheckBox.class, null);
       datasetContainer.addContainerProperty("Project", String.class, null);
       datasetContainer.addContainerProperty("Sample", String.class, null);
+      datasetContainer.addContainerProperty("Description", String.class, null);
       // datasetContainer.addContainerProperty("Sample Type", String.class, null);
       datasetContainer.addContainerProperty("File Name", String.class, null);
       datasetContainer.addContainerProperty("File Type", String.class, null);
@@ -152,17 +154,36 @@ public class DatasetComponent extends CustomComponent {
           new HashMap<String, AbstractMap.SimpleEntry<String, Long>>(),
           PortletSession.APPLICATION_SCOPE);
 
+      Map<String, Sample> checkedTestSamples = new HashMap<String, Sample>();
+
       switch (type) {
         case "project":
           String projectIdentifier = id;
           retrievedDatasets = datahandler.getOpenBisClient()
               .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
+
+          List<Sample> allSamples = datahandler.getOpenBisClient()
+              .getSamplesWithParentsAndChildrenOfProjectBySearchService(projectIdentifier);
+
+          for (Sample sample : allSamples) {
+            checkedTestSamples.put(sample.getCode(), sample);
+          }
           break;
 
         case "experiment":
           String experimentIdentifier = id;
           retrievedDatasets = datahandler.getOpenBisClient()
               .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
+
+          Project proj = datahandler.getOpenBisClient()
+              .getProjectOfExperimentByIdentifier(experimentIdentifier);
+
+          List<Sample> extSamples = datahandler.getOpenBisClient()
+              .getSamplesWithParentsAndChildrenOfProjectBySearchService(proj.getIdentifier());
+
+          for (Sample sample : extSamples) {
+            checkedTestSamples.put(sample.getCode(), sample);
+          }
           break;
 
         case "sample":
@@ -170,14 +191,23 @@ public class DatasetComponent extends CustomComponent {
           retrievedDatasets =
               new ArrayList<ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.DataSet>();
 
-          // Sample start = datahandler.getOpenBisClient().getSampleByIdentifier(sampleIdentifier);
-
-          String code = id.split("/")[2];
+          String code = sampleIdentifier.split("/")[2];
           Sample start =
               datahandler.getOpenBisClient().getSamplesWithParentsAndChildren(code).get(0);
 
+          Project sampProject = datahandler.getOpenBisClient()
+              .getProjectOfExperimentByIdentifier(start.getExperimentIdentifierOrNull());
+
           retrievedDatasets
               .addAll(datahandler.getOpenBisClient().getDataSetsOfSample(start.getCode()));
+
+          List<Sample> allProjSamples = datahandler.getOpenBisClient()
+              .getSamplesWithParentsAndChildrenOfProjectBySearchService(
+                  sampProject.getIdentifier());
+
+          for (Sample sample : allProjSamples) {
+            checkedTestSamples.put(sample.getCode(), sample);
+          }
 
           Set<Sample> startList = new HashSet<Sample>();
           Set<Sample> allChildren = getAllChildren(startList, start);
@@ -248,9 +278,17 @@ public class DatasetComponent extends CustomComponent {
           String dateString = sd.format(date);
           // Timestamp ts = Timestamp.valueOf(dateString);
           String sampleID = samples.get(d.getCode());
+
+          Sample dsSample = checkedTestSamples.get(sampleID);
+
+          String secNameDS = d.getProperties().get("Q_SECONDARY_NAME");
+
+          String secName = datahandler.getSecondaryName(dsSample, secNameDS);
+
           forExport.addBean(d);
 
-          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, dateString, null);
+          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, dateString, null,
+              secName);
         }
       }
 
@@ -587,7 +625,7 @@ public class DatasetComponent extends CustomComponent {
   }
 
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
-      String project, String sample, String ts, Object parent) {
+      String project, String sample, String ts, Object parent, String secName) {
 
     UglyToPrettyNameMapper mapper = new UglyToPrettyNameMapper();
 
@@ -603,6 +641,7 @@ public class DatasetComponent extends CustomComponent {
 
       dataset_container.getContainerProperty(new_ds, "Project").setValue(project);
       dataset_container.getContainerProperty(new_ds, "Sample").setValue(sample);
+      dataset_container.getContainerProperty(new_ds, "Description").setValue(secName);
       // dataset_container.getContainerProperty(new_ds, "Sample Type").setValue(
       // d.getSample().getType());
       dataset_container.getContainerProperty(new_ds, "File Name").setValue(d.getName());
@@ -623,7 +662,7 @@ public class DatasetComponent extends CustomComponent {
       // LOGGER.debug(d+" has files/folders:");
       for (DatasetBean file : subList) {
         // LOGGER.debug(file.getFileName());
-        registerDatasetInTable(file, dataset_container, project, sample, ts, new_ds);
+        registerDatasetInTable(file, dataset_container, project, sample, ts, new_ds, secName);
       }
 
     } else {
@@ -635,6 +674,7 @@ public class DatasetComponent extends CustomComponent {
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
+      dataset_container.getContainerProperty(new_file, "Description").setValue(secName);
       // dataset_container.getContainerProperty(new_file, "Sample Type").setValue(sampleType);
       dataset_container.getContainerProperty(new_file, "File Name").setValue(d.getFileName());
       dataset_container.getContainerProperty(new_file, "File Type").setValue(d.getFileType());

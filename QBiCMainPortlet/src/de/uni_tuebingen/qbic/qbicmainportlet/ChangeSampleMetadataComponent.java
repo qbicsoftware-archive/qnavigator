@@ -15,8 +15,6 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.Utils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,16 +23,7 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
-import model.PropertyBean;
-import parser.XMLParser;
-import properties.Property;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
-
-import com.gargoylesoftware.htmlunit.WebConsole.Logger;
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup.BindException;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
@@ -49,7 +38,14 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
+import helpers.Utils;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
+import model.PropertyBean;
+import parser.XMLParser;
+import properties.Property;
 
 public class ChangeSampleMetadataComponent extends CustomComponent {
   /**

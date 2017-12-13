@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -15,9 +15,6 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.Utils;
-import life.qbic.openbis.openbisclient.OpenBisClient;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,15 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.ExperimentBean;
-import model.ProjectBean;
-import upload.AttachmentUploadComponent;
-
 import org.tepi.filtertable.FilterTable;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -71,9 +60,17 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import controllers.WorkflowViewController;
-import de.uni_tuebingen.qbic.main.ConfigurationManager;
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
+import life.qbic.portal.liferayandvaadinhelpers.main.ConfigurationManager;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.ExperimentBean;
+import model.ProjectBean;
+import upload.AttachmentUploadComponent;
 
 @SuppressWarnings("serial")
 public class ProjectView extends VerticalLayout implements View {
@@ -317,9 +314,8 @@ public class ProjectView extends VerticalLayout implements View {
   void updateContentButtonLayout() {
     if (fileDownloader != null)
       this.export.removeExtension(fileDownloader);
-    StreamResource sr =
-        Utils.getTSVStream(Utils.containerToString(currentBean.getExperiments()),
-            currentBean.getId());
+    StreamResource sr = Utils.getTSVStream(Utils.containerToString(currentBean.getExperiments()),
+        currentBean.getId());
     fileDownloader = new FileDownloader(sr);
     fileDownloader.extend(this.export);
   }
@@ -363,7 +359,8 @@ public class ProjectView extends VerticalLayout implements View {
     // descContent.setValue(desc);
     // }
     descContent = new Label("");
-    // contact.setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+    // contact.setValue("<a
+    // href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
     // + currentBean.getId()
     // + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
     // + currentBean.getId() + "</a>");
@@ -410,8 +407,8 @@ public class ProjectView extends VerticalLayout implements View {
 
   void updateContentDescription() {
     projDescriptionContent.removeAllComponents();
-    contact
-        .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+    contact.setValue(
+        "<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
             + currentBean.getId()
             + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding project "
             + currentBean.getId() + "</a>");
@@ -420,8 +417,8 @@ public class ProjectView extends VerticalLayout implements View {
       descContent.setValue(desc);
     }
 
-    projDescriptionContent.addComponent(new Label(String.format("%s experiment(s),", currentBean
-        .getExperiments().size())));
+    projDescriptionContent.addComponent(
+        new Label(String.format("%s experiment(s),", currentBean.getExperiments().size())));
 
     // VerticalLayout statusContent =
     // this.createProjectStatusComponent(datahandler.computeProjectStatuses(currentBean));
@@ -472,8 +469,8 @@ public class ProjectView extends VerticalLayout implements View {
    */
   void updateContentStatistics() {
     statContent.removeAllComponents();
-    statContent.addComponent(new Label(String.format("%s experiment(s),", currentBean
-        .getExperiments().size())));
+    statContent.addComponent(
+        new Label(String.format("%s experiment(s),", currentBean.getExperiments().size())));
     statContent.setMargin(new MarginInfo(true, false, true, true));
 
     status.removeAllComponents();
@@ -608,9 +605,8 @@ public class ProjectView extends VerticalLayout implements View {
         || !(graphSectionContent.getComponent(0) instanceof Image)) {
       ProgressBar progress = new ProgressBar();
       progress.setIndeterminate(true);
-      Label info =
-          new Label(
-              "Computing the project graph can take several seconds on big projects. Please be patient.");
+      Label info = new Label(
+          "Computing the project graph can take several seconds on big projects. Please be patient.");
       info.setStyleName(ValoTheme.LABEL_SUCCESS);
       graphSectionContent.removeAllComponents();
       graphSectionContent.addComponent(progress);
@@ -692,8 +688,8 @@ public class ProjectView extends VerticalLayout implements View {
       ExperimentBean item = (ExperimentBean) i.next();
 
     }
-    table.setVisibleColumns(new Object[] {"code", "prettyType", "registrationDate", "registrator",
-        "status"});
+    table.setVisibleColumns(
+        new Object[] {"code", "prettyType", "registrationDate", "registrator", "status"});
 
     table.setColumnHeader("prettyType", "Type");
     int rowNumber = this.table.size();
@@ -717,11 +713,11 @@ public class ProjectView extends VerticalLayout implements View {
     Resource resource = null;
     try {
 
-      GraphGenerator graphFrame =
-          new GraphGenerator(datahandler.getOpenBisClient()
-              .getSamplesWithParentsAndChildrenOfProjectBySearchService(currentBean.getId()),
-              datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(),
-              currentBean.getId());
+      GraphGenerator graphFrame = new GraphGenerator(
+          datahandler.getOpenBisClient().getSamplesWithParentsAndChildrenOfProjectBySearchService(
+              currentBean.getId()),
+          datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(),
+          currentBean.getId());
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
@@ -732,8 +728,8 @@ public class ProjectView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     table.setSelectable(true);
     table.setImmediate(true);
-    this.table.addValueChangeListener(new ViewTablesClickListener(table,
-        ExperimentView.navigateToLabel));
+    this.table
+        .addValueChangeListener(new ViewTablesClickListener(table, ExperimentView.navigateToLabel));
   }
 
   /**
@@ -785,11 +781,11 @@ public class ProjectView extends VerticalLayout implements View {
       } catch (PortalException | SystemException e) {
         LOGGER.error(
             "liferay error, could not retrieve companyId. Trying default companyId, which is "
-                + companyId, e.getStackTrace());
+                + companyId,
+            e.getStackTrace());
       }
-      Set<String> list =
-          datahandler.removeQBiCStaffFromMemberSet(datahandler.getOpenBisClient().getSpaceMembers(
-              currentBean.getId().split("/")[1]));
+      Set<String> list = datahandler.removeQBiCStaffFromMemberSet(
+          datahandler.getOpenBisClient().getSpaceMembers(currentBean.getId().split("/")[1]));
       members = new TreeMap<String, String>();
       memberLetters = new HashMap<String, String>();
 
@@ -856,9 +852,8 @@ public class ProjectView extends VerticalLayout implements View {
 
     ProgressBar progress = new ProgressBar();
     progress.setIndeterminate(true);
-    Label info =
-        new Label(
-            "Searching for members. Can take several seconds on big projects. Please be patient.");
+    Label info = new Label(
+        "Searching for members. Can take several seconds on big projects. Please be patient.");
     info.setStyleName(ValoTheme.LABEL_SUCCESS);
     membersLayout.addComponent(progress);
     MemberWorker worker = new MemberWorker();
@@ -908,9 +903,8 @@ public class ProjectView extends VerticalLayout implements View {
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
     OpenBisClient oc = datahandler.getOpenBisClient();
-    List<Project> userProjects =
-        oc.getOpenbisInfoService().listProjectsOnBehalfOfUser(oc.getSessionToken(),
-            LiferayAndVaadinUtils.getUser().getScreenName().toString());
+    List<Project> userProjects = oc.getOpenbisInfoService().listProjectsOnBehalfOfUser(
+        oc.getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName().toString());
 
     List<String> projectIDs = new ArrayList<String>();
 
@@ -932,13 +926,11 @@ public class ProjectView extends VerticalLayout implements View {
 
       updateContent();
     } else {
-      Utils
-          .Notification(
-              "Unable to load project",
-              String
-                  .format(
-                      "The requested project %s could not be loaded. You probably don't have access to the requested project. Please contact the corresponding project manager or write an email to info@qbic.uni-tuebingen.de.",
-                      currentValue), "error");
+      Utils.Notification("Unable to load project",
+          String.format(
+              "The requested project %s could not be loaded. You probably don't have access to the requested project. Please contact the corresponding project manager or write an email to info@qbic.uni-tuebingen.de.",
+              currentValue),
+          "error");
     }
     // projectview_tab.setSelectedTab(0);
   }

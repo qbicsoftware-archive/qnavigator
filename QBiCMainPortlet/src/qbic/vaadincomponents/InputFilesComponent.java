@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -23,16 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import logging.Log4j2Logger;
-
 import org.apache.commons.lang.NotImplementedException;
-
-import submitter.Workflow;
-import submitter.parameters.FileListParameter;
-import submitter.parameters.FileParameter;
-import submitter.parameters.InputList;
-import submitter.parameters.Parameter;
-import submitter.parameters.ParameterSet;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
@@ -54,6 +45,13 @@ import controllers.WorkflowViewController;
 import de.uni_tuebingen.qbic.beans.DatasetBean;
 import fasta.FastaBean;
 import fasta.FastaDB;
+import logging.Log4j2Logger;
+import submitter.Workflow;
+import submitter.parameters.FileListParameter;
+import submitter.parameters.FileParameter;
+import submitter.parameters.InputList;
+import submitter.parameters.Parameter;
+import submitter.parameters.ParameterSet;
 
 public class InputFilesComponent extends WorkflowParameterComponent {
 
@@ -152,7 +150,8 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       // "Missing Dataset Type",
       // String
       // .format(
-      // "Workflow submission might not be possible because no dataset of type %s is available in this project",
+      // "Workflow submission might not be possible because no dataset of type %s is available in
+      // this project",
       // entry.getKey()), "warning");
       layout.addComponent(newGrid);
       // }
@@ -188,7 +187,21 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     FastaDB db = new FastaDB();
     subContainer.addAll(db.getAll());
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
+    gpcontainer.addGeneratedProperty("Type", new PropertyValueGenerator<String>() {
+      @Override
+      public Class<String> getType() {
+        return String.class;
+      }
+
+      @Override
+      public String getValue(Item item, Object itemId, Object propertyId) {
+        String detailedType = item.getItemProperty("detailedType").getValue().toString();
+        return detailedType;
+      }
+    });
     gpcontainer.removeContainerProperty("path");
+    gpcontainer.removeContainerProperty("detailedType");
+
     return gpcontainer;
   }
 
@@ -207,7 +220,21 @@ public class InputFilesComponent extends WorkflowParameterComponent {
     }
 
     GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(subContainer);
+    gpcontainer.addGeneratedProperty("Type", new PropertyValueGenerator<String>() {
+      @Override
+      public Class<String> getType() {
+        return String.class;
+      }
+
+      @Override
+      public String getValue(Item item, Object itemId, Object propertyId) {
+        String detailedType = item.getItemProperty("detailedType").getValue().toString();
+        return detailedType;
+      }
+    });
     gpcontainer.removeContainerProperty("path");
+    gpcontainer.removeContainerProperty("detailedType");
+
     return gpcontainer;
   }
 
@@ -230,18 +257,19 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       // use the filter[1] which is the filetype.
       // However it has to be specified in the corresponding CTD.
       // For now, do workflow specific filtering additionally
-      if (((filter.contains(dataset.getFileType().toLowerCase()) | filter.contains(dataset
-          .getFileType()))) & dataset.getFileType().equals("Q_WF_NGS_HLATYPING_RESULTS")) {
+      if (((filter.contains(dataset.getFileType().toLowerCase())
+          | filter.contains(dataset.getFileType())))
+          & dataset.getFileType().equals("Q_WF_NGS_HLATYPING_RESULTS")) {
         if (dataset.getFileName().endsWith("alleles")) {
           subContainer.addBean(dataset);
         }
       } else if (filter.contains(dataset.getFileType().toLowerCase())
           | filter.contains(dataset.getFileType())
-          & !(dataset.getFileName().endsWith(".html") | dataset.getFileName().endsWith(".zip")
-              | dataset.getFileName().endsWith(".pdf") | dataset.getFileName().endsWith(".png")
-              | dataset.getFileName().endsWith(".origlabfilename")
-              | dataset.getFileName().endsWith(".sha256sum") | dataset.getFileName().contains(
-              "source_dropbox"))) {
+              & !(dataset.getFileName().endsWith(".html") | dataset.getFileName().endsWith(".zip")
+                  | dataset.getFileName().endsWith(".pdf") | dataset.getFileName().endsWith(".png")
+                  | dataset.getFileName().endsWith(".origlabfilename")
+                  | dataset.getFileName().endsWith(".sha256sum")
+                  | dataset.getFileName().contains("source_dropbox"))) {
         subContainer.addBean(dataset);
       }
     }
@@ -305,7 +333,21 @@ public class InputFilesComponent extends WorkflowParameterComponent {
           FastaDB db = new FastaDB();
           subContainer.addAll(db.getAll());
           gpcontainer = new GeneratedPropertyContainer(subContainer);
+          gpcontainer.addGeneratedProperty("Type", new PropertyValueGenerator<String>() {
+            @Override
+            public Class<String> getType() {
+              return String.class;
+            }
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+              String detailedType = item.getItemProperty("detailedType").getValue().toString();
+              return detailedType;
+            }
+          });
           gpcontainer.removeContainerProperty("path");
+          gpcontainer.removeContainerProperty("detailedType");
+
         }
 
         else {
@@ -372,7 +414,8 @@ public class InputFilesComponent extends WorkflowParameterComponent {
       // "Missing Dataset Type",
       // String
       // .format(
-      // "Workflow submission might not be possible because no dataset of type %s is available in this project",
+      // "Workflow submission might not be possible because no dataset of type %s is available in
+      // this project",
       // entry.getKey()), "warning");
       // Notification.show(
       // String.format("No dataset of type %s available in this project!", entry.getKey()),
@@ -542,9 +585,8 @@ public class InputFilesComponent extends WorkflowParameterComponent {
                 inpList.getData().get(caption)
                     .setValue(controller.getDatasetsNfsPath(selectedBean));
               } catch (Exception e) {
-                LOGGER.error(
-                    "could not retrieve nfs path. Using datasetbeans getfullpath instead. "
-                        + e.getMessage(), e.getStackTrace());
+                LOGGER.error("could not retrieve nfs path. Using datasetbeans getfullpath instead. "
+                    + e.getMessage(), e.getStackTrace());
                 inpList.getData().get(caption).setValue(selectedBean.getFullPath());
               }
             }
@@ -574,9 +616,8 @@ public class InputFilesComponent extends WorkflowParameterComponent {
               try {
                 selectedPaths.add(controller.getDatasetsNfsPath(selectedBean));
               } catch (Exception e) {
-                LOGGER.error(
-                    "could not retrieve nfs path. Using datasetbeans getfullpath instead. "
-                        + e.getMessage(), e.getStackTrace());
+                LOGGER.error("could not retrieve nfs path. Using datasetbeans getfullpath instead. "
+                    + e.getMessage(), e.getStackTrace());
                 selectedPaths.add(selectedBean.getFullPath());
               }
             }

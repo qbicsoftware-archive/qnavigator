@@ -54,10 +54,10 @@ import com.vaadin.ui.themes.ValoTheme;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import controllers.MultiscaleController;
 import controllers.WorkflowViewController;
-import de.uni_tuebingen.qbic.main.ConfigurationManager;
-import de.uni_tuebingen.qbic.main.ConfigurationManagerFactory;
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import life.qbic.openbis.openbisclient.OpenBisClient;
+import life.qbic.portal.liferayandvaadinhelpers.main.ConfigurationManager;
+import life.qbic.portal.liferayandvaadinhelpers.main.ConfigurationManagerFactory;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 import logging.Log4j2Logger;
 import model.DBConfig;
 import model.DBManager;
@@ -84,7 +84,7 @@ public class QbicmainportletUI extends UI {
 
   private logging.Logger LOGGER = new Log4j2Logger(QbicmainportletUI.class);
   private String version = "1.6.0";
-  private String revision = "73a8242";
+  private String revision = "7e33491";
   private String resUrl;
   protected View currentView;
 
@@ -279,10 +279,6 @@ public class QbicmainportletUI extends UI {
     // ChangePropertiesView changepropertiesView = new ChangePropertiesView(datahandler);
 
     final AddPatientView addPatientView = new AddPatientView(datahandler, state, resUrl);
-
-    // Not yet production ready
-    // final VaccineDesignerView vaccineDesignerView =
-    // new VaccineDesignerView(datahandler, state, resUrl);
 
     final SearchResultsView searchResultsView =
         new SearchResultsView(datahandler, "Search results", user, state, resUrl);

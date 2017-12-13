@@ -59,11 +59,11 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
-import de.uni_tuebingen.qbic.util.DashboardUtil;
 import helpers.AlternativeSecondaryNameCreator;
 import helpers.Utils;
 import life.qbic.openbis.openbisclient.OpenBisClient;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
+import life.qbic.portal.liferayandvaadinhelpers.util.DashboardUtil;
 import logging.Log4j2Logger;
 import model.DBManager;
 import model.DatasetBean;
@@ -2488,6 +2488,64 @@ public class DataHandler implements Serializable {
     // projectStatusContent.addComponent(progressBar);
 
     return projectStatusContent;
+  }
+
+  /**
+   * Get secondary Name of parent or parents of parent
+   * 
+   * @param samp
+   * @return
+   */
+  public String getSecondaryName(Sample samp, String datsetSecName) {
+    List<Sample> firstParents = samp.getParents();
+    String secondaryName = "";
+    Set<String> secNamesTest = new HashSet<String>();
+    Set<String> secNamesBiological = new HashSet<String>();
+    Set<String> secNamesEntities = new HashSet<String>();
+    List<Sample> allParents = new ArrayList<Sample>();
+
+    for (Sample p : firstParents) {
+      allParents.add(p);
+      for (Sample q : p.getParents()) {
+        allParents.add(q);
+        for (Sample r : q.getParents()) {
+          allParents.add(r);
+          for (Sample s : r.getParents()) {
+            allParents.add(s);
+          }
+        }
+      }
+    }
+
+    for (Sample pp : allParents) {
+      if (pp.getSampleTypeCode().equals("Q_TEST_SAMPLE")) {
+        String new_sec = pp.getProperties().get("Q_SECONDARY_NAME");
+        if (new_sec != null) {
+          secNamesTest.add(new_sec);
+        }
+      } else if (pp.getSampleTypeCode().equals("Q_BIOLOGICAL_SAMPLE")) {
+        String new_sec = pp.getProperties().get("Q_SECONDARY_NAME");
+        if (new_sec != null) {
+          secNamesBiological.add(new_sec);
+        }
+
+      } else if (pp.getSampleTypeCode().equals("Q_BIOLOGICAL_ENTITY")) {
+        String new_sec = pp.getProperties().get("Q_SECONDARY_NAME");
+        if (new_sec != null) {
+          secNamesEntities.add(new_sec);
+        }
+      }
+    }
+
+    if (datsetSecName != null) {
+      secondaryName = String.format("%s_%s_%s_%s", String.join("_", secNamesEntities),
+          String.join("_", secNamesBiological), String.join("_", secNamesTest), datsetSecName);
+    } else {
+      secondaryName = String.format("%s_%s_%s", String.join("_", secNamesEntities),
+          String.join("_", secNamesBiological), String.join("_", secNamesTest), datsetSecName);
+    }
+
+    return secondaryName;
   }
 
 

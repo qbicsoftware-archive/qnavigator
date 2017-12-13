@@ -73,7 +73,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
-import de.uni_tuebingen.qbic.util.DashboardUtil;
+import life.qbic.portal.liferayandvaadinhelpers.util.DashboardUtil;
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.DatasetBean;
