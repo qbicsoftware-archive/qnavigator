@@ -194,7 +194,7 @@ public class ProjInformationComponent extends CustomComponent {
     peopleInCharge.addTab(layoutC, "Contact Person");
     peopleInCharge.addTab(layoutP, "Project Manager");
 
-    descEdit = new Button("Edit Description");
+    descEdit = new Button("Edit");
     descEdit.setIcon(FontAwesome.PENCIL);
     descEdit.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
     descEdit.setResponsive(true);
@@ -309,11 +309,12 @@ public class ProjInformationComponent extends CustomComponent {
       String desc = currentBean.getDescription();
       if (!desc.isEmpty()) {
         String secondaryName = projectBean.getSecondaryName();
+        String[] codes = projectBean.getId().split("/");
 
         if (secondaryName.equals("n/a") || secondaryName.equals(desc)) {
-          descContent.setCaption("Description");
+          descContent.setCaption(String.format("%s-%s", codes[1], codes[2]));
         } else {
-          descContent.setCaption(secondaryName);
+          descContent.setCaption(String.format("%s-%s: ", codes[1], codes[2]) + secondaryName);
         }
         descContent.setValue(desc);
       }
@@ -510,8 +511,8 @@ public class ProjInformationComponent extends CustomComponent {
     descHorz.addComponent(descContent);
     descHorz.addComponent(descEdit);
     descHorz.setComponentAlignment(descEdit, Alignment.TOP_RIGHT);
-    descHorz.setExpandRatio(descContent, 0.8f);
-    descHorz.setExpandRatio(descEdit, 0.2f);
+    descHorz.setExpandRatio(descContent, 0.9f);
+    descHorz.setExpandRatio(descEdit, 0.1f);
 
     projDescriptionContent.addComponent(descHorz);
     projDescriptionContent.addComponent(peopleInCharge);
