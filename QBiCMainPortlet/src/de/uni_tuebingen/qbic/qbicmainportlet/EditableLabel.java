@@ -47,14 +47,15 @@ public class EditableLabel extends VerticalLayout {
     setMargin(true);
     editArea.setConverter(new HTMLConverter());
     label.setContentMode(ContentMode.HTML);
+    editArea.setValue(nullValueLabel);
 
     if (value.isEmpty()) {
-      value = nullValueLabel;
+      label.setValue(editArea.getConvertedValue().toString());
       editArea.setValue("");
     } else {
       editArea.setValue(value);
+      label.setValue(editArea.getConvertedValue().toString());
     }
-    label.setValue(editArea.getConvertedValue().toString());
 
     editArea.setWidth(100, Unit.PERCENTAGE);
     setDescription("Double click to change value");
