@@ -429,7 +429,7 @@ public class InputFilesComponent extends WorkflowParameterComponent {
 
   // TODO
   public void resetInputList() {
-    throw new NotImplementedException();
+    throw new NotImplementedException("Not implemented.");
     /*
      * Collection<Field<?>> registeredFields = inputFileFieldGroup.getFields();
      * 

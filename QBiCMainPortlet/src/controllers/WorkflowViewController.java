@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -15,9 +15,6 @@
  *******************************************************************************/
 package controllers;
 
-import helpers.Utils;
-import life.qbic.openbis.openbisclient.OpenBisClient;
-
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.nio.file.Paths;
@@ -31,24 +28,16 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
-import logging.Log4j2Logger;
-
 import org.apache.commons.lang.NotImplementedException;
 
-import parser.XMLParser;
-import properties.Property;
-import submitter.SubmitFailedException;
-import submitter.Submitter;
-import submitter.Workflow;
+import com.vaadin.data.Container;
+import com.vaadin.data.util.BeanItemContainer;
+
 import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
-
-import com.vaadin.data.Container;
-import com.vaadin.data.util.BeanItemContainer;
-
 import de.uni_tuebingen.qbic.beans.DatasetBean;
 import de.uni_tuebingen.qbic.qbicmainportlet.DataHandler;
 import de.uni_tuebingen.qbic.qbicmainportlet.DatasetView;
@@ -56,6 +45,14 @@ import de.uni_tuebingen.qbic.qbicmainportlet.ExperimentView;
 import de.uni_tuebingen.qbic.qbicmainportlet.PatientView;
 import de.uni_tuebingen.qbic.qbicmainportlet.ProjectView;
 import de.uni_tuebingen.qbic.qbicmainportlet.SampleView;
+import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
+import logging.Log4j2Logger;
+import parser.XMLParser;
+import properties.Property;
+import submitter.SubmitFailedException;
+import submitter.Submitter;
+import submitter.Workflow;
 
 public class WorkflowViewController {
   private DataHandler datahandler;
@@ -69,7 +66,7 @@ public class WorkflowViewController {
   private final String wf_started = "Q_WF_STARTED_AT";
   private final String wf_status = "Q_WF_STATUS";
   private final String wf_name = "Q_WF_NAME";
-  private final String openbis_dss = "DSS1"; //TODO this shouldn't be hardcoded
+  private final String openbis_dss = "DSS1"; // TODO this shouldn't be hardcoded
 
   // used by Microarray QC Workflow. See function mapExperimentalProperties
   private Map<String, String> expProps;
@@ -113,10 +110,9 @@ public class WorkflowViewController {
     for (model.DatasetBean bean : datasetBeans) {
       fileNames.add(bean.getFileName());
 
-      DatasetBean newBean =
-          new DatasetBean(bean.getFileName(), dataMap.get(bean.getCode()).getDataSetTypeCode(),
-              bean.getCode(), bean.getDssPath(), dataMap.get(bean.getCode())
-                  .getSampleIdentifierOrNull());
+      DatasetBean newBean = new DatasetBean(bean.getFileName(),
+          dataMap.get(bean.getCode()).getDataSetTypeCode(), bean.getCode(), bean.getDssPath(),
+          dataMap.get(bean.getCode()).getSampleIdentifierOrNull());
 
       if (dataMap.get(bean.getCode()).getProperties() != null) {
         newBean.setProperties(dataMap.get(bean.getCode()).getProperties());
@@ -198,9 +194,8 @@ public class WorkflowViewController {
   public String registerWFSample(String space, String project, String experiment, String typecode,
       List<String> parents, List<DatasetBean> datasets) {
     int last = 0;
-    for (Sample s : datahandler.getOpenBisClient().getSamplesofExperiment(
-        (new StringBuilder("/")).append(space).append("/").append(project).append("/")
-            .append(experiment).toString())) {
+    for (Sample s : datahandler.getOpenBisClient().getSamplesofExperiment((new StringBuilder("/"))
+        .append(space).append("/").append(project).append("/").append(experiment).toString())) {
       String[] codeSplit = s.getCode().split("R");
       String number = codeSplit[codeSplit.length - 1];
       int num = 0;
@@ -413,8 +408,8 @@ public class WorkflowViewController {
   }
 
   public String submitAndRegisterWf(String type, String id, Workflow workflow,
-      List<DatasetBean> selectedDatasets) throws ConnectException, IllegalArgumentException,
-      SubmitFailedException {
+      List<DatasetBean> selectedDatasets)
+      throws ConnectException, IllegalArgumentException, SubmitFailedException {
 
     SpaceAndProjectCodes spaceandproject = getSpaceAndProjects(type, id);
 
@@ -422,16 +417,14 @@ public class WorkflowViewController {
     String projectCode = spaceandproject.project;
 
 
-    String experimentCode =
-        registerWFExperiment(spaceCode, projectCode, workflow.getExperimentType(),
-            workflow.getID(), workflow.getVersion(), user);
+    String experimentCode = registerWFExperiment(spaceCode, projectCode,
+        workflow.getExperimentType(), workflow.getID(), workflow.getVersion(), user);
 
     List<String> parents = getConnectedSamples(selectedDatasets);
     String sampleType = workflow.getSampleType();
 
-    String sampleCode =
-        registerWFSample(spaceCode, projectCode, experimentCode, sampleType, parents,
-            selectedDatasets);
+    String sampleCode = registerWFSample(spaceCode, projectCode, experimentCode, sampleType,
+        parents, selectedDatasets);
 
     String openbisId =
         String.format("%s-%s-%s-%s", spaceCode, projectCode, experimentCode, sampleCode);
@@ -458,10 +451,9 @@ public class WorkflowViewController {
       case "workflowExperimentType":
         return new SpaceAndProjectCodes(split[1], split[2]);
       case SampleView.navigateToLabel:
-        String expId =
-            datahandler.getOpenBisClient()
-                .getSampleByIdentifier(String.format("%s/%s", split[1], split[2]))
-                .getExperimentIdentifierOrNull();
+        String expId = datahandler.getOpenBisClient()
+            .getSampleByIdentifier(String.format("%s/%s", split[1], split[2]))
+            .getExperimentIdentifierOrNull();
         if (expId == null)
           return null;
         return getSpaceAndProjects(ExperimentView.navigateToLabel, expId);
