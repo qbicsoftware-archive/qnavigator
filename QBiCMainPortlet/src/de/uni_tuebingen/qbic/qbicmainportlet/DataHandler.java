@@ -2545,7 +2545,7 @@ public class DataHandler implements Serializable {
           String.join("_", secNamesBiological), String.join("_", secNamesTest), datsetSecName);
     }
 
-    return secondaryName;
+    return secondaryName.replace("__", "_").replaceAll("^_+", "").replaceAll("_+$", "");
   }
 
 
