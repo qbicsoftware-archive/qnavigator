@@ -15,8 +15,6 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.Utils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,13 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBException;
-
-import model.PropertyBean;
-import parser.XMLParser;
-import properties.Property;
-import properties.PropertyType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
 
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.server.Page;
@@ -47,7 +38,14 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
+import helpers.Utils;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
+import model.PropertyBean;
+import parser.XMLParser;
+import properties.Property;
+import properties.PropertyType;
 
 public class ChangeExperimentMetadataComponent extends CustomComponent {
   private DataHandler datahandler;
@@ -230,12 +228,12 @@ public class ChangeExperimentMetadataComponent extends CustomComponent {
 
     for (Property f : xmlProps) {
       PropertyType type = f.getType();
-      
+
       String label = f.getLabel();
       if (f.hasUnit())
         label += " in " + f.getUnit();
       TextField tf = new TextField(label);
-      tf.setData(type);//save property type for later, when it is written back
+      tf.setData(type);// save property type for later, when it is written back
       fieldGroup.bind(tf, label);
       tf.setCaption(label);
       tf.setDescription("Q_PROPERTIES");

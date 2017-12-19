@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package qbic.model.maxquant;
 
@@ -34,17 +32,17 @@ public class MaxQuantModel implements Serializable {
   private static final long serialVersionUID = 6180632029094989505L;
 
 
-  private BeanItemContainer<RawFilesBean> rawFilesBeans = new BeanItemContainer<RawFilesBean>(
-      RawFilesBean.class);
-  private BeanItemContainer<DatasetBean> datasetBeans = new BeanItemContainer<DatasetBean>(
-      DatasetBean.class);
+  private BeanItemContainer<RawFilesBean> rawFilesBeans =
+      new BeanItemContainer<RawFilesBean>(RawFilesBean.class);
+  private BeanItemContainer<DatasetBean> datasetBeans =
+      new BeanItemContainer<DatasetBean>(DatasetBean.class);
   private HashMap<RawFilesBean, DatasetBean> selecteddatasets =
       new HashMap<RawFilesBean, DatasetBean>();
 
-  private BeanItemContainer<FastaBean> fastaBeans = new BeanItemContainer<FastaBean>(
-      FastaBean.class);
-  private BeanItemContainer<FastaBean> selectedFastaBeans = new BeanItemContainer<FastaBean>(
-      FastaBean.class);
+  private BeanItemContainer<FastaBean> fastaBeans =
+      new BeanItemContainer<FastaBean>(FastaBean.class);
+  private BeanItemContainer<FastaBean> selectedFastaBeans =
+      new BeanItemContainer<FastaBean>(FastaBean.class);
 
   // group specific parameters
   private HashMap<Integer, Group> groups = new HashMap<Integer, Group>();
@@ -85,15 +83,15 @@ public class MaxQuantModel implements Serializable {
   }
 
   public void fromJson(String json) {
-    throw new NotImplementedException();
+    throw new NotImplementedException("Not implemented.");
   }
 
   public void fromJson(File json) {
-    throw new NotImplementedException();
+    throw new NotImplementedException("Not implemented.");
   }
 
   public String toJson() {
-    throw new NotImplementedException();
+    throw new NotImplementedException("Not implemented.");
   }
 
   /**

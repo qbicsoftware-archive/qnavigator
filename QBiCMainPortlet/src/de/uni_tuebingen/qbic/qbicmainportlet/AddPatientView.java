@@ -51,8 +51,8 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import helpers.Utils;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 import model.NewIvacSampleBean;
 
 

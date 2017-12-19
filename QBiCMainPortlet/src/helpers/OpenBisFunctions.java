@@ -1,32 +1,29 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package helpers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.EntityType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.PropertyTypeGroup;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleType;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
 
 
@@ -63,7 +60,7 @@ public class OpenBisFunctions {
     }
     return value;
   }
-  
+
   /**
    * Function to list the vocabulary terms for a given property which has been added to openBIS. The
    * property has to be a Controlled Vocabulary Property.
@@ -98,7 +95,7 @@ public class OpenBisFunctions {
     }
     throw new IllegalArgumentException();
   }
-  
+
   /**
    * Function to retrieve all properties which have been assigned to a specific entity type
    * 
@@ -115,7 +112,7 @@ public class OpenBisFunctions {
     }
     return property_types;
   }
-  
+
   /**
    * Function to transform openBIS entity type to human readable text. Performs String replacement
    * and does not query openBIS!
@@ -125,14 +122,13 @@ public class OpenBisFunctions {
    */
   public static String openBIScodeToString(String entityCode) {
     entityCode = WordUtils.capitalizeFully(entityCode.replace("_", " ").toLowerCase());
-    String edit_string =
-        entityCode.replace("Ngs", "NGS").replace("Hla", "HLA").replace("Rna", "RNA")
-            .replace("Dna", "DNA").replace("Ms", "MS");
+    String edit_string = entityCode.replace("Ngs", "NGS").replace("Hla", "HLA")
+        .replace("Rna", "RNA").replace("Dna", "DNA").replace("Ms", "MS");
     if (edit_string.startsWith("Q ")) {
       edit_string = edit_string.replace("Q ", "");
     }
     return edit_string;
   }
-  
-  
+
+
 }

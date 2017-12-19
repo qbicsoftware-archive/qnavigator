@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
@@ -33,10 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.portlet.PortletSession;
-
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.DatasetBean;
 
 import org.tepi.filtertable.FilterTreeTable;
 
@@ -68,7 +62,10 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-import de.uni_tuebingen.qbic.util.DashboardUtil;
+import life.qbic.portal.liferayandvaadinhelpers.util.DashboardUtil;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.DatasetBean;
 
 public class DatasetView extends VerticalLayout implements View {
 
@@ -89,8 +86,8 @@ public class DatasetView extends VerticalLayout implements View {
   private ToolBar toolbar;
   private State state;
   private String resourceUrl;
-  private final ButtonLink download = new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(
-      ""));
+  private final ButtonLink download =
+      new ButtonLink(DOWNLOAD_BUTTON_CAPTION, new ExternalResource(""));
 
   private final String[] FILTER_TABLE_COLUMNS = new String[] {"Select", "Project", "Sample",
       "File Name", "Dataset Type", "Registration Date", "File Size"};
@@ -313,8 +310,8 @@ public class DatasetView extends VerticalLayout implements View {
           // state.notifyObservers(message);
         } else {
           message.add("null");
-        }// TODO
-         // state.notifyObservers(message);
+        } // TODO
+          // state.notifyObservers(message);
 
       }
     });
@@ -343,16 +340,14 @@ public class DatasetView extends VerticalLayout implements View {
           if (parent != null) {
             String parentDatasetFileName =
                 (String) table.getItem(parent).getItemProperty("File Name").getValue();
-            url =
-                datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
-                    parentDatasetFileName + "/" + datasetFileName);
+            url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode,
+                parentDatasetFileName + "/" + datasetFileName);
           } else {
             url = datahandler.getOpenBisClient().getUrlForDataset(datasetCode, datasetFileName);
           }
 
-          Window subWindow =
-              new Window("QC of Sample: "
-                  + (String) table.getItem(next).getItemProperty("Sample").getValue());
+          Window subWindow = new Window(
+              "QC of Sample: " + (String) table.getItem(next).getItemProperty("Sample").getValue());
           VerticalLayout subContent = new VerticalLayout();
           subContent.setMargin(true);
           subWindow.setContent(subContent);
@@ -390,9 +385,8 @@ public class DatasetView extends VerticalLayout implements View {
             // fileId = "control.1kg.panel.samples.vcf.gz";
             // UI.getCurrent().getSession().addRequestHandler(rh);
             rhAttached = true;
-            ThemeDisplay themedisplay =
-                (ThemeDisplay) VaadinService.getCurrentRequest()
-                    .getAttribute(WebKeys.THEME_DISPLAY);
+            ThemeDisplay themedisplay = (ThemeDisplay) VaadinService.getCurrentRequest()
+                .getAttribute(WebKeys.THEME_DISPLAY);
             String hostTmp = "http://localhost:7778/vizrest/rest";// "http://localhost:8080/web/guest/mainportlet?p_p_id=QbicmainportletApplicationPortlet_WAR_QBiCMainPortlet_INSTANCE_5pPd5JQ8uGOt&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_count=1";
             // hostTmp +=
             // "&qbicsession=" + UI.getCurrent().getSession().getAttribute("gv-restapi-session")
@@ -438,12 +432,11 @@ public class DatasetView extends VerticalLayout implements View {
           // Open it in the UI
           ui.addWindow(subWindow);
         } catch (MalformedURLException e) {
-          LOGGER.error(String.format(
-              "Visualization failed because of malformedURL for dataset: %s", datasetCode));
-          Notification
-              .show(
-                  "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
-                  Notification.Type.ERROR_MESSAGE);
+          LOGGER.error(String.format("Visualization failed because of malformedURL for dataset: %s",
+              datasetCode));
+          Notification.show(
+              "Given dataset has no file attached to it!! Please Contact your project manager. Or check whether it already has some data",
+              Notification.Type.ERROR_MESSAGE);
         }
       }
     });
@@ -460,10 +453,10 @@ public class DatasetView extends VerticalLayout implements View {
 
     if (table.hasChildren(itemId)) {
       for (Object childId : table.getChildren(itemId)) {
-        String newParentFolder =
-            Paths.get(parentFolder,
+        String newParentFolder = Paths
+            .get(parentFolder,
                 (String) this.table.getItem(itemId).getItemProperty("File Name").getValue())
-                .toString();
+            .toString();
         setCheckedBox(childId, newParentFolder);
       }
     }
@@ -522,16 +515,14 @@ public class DatasetView extends VerticalLayout implements View {
       switch (map.get("type")) {
         case "project":
           String projectIdentifier = map.get("id");
-          retrievedDatasets =
-              datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifierWithSearchCriteria(
-                  projectIdentifier);
+          retrievedDatasets = datahandler.getOpenBisClient()
+              .getDataSetsOfProjectByIdentifierWithSearchCriteria(projectIdentifier);
           break;
 
         case "experiment":
           String experimentIdentifier = map.get("id");
-          retrievedDatasets =
-              datahandler.getOpenBisClient().getDataSetsOfExperimentByCodeWithSearchCriteria(
-                  experimentIdentifier);
+          retrievedDatasets = datahandler.getOpenBisClient()
+              .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
           break;
 
         case "sample":
@@ -633,8 +624,8 @@ public class DatasetView extends VerticalLayout implements View {
       dataset_container.getContainerProperty(new_file, "Dataset Type").setValue(d.getType());
       dataset_container.getContainerProperty(new_file, "Registration Date").setValue(ts);
       dataset_container.getContainerProperty(new_file, "Validated").setValue(true);
-      dataset_container.getContainerProperty(new_file, "File Size").setValue(
-          DashboardUtil.humanReadableByteCount(d.getFileSize(), true));
+      dataset_container.getContainerProperty(new_file, "File Size")
+          .setValue(DashboardUtil.humanReadableByteCount(d.getFileSize(), true));
       dataset_container.getContainerProperty(new_file, "dl_link").setValue(d.getDssPath());
       dataset_container.getContainerProperty(new_file, "CODE").setValue(d.getCode());
       dataset_container.getContainerProperty(new_file, "file_size_bytes").setValue(d.getFileSize());
@@ -665,8 +656,8 @@ public class DatasetView extends VerticalLayout implements View {
 
       PortletSession portletSession = ((QbicmainportletUI) UI.getCurrent()).getPortletSession();
       Map<String, AbstractMap.SimpleEntry<String, Long>> entries =
-          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession.getAttribute(
-              "qbic_download", PortletSession.APPLICATION_SCOPE);
+          (Map<String, AbstractMap.SimpleEntry<String, Long>>) portletSession
+              .getAttribute("qbic_download", PortletSession.APPLICATION_SCOPE);
 
       boolean itemSelected = (Boolean) event.getProperty().getValue();
       /*
@@ -706,9 +697,9 @@ public class DatasetView extends VerticalLayout implements View {
 
       ((CheckBox) table.getItem(itemId).getItemProperty("Select").getValue())
           .setValue(itemSelected);
-      fileName =
-          Paths.get(fileName,
-              (String) table.getItem(itemId).getItemProperty("File Name").getValue()).toString();
+      fileName = Paths
+          .get(fileName, (String) table.getItem(itemId).getItemProperty("File Name").getValue())
+          .toString();
 
       // System.out.println(fileName);
       if (table.hasChildren(itemId)) {
@@ -719,8 +710,8 @@ public class DatasetView extends VerticalLayout implements View {
         String datasetCode = (String) table.getItem(itemId).getItemProperty("CODE").getValue();
         Long datasetFileSize =
             (Long) table.getItem(itemId).getItemProperty("file_size_bytes").getValue();
-        entries.put(fileName, new AbstractMap.SimpleEntry<String, Long>(datasetCode,
-            datasetFileSize));
+        entries.put(fileName,
+            new AbstractMap.SimpleEntry<String, Long>(datasetCode, datasetFileSize));
       } else {
         entries.remove(fileName);
       }

@@ -71,9 +71,9 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import de.uni_tuebingen.qbic.util.DashboardUtil;
 import helpers.UglyToPrettyNameMapper;
 import helpers.Utils;
+import life.qbic.portal.liferayandvaadinhelpers.util.DashboardUtil;
 import logging.Log4j2Logger;
 import logging.Logger;
 import model.DatasetBean;
@@ -186,6 +186,7 @@ public class LevelComponent extends CustomComponent {
       portletSession.setAttribute("qbic_download",
           new HashMap<String, AbstractMap.SimpleEntry<String, Long>>(),
           PortletSession.APPLICATION_SCOPE);
+      Map<String, Sample> checkedTestSamples = new HashMap<String, Sample>();
 
       switch (type) {
         case "project":
@@ -217,6 +218,7 @@ public class LevelComponent extends CustomComponent {
                 .getSamplesWithParentsAndChildrenOfProjectBySearchService(id);
 
             for (Sample sample : allSamples) {
+              checkedTestSamples.put(sample.getCode(), sample);
               if (sample.getSampleTypeCode().equals("Q_TEST_SAMPLE")) {
                 // samplesContainer.addBean(new SampleBean(sample.getIdentifier(), sample.getCode(),
                 // sample.getSampleTypeCode(), null, null, null, sample.getProperties(), null,
@@ -381,8 +383,8 @@ public class LevelComponent extends CustomComponent {
             List<Sample> allSamples = datahandler.getOpenBisClient()
                 .getSamplesWithParentsAndChildrenOfProjectBySearchService(projectIdentifier);
 
-
             for (Sample sample : allSamples) {
+              checkedTestSamples.put(sample.getCode(), sample);
               if (!sample.getSampleTypeCode().equals("Q_TEST_SAMPLE")
                   && !sample.getSampleTypeCode().equals("Q_MICROARRAY_RUN")
                   && !sample.getSampleTypeCode().equals("Q_MS_RUN")
@@ -464,6 +466,7 @@ public class LevelComponent extends CustomComponent {
           break;
 
         case "experiment":
+
           String experimentIdentifier = id;
           retrievedDatasets = datahandler.getOpenBisClient()
               .getDataSetsOfExperimentByCodeWithSearchCriteria(experimentIdentifier);
@@ -519,10 +522,17 @@ public class LevelComponent extends CustomComponent {
           String sampleID = samples.get(d.getCode());
           forExport.addBean(d);
 
-          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, dateString, null);
+          Sample dsSample = checkedTestSamples.get(sampleID);
+          String secNameDS = d.getProperties().get("Q_SECONDARY_NAME");
+          String secName = datahandler.getSecondaryName(dsSample, secNameDS);
+
+          registerDatasetInTable(d, datasetContainer, projectCode, sampleID, dateString, null,
+              secName);
         }
 
-        if (filterFor.equals("measured")) {
+        if (filterFor.equals("measured"))
+
+        {
           descriptionLabel = new Label(String.format(
               "This project contains %s measured samples for which %s raw data dataset(s) have been registered.",
               numberOfSamples, dsBeans.size()), ContentMode.HTML);
@@ -905,7 +915,7 @@ public class LevelComponent extends CustomComponent {
   }
 
   public void registerDatasetInTable(DatasetBean d, HierarchicalContainer dataset_container,
-      String project, String sample, String ts, Object parent) {
+      String project, String sample, String ts, Object parent, String secName) {
     if (d.hasChildren()) {
 
       Object new_ds = dataset_container.addItem();
@@ -915,11 +925,11 @@ public class LevelComponent extends CustomComponent {
 
       dataset_container.setChildrenAllowed(new_ds, true);
 
-      String secName = d.getProperties().get("Q_SECONDARY_NAME");
+      // String secName = d.getProperties().get("Q_SECONDARY_NAME");
       // TODO add User here too
-      if (secName != null) {
-        dataset_container.getContainerProperty(new_ds, "Description").setValue(secName);
-      }
+      // if (secName != null) {
+      dataset_container.getContainerProperty(new_ds, "Description").setValue(secName);
+      // }
 
       dataset_container.getContainerProperty(new_ds, "Select").setValue(new CheckBox());
 
@@ -944,7 +954,7 @@ public class LevelComponent extends CustomComponent {
       }
 
       for (DatasetBean file : subList) {
-        registerDatasetInTable(file, dataset_container, project, sample, ts, new_ds);
+        registerDatasetInTable(file, dataset_container, project, sample, ts, new_ds, secName);
       }
 
     } else {
@@ -954,11 +964,11 @@ public class LevelComponent extends CustomComponent {
       dataset_container.setChildrenAllowed(new_file, false);
 
       // TODO no hardcoding
-      String secName = d.getProperties().get("Q_SECONDARY_NAME");
+      // String secName = d.getProperties().get("Q_SECONDARY_NAME");
       // TODO add User here too
-      if (secName != null) {
-        dataset_container.getContainerProperty(new_file, "Description").setValue(secName);
-      }
+      // if (secName != null) {
+      dataset_container.getContainerProperty(new_file, "Description").setValue(secName);
+      // }
       dataset_container.getContainerProperty(new_file, "Select").setValue(new CheckBox());
       dataset_container.getContainerProperty(new_file, "Project").setValue(project);
       dataset_container.getContainerProperty(new_file, "Sample").setValue(sample);
@@ -1093,5 +1103,4 @@ public class LevelComponent extends CustomComponent {
     }
     return map;
   }
-
 }

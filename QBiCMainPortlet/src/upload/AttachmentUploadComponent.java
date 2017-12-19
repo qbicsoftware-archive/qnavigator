@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -22,9 +22,9 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.VerticalLayout;
 
-import de.uni_tuebingen.qbic.main.ConfigurationManager;
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import life.qbic.openbis.openbisclient.OpenBisClient;
+import life.qbic.portal.liferayandvaadinhelpers.main.ConfigurationManager;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 
 public class AttachmentUploadComponent extends CustomComponent {
 
@@ -52,14 +52,13 @@ public class AttachmentUploadComponent extends CustomComponent {
 
   public void updateUI(ConfigurationManager manager, String projectCode, String space,
       OpenBisClient openBisClient) {
-    AttachmentConfig attachConfig =
-        new AttachmentConfig(Integer.parseInt(manager.getAttachmentMaxSize()),
-            manager.getAttachmentURI(), manager.getAttachmentUser(), manager.getAttachmenPassword());
+    AttachmentConfig attachConfig = new AttachmentConfig(
+        Integer.parseInt(manager.getAttachmentMaxSize()), manager.getAttachmentURI(),
+        manager.getAttachmentUser(), manager.getAttachmenPassword());
 
-    mainView =
-        new UploadsPanel(manager.getTmpFolder(), space, projectCode, new ArrayList<String>(
-            Arrays.asList("Project Planning", "Results")), LiferayAndVaadinUtils.getUser()
-            .getScreenName(), attachConfig, openBisClient);
+    mainView = new UploadsPanel(manager.getTmpFolder(), space, projectCode,
+        new ArrayList<String>(Arrays.asList("Project Planning", "Results")),
+        LiferayAndVaadinUtils.getUser().getScreenName(), attachConfig, openBisClient);
     mainView.setResponsive(true);
 
     mainView.setWidth(100.0f, Unit.PERCENTAGE);

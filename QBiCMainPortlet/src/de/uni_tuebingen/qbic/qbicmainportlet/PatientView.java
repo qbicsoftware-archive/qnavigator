@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -15,9 +15,6 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.Utils;
-import life.qbic.openbis.openbisclient.OpenBisClient;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,21 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.ExperimentStatusBean;
-import model.ProjectBean;
-import upload.AttachmentUploadComponent;
-import views.WorkflowView;
-
 import org.tepi.filtertable.FilterTable;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -88,15 +71,29 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.ProgressBarRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 import controllers.WorkflowViewController;
-import de.uni_tuebingen.qbic.main.ConfigurationManager;
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
+import helpers.Utils;
+import life.qbic.openbis.openbisclient.OpenBisClient;
+import life.qbic.portal.liferayandvaadinhelpers.main.ConfigurationManager;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.ExperimentStatusBean;
+import model.ProjectBean;
+import upload.AttachmentUploadComponent;
+import views.WorkflowView;
 
 public class PatientView extends VerticalLayout implements View {
 
   /**
-	 * 
-	 */
+   * 
+   */
   private static final long serialVersionUID = 2177082328716962295L;
 
   public final static String navigateToLabel = "ivacproject";
@@ -203,8 +200,8 @@ public class PatientView extends VerticalLayout implements View {
 
     registeredExperiments.setContainerDataSource(projectBean.getExperiments());
 
-    registeredExperiments.setVisibleColumns(new Object[] {"code", "prettyType", "registrationDate",
-        "registrator", "status"});
+    registeredExperiments.setVisibleColumns(
+        new Object[] {"code", "prettyType", "registrationDate", "registrator", "status"});
 
     registeredExperiments.setColumnHeader("prettyType", "Type");
 
@@ -375,8 +372,8 @@ public class PatientView extends VerticalLayout implements View {
   }
 
   void updateContentDescription() {
-    contact
-        .setValue("<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
+    contact.setValue(
+        "<a href=\"mailto:info@qbic.uni-tuebingen.de?subject=Question%20concerning%20project%20"
             + currentBean.getId()
             + "\" style=\"color: #0068AA; text-decoration: none\">Send question regarding patient "
             + currentBean.getCode() + "</a>");
@@ -388,11 +385,11 @@ public class PatientView extends VerticalLayout implements View {
     Boolean available = false;
 
     SearchCriteria sampleSc = new SearchCriteria();
-    sampleSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
-        "Q_BIOLOGICAL_ENTITY"));
+    sampleSc.addMatchClause(
+        MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE, "Q_BIOLOGICAL_ENTITY"));
     SearchCriteria projectSc = new SearchCriteria();
-    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
-        currentBean.getCode()));
+    projectSc.addMatchClause(
+        MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
     sampleSc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
 
     SearchCriteria experimentSc = new SearchCriteria();
@@ -468,10 +465,9 @@ public class PatientView extends VerticalLayout implements View {
 
     Component memberComponent = getMembersComponent();
 
-    membersSection
-        .addComponent(new Label(
-            "The following people are members of this project. If you would like to contact them, click on their name.",
-            Label.CONTENT_PREFORMATTED));
+    membersSection.addComponent(new Label(
+        "The following people are members of this project. If you would like to contact them, click on their name.",
+        Label.CONTENT_PREFORMATTED));
 
     membersSection.addComponent(memberComponent);
     membersSection.setComponentAlignment(memberComponent, Alignment.MIDDLE_CENTER);
@@ -519,8 +515,8 @@ public class PatientView extends VerticalLayout implements View {
     sc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
         model.ExperimentType.Q_NGS_HLATYPING.name()));
     SearchCriteria projectSc = new SearchCriteria();
-    projectSc.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
-        currentBean.getCode()));
+    projectSc.addMatchClause(
+        MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
     sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc));
 
     SearchCriteria experimentSc = new SearchCriteria();
@@ -536,8 +532,8 @@ public class PatientView extends VerticalLayout implements View {
     sc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.TYPE,
         model.ExperimentType.Q_WF_NGS_HLATYPING.name()));
     SearchCriteria projectSc2 = new SearchCriteria();
-    projectSc2.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT,
-        currentBean.getCode()));
+    projectSc2.addMatchClause(
+        MatchClause.createAttributeMatch(MatchClauseAttribute.PROJECT, currentBean.getCode()));
     sc2.addSubCriteria(SearchSubCriteria.createExperimentCriteria(projectSc2));
 
     SearchCriteria experimentSc2 = new SearchCriteria();
@@ -569,16 +565,14 @@ public class PatientView extends VerticalLayout implements View {
         addInformation = sample.getProperties().get("Q_ADDITIONAL_INFO");
       }
 
-      labelContent +=
-          String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ", lastOne,
-              sample.getProperties().get("Q_HLA_TYPING"), addInformation);
+      labelContent += String.format("MHC Class %s " + "<p><u>Patient</u>: %s </p> " + "<p>%s </p> ",
+          lastOne, sample.getProperties().get("Q_HLA_TYPING"), addInformation);
     }
 
     for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample sample : wfSamples) {
       available = true;
-      labelContent +=
-          String.format("<u>Computational Typing (OptiType)</u>" + "<p> %s </p> ", sample
-              .getProperties().get("Q_HLA_TYPING"));
+      labelContent += String.format("<u>Computational Typing (OptiType)</u>" + "<p> %s </p> ",
+          sample.getProperties().get("Q_HLA_TYPING"));
     }
 
     labelContent += "</body>";
@@ -663,16 +657,16 @@ public class PatientView extends VerticalLayout implements View {
         String webId = PropsUtil.get(PropsKeys.COMPANY_DEFAULT_WEB_ID);
         company = CompanyLocalServiceUtil.getCompanyByWebId(webId);
         companyId = company.getCompanyId();
-        LOGGER.debug(String.format("Using webId %s and companyId %d to get Portal User", webId,
-            companyId));
+        LOGGER.debug(
+            String.format("Using webId %s and companyId %d to get Portal User", webId, companyId));
       } catch (PortalException | SystemException e) {
         LOGGER.error(
             "liferay error, could not retrieve companyId. Trying default companyId, which is "
-                + companyId, e.getStackTrace());
+                + companyId,
+            e.getStackTrace());
       }
-      Set<String> list =
-          datahandler.removeQBiCStaffFromMemberSet(datahandler.getOpenBisClient().getSpaceMembers(
-              currentBean.getId().split("/")[1]));
+      Set<String> list = datahandler.removeQBiCStaffFromMemberSet(
+          datahandler.getOpenBisClient().getSpaceMembers(currentBean.getId().split("/")[1]));
       members = new TreeMap<String, String>();
       memberLetters = new HashMap<String, String>();
 
@@ -748,9 +742,8 @@ public class PatientView extends VerticalLayout implements View {
     // public void buttonClick(ClickEvent event) {
     ProgressBar progress = new ProgressBar();
     progress.setIndeterminate(true);
-    Label info =
-        new Label(
-            "Searching for members. Can take several seconds on big projects. Please be patient.");
+    Label info = new Label(
+        "Searching for members. Can take several seconds on big projects. Please be patient.");
     info.setStyleName(ValoTheme.LABEL_SUCCESS);
     // membersLayout.addComponent(info);
     membersLayout.addComponent(progress);
@@ -826,15 +819,13 @@ public class PatientView extends VerticalLayout implements View {
         String status = null;
 
         if ((double) item.getItemProperty("status").getValue() > 0.0) {
-          status =
-              "<span class=\"v-icon\" style=\"font-family: " + FontAwesome.CHECK.getFontFamily()
-                  + ";color:" + "#2dd085" + "\">&#x"
-                  + Integer.toHexString(FontAwesome.CHECK.getCodepoint()) + ";</span>";
+          status = "<span class=\"v-icon\" style=\"font-family: "
+              + FontAwesome.CHECK.getFontFamily() + ";color:" + "#2dd085" + "\">&#x"
+              + Integer.toHexString(FontAwesome.CHECK.getCodepoint()) + ";</span>";
         } else {
-          status =
-              "<span class=\"v-icon\" style=\"font-family: " + FontAwesome.TIMES.getFontFamily()
-                  + ";color:" + "#f54993" + "\">&#x"
-                  + Integer.toHexString(FontAwesome.TIMES.getCodepoint()) + ";</span>";
+          status = "<span class=\"v-icon\" style=\"font-family: "
+              + FontAwesome.TIMES.getFontFamily() + ";color:" + "#f54993" + "\">&#x"
+              + Integer.toHexString(FontAwesome.TIMES.getCodepoint()) + ";</span>";
         }
 
         return status.toString();
@@ -862,11 +853,11 @@ public class PatientView extends VerticalLayout implements View {
         if (esb.getDescription().equals("Barcode Generation")) {
           new Notification("Download of Barcodes not available.",
               "<br/>Please create barcodes by clicking 'Run'.", Type.WARNING_MESSAGE, true)
-              .show(Page.getCurrent());
+                  .show(Page.getCurrent());
         } else if (esb.getIdentifier() == null || esb.getIdentifier().isEmpty()) {
           new Notification("No data available for download.",
               "<br/>Please do the analysis by clicking 'Run' first.", Type.WARNING_MESSAGE, true)
-              .show(Page.getCurrent());
+                  .show(Page.getCurrent());
         } else {
           ArrayList<String> message = new ArrayList<String>();
           message.add("clicked");
@@ -888,8 +879,8 @@ public class PatientView extends VerticalLayout implements View {
 
     experiments.getColumn("download").setRenderer(downloadRenderer);
 
-    experiments.getColumn("runWorkflow").setRenderer(
-        new ButtonRenderer(new RendererClickListener() {
+    experiments.getColumn("runWorkflow")
+        .setRenderer(new ButtonRenderer(new RendererClickListener() {
           @Override
           public void click(RendererClickEvent event) {
             ExperimentStatusBean esb = (ExperimentStatusBean) event.getItemId();
@@ -899,9 +890,9 @@ public class PatientView extends VerticalLayout implements View {
               ArrayList<String> message = new ArrayList<String>();
               message.add("clicked");
               message.add(currentBean.getId());
-              //TODO link to barcode dragon
-//              message.add(BarcodeView.navigateToLabel);
-//              state.notifyObservers(message);
+              // TODO link to barcode dragon
+              // message.add(BarcodeView.navigateToLabel);
+              // state.notifyObservers(message);
             } else {
               ArrayList<String> message = new ArrayList<String>();
               message.add("clicked");
@@ -1066,9 +1057,8 @@ public class PatientView extends VerticalLayout implements View {
         || !(graphSectionContent.getComponent(0) instanceof Image)) {
       ProgressBar progress = new ProgressBar();
       progress.setIndeterminate(true);
-      Label info =
-          new Label(
-              "Computing the project graph can take several seconds on big projects. Please be patient.");
+      Label info = new Label(
+          "Computing the project graph can take several seconds on big projects. Please be patient.");
       info.setStyleName(ValoTheme.LABEL_SUCCESS);
       graphSectionContent.removeAllComponents();
       // graphSectionContent.addComponent(info);
@@ -1085,8 +1075,8 @@ public class PatientView extends VerticalLayout implements View {
   private void tableClickChangeTreeView() {
     registeredExperiments.setSelectable(true);
     registeredExperiments.setImmediate(true);
-    registeredExperiments.addValueChangeListener(new ViewTablesClickListener(registeredExperiments,
-        ExperimentView.navigateToLabel));
+    registeredExperiments.addValueChangeListener(
+        new ViewTablesClickListener(registeredExperiments, ExperimentView.navigateToLabel));
   }
 
   /**
@@ -1154,11 +1144,11 @@ public class PatientView extends VerticalLayout implements View {
   private Resource getGraphResource() {
     Resource resource = null;
     try {
-      GraphGenerator graphFrame =
-          new GraphGenerator(datahandler.getOpenBisClient()
-              .getSamplesWithParentsAndChildrenOfProjectBySearchService(currentBean.getId()),
-              datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(),
-              currentBean.getId());
+      GraphGenerator graphFrame = new GraphGenerator(
+          datahandler.getOpenBisClient().getSamplesWithParentsAndChildrenOfProjectBySearchService(
+              currentBean.getId()),
+          datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(),
+          currentBean.getId());
       resource = graphFrame.getRes();
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
@@ -1170,9 +1160,8 @@ public class PatientView extends VerticalLayout implements View {
   public void enter(ViewChangeEvent event) {
     String currentValue = event.getParameters();
     OpenBisClient oc = datahandler.getOpenBisClient();
-    List<Project> userProjects =
-        oc.getOpenbisInfoService().listProjectsOnBehalfOfUser(oc.getSessionToken(),
-            LiferayAndVaadinUtils.getUser().getScreenName().toString());
+    List<Project> userProjects = oc.getOpenbisInfoService().listProjectsOnBehalfOfUser(
+        oc.getSessionToken(), LiferayAndVaadinUtils.getUser().getScreenName().toString());
 
     List<String> projectIDs = new ArrayList<String>();
 
@@ -1194,13 +1183,11 @@ public class PatientView extends VerticalLayout implements View {
 
       updateContent();
     } else {
-      Utils
-          .Notification(
-              "Unable to load project",
-              String
-                  .format(
-                      "The requested project %s could not be loaded. You probably don't have access to the requested project. Please contact the corresponding project manager or write an email to info@qbic.uni-tuebingen.de.",
-                      currentValue), "error");
+      Utils.Notification("Unable to load project",
+          String.format(
+              "The requested project %s could not be loaded. You probably don't have access to the requested project. Please contact the corresponding project manager or write an email to info@qbic.uni-tuebingen.de.",
+              currentValue),
+          "error");
     }
 
   }
