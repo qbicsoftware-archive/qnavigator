@@ -60,7 +60,9 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import controllers.WorkflowViewController;
 import helpers.Utils;
 import life.qbic.openbis.openbisclient.OpenBisClient;
@@ -70,6 +72,7 @@ import logging.Log4j2Logger;
 import logging.Logger;
 import model.ExperimentBean;
 import model.ProjectBean;
+import samplegraph.GraphPage;
 import upload.AttachmentUploadComponent;
 
 @SuppressWarnings("serial")
@@ -105,6 +108,7 @@ public class ProjectView extends VerticalLayout implements View {
   private HorizontalLayout statContent;
 
   private VerticalLayout graphSectionContent;
+  private GraphPage newGraphContent;
 
   private VerticalLayout membersSection;
   private StringBuilder memberString;
@@ -214,7 +218,7 @@ public class ProjectView extends VerticalLayout implements View {
 
     // add tabs to tabsheet
     projectview_tab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
-    projectview_tab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
+    projectview_tab.addTab(initGraphs()).setIcon(FontAwesome.SITEMAP);
     // projectview_tab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
 
     projectview_tab.addTab(experimentComponent).setIcon(FontAwesome.FLASK);
@@ -575,6 +579,36 @@ public class ProjectView extends VerticalLayout implements View {
     graphSection.addComponent(graphSectionContent);
     return graphSection;
   }
+  
+  /**
+   * for both graphs
+   * 
+   * @return the tablayout containing both graphs
+   */
+  Component initGraphs() {
+    TabSheet graphTab = new TabSheet();
+    graphTab.setCaption("Project Graph");
+
+    VerticalLayout graphSection = new VerticalLayout();
+    graphSectionContent = new VerticalLayout();
+
+    graphSection.setCaption("Project Graph");
+
+    graphSectionContent.setMargin(new MarginInfo(true, false, true, true));
+    graphSection.setMargin(new MarginInfo(true, false, true, true));
+    graphSection.setWidth("100%");
+    graphSectionContent.setWidth("100%");
+
+    OpenBisClient openbis = datahandler.getOpenBisClient();
+    Map<String, String> taxMap = openbis.getVocabCodesAndLabelsForVocab("Q_NCBI_TAXONOMY");
+    Map<String, String> tissueMap = openbis.getVocabCodesAndLabelsForVocab("Q_PRIMARY_TISSUES");
+    newGraphContent = new GraphPage(taxMap, tissueMap);
+
+    graphSection.addComponent(graphSectionContent);
+    graphTab.addTab(graphSection, "Sample Graph");
+    graphTab.addTab(newGraphContent, "New Graph");
+    return graphTab;
+  }
 
   public void processed() {
     UI.getCurrent().setPollInterval(-1);
@@ -629,7 +663,7 @@ public class ProjectView extends VerticalLayout implements View {
    * 
    */
   void updateContentGraph() {
-    Resource resource = getGraphResource();
+    Resource resource = getGraphResourceAndParseNewGraph();
 
     if (resource != null) {
       graphSectionContent.removeAllComponents();
@@ -709,16 +743,21 @@ public class ProjectView extends VerticalLayout implements View {
    * 
    * @return
    */
-  private Resource getGraphResource() {
+  private Resource getGraphResourceAndParseNewGraph() {
     Resource resource = null;
     try {
+      String projectID = currentBean.getId();
+      List<DataSet> datasets =
+          datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifier(projectID);
+      List<Sample> samples = datahandler.getOpenBisClient()
+          .getSamplesWithParentsAndChildrenOfProjectBySearchService(projectID);
 
-      GraphGenerator graphFrame = new GraphGenerator(
-          datahandler.getOpenBisClient().getSamplesWithParentsAndChildrenOfProjectBySearchService(
-              currentBean.getId()),
-          datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(),
-          currentBean.getId());
+      GraphGenerator graphFrame =
+          new GraphGenerator(samples, datahandler.getOpenBisClient().getSampleTypes(),
+              datahandler.getOpenBisClient(), projectID);
       resource = graphFrame.getRes();
+
+      newGraphContent.loadProjectGraph(projectID, samples, datasets);
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
     }
