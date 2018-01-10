@@ -4,6 +4,7 @@ window.samplegraph_ProjectGraph = function() {
 	var rpcProxy = this.getRpcProxy();
 
 	this.onStateChange = function() {
+		imagePath = this.getState().imagePath;
 		init_graph_circles(this.getState().project);
 	}
 
@@ -42,9 +43,8 @@ window.samplegraph_ProjectGraph = function() {
 	};
 
 	function addBGImages(canvas, data, prefix, size) {
-		var base_dir = "./APP/PUBLISHED/";
+		var base_dir = imagePath; 
 			//window.location.href + "VAADIN/themes/d3js/img/"
-		alert(base_dir);
 		canvas.append("defs").selectAll("patterns").data(data).enter().append(
 				"pattern").attr('width', size).attr('height', size).attr("id",
 				function(d) {

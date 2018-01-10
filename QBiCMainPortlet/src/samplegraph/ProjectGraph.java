@@ -18,7 +18,9 @@ public class ProjectGraph extends AbstractJavaScriptComponent {
     getState().setProject(list);
   }
   
-  public ProjectGraph(final GraphPage layout) {
+  public ProjectGraph(final GraphPage layout, String imagePath) {
+    getState().setImagePath(imagePath);
+
     registerRpc(new NodeClickRpc() {
 //      public void onNodeClick(List<String> nodeEntries) {
 //        layout.showSamples(nodeEntries);

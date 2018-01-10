@@ -1,5 +1,6 @@
 package samplegraph;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,25 @@ public class GraphPage extends VerticalLayout {
     addComponent(factorBox);
   }
 
+  private String buildImagePath() {
+    URI location = UI.getCurrent().getPage().getLocation();
+    StringBuilder pathBuilder = new StringBuilder();
+    // http
+    pathBuilder.append(location.getScheme() + "://");
+    // host+port
+    pathBuilder.append(location.getAuthority());
+
+    // can we get this dynamically?
+    final String portletName = "qnavigator";
+
+    // String port = (Integer.toString(location.getPort()));
+    // if (location.toString().contains(port))
+    // pathBuilder.append(":" + port);
+    pathBuilder.append("/" + portletName);
+    pathBuilder.append("/VAADIN/themes/" + UI.getCurrent().getTheme() + "/img/");
+    return pathBuilder.toString();
+  }
+
   public void loadProjectGraph(String projectIdentifier, List<Sample> samples,
       List<DataSet> datasets) {
     factorBox.removeAllItems();
@@ -88,7 +108,7 @@ public class GraphPage extends VerticalLayout {
         Object factor = factorBox.getValue();
         if (sampleGraph != null)
           parent.removeComponent(sampleGraph);
-        sampleGraph = new ProjectGraph(parent);
+        sampleGraph = new ProjectGraph(parent, buildImagePath());
         sampleGraph.setSizeFull();
         parent.addComponent(sampleGraph);
         if (factor != null) {
@@ -187,25 +207,25 @@ public class GraphPage extends VerticalLayout {
     ui.addWindow(subWindow);
   }
 
-//
-//  public void showSamples(List<String> nodeEntries) {
-//    sampleTable.setPageLength(Math.min(6, nodeEntries.size()));
-//    sampleTable.removeAllItems();
-//    sampleTable.addContainerProperty("Code", String.class, null);
-//    sampleTable.addContainerProperty("Secondary Name", String.class, null);
-//    int i = 0;
-//    for (Sample s : currentSamples) {
-//      i++;
-//      String code = s.getCode();
-//      String name = s.getProperties().get("Q_SECONDARY_NAME");
-//      if (nodeEntries.contains(code)) {
-//        List<Object> row = new ArrayList<Object>();
-//        row.add(code);
-//        row.add(name);
-//        sampleTable.addItem(row.toArray(new Object[row.size()]), i);
-//      }
-//    }
-//    sampleTable.setVisible(true);
-//  }
+  //
+  // public void showSamples(List<String> nodeEntries) {
+  // sampleTable.setPageLength(Math.min(6, nodeEntries.size()));
+  // sampleTable.removeAllItems();
+  // sampleTable.addContainerProperty("Code", String.class, null);
+  // sampleTable.addContainerProperty("Secondary Name", String.class, null);
+  // int i = 0;
+  // for (Sample s : currentSamples) {
+  // i++;
+  // String code = s.getCode();
+  // String name = s.getProperties().get("Q_SECONDARY_NAME");
+  // if (nodeEntries.contains(code)) {
+  // List<Object> row = new ArrayList<Object>();
+  // row.add(code);
+  // row.add(name);
+  // sampleTable.addItem(row.toArray(new Object[row.size()]), i);
+  // }
+  // }
+  // sampleTable.setVisible(true);
+  // }
 
 }
