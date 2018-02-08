@@ -71,8 +71,10 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.ProgressBarRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.dss.client.api.v1.DataSet;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClause;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchClauseAttribute;
@@ -86,6 +88,7 @@ import logging.Log4j2Logger;
 import logging.Logger;
 import model.ExperimentStatusBean;
 import model.ProjectBean;
+import samplegraph.GraphPage;
 import upload.AttachmentUploadComponent;
 import views.WorkflowView;
 
@@ -122,6 +125,7 @@ public class PatientView extends VerticalLayout implements View {
 
   private VerticalLayout buttonLayoutSection;
   private VerticalLayout graphSectionContent;
+  private GraphPage newGraphContent;
 
   private TreeMap<String, String> members;
   private HashMap<String, String> memberLetters;
@@ -262,7 +266,7 @@ public class PatientView extends VerticalLayout implements View {
     // patientViewTab.addTab(initDescription()).setIcon(FontAwesome.INFO_CIRCLE);
     patientViewTab.addTab(projectInformation).setIcon(FontAwesome.INFO_CIRCLE);
     patientViewTab.addTab(statusComponent).setIcon(FontAwesome.CHECK_CIRCLE);
-    patientViewTab.addTab(initGraph()).setIcon(FontAwesome.SITEMAP);
+    patientViewTab.addTab(initGraphs()).setIcon(FontAwesome.SITEMAP);
     // patientViewTab.addTab(initMemberSection()).setIcon(FontAwesome.USERS);
     // patientViewTab.addTab(initHLALayout()).setIcon(FontAwesome.BARCODE);
     // patientViewTab.addTab(initTable()).setIcon(FontAwesome.FLASK);
@@ -420,8 +424,8 @@ public class PatientView extends VerticalLayout implements View {
      * SampleBean sampBean = ii.next(); if (sampBean.getType().equals("Q_BIOLOGICAL_ENTITY")) { if
      * (sampBean.getProperties().get("Q_ADDITIONAL_INFO") != null) { available = true; String[]
      * splitted = sampBean.getProperties().get("Q_ADDITIONAL_INFO").split(";"); for (String s :
-     * splitted) { String[] splitted2 = s.split(":"); patientInfo +=
-     * String.format("<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
+     * splitted) { String[] splitted2 = s.split(":"); patientInfo += String.format(
+     * "<p><u>%s</u>: %s </p> ", splitted2[0], splitted2[1]);
      * 
      * } } } } } }
      */
@@ -1028,6 +1032,38 @@ public class PatientView extends VerticalLayout implements View {
     return graphSection;
   }
 
+  /**
+   * for both graphs
+   * 
+   * @return the tablayout containing both graphs
+   */
+  Component initGraphs() {
+    TabSheet graphTab = new TabSheet();
+    graphTab.setCaption("Project Graph");
+
+    VerticalLayout graphSection = new VerticalLayout();
+    graphSectionContent = new VerticalLayout();
+
+    graphSection.setCaption("Project Graph");
+
+    graphSectionContent.setMargin(new MarginInfo(true, false, true, true));
+//    graphSection.setMargin(new MarginInfo(true, false, true, true));
+    graphSection.setMargin(true);
+    graphSection.setSpacing(true);
+    graphSection.setWidth("100%");
+    graphSectionContent.setWidth("100%");
+
+    OpenBisClient openbis = datahandler.getOpenBisClient();
+    Map<String, String> taxMap = openbis.getVocabCodesAndLabelsForVocab("Q_NCBI_TAXONOMY");
+    Map<String, String> tissueMap = openbis.getVocabCodesAndLabelsForVocab("Q_PRIMARY_TISSUES");
+    newGraphContent = new GraphPage(taxMap, tissueMap);
+
+    graphSection.addComponent(graphSectionContent);
+    graphTab.addTab(graphSection, "Sample Graph");
+    graphTab.addTab(newGraphContent, "New Graph");
+    return graphTab;
+  }
+
   public void processed() {
     UI.getCurrent().setPollInterval(-1);
   }
@@ -1115,7 +1151,7 @@ public class PatientView extends VerticalLayout implements View {
   }
 
   void updateContentGraph() {
-    Resource resource = getGraphResource();
+    Resource resource = getGraphResourceAndParseNewGraph();
 
     if (resource != null) {
       graphSectionContent.removeAllComponents();
@@ -1141,15 +1177,21 @@ public class PatientView extends VerticalLayout implements View {
    * 
    * @return
    */
-  private Resource getGraphResource() {
+  private Resource getGraphResourceAndParseNewGraph() {
     Resource resource = null;
     try {
-      GraphGenerator graphFrame = new GraphGenerator(
-          datahandler.getOpenBisClient().getSamplesWithParentsAndChildrenOfProjectBySearchService(
-              currentBean.getId()),
-          datahandler.getOpenBisClient().getSampleTypes(), datahandler.getOpenBisClient(),
-          currentBean.getId());
+      String projectID = currentBean.getId();
+      List<DataSet> datasets =
+          datahandler.getOpenBisClient().getDataSetsOfProjectByIdentifier(projectID);
+      List<Sample> samples = datahandler.getOpenBisClient()
+          .getSamplesWithParentsAndChildrenOfProjectBySearchService(projectID);
+
+      GraphGenerator graphFrame =
+          new GraphGenerator(samples, datahandler.getOpenBisClient().getSampleTypes(),
+              datahandler.getOpenBisClient(), projectID);
       resource = graphFrame.getRes();
+
+      newGraphContent.loadProjectGraph(projectID, samples, datasets);
     } catch (IOException e) {
       LOGGER.error("graph creation failed", e.getStackTrace());
     }
