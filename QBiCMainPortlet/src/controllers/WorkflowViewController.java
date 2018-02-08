@@ -50,9 +50,12 @@ import life.qbic.openbis.openbisclient.OpenBisClient;
 import logging.Log4j2Logger;
 import parser.XMLParser;
 import properties.Property;
+import properties.PropertyType;
 import submitter.SubmitFailedException;
 import submitter.Submitter;
 import submitter.Workflow;
+import submitter.parameters.Parameter;
+import submitter.parameters.ParameterSet;
 
 public class WorkflowViewController {
   private DataHandler datahandler;
@@ -138,10 +141,11 @@ public class WorkflowViewController {
    * @param wfName name of the workflow
    * @param wfVersion version of the workflow
    * @param userID the user that starts the workflow
+   * @param qProperties
    * @return Code of the newly registered experiment
    */
   public String registerWFExperiment(String space, String project, String typecode, String wfName,
-      String wfVersion, String userID) {
+      String wfVersion, String userID, String qProperties) {
     int last = 0;
     for (Experiment e : datahandler.getOpenBisClient().getExperimentsOfProjectByIdentifier(
         (new StringBuilder("/")).append(space).append("/").append(project).toString())) {
@@ -176,6 +180,8 @@ public class WorkflowViewController {
     properties.put(wf_executer, userID);
     properties.put(wf_started, Utils.getTime());
     properties.put(wf_status, workflow_statuses.RUNNING.toString());
+    properties.put("Q_PROPERTIES", qProperties);
+
     params.put("properties", properties);
 
     datahandler.getOpenBisClient().ingest(openbis_dss, "register-exp", params);
@@ -416,9 +422,62 @@ public class WorkflowViewController {
     String spaceCode = spaceandproject.space;
     String projectCode = spaceandproject.project;
 
+    ParameterSet params = workflow.getParameters();
+    List<Property> factors = new ArrayList<Property>();
+
+    XMLParser xmlParser = new XMLParser();
+
+    for (Map.Entry<String, Parameter> entry : workflow.getData().getData().entrySet()) {
+      String key = entry.getKey();
+      Parameter value = entry.getValue();
+
+      if (key.contains("input")) {
+        List<String> files = (List<String>) value.getValue();
+        List<String> inputFiles = new ArrayList<String>();
+
+        for (String f : files) {
+          String[] splitted = f.split("/");
+          String fileName = splitted[splitted.length - 1];
+          inputFiles.add(fileName);
+        }
+
+        System.out.println(inputFiles.toString());
+        String concat = String.join("; ", inputFiles);
+        System.out.println(concat);
+        Property newProperty = new Property("input_files", concat, PropertyType.Property);
+        factors.add(newProperty);
+      }
+
+      else {
+        Property newProperty = new Property("database",
+            value.getValue().toString().replace("/lustre_cfc/qbic/reference_genomes/", ""),
+            PropertyType.Property);
+        factors.add(newProperty);
+      }
+    }
+
+    for (String p : params.getParamNames()) {
+      Parameter par = params.getParam(p);
+      String[] splitted = par.getTitle().split("\\.");
+      String parName = splitted[splitted.length - 1].replace(" ", "_").toLowerCase();
+
+      Property newProperty =
+          new Property(parName, par.getValue().toString(), PropertyType.Property);
+      factors.add(newProperty);
+    }
+
+    String qProperties = "";
+
+    try {
+      qProperties = xmlParser.toString(xmlParser.createXMLFromProperties(factors));
+      System.out.println(qProperties);
+    } catch (JAXBException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
     String experimentCode = registerWFExperiment(spaceCode, projectCode,
-        workflow.getExperimentType(), workflow.getID(), workflow.getVersion(), user);
+        workflow.getExperimentType(), workflow.getID(), workflow.getVersion(), user, qProperties);
 
     List<String> parents = getConnectedSamples(selectedDatasets);
     String sampleType = workflow.getSampleType();

@@ -1,6 +1,6 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016”
- * Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -15,18 +15,9 @@
  *******************************************************************************/
 package de.uni_tuebingen.qbic.qbicmainportlet;
 
-import helpers.UglyToPrettyNameMapper;
-import helpers.Utils;
-
 import javax.xml.bind.JAXBException;
 
-import logging.Log4j2Logger;
-import logging.Logger;
-import model.ExperimentBean;
-
 import org.tepi.filtertable.FilterTable;
-
-import ch.systemsx.cisd.openbis.generic.shared.dto.EventPE.EntityType;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -43,7 +34,13 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import ch.systemsx.cisd.openbis.generic.shared.dto.EventPE.EntityType;
 import controllers.MultiscaleController;
+import helpers.UglyToPrettyNameMapper;
+import helpers.Utils;
+import logging.Log4j2Logger;
+import logging.Logger;
+import model.ExperimentBean;
 
 public class ExperimentView extends VerticalLayout implements View {
 
@@ -233,8 +230,8 @@ public class ExperimentView extends VerticalLayout implements View {
 
   void updateContentDescription() {
     idLabel.setValue(String.format("Identifier: %s", currentBean.getId()));
-    generalInfoLabel.setValue(String.format("Stage:\t %s",
-        prettyNameMapper.getPrettyName(currentBean.getType())));
+    generalInfoLabel.setValue(
+        String.format("Stage:\t %s", prettyNameMapper.getPrettyName(currentBean.getType())));
     statContentLabel.setValue(String.format("This experimental step involves %s sample(s)",
         currentBean.getSamples().size()));
 
@@ -313,6 +310,7 @@ public class ExperimentView extends VerticalLayout implements View {
     propertiesContentLabel = new Label("", ContentMode.HTML);
     propertiesContentLabel.setCaption("Properties");
     experimentalFactorLabel = new Label("", ContentMode.HTML);
+    experimentalFactorLabel.setCaption("Workflow Settings");
 
     propertiesContent.addComponent(propertiesContentLabel);
     propertiesContent.addComponent(experimentalFactorLabel);
