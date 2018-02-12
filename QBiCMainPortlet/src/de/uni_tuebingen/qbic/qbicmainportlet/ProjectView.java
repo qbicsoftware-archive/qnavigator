@@ -579,7 +579,7 @@ public class ProjectView extends VerticalLayout implements View {
     graphSection.addComponent(graphSectionContent);
     return graphSection;
   }
-  
+
   /**
    * for both graphs
    * 
@@ -606,7 +606,7 @@ public class ProjectView extends VerticalLayout implements View {
 
     graphSection.addComponent(graphSectionContent);
     graphTab.addTab(graphSection, "Sample Graph");
-    graphTab.addTab(newGraphContent, "New Graph");
+    graphTab.addTab(newGraphContent, "Sample Graph v2 (beta)");
     return graphTab;
   }
 
