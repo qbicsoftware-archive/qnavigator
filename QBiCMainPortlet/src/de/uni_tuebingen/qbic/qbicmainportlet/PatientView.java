@@ -1047,7 +1047,7 @@ public class PatientView extends VerticalLayout implements View {
     graphSection.setCaption("Project Graph");
 
     graphSectionContent.setMargin(new MarginInfo(true, false, true, true));
-//    graphSection.setMargin(new MarginInfo(true, false, true, true));
+    // graphSection.setMargin(new MarginInfo(true, false, true, true));
     graphSection.setMargin(true);
     graphSection.setSpacing(true);
     graphSection.setWidth("100%");
@@ -1060,7 +1060,7 @@ public class PatientView extends VerticalLayout implements View {
 
     graphSection.addComponent(graphSectionContent);
     graphTab.addTab(graphSection, "Sample Graph");
-    graphTab.addTab(newGraphContent, "New Graph");
+    graphTab.addTab(newGraphContent, "Sample Graph v2 (beta)");
     return graphTab;
   }
 
