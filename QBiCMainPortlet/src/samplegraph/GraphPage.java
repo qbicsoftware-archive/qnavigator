@@ -46,11 +46,6 @@ public class GraphPage extends VerticalLayout {
         .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
     parser = new ProjectParser(reverseTaxMap, reverseTissueMap);
-
-    this.factorBox = new ComboBox("Experimental Factor");
-    factorBox.setVisible(false);
-
-    addComponent(factorBox);
   }
 
   private String buildImagePath() {
@@ -74,8 +69,9 @@ public class GraphPage extends VerticalLayout {
 
   public void loadProjectGraph(String projectIdentifier, List<Sample> samples,
       List<DataSet> datasets) {
-    factorBox.removeAllItems();
+    this.factorBox = new ComboBox("Experimental Factor");
     factorBox.setVisible(false);
+    addComponent(factorBox);
 
     currentSamples = samples;
     // openbis
@@ -87,6 +83,7 @@ public class GraphPage extends VerticalLayout {
     } else {
       // structure = parser.parseAll(currentSamples, datasets);
       try {
+        // load here
         structure = parser.parseSamplesBreadthFirst(currentSamples, datasets);
         if (!structure.getFactorsToSamples().isEmpty()) {
           factorBox.addItems(structure.getFactorsToSamples().keySet());
@@ -206,26 +203,5 @@ public class GraphPage extends VerticalLayout {
     QbicmainportletUI ui = (QbicmainportletUI) UI.getCurrent();
     ui.addWindow(subWindow);
   }
-
-  //
-  // public void showSamples(List<String> nodeEntries) {
-  // sampleTable.setPageLength(Math.min(6, nodeEntries.size()));
-  // sampleTable.removeAllItems();
-  // sampleTable.addContainerProperty("Code", String.class, null);
-  // sampleTable.addContainerProperty("Secondary Name", String.class, null);
-  // int i = 0;
-  // for (Sample s : currentSamples) {
-  // i++;
-  // String code = s.getCode();
-  // String name = s.getProperties().get("Q_SECONDARY_NAME");
-  // if (nodeEntries.contains(code)) {
-  // List<Object> row = new ArrayList<Object>();
-  // row.add(code);
-  // row.add(name);
-  // sampleTable.addItem(row.toArray(new Object[row.size()]), i);
-  // }
-  // }
-  // sampleTable.setVisible(true);
-  // }
 
 }
