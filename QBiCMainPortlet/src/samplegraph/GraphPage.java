@@ -116,7 +116,7 @@ public class GraphPage extends VerticalLayout {
   }
 
   public void showDatasetsForSamples(String label, List<String> sampleCodes) {
-    Window subWindow = new Window(" " + label + " Dataset information");
+    Window subWindow = new Window(" " + label + " information");
     subWindow.setWidth("680px");
 
     VerticalLayout layout = new VerticalLayout();
@@ -132,7 +132,7 @@ public class GraphPage extends VerticalLayout {
         samplesWithoutData.add(s);
     }
 
-    Table haveData = new Table("Samples with Data");
+    Table haveData = new Table("Samples/Entities with Data");
     haveData.setStyleName(ValoTheme.TABLE_SMALL);
     haveData.addContainerProperty("Sample", String.class, null);
     haveData.addContainerProperty("Secondary Name", String.class, null);
@@ -156,7 +156,7 @@ public class GraphPage extends VerticalLayout {
       haveData.addItem(row.toArray(new Object[row.size()]), s);
     }
 
-    Table noData = new Table("Samples without Data");
+    Table noData = new Table("Samples/Entities without Data");
     noData.setStyleName(ValoTheme.TABLE_SMALL);
     noData.addContainerProperty("Sample", String.class, null);
     noData.addContainerProperty("Secondary Name", String.class, null);
