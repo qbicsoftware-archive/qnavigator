@@ -93,7 +93,7 @@ public class UploadComponent extends VerticalLayout implements Upload.SucceededL
     FileOutputStream fos = null;
     Date date = new java.util.Date();
     String timeStamp = new SimpleDateFormat("HHmmssS").format(new Timestamp(date.getTime()));
-    file = new File(directory, user + "_" + timeStamp + "_" + filename);
+    file = new File(directory, filename);
     try {
       fos = new FileOutputStream(file);
     } catch (final java.io.FileNotFoundException e) {
