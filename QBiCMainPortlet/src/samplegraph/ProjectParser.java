@@ -52,8 +52,6 @@ public class ProjectParser {
         String code = s.getCode();
         if (sampCodeToDS.containsKey(code)) {
           hasDatasets = true;
-          // for (DataSet ds : sampCodeToDS.get(code))//TODO codes needed?
-          // dsCodes.add(ds.getCode());
         }
         hasDatasets |=
             collectCodesOfDatasetsAttachedToSamples(s.getChildren(), nodeCodes, maxDepth - 1);
@@ -137,7 +135,7 @@ public class ProjectParser {
         }
       }
     }
-    // TODO maybe fill stack (then copy stack) and map to parents outside this loop
+    // TODO maybe fill queue (then copy queue) and map to parents outside this loop
     Map<String, Integer> idCounterPerLabel = new HashMap<String, Integer>();
     Map<String, Map<Sample, Set<SampleSummary>>> sampleToParentNodesPerLabel =
         new HashMap<String, Map<Sample, Set<SampleSummary>>>();
@@ -148,7 +146,7 @@ public class ProjectParser {
       sampleToParentNodesPerLabel.put(label, new HashMap<Sample, Set<SampleSummary>>());
       nodesForFactorPerLabel.put(label, new LinkedHashSet<SampleSummary>());
     }
-    // breadth first stack loop
+    // breadth first queue loop
     while (!samplesBreadthFirst.isEmpty()) {
       Sample s = samplesBreadthFirst.poll();
       String type = s.getSampleTypeCode();
@@ -164,10 +162,7 @@ public class ProjectParser {
           if (parentSummaries == null)
             parentSummaries = new LinkedHashSet<SampleSummary>();
           SampleSummary node =
-              createSummary(s, parentSummaries, label, idCounterPerLabel.get(label)); // discriminate
-                                                                                      // between
-                                                                                      // leaf nodes
-                                                                                      // and other?
+              createSummary(s, parentSummaries, label, idCounterPerLabel.get(label));
           // check for hashcode and add current sample s if node exists
           boolean exists = false;
           for (SampleSummary oldNode : nodesForFactorPerLabel.get(label)) {
@@ -179,7 +174,6 @@ public class ProjectParser {
           }
           if (!exists)
             idCounterPerLabel.put(label, idCounterPerLabel.get(label) + 1);
-          // idCounter++;
           // adds node if not already contained in set
           Set<SampleSummary> theseNodes = nodesForFactorPerLabel.get(label);
           theseNodes.add(node);
