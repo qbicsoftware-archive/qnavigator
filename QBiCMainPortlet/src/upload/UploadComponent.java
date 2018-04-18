@@ -6,9 +6,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -91,8 +88,6 @@ public class UploadComponent extends VerticalLayout implements Upload.SucceededL
       upload.interruptUpload();
     }
     FileOutputStream fos = null;
-    Date date = new java.util.Date();
-    String timeStamp = new SimpleDateFormat("HHmmssS").format(new Timestamp(date.getTime()));
     file = new File(directory, filename);
     try {
       fos = new FileOutputStream(file);
