@@ -23,29 +23,8 @@ public class SampleSummary {
   private int amount;
   private boolean leaf;
 
-  public SampleSummary(List<Sample> samples, String name, int measured, int amount, String sampleType) {
-    super();
-    this.samples = samples;
-    this.name = name;
-    this.measuredPercent = measured;
-    this.amount = amount;
-    this.sampleType = sampleType;
-    childIDs = new HashSet<Integer>();
-    addCodes(samples);
-  }
-
-  public SampleSummary(List<Sample> samples, String name, String sampleType, boolean isLeaf) {
-    super();
-    this.samples = samples;
-    this.name = name;
-    childIDs = new HashSet<Integer>();
-    this.leaf = isLeaf;
-    this.amount = samples.size();
-    this.sampleType = sampleType;
-    addCodes(samples);
-  }
-
-  public SampleSummary(int id, Set<Integer> parentIDs, List<Sample> samples, String factorValue, String name, String sampleType, boolean isLeaf) {
+  public SampleSummary(int id, Set<Integer> parentIDs, List<Sample> samples, String factorValue,
+      String name, String sampleType, boolean isLeaf) {
     this.samples = samples;
     this.parentIDs = parentIDs;
     this.name = name;
@@ -65,7 +44,11 @@ public class SampleSummary {
       codes.add(s.getCode());
   }
 
-  public boolean isLeaf() {
+  public void setLeaf(boolean isLeaf) {
+    this.leaf = isLeaf;
+  }
+
+  public boolean getLeaf() {
     return leaf;
   }
 
@@ -132,7 +115,7 @@ public class SampleSummary {
   public int getAmount() {
     return amount;
   }
-  
+
   public String getSampleType() {
     return sampleType;
   }
@@ -164,7 +147,7 @@ public class SampleSummary {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((factorValue == null) ? 0 : factorValue.hashCode());
-//    result = prime * result + (leaf ? 1231 : 1237);
+    // result = prime * result + (leaf ? 1231 : 1237);
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     result = prime * result + ((parentIDs == null) ? 0 : parentIDs.hashCode());
     result = prime * result + ((source == null) ? 0 : source.hashCode());
@@ -185,8 +168,8 @@ public class SampleSummary {
         return false;
     } else if (!factorValue.equals(other.factorValue))
       return false;
-//    if (leaf != other.leaf)
-//      return false;
+    // if (leaf != other.leaf)
+    // return false;
     if (name == null) {
       if (other.name != null)
         return false;

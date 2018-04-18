@@ -17,16 +17,12 @@ import javax.xml.bind.JAXBException;
 import model.notes.Note;
 import model.notes.Notes;
 
-import org.docx4j.jaxb.Context;
-import org.docx4j.model.datastorage.XPathEnhancerParser.main_return;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.wml.Br;
-import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
-import org.docx4j.wml.R;
 
 import parser.XMLParser;
 import properties.Property;
@@ -95,7 +91,6 @@ public class SummaryFetcher {
       put("Q_MHC_LIGAND_EXTRACTION", "MHC Ligand Extraction");
     };
   };
-  private ObjectFactory factory;
   private WordprocessingMLPackage wordMLPackage;
   private Docx4jHelper docxHelper;
   private Component summaryComponent;
@@ -262,7 +257,6 @@ public class SummaryFetcher {
   }
 
   private void initDocx4J() {
-    factory = Context.getWmlObjectFactory();
     docxHelper = new Docx4jHelper();
     try {
       wordMLPackage = WordprocessingMLPackage.createPackage();
