@@ -1,19 +1,17 @@
 /*******************************************************************************
- * QBiC Project qNavigator enables users to manage their projects.
- * Copyright (C) "2016”  Christopher Mohr, David Wojnar, Andreas Friedrich
+ * QBiC Project qNavigator enables users to manage their projects. Copyright (C) "2016” Christopher
+ * Mohr, David Wojnar, Andreas Friedrich
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package qbic.vaadincomponents;
 
@@ -25,13 +23,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBException;
+
 import logging.Log4j2Logger;
+import parser.XMLParser;
+import properties.Property;
 
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -98,34 +101,98 @@ public class TSVDownloadComponent extends VerticalLayout {
       final String project, final OpenBisClient openbis) {
     final TSVDownloadComponent layout = this;
 
-    // final int todo = 1;
-    // Thread t = new Thread(new Runnable() {
-    // // volatile int current = 0;
-    //
-    // @Override
-    // public void run() {
-    //
-    Map<String, List<String>> tables = new HashMap<String, List<String>>();
-    for (String type : sampleTypes) {
-      tables.put(type, openbis.getProjectTSV(project, type));
-      // current++;
-      // updateProgressBar(current, todo, bar, info);
-    }
-    // UI.getCurrent().setPollInterval(-1);
-    // UI.getCurrent().access(new TSVReadyRunnable(layout, tables, project));
-    // }
-    // });
-    // t.start();
-    // UI.getCurrent().setPollInterval(100);
-    TSVReadyRunnable r = new TSVReadyRunnable(layout, tables, project);
-    final Thread t = new Thread(r);
+    Thread t = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+
+        Map<String, String> tables = new HashMap<String, String>();
+        for (String type : sampleTypes) {
+          tables.put(type, getTSVString(openbis.getProjectTSV(project, type)));
+        }
+        UI.getCurrent().access(new TSVReadyRunnable(layout, tables, project));
+      }
+    });
     t.start();
   }
+  
+  private static String getTSVString(List<String> table) {
+    XMLParser p = new XMLParser();
 
-  // private void updateProgressBar(int current, int todo, ProgressBar bar, Label info) {
-  // double frac = current * 1.0 / todo;
-  // UI.getCurrent().access(new UpdateProgressBar(bar, info, frac));
-  // }
+    StringBuilder header = new StringBuilder(table.get(0).replace("\tAttributes", ""));
+    StringBuilder tsv = new StringBuilder();
+    table.remove(0);
+
+    String xmlStart = "<?xml";
+    // header
+    List<String> factorLabels = new ArrayList<String>();
+    for (String row : table) {
+      String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
+      String xml = "";
+      for (String cell : lineSplit) {
+        if (cell.startsWith(xmlStart))
+          xml = cell;
+      }
+      List<Property> factors = new ArrayList<Property>();
+      if (!xml.equals(xmlStart)) {
+        try {
+          factors = p.getAllPropertiesFromXML(xml);
+        } catch (JAXBException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+        for (Property f : factors) {
+          String label = f.getLabel();
+          if (!factorLabels.contains(label)) {
+            factorLabels.add(label);
+            header.append("\tCondition: " + label);
+          }
+        }
+      }
+    }
+
+    // data
+    for (String row : table) {
+      String[] lineSplit = row.split("\t", -1);// doesn't remove trailing whitespaces
+      String xml = "";
+      for (String cell : lineSplit) {
+        if (cell.startsWith(xmlStart))
+          xml = cell;
+      }
+      row = row.replace("\t" + xml, "");
+      StringBuilder line = new StringBuilder("\n" + row);
+      List<Property> factors = new ArrayList<Property>();
+      if (!xml.equals(xmlStart)) {
+        try {
+          factors = p.getAllPropertiesFromXML(xml);
+        } catch (JAXBException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+        Map<Integer, Property> order = new HashMap<Integer, Property>();
+        for (Property f : factors) {
+          String label = f.getLabel();
+          order.put(factorLabels.indexOf(label), f);
+        }
+        for (int i = 0; i < factorLabels.size(); i++) {
+          if (order.containsKey(i)) {
+            Property f = order.get(i);
+            line.append("\t" + f.getValue());
+            if (f.hasUnit())
+              line.append(f.getUnit());
+          } else {
+            line.append("\t");
+          }
+        }
+      } else {
+        for (int i = 0; i < factorLabels.size() - 1; i++) {
+          line.append("\t");
+        }
+      }
+      tsv.append(line);
+    }
+    return header.append(tsv).toString();
+  }
 
   public void armButtons(List<StreamResource> streams) {
     armDownloadButton(dlEntities, streams.get(0), 1);
