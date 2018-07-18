@@ -85,6 +85,9 @@ public class TSVDownloadComponent extends VerticalLayout {
     dlEntities.setEnabled(false);
     dlExtracts.setEnabled(false);
     dlPreps.setEnabled(false);
+    dlEntities.setImmediate(true);
+    dlExtracts.setImmediate(true);
+    dlPreps.setImmediate(true);
     downloads.addComponent(dlEntities);
     downloads.addComponent(dlExtracts);
     downloads.addComponent(dlPreps);
@@ -110,10 +113,12 @@ public class TSVDownloadComponent extends VerticalLayout {
         for (String type : sampleTypes) {
           tables.put(type, getTSVString(openbis.getProjectTSV(project, type)));
         }
+        UI.getCurrent().setPollInterval(-1);
         UI.getCurrent().access(new TSVReadyRunnable(layout, tables, project));
       }
     });
     t.start();
+    UI.getCurrent().setPollInterval(100);
   }
   
   private static String getTSVString(List<String> table) {
