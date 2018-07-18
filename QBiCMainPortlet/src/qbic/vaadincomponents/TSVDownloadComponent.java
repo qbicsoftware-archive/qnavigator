@@ -118,7 +118,8 @@ public class TSVDownloadComponent extends VerticalLayout {
     // t.start();
     // UI.getCurrent().setPollInterval(100);
     TSVReadyRunnable r = new TSVReadyRunnable(layout, tables, project);
-    r.start();
+    final Thread t = new Thread(r);
+    t.start();
   }
 
   // private void updateProgressBar(int current, int todo, ProgressBar bar, Label info) {
